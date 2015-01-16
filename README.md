@@ -45,7 +45,12 @@ OSC messages (port 3030):
          effect by making localisation blur more 
          constant.
 
+
+
 command line testing:
 ---------------------
 sudp apt-get install liblo-tools
 for i in `seq 180`; do oscsend localhost 3030 /azi i $i; done
+
+
+zack test write
