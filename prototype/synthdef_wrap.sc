@@ -53,7 +53,7 @@ y.set(\srcfreq, 8);
 y.set(\room, 0);
 y.set(\room, 1);
 
-// ------------- array of SOURCE/ array of LISTENER -------------------------------------------------------
+// ------------- SOURCE/ array of LISTENER -------------------------------------------------------
 // for a source having n listeners, this goes like this:
 //     /--> listener 1
 // src ---> ...
@@ -90,6 +90,7 @@ y.set(\room, 0);
 y.set(\room, 1);
 y.set(\room2, 0);
 y.set(\room2, 20);
+y.set(\vol, 1);
 
 // ----------------------- FUNCTION ARRAY ---------------------------------------------------------
 (
