@@ -10,7 +10,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-s.boot;
+
 (
 s.waitForBoot{
 
@@ -50,9 +50,12 @@ s.waitForBoot{
 ~synths;
 s.sync;
 (
+// Dictionary to keep references to synths
 ~synths = Dictionary();
+// define and OSC target
 OSCdef(\createSoundSource, ~coreCallback, "/spatosc/core");
 
+// our main OSC callback
 ~coreCallback = {
 
 	arg msg;
@@ -68,6 +71,7 @@ OSCdef(\createSoundSource, ~coreCallback, "/spatosc/core");
 	);
 };
 
+// define some functions to handle actions
 ~createSynth = {
 	arg args;
 	var name, synth;
