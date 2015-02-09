@@ -30,81 +30,93 @@ s.waitForBoot{
 	// here a PinkSin source spatialized by
 	//   - a stereo panner (starting channel 0)
 	//   - a monoSpat (starting channel 1)
-	/*~scbr.makeSynthDef(\fool, \PinkSin, [\stereoPanner, \monoSpat], [0, 2]);
+	~scbr.makeSynthDef(\pink, \PinkSin, [\stereoPanner, \monoSpat], [0, 2]);
+	~scbr.makeSynthDef(\dust, \DustDust, [\stereoPanner, \monoSpat], [0, 2]);
 	// be sure the synthDef is compiled on the server
 	s.sync;
 
 	// initialization is done, create and remove a source + controls
-	y = Synth.tail(s, \fool);
+	//y = Synth.tail(s, \fool);
 	// spat properties
-	y.set(\vol, 0.1);
-	y.set(\azi, 0.2);
+	//y.set(\vol, 0.1);
+	//y.set(\azi, 0.2);
 	// source property
-	y.set(\sfreq, 100);
+	//y.set(\sfreq, 100);
 	// remove source
 	// y.release;*/
 
-};  // s.waitForBoot
+	// s.waitForBoot
+
+
+	// OSC business
+
+	// Dictionary to keep references to sound sources
+	~synths = Dictionary();
+	// define and OSC target
+	OSCdef(\createSoundSource, ~coreCallback, "/spatosc/core");
+
+	// our main OSC callback
+	~coreCallback = {
+
+		arg msg;
+		var command;
+		msg.postln;
+		command = msg[1];
+		command.postln;
+
+		switch (command,
+			'create', {~createSynth.value(msg)},
+			'delete', {~deleteSynth.value(msg[2])},
+			'setProperty', {~setProperty.value(msg)}
+		);
+	};
+
+	// define some functions to handle actions
+	~createSynth = {
+		arg args;
+		var name, synth;
+		'creatingSynth'.postln;
+		args.postln;
+		name = args[2];
+		synth = args[3];
+		if (~synths.includesKey(name),
+			{ 'Not adding, synth exists'.postln; },
+			{
+				~synths.put(name, Synth.tail(s, synth));
+				'adding synth'.postln;
+			}
+		)
+	};
+
+	~setProperty = {
+		arg args;
+		var name, property, value;
+		name = args[2];
+		property = args[3];
+		value = args[4];
+		postf("seting % of % to %", property, name, value);
+		~synths[name].set(property, value);
+	};
+
+	~deleteSynth = {
+		arg name;
+		'deleting synth'.postln;
+		~synths[name].release;
+		~synths.removeAt(name)
+
+	};
+	s.sync;
+
+};
+
+
+
+
 )
 
-~synths;
-s.sync;
+
 (
-// Dictionary to keep references to synths
-~synths = Dictionary();
-// define and OSC target
-OSCdef(\createSoundSource, ~coreCallback, "/spatosc/core");
 
-// our main OSC callback
-~coreCallback = {
 
-	arg msg;
-	var command;
-	msg.postln;
-	command = msg[1];
-	command.postln;
 
-	switch (command,
-		'create', {~createSynth.value(msg)},
-		'delete', {~deleteSynth.value(msg[2])},
-		'setProperty', {~setProperty.value(msg)}
-	);
-};
-
-// define some functions to handle actions
-~createSynth = {
-	arg args;
-	var name, synth;
-	'creatingSynth'.postln;
-	args.postln;
-	name = args[2];
-	synth = args[3];
-	if (~synths.includesKey(name),
-		{ 'Not adding, synth exists'.postln; },
-		{
-			~scbr.makeSynthDef(name, synth, [\stereoPanner, \monoSpat], [0, 2]);
-			~synths.put(name, Synth.tail(s, name));
-			'adding synth'.postln;
-		}
-	)
-};
-
-~setProperty = {
-	arg args;
-	var name, property, value;
-	name = args[2];
-	property = args[3];
-	value = args[4];
-	postf("seting % of % to %", property, name, value);
-	~synths[name].set(property, value);
-};
-
-~deleteSynth = {
-	arg name;
-	'deleting synth'.postln;
-	~synths[name].release;
-	~synths.removeAt(name)
-
-};
 )
-
