@@ -17,6 +17,7 @@
 		// TODO use try catch with this
 		~pluginLoader;
 		~synthDefFactory;
+		~cOSCMaker;
 
 		~makeSynthDef = { | self, name, srcSymbol, spatSymbolArray, busShiftArray = #[0] |
 			// TODO try catch
@@ -31,6 +32,7 @@
 	e.know = true;
 	e.pluginLoader = ~scbrPlugins.value();
 	e.synthDefFactory = ~scbrFactory.value();
+	e.oscInterface = ~cOSCMaker.value();
 	e;
 };  // scbrMaker
 )
