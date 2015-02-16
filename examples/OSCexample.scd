@@ -10,7 +10,6 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 (
 s.waitForBoot{
 
@@ -47,14 +46,7 @@ s.waitForBoot{
 
 	// s.waitForBoot
 
-
 	// OSC business
-
-	// Dictionary to keep references to sound sources
-	~synths = Dictionary();
-	// define and OSC target
-	OSCdef(\createSoundSource, ~coreCallback, "/spatosc/core");
-
 	// our main OSC callback
 	~coreCallback = {
 
@@ -65,11 +57,15 @@ s.waitForBoot{
 		command.postln;
 
 		switch (command,
-			'create', {~createSynth.value(msg)},
-			'delete', {~deleteSynth.value(msg[2])},
-			'setProperty', {~setProperty.value(msg)}
+			'createSource', {~createSynth.value(msg)},
+			'deleteNode', {~deleteSynth.value(msg[2])},
+			//'setProperty', {~setProperty.value(msg)}
 		);
 	};
+	~scbr.oscInterface.newOSC(\createSoundSource, ~coreCallback, "/spatosc/core");
+
+	// hold synths references
+	~synths = Dictionary();
 
 	// define some functions to handle actions
 	~createSynth = {
@@ -84,28 +80,34 @@ s.waitForBoot{
 			{
 				~synths.put(name, Synth.tail(s, synth));
 				'adding synth'.postln;
+				~scbr.oscInterface.sourceOSC(name, ~setProperty);
 			}
-		)
+		);
+		~synths.postln;
 	};
 
 	~setProperty = {
 		arg args;
 		var name, property, value;
-		name = args[2];
-		property = args[3];
-		value = args[4];
-		postf("seting % of % to %", property, name, value);
+		name = args[0].asString.split[4].asSymbol;
+		//name.postln;
+		property = args[1];
+		value = args[2];
+		postf("seting % of % to %\n", property, name, value);
 		~synths[name].set(property, value);
+		~synths[name].postln;
 	};
+
 
 	~deleteSynth = {
 		arg name;
 		'deleting synth'.postln;
 		~synths[name].release;
-		~synths.removeAt(name)
+		~synths.removeAt(name);
+		~scbr.oscInterface.removeSourceOSC(name);
+
 
 	};
 	s.sync;
-
 };
 )
