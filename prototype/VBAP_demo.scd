@@ -72,7 +72,7 @@ s.waitForBoot{
 
 	t = Tuning.just;
 	a = Scale.pelog(t);
-	// a = Scale.major(t);
+	a = Scale.major(t);
 	~pf = Pfunc({a.ratios.choose},{\reset.postln }).asStream;
 	s.sync;
 
@@ -91,6 +91,25 @@ s.waitForBoot{
 				spread: 0));
 	}).add;
 
+	// SynthDef(\oiseaubouge, {
+	// 	| outbus = 0, freq = 200, spr = 1, azibus = 0, elebus = 0, delaybus = 0, volbus = 0 |
+	// 	var  browndist, brownele, brownazi;
+	// 	browndist = Dbrown.kr(lo: 0.0, hi: 1.0, step: 0.01);
+	// 	brownele  = Dbrown.kr(lo: 0.0, hi: 90.0, step: 0.01);
+	// 	brownazi  = Dbrown.kr(lo: -180.0, hi: 180.0, step: 0.01);
+	// 	Out.ar(outbus,
+	// 		VBAP.ar(numChans: ~spk.numSpeakers,
+	// 			in: DelayC.ar(browndist.squared
+	// 				* (0.2 * PinkNoise.ar() + FSinOsc.ar(freq))
+	// 				* EnvGen.kr(Env.sine(dur:3), doneAction: 2),
+	// 				maxdelay,
+	// 			maxdelay * (1 - browndist)),
+	// 			bufnum: ~vbuf.bufnum,
+	// 			azimuth: brownazi,
+	// 			elevation: brownele,
+	// 	spread: 0));
+	// }).add;
+
 	SynthDef("rotate",{ arg out=0, gate = 0, orient = 1;
 		Out.kr(out,
 			Linen.kr(gate, 0.1, 1, 0.1) *
@@ -104,10 +123,10 @@ s.waitForBoot{
 
 		// auto move
 	SynthDef("distate", { arg out = 0, gate = 0;
-		var freq = 0.5;
+		var freq = 1;
 		Out.kr(out, [
-			Linen.kr(gate, 0.1, 1, 0.1) * LFTri.kr(freq, mul: 0.5, add: 0.5),
-			1 - (Linen.kr(gate, 0.1, 1, 0.1) * LFTri.kr(freq, mul: 0.5, add: 0.5) * LFTri.kr(freq, mul: 0.5, add: 0.5))
+			Linen.kr(gate, 0.1, 1, 0.1) * FSinOsc.kr(freq, mul: 0.5, add: 0.5),
+			1 - (Linen.kr(gate, 0.1, 1, 0.1) * FSinOsc.kr(freq, mul: 0.5, add: 0.5) * LFTri.kr(freq, mul: 0.5, add: 0.5))
 	]);}).add;
 
 	s.sync;
@@ -123,7 +142,7 @@ s.waitForBoot{
 				volbus: e.index + 3,
 				freq: [200, 400, 800].choose * ~pf.next
 			]);
-			2.wait;
+			0.5.wait;
 			//0.1.yield;
 	}});
 	r.play;
@@ -160,7 +179,7 @@ s.waitForBoot{
 	}} );
 	~device.slots[1].at( 288 ).action_( { |v|
 		if (v.value == 1) {
-						"dist".postln;
+			"dist".postln;
 		} {}} );
 	~device.slots[3].at( 1 ).action_( { |v|
 		if(v.value > 0.6) {~el.set(\gate, 1); ~el.set(\orient, -1); "floor".postln;} {
