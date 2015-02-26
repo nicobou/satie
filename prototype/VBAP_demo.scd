@@ -25,34 +25,28 @@ o.numOutputBusChannels.postln;
 o.numOutputBusChannels = 128;
 o.memSize.postln;
 o.memSize = 2**20;
-o.blockSize = 2048;
+o.blockSize = 512;
 // o.numAudioBusChannels = 512;
 // o.numPrivateAudioBusChannels = 512;
 // s.reboot
 
 // init
 s.waitForBoot{
-	var maxdelay = 0.01;
+	~maxdelay = 0.02;
 	~pargroup = ParGroup.new;
 
-	// 128 channels
-	// VBAPSpeakerArray.maxNumSpeakers = 128;
+	// dome
 	// ~spk = VBAPSpeakerArray.new(3, [
-	// 	[0,0], [23,0], [46,0], [69,0], [92,0], [115,0], [138,0], [161,0], [184,0], [207,0], [230,0], [253,0], [276,0], [299,0], [322,0], [345,0], [0,10], [23,10], [46,10], [69,10], [92,10], [115,10], [138,10], [161,10], [184,10], [207,10], [230,10], [253,10], [276,10], [299,10], [322,10], [345,10], [0,20], [23,20], [46,20], [69,20], [92,20], [115,20], [138,20], [161,20], [184,20], [207,20], [230,20], [253,20], [276,20], [299,20], [322,20], [345,20], [0,30], [23,30], [46,30], [69,30], [92,30], [115,30], [138,30], [161,30], [184,30], [207,30], [230,30], [253,30], [276,30], [299,30], [322,30], [345,30], [0,40], [23,40], [46,40], [69,40], [92,40], [115,40], [138,40], [161,40], [184,40], [207,40], [230,40], [253,40], [276,40], [299,40], [322,40], [345,40], [0,50], [23,50], [46,50], [69,50], [92,50], [115,50], [138,50], [161,50], [184,50], [207,50], [230,50], [253,50], [276,50], [299,50], [322,50], [345,50], [0,60], [23,60], [46,60], [69,60], [92,60], [115,60], [138,60], [161,60], [184,60], [207,60], [230,60], [253,60], [276,60], [299,60], [322,60], [345,60], [0,70], [23,70], [46,70], [69,70], [92,70], [115,70], [138,70], [161,70], [184,70], [207,70], [230,70], [253,70], [276,70], [299,70], [322,70], [345,70],
+	// 	[0, 90],
+	// 	[15, 45], [75, 45], [135, 45], [-165, 45], [-105, 45], [-45, 45],
+	// 	[0, 22.5], [30, 22.5], [60, 22.5], [90, 22.5], [120, 22.5], [150, 22.5], [180, 22.5], [-150, 22.5], [-120, 22.5], [-90, 22.5], [-60, 22.5], [-30, 22.5],
+	// 	[0, 0], [30, 0], [60, 0], [90, 0], [120, 0], [150, 0], [180, 0], [-150, 0], [-120, 0], [-90, 0], [-60, 0], [-30, 0],
 	// ]);
 
-	// 55 channels
-	//VBAPSpeakerArray.maxNumSpeakers = 64;
-	/*~spk = VBAPSpeakerArray.new(3, [
-		[0,0], [23,0], [46,0], [69,0], [92,0], [115,0], [138,0], [161,0], [184,0], [207,0], [230,0], [253,0], [276,0], [299,0], [322,0], [345,0], [0,10], [23,10], [46,10], [69,10], [92,10], [115,10], [138,10], [161,10], [184,10], [207,10], [230,10], [253,10], [276,10], [299,10], [322,10], [345,10], [0,20], [23,20], [46,20], [69,20], [92,20], [115,20], [138,20], [161,20], [184,20], [207,20], [230,20], [253,20], [276,20], [299,20], [322,20], [345,20], [0,30], [23,30], [46,30], [69,30], [92,30], [115,30], [138,30]
-	]);*/
-
-	// dome
 	~spk = VBAPSpeakerArray.new(3, [
+		[0, 0], [60, 0], [120, 0], [180, 0], [-120, 0], [-60, 0], [-30, 0],
 		[0, 90],
-		[15, 45], [75, 45], [135, 45], [-165, 45], [-105, 45], [-45, 45],
-		[0, 22.5], [30, 22.5], [60, 22.5], [90, 22.5], [120, 22.5], [150, 22.5], [180, 22.5], [-150, 22.5], [-120, 22.5], [-90, 22.5], [-60, 22.5], [-30, 22.5],
-		[0, 0], [30, 0], [60, 0], [90, 0], [120, 0], [150, 0], [180, 0], [-150, 0], [-120, 0], [-90, 0], [-60, 0], [-30, 0],
+
 	]);
 
 	// mini dome
@@ -67,86 +61,59 @@ s.waitForBoot{
 	~spk.speakers[1].dump;
 	~vbuf = Buffer.loadCollection(s, ~spk.getSetsAndMatrices);
 
-	e = Bus.control(s, 5); // azi, ele, delay, vol
-	e.set(0, 0, 0, 1);
+	f = Bus.control(s, 1); // move
+	f.set(0);
 
 	t = Tuning.just;
-	a = Scale.pelog(t);
-	a = Scale.major(t);
-	~pf = Pfunc({a.ratios.choose},{\reset.postln }).asStream;
+	~scale = Scale.pelog(t);
+	//~scale = Scale.major(t);
+	~pf = Pfunc({~scale.ratios.choose},{\reset.postln }).asStream;
+	~tone = 200;
 	s.sync;
 
-	SynthDef(\oiseausimple, {
-	| outbus = 0, freq = 200, spr = 1, azibus = 0, elebus = 0, delaybus = 0, volbus = 0 |
-	Out.ar(outbus,
-		VBAP.ar(numChans: ~spk.numSpeakers,
-				in: DelayC.ar(((In.kr(volbus)/2.0) + Rand(0.5, 1.0) )
-					* (PinkNoise.ar() + FSinOsc.ar(freq))
+	SynthDef(\oiseaubouge, { | outbus = 0, freq = 200, moveb = 0 |
+		var locdist, locazi, locele;
+		locdist = In.kr(moveb)
+		* FSinOsc.kr(freq: Rand(0.2, 1), mul:0.3, add: 0.7);
+		locazi = In.kr(moveb)
+		* FSinOsc.kr(freq: Rand(0.01, 0.2), mul: ([1, -1].choose * 180), add: 180);
+		locele = In.kr(moveb)
+		* FSinOsc.kr(freq: Rand(0.01, 0.2), mul: ([1, -1].choose * 45), add: 45);
+		Out.ar(outbus,
+			VBAP.ar(numChans: ~spk.numSpeakers,
+				in: DelayC.ar(
+					(1 - locdist).squared
+					* SinOsc.ar(freq)
 					* EnvGen.kr(Env.sine(dur:3), doneAction: 2),
-					maxdelay,
-					maxdelay * (In.kr(delaybus) * Rand(0.0, 1.0))),
+					~maxdelay,
+					~maxdelay * locdist
+				),
 				bufnum: ~vbuf.bufnum,
-				azimuth: ((In.kr(azibus) + Rand(0, 360))%360) - 180,
-				elevation: (In.kr(elebus) + Rand(0, 90)).clip(0.0, 90.0),
-				spread: 0));
+				azimuth: (locazi + Rand(0, 360)) % 360,
+				elevation: (locele + Rand(0, 90)) % 90 ,
+				spread: 0)
+		);
 	}).add;
 
-	// SynthDef(\oiseaubouge, {
-	// 	| outbus = 0, freq = 200, spr = 1, azibus = 0, elebus = 0, delaybus = 0, volbus = 0 |
-	// 	var  browndist, brownele, brownazi;
-	// 	browndist = Dbrown.kr(lo: 0.0, hi: 1.0, step: 0.01);
-	// 	brownele  = Dbrown.kr(lo: 0.0, hi: 90.0, step: 0.01);
-	// 	brownazi  = Dbrown.kr(lo: -180.0, hi: 180.0, step: 0.01);
-	// 	Out.ar(outbus,
-	// 		VBAP.ar(numChans: ~spk.numSpeakers,
-	// 			in: DelayC.ar(browndist.squared
-	// 				* (0.2 * PinkNoise.ar() + FSinOsc.ar(freq))
-	// 				* EnvGen.kr(Env.sine(dur:3), doneAction: 2),
-	// 				maxdelay,
-	// 			maxdelay * (1 - browndist)),
-	// 			bufnum: ~vbuf.bufnum,
-	// 			azimuth: brownazi,
-	// 			elevation: brownele,
-	// 	spread: 0));
-	// }).add;
-
-	SynthDef("rotate",{ arg out=0, gate = 0, orient = 1;
+	SynthDef(\move, { arg out = 0, gate = 0;
 		Out.kr(out,
-			Linen.kr(gate, 0.1, 1, 0.1) *
-			LFSaw.kr(freq: 0.2, mul: orient * 180.0, add: 180)
-		)
+			Linen.kr(gate, 1, 1, 1));
 	}).add;
-
-	SynthDef("elevate",{ arg out=0, gate = 0, orient = 1;
-		Out.kr(out,	Linen.kr(gate, 4, 90, 0.2))
-	}).add;
-
-		// auto move
-	SynthDef("distate", { arg out = 0, gate = 0;
-		var freq = 1;
-		Out.kr(out, [
-			Linen.kr(gate, 0.1, 1, 0.1) * FSinOsc.kr(freq, mul: 0.5, add: 0.5),
-			1 - (Linen.kr(gate, 0.1, 1, 0.1) * FSinOsc.kr(freq, mul: 0.5, add: 0.5) * LFTri.kr(freq, mul: 0.5, add: 0.5))
-	]);}).add;
 
 	s.sync;
 
-	// CLUSTER
 	r = Routine({
 		loop {
-			Synth.head(~pargroup, \oiseausimple, [
-				buffer: ~afiles.next,
-				azibus: e.index,
-				elebus: e.index + 1,
-				delaybus: e.index + 2,
-				volbus: e.index + 3,
-				freq: [200, 400, 800].choose * ~pf.next
+			Synth.head(~pargroup, \oiseaubouge, [
+				\freq, [~tone, ~tone*2, ~tone*4, ~tone*8].choose * ~pf.next,
+				\moveb, f.index;
 			]);
-			0.5.wait;
+			0.2.wait;
 			//0.1.yield;
 	}});
 	r.play;
 
+	~move = Synth(\move, [\out, f.index]);
 	// HID
 	GeneralHID.buildDeviceList;
 	~logitech = GeneralHID.findBy( 1133, 49690 );
@@ -163,35 +130,40 @@ s.waitForBoot{
 	// You can also create a generic gui to see what is coming in:
 	//a.makeGui;
 
-	~test = Synth("rotate", [\out, e.index]);
-	~el = Synth("elevate", [\out, e.index + 1]);
-	~dist = Synth("distate", [\out, e.index + 2]);
-	// ~test.set(\gate, 0);
-	// ~test.set(\gate, 1);
-	// ~sound = Synth.new("mysound");
 
 	~device.slots[1].at( 290 ).action_( { |v|
 		if (v.value == 1) {
-			~dist.set(\gate, 1);
+			~move.set(\gate, 1);
 			"dist".postln;
 		} {
-			~dist.set(\gate, 0);
+			~move.set(\gate, 0);
 	}} );
 	~device.slots[1].at( 288 ).action_( { |v|
 		if (v.value == 1) {
-			"dist".postln;
+			~tone = rrand(50, 99);
+			// ~scale = Scale.major(t);
+			~tone.postln;
 		} {}} );
-	~device.slots[3].at( 1 ).action_( { |v|
-		if(v.value > 0.6) {~el.set(\gate, 1); ~el.set(\orient, -1); "floor".postln;} {
-			if(v.value < 0.4) {~el.set(\gate, 1);~el.set(\orient, 1); "top".postln;}
-			{~el.set(\gate, 0);"center".postln;}
-	}});
-	~device.slots[3].at( 0 ).action_( { |v|
-		if(v.value > 0.6) {~test.set(\gate, 1); ~test.set(\orient, 1); "right".postln;} {
-			if(v.value < 0.4) {~test.set(\gate, 1);~test.set(\orient, -1); "left".postln;}
-			{~test.set(\gate, 0);"center".postln;}
-	}});
+	// ~device.slots[3].at( 1 ).action_( { |v|
+	// 	if(v.value > 0.6) {~el.set(\gate, 1); ~el.set(\orient, -1); "floor".postln;} {
+	// 		if(v.value < 0.4) {~el.set(\gate, 1);~el.set(\orient, 1); "top".postln;}
+	// 		{~el.set(\gate, 0);"center".postln;}
+	// }});
+	// ~device.slots[3].at( 0 ).action_( { |v|
+	// 	if(v.value > 0.6) {~test.set(\gate, 1); ~test.set(\orient, 1); "right".postln;} {
+	// 		if(v.value < 0.4) {~test.set(\gate, 1);~test.set(\orient, -1); "left".postln;}
+	// 		{~test.set(\gate, 0);"center".postln;}
+	// }});
 
 };
 )
 
+
+(
+{
+	Out.ar(0,
+		DelayC.ar(SinOsc.ar(300), 1.0,
+	LFBrownNoise2.kr(freq:15, dev: 0.01, dist: 0, mul: 1, add: 0)));
+
+}.play;
+)
