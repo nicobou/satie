@@ -25,7 +25,7 @@ o.numOutputBusChannels.postln;
 o.numOutputBusChannels = 128;
 o.memSize.postln;
 o.memSize = 2**20;
-o.blockSize = 512;
+o.blockSize = 2048;
 // o.numAudioBusChannels = 512;
 // o.numPrivateAudioBusChannels = 512;
 // s.reboot
@@ -66,12 +66,15 @@ s.waitForBoot{
 
 	t = Tuning.just;
 	~scale = Scale.pelog(t);
+	~period = 0.2;
+	~duration = 3;
 	//~scale = Scale.major(t);
 	~pf = Pfunc({~scale.ratios.choose},{\reset.postln }).asStream;
-	~tone = 200;
+	~streamdel = Pfunc({~period}, {\reset.postln}).asStream;
+	~tone = 55;
 	s.sync;
 
-	SynthDef(\oiseaubouge, { | outbus = 0, freq = 200, moveb = 0 |
+	SynthDef(\oiseaubouge, { | outbus = 0, freq = 200, moveb = 0, dur = 3 |
 		var locdist, locazi, locele;
 		locdist = In.kr(moveb)
 		* FSinOsc.kr(freq: Rand(0.2, 1), mul:0.3, add: 0.7);
@@ -84,7 +87,7 @@ s.waitForBoot{
 				in: DelayC.ar(
 					(1 - locdist).squared
 					* SinOsc.ar(freq)
-					* EnvGen.kr(Env.sine(dur:3), doneAction: 2),
+					* EnvGen.kr(Env.sine(dur: dur), doneAction: 2),
 					~maxdelay,
 					~maxdelay * locdist
 				),
@@ -106,9 +109,10 @@ s.waitForBoot{
 		loop {
 			Synth.head(~pargroup, \oiseaubouge, [
 				\freq, [~tone, ~tone*2, ~tone*4, ~tone*8].choose * ~pf.next,
-				\moveb, f.index;
+				\moveb, f.index,
+				\dur, ~duration
 			]);
-			0.2.wait;
+			~streamdel.next.wait;
 			//0.1.yield;
 	}});
 	r.play;
@@ -140,10 +144,37 @@ s.waitForBoot{
 	}} );
 	~device.slots[1].at( 288 ).action_( { |v|
 		if (v.value == 1) {
-			~tone = rrand(50, 99);
+			~tone = rrand(50, 71);
 			// ~scale = Scale.major(t);
 			~tone.postln;
 		} {}} );
+	~device.slots[1].at( 293 ).action_( { |v|
+		if (v.value == 1) {
+			~period = (~period/2.0).clip(0.005, 1);
+			("nextdel" + ~period).postln;
+		} {
+	}} );
+	~device.slots[1].at( 292 ).action_( { |v|
+		if (v.value == 1) {
+			~period = (~period * 2.0).clip(0.005, 1);
+			("nextdel" + ~period).postln;
+		} {
+	}} );
+	~device.slots[1].at( 295 ).action_( { |v|
+		if (v.value == 1) {
+			~duration = (~duration - 0.1).clip(0.06, 3);
+			("duration " + ~duration).postln;
+		} {
+	}} );
+	~device.slots[1].at( 294 ).action_( { |v|
+		if (v.value == 1) {
+			~duration = (~duration + 0.1).clip(0.06, 3);
+			("duration" + ~duration).postln;
+		} {
+	}} );
+
+
+
 	// ~device.slots[3].at( 1 ).action_( { |v|
 	// 	if(v.value > 0.6) {~el.set(\gate, 1); ~el.set(\orient, -1); "floor".postln;} {
 	// 		if(v.value < 0.4) {~el.set(\gate, 1);~el.set(\orient, 1); "top".postln;}
@@ -158,12 +189,3 @@ s.waitForBoot{
 };
 )
 
-
-(
-{
-	Out.ar(0,
-		DelayC.ar(SinOsc.ar(300), 1.0,
-	LFBrownNoise2.kr(freq:15, dev: 0.01, dist: 0, mul: 1, add: 0)));
-
-}.play;
-)
