@@ -14,7 +14,7 @@
 (
 ~cOSCMaker = {
 	e = Environment.make({
-		var
+
 		// main OSC method
 		~newOSC = {|self, id, cb, path|
 			"creating newOSC".postln;
