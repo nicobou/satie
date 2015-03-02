@@ -21,7 +21,7 @@ s.waitForBoot{
 	// loading source plugins
 	~scbr.pluginLoader.loadAudioPlugins(~rootSrcPath ++ "/audiosources/*.scd");
 	// see the loaded plugins in the console
-	~scbr.pluginLoader.audioPlugins;
+	~scbr.pluginLoader.audioPlugins.postln;
 	// loading spatializer plugins
 	~scbr.pluginLoader.loadSpatPlugins(~rootSrcPath ++ "/spatializers/*.scd");
 	~scbr.pluginLoader.spatPlugins;
@@ -31,6 +31,7 @@ s.waitForBoot{
 	//   - a monoSpat (starting channel 1)
 	~scbr.makeSynthDef(\pink, \PinkSin, [\stereoPanner, \monoSpat], [0, 2]);
 	~scbr.makeSynthDef(\dust, \DustDust, [\stereoPanner, \monoSpat], [0, 2]);
+	~scbr.makeSynthDef(\input, \MonoIn, [\stereoPanner, \monoSpat], [0, 2]);
 	// be sure the synthDef is compiled on the server
 	s.sync;
 
@@ -48,6 +49,7 @@ s.waitForBoot{
 
 	// OSC business
 	// our main OSC callback
+
 	~coreCallback = {
 
 		arg msg;
@@ -57,7 +59,7 @@ s.waitForBoot{
 		command.postln;
 
 		switch (command,
-			'createSource', {~createSynth.value(msg)},
+			'createNode', {~createNode.value(msg)},
 			'deleteNode', {~deleteSynth.value(msg[2])},
 			//'setProperty', {~setProperty.value(msg)}
 		);
@@ -68,6 +70,25 @@ s.waitForBoot{
 	~synths = Dictionary();
 
 	// define some functions to handle actions
+	~createNode = {
+		|args|
+		var name;
+		name = args[2];
+		if (~synths.includesKey(name),
+			{
+				'Not adding, synth exists'.postln;
+			},
+			{
+				// we need a placeholder before instantiating the synth
+				~synths.put(name, name);
+				~scbr.oscInterface.newOSC(name ++ \prop, ~setProperty, "/spatosc/core/source" +/+ name +/+ "/prop");
+				~scbr.oscInterface.newOSC(name ++ \uri, ~setUri, "/spatosc/core/source" +/+ name +/+ "/uri");
+				~scbr.oscInterface.newOSC(name ++ \state, ~setState, "/spatosc/core/source" +/+ name +/+ "/state");
+				~scbr.oscInterface.newOSC(name ++ \event, ~setEvent, "/spatosc/core/source" +/+ name +/+ "/event");
+			}
+		);
+		~synths.postln;
+	};
 	~createSynth = {
 		arg args;
 		var name, synth;
@@ -85,6 +106,19 @@ s.waitForBoot{
 		);
 		~synths.postln;
 	};
+	~setUri = {
+		// type://name (i.e. plugin://DustDust, file://<path>
+		| args |
+		var name, type, plugin;
+		name = args[0].asString.split[4].asSymbol;
+		type = args[1].asString.split[0].asSymbol;
+		plugin = args[1].asString.split[2].asSymbol;
+		postf("creating name: %, of type: %, using synth: %\n", name, type, plugin);
+		switch (type,
+			'plugin:', { ~synths.put(name, Synth.tail(s, plugin))},
+			'file:', { postf("unimplemented yet ");  }
+		)
+	};
 
 	~setProperty = {
 		arg args;
@@ -96,6 +130,12 @@ s.waitForBoot{
 		postf("seting % of % to %\n", property, name, value);
 		~synths[name].set(property, value);
 		~synths[name].postln;
+	};
+	~setState = {
+		'setState called'.postln;
+	};
+	~setEvent = {
+		'setEvent called'.postln;
 	};
 
 
