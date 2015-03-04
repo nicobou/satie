@@ -1,4 +1,4 @@
-#N canvas 475 22 721 901 10;
+#N canvas 226 63 721 901 10;
 #X obj 34 -34 tgl 20 0 empty empty success 25 10 0 10 -258113 -1 -1
 1 1;
 #X floatatom 269 297 5 0 0 0 - - -;
@@ -50,7 +50,7 @@
 #X text 98 69 <-- Clear the whole scene;
 #X obj 436 -119 cnv 15 250 150 empty empty More_info: 10 12 1 12 -228856
 -128992 0;
-#N canvas 1073 68 788 356 HOW_TO_SET_NODE_PROPERTIES 0;
+#N canvas 349 474 788 356 HOW_TO_SET_NODE_PROPERTIES 1;
 #X msg 141 -109 setNodeStringProperty mySound foo bar;
 #X msg 141 -80 removeNodeStringProperty mySound foo;
 #X msg 143 -29 removeNodeIntProperty mySound channel;
@@ -413,7 +413,6 @@ from 0 to 1];
 #X connect 13 0 4 0;
 #X connect 14 0 4 0;
 #X restore 527 9 pd sourceNode_directivity;
-#X msg 127 146 setURI mySound plugin://looper1~;
 #N canvas 164 601 527 378 global-settings 0;
 #X obj 33 191 s toSpatOSC;
 #X msg 34 112 setSceneRotation 0 0 \$1;
@@ -429,7 +428,7 @@ to work with other 3D envrionments.;
 #X msg 184 187 createListener ear \, setActive ear 1;
 #X msg 334 719 setActive ear \$1 \, setActive mySound \$1;
 #X text 353 696 (de)activate nodes;
-#X obj 334 697 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+#X obj 334 697 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
 1;
 #X msg 83 105 createSource mySound \, setActive mySound 1;
 #X text 343 144 <-- specify plugin for source;
@@ -439,6 +438,9 @@ to work with other 3D envrionments.;
 #X text 413 188 <-- Create a listener and set to Active;
 #X text 229 220 note: connections automatically made as soon as listener
 exists;
+#X msg 127 146 setURI mySound plugin://DustDust;
+#X obj 523 60 p;
+#X obj 400 47 OSCrx 28032;
 #X connect 1 0 4 0;
 #X connect 2 0 4 1;
 #X connect 3 0 4 2;
@@ -462,8 +464,9 @@ exists;
 #X connect 34 0 35 2;
 #X connect 35 0 36 0;
 #X connect 36 0 13 0;
-#X connect 38 0 13 0;
+#X connect 39 0 13 0;
 #X connect 40 0 13 0;
-#X connect 41 0 13 0;
-#X connect 43 0 41 0;
-#X connect 44 0 13 0;
+#X connect 42 0 40 0;
+#X connect 43 0 13 0;
+#X connect 49 0 13 0;
+#X connect 51 0 50 0;
