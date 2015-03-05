@@ -8,4 +8,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ~name = \Default;
-~function = { | gain = 1 |  WhiteNoise.ar() * gain};
+~function = { | freq = 10 , t_|
+	WhiteNoise.ar(0.25)*LFPulse.ar(freq); };
+
+
+// a=~function.play;
+// a.set(\freq, 10);
