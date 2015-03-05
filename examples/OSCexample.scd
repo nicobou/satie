@@ -77,9 +77,13 @@ s.waitForBoot{
 
 	~sourceCallback = {
 		| args |
-		var name, type, value;
+		var name, type, values, eventName;
 		name = args[0].asString.split[4].asSymbol;
 		type = args[0].asString.split[5].asSymbol;
+
+		args.postln;
+
+
 		//name.postln;
 		//property = args[1];
 		//value = args[1];
@@ -87,7 +91,16 @@ s.waitForBoot{
 
 		switch(type,
 			'prop', {~setProperty.value(name, args[1], args[2])},
-			'uri', {~setUri.value(name, args[1])}
+			'uri', {~setUri.value(name, args[1])},
+			'event',
+			{
+				values = args;
+				eventName = args[1];
+				values.removeAt(0);
+				values.removeAt(0);
+				~setEvent.value(name, eventName, values);
+			}
+
 			// TO BE CONTINUED
 		);
 	};
@@ -171,8 +184,10 @@ s.waitForBoot{
 		'setState called'.postln;
 	};
 
-	~setEvent = {
-		'setEvent called'.postln;
+	~setEvent = { | nodeName eventName args |
+		postf("~setEvent: nodeName: % event: %  args: %\n", nodeName, eventName, args);
+		~synths[nodeName].set(eventName, args);
+
 	};
 
 

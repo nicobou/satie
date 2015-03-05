@@ -1,6 +1,9 @@
 #!/bin/bash
 
 oscsend localhost 18032 /spatosc/core ss createSource sheefa
+
+oscsend localhost 18032 /spatosc/core/source/sheefa/event sf trigger -9 -8 -7 -6
+
 sleep 1
 oscsend localhost 18032 /spatosc/core/source/sheefa/prop sf vol .1
 sleep 1
