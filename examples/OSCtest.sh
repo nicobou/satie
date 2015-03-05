@@ -1,9 +1,11 @@
 #!/bin/bash
 
+# will create a node using the "default" plugin
 oscsend localhost 18032 /spatosc/core ss createSource sheefa
-
-oscsend localhost 18032 /spatosc/core/source/sheefa/event sf trigger -9 -8 -7 -6
-
+sleep 2
+oscsend localhost 18032 /spatosc/core/source/sheefa/event sff noteOn 3 20
+sleep 3
+oscsend localhost 18032 /spatosc/core/source/sheefa/event sff noteOn 10 20
 sleep 1
 oscsend localhost 18032 /spatosc/core/source/sheefa/prop sf vol .1
 sleep 1

@@ -16,19 +16,20 @@ s.waitForBoot{
 	// finding source directory
 	~rootSrcPath = thisProcess.nowExecutingPath.dirname ++ "/..";
 	(~rootSrcPath ++ "/src/*.scd").pathMatch.do({arg item; item.loadPaths});
+
 	// creating a sc-basic-renderer
 	~scbr = ~scbrMaker.value(~rootSrcPath);
+
 	// loading source plugins
 	~scbr.pluginLoader.loadAudioPlugins(~rootSrcPath ++ "/audiosources/*.scd");
+
 	// see the loaded plugins in the console
 	~scbr.pluginLoader.audioPlugins.postln;
+
 	// loading spatializer plugins
 	~scbr.pluginLoader.loadSpatPlugins(~rootSrcPath ++ "/spatializers/*.scd");
 	~scbr.pluginLoader.spatPlugins;
-	// generating SynthDef that are going to be used,
-	// here a PinkSin source spatialized by
-	//   - a stereo panner (starting channel 0)
-	//   - a monoSpat (starting channel 1)
+
 
 
 	// NEEDS IMPROVEMENT
@@ -41,20 +42,6 @@ s.waitForBoot{
 	// be sure the synthDef is compiled on the server
 	s.sync;
 
-	// initialization is done, create and remove a source + controls
-	//y = Synth.tail(s, \fool);
-	// spat properties
-	//y.set(\vol, 0.1);
-	//y.set(\azi, 0.2);
-	// source property
-	//y.set(\sfreq, 100);
-	// remove source
-	// y.release;*/
-
-	// s.waitForBoot
-
-	// OSC business
-	// our main OSC callback
 
 	~scbr.oscInterface.newOSC(\createSoundSource, ~coreCallback, "/spatosc/core");
 
