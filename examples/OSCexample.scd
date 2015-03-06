@@ -16,19 +16,20 @@ s.waitForBoot{
 	// finding source directory
 	~rootSrcPath = thisProcess.nowExecutingPath.dirname ++ "/..";
 	(~rootSrcPath ++ "/src/*.scd").pathMatch.do({arg item; item.loadPaths});
+
 	// creating a sc-basic-renderer
 	~scbr = ~scbrMaker.value(~rootSrcPath);
+
 	// loading source plugins
 	~scbr.pluginLoader.loadAudioPlugins(~rootSrcPath ++ "/audiosources/*.scd");
+
 	// see the loaded plugins in the console
 	~scbr.pluginLoader.audioPlugins.postln;
+
 	// loading spatializer plugins
 	~scbr.pluginLoader.loadSpatPlugins(~rootSrcPath ++ "/spatializers/*.scd");
 	~scbr.pluginLoader.spatPlugins;
-	// generating SynthDef that are going to be used,
-	// here a PinkSin source spatialized by
-	//   - a stereo panner (starting channel 0)
-	//   - a monoSpat (starting channel 1)
+
 
 
 	// NEEDS IMPROVEMENT
@@ -41,20 +42,6 @@ s.waitForBoot{
 	// be sure the synthDef is compiled on the server
 	s.sync;
 
-	// initialization is done, create and remove a source + controls
-	//y = Synth.tail(s, \fool);
-	// spat properties
-	//y.set(\vol, 0.1);
-	//y.set(\azi, 0.2);
-	// source property
-	//y.set(\sfreq, 100);
-	// remove source
-	// y.release;*/
-
-	// s.waitForBoot
-
-	// OSC business
-	// our main OSC callback
 
 	~scbr.oscInterface.newOSC(\createSoundSource, ~coreCallback, "/spatosc/core");
 
@@ -77,18 +64,39 @@ s.waitForBoot{
 
 	~sourceCallback = {
 		| args |
-		var name, type, value;
+		var name, type, values, eventName, state;
 		name = args[0].asString.split[4].asSymbol;
 		type = args[0].asString.split[5].asSymbol;
-		//name.postln;
-		//property = args[1];
-		//value = args[1];
-		postf("~sourceCallback:  nodeName: %  mesageType: % args: %\n", name, type, args);
+
+		//args.postln;
 
 		switch(type,
 			'prop', {~setProperty.value(name, args[1], args[2])},
-			'uri', {~setUri.value(name, args[1])}
-			// TO BE CONTINUED
+			'uri', {~setUri.value(name, args[1])},
+			'event',
+			{
+			//postf("~sourceCallback:  nodeName: %  mesageType: %  size: % args: %\n", name, type, args.size, args);
+			if ( (args.size < 2 ) ,
+					{"~setEvent: OSCrx message with no values".warn;},
+					{  // else
+						values = args;
+						eventName = args[1];
+						values.removeAt(0);
+						values.removeAt(0);
+						~setEvent.value(name, eventName, values);
+					}
+				)
+			},
+			'state',
+			{
+				if ( (args.size > 1) ,
+					{
+						state = args[2];
+						eventName = args[1];
+						~setState.value(name, eventName, args[2]);
+					},
+					{"~setState: OSCrx message with no values".warn; })  // else
+			}
 		);
 	};
 
@@ -131,8 +139,6 @@ s.waitForBoot{
 		~synths.removeAt(name);
 
 		~synths.put(name, Synth.tail(s, synth));
-
-
 		//~synths.postln;
 
 	};
@@ -161,18 +167,39 @@ s.waitForBoot{
 	// always a keyWord Value pair
 	~setProperty = { | nodeName property value |
 		//name.postln;
-		postf("seting % of % to %\n", property, nodeName, value);
+		//postf("~setProperty: seting % of % to %\n", property, nodeName, value);
 
 		~synths[nodeName].set(property, value);
 		//~synths[name].postln;
 	};
 
-	~setState = {
+	~setState = { | nodeName state |
+		if ( (state > 0),
+			{state = 1},
+			{state = 0}
+		);
+		//postf("~setState: seting state of % to %\n", nodeName, state);
+		~synths[nodeName].run(state);
+
 		'setState called'.postln;
 	};
 
-	~setEvent = {
-		'setEvent called'.postln;
+	// events RX:   /spatosc/core/source/nodename/event eventName v1...vN
+	// generates two messages to the node:
+	// see below
+	~setEvent = { | nodeName eventName args |
+		var trigName = "t_"++eventName++"Bang";   // generate trigger name
+		trigName.postln;
+		if ( (args.size > 0) ,
+			{
+				~synths[nodeName].set(eventName, args);   // first pass the args
+				~synths[nodeName].set(trigName, 1);      // then generate trigger event
+			},
+			{
+				postf("~setEvent: trigger name: % \n",trigName);
+				~synths[nodeName].set(trigName, 1);  // no args, just generate trigger event
+			}
+		)
 	};
 
 
