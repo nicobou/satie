@@ -7,8 +7,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-~name = \stereoPanner;
-// was  ~function = {|in = 0, vol, delay, azi, ele |
+
+// fed by the following osc message
+// /spatosc/core/connection/sourceNode->listenerNode/update azimuthRADIANS elevationRADIANS delayMS gainDB lpHZ
+
+~name = \stereoListener;
 
 // note:  spread:  // need to invert this value:  so 0 = full spread, 1 = normal, > 1 = narrower
 // note:  update vector:  azimuthRADIANS elevationRADIANS delayMS gainDB lpHZ
@@ -21,5 +24,6 @@
 	var lpf = update[4];
 
 	Pan2.ar(DelayC.ar(gain * in, maxdelaytime: 0.5, delaytime: delay), azi);
+
 };
 
