@@ -11,20 +11,25 @@
 // becomes:
 // node.set.(noteON, [duration freq]);
 // node.set.(t_noteOn 1);
-//
+// NOTE: there is no array length checking, so be careful
+
+
 
 
 ~name = \Default;
-~function = { arg amp=1, t_noteOn, noteOn=#[1,10];
+~function = { arg amp=1, tremelo=10, t_noteOnBang, noteOn=#[2,60];
 	var signal, env;
-	env = EnvGen.ar(Env.perc(0.01, noteOn[0], amp), t_noteOn, doneAction:0);
-	env * WhiteNoise.ar(0.25) * LFPulse.ar(noteOn[1]); };
+	env = EnvGen.ar(Env.perc(0.01, noteOn[0], 1), t_noteOnBang, doneAction:0);
+	amp*(PinkNoise.ar(0.1)* LFPulse.ar(tremelo) + (env*FSinOsc.ar((noteOn[1]).midicps)));
 
+};
 
-/*  test of event method
+/*  for test of "prop" and "event" messages
 a=~function.play;
 
-a.set(\noteOn, #[1,8]);
-a.set(\t_noteOn, 1);
+a.set(\tremelo, 20);   // accessed via the "prop" message
+a.set(\amp, 2.reciprocal);   // accessed via the "prop" message
 
+a.set(\noteOn, #[1,60]);   // accessed via the "event" message
+a.set(\t_noteOnBang, 1);
 */

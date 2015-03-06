@@ -64,31 +64,39 @@ s.waitForBoot{
 
 	~sourceCallback = {
 		| args |
-		var name, type, values, eventName;
+		var name, type, values, eventName, state;
 		name = args[0].asString.split[4].asSymbol;
 		type = args[0].asString.split[5].asSymbol;
 
-		args.postln;
-
-
-		//name.postln;
-		//property = args[1];
-		//value = args[1];
-		postf("~sourceCallback:  nodeName: %  mesageType: % args: %\n", name, type, args);
+		//args.postln;
 
 		switch(type,
 			'prop', {~setProperty.value(name, args[1], args[2])},
 			'uri', {~setUri.value(name, args[1])},
 			'event',
 			{
-				values = args;
-				eventName = args[1];
-				values.removeAt(0);
-				values.removeAt(0);
-				~setEvent.value(name, eventName, values);
+			//postf("~sourceCallback:  nodeName: %  mesageType: %  size: % args: %\n", name, type, args.size, args);
+			if ( (args.size < 2 ) ,
+					{"~setEvent: OSCrx message with no values".warn;},
+					{  // else
+						values = args;
+						eventName = args[1];
+						values.removeAt(0);
+						values.removeAt(0);
+						~setEvent.value(name, eventName, values);
+					}
+				)
+			},
+			'state',
+			{
+				if ( (args.size > 1) ,
+					{
+						state = args[2];
+						eventName = args[1];
+						~setState.value(name, eventName, args[2]);
+					},
+					{"~setState: OSCrx message with no values".warn; })  // else
 			}
-
-			// TO BE CONTINUED
 		);
 	};
 
@@ -131,8 +139,6 @@ s.waitForBoot{
 		~synths.removeAt(name);
 
 		~synths.put(name, Synth.tail(s, synth));
-
-
 		//~synths.postln;
 
 	};
@@ -161,20 +167,39 @@ s.waitForBoot{
 	// always a keyWord Value pair
 	~setProperty = { | nodeName property value |
 		//name.postln;
-		postf("seting % of % to %\n", property, nodeName, value);
+		//postf("~setProperty: seting % of % to %\n", property, nodeName, value);
 
 		~synths[nodeName].set(property, value);
 		//~synths[name].postln;
 	};
 
-	~setState = {
+	~setState = { | nodeName state |
+		if ( (state > 0),
+			{state = 1},
+			{state = 0}
+		);
+		//postf("~setState: seting state of % to %\n", nodeName, state);
+		~synths[nodeName].run(state);
+
 		'setState called'.postln;
 	};
 
+	// events RX:   /spatosc/core/source/nodename/event eventName v1...vN
+	// generates two messages to the node:
+	// see below
 	~setEvent = { | nodeName eventName args |
-		postf("~setEvent: nodeName: % event: %  args: %\n", nodeName, eventName, args);
-		~synths[nodeName].set(eventName, args);
-
+		var trigName = "t_"++eventName++"Bang";   // generate trigger name
+		trigName.postln;
+		if ( (args.size > 0) ,
+			{
+				~synths[nodeName].set(eventName, args);   // first pass the args
+				~synths[nodeName].set(trigName, 1);      // then generate trigger event
+			},
+			{
+				postf("~setEvent: trigger name: % \n",trigName);
+				~synths[nodeName].set(trigName, 1);  // no args, just generate trigger event
+			}
+		)
 	};
 
 
