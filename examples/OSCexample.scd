@@ -37,28 +37,96 @@ s.waitForBoot{
 	//
 	~scbr.makeSynthDef(\pink, \PinkSin, [\stereoPanner, \monoSpat], [0, 2]);
 	~scbr.makeSynthDef(\dust, \DustDust, [\stereoPanner, \monoSpat], [0, 2]);
-	~scbr.makeSynthDef(\default, \Default, [\stereoPanner], [0, 2]);
+	~scbr.makeSynthDef(\default, \Default, [\stereoListener], [0, 2]);
 
 	// be sure the synthDef is compiled on the server
 	s.sync;
 
-
+	OSCdef(\createSoundSource).clear.free;  // just in case this has been re-evaluated.
 	~scbr.oscInterface.newOSC(\createSoundSource, ~coreCallback, "/spatosc/core");
+
+
+
+	// hold synths references
+	~synths = Dictionary();        //  ~synths.postln;
+	~connections = Dictionary();   // ~connections.postln;
+
+
+
 
 	~coreCallback = {
 
 		arg msg;
 		var command;
-		msg.postln;
+		//msg.postln;
 		command = msg[1];
-		command.postln;
+		//command.postln;
 
-		postf("~coreCallback: command: %, msg: %, \n", command, msg);
+		//postf("~coreCallback: command: %, msg: %, \n", command, msg);
 
+
+		// TO DO:   arg checking
 		switch (command,
 			'createSource', {~createSource.value(msg)},
 			'deleteNode', {~deleteSynth.value(msg[2])},
-			//'setProperty', {~setProperty.value(msg)}
+			'connect',
+			{
+				if ( (msg.size < 4 ) ,
+					{"~coreCallback: OSCrx connect message missing values".warn;},
+					{  // else
+						var sourceName, listenerName;
+						sourceName = msg[2];
+						listenerName = msg[3];
+						~createConnection.value(sourceName, listenerName);
+					}
+				)
+			};
+		);
+	};
+
+
+	// /spatosc/core/connection/source->listener/update azi elev delayMS gainDB lpHZ
+	// /spatosc/core/connection/source->listener/spread  exp   // exponent for incidence effect
+	~connectionCallback = { | args |
+		var nodeName, connectionName, type, values, temp, charIndex;
+		//args.postln;
+
+		connectionName = args[0].asString.split[4].asSymbol;
+		type = args[0].asString.split[5].asSymbol;
+		charIndex = connectionName.asString.find("->");
+
+		//temp = value.asString.subStr(charIndex);
+		nodeName = connectionName.asString.subStr(0, charIndex-1);
+
+		postf("~connectionCallback:  connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
+
+		switch(type,
+			'update',
+			{
+				if ( (args.size != 6 ) ,
+					{"connectionCallback: OSCrx update message missing values".warn;},
+					// else
+					{
+						values = args;
+						values.removeAt(0);
+
+				//postf("~connectionCallback:  nodeName: %  update:  argc: %  argv: %\n", nodeName, args.size, values);
+						values.postln;
+						~synths[nodeName.asSymbol].set(\update, values);   // first pass the args
+					}
+				)
+			},
+			'spread',
+			{
+				if ( (args.size > 0 ) ,
+					{
+						var spread = args[1];
+						postf("connectionCallback: setting spread: %\n",spread);
+						~synths[nodeName.asSymbol].set(\update, spread);   // first pass the args
+					},
+					 // else
+					{"~connectionCallback: OSCrx spread message with no values".warn; })
+			};
 		);
 	};
 
@@ -68,15 +136,15 @@ s.waitForBoot{
 		name = args[0].asString.split[4].asSymbol;
 		type = args[0].asString.split[5].asSymbol;
 
-		//args.postln;
+		//'~sourceCallback'.postln;
 
 		switch(type,
 			'prop', {~setProperty.value(name, args[1], args[2])},
 			'uri', {~setUri.value(name, args[1])},
 			'event',
 			{
-			//postf("~sourceCallback:  nodeName: %  mesageType: %  size: % args: %\n", name, type, args.size, args);
-			if ( (args.size < 2 ) ,
+				postf("~sourceCallback:  nodeName: %  mesageType: %  size: % args: %\n", name, type, args.size, args);
+				if ( (args.size < 2 ) ,
 					{"~setEvent: OSCrx message with no values".warn;},
 					{  // else
 						values = args;
@@ -96,36 +164,66 @@ s.waitForBoot{
 						~setState.value(name, eventName, args[2]);
 					},
 					{"~setState: OSCrx message with no values".warn; })  // else
-			}
+			},
+			{postf("~sourceCallback:  UNMATCHED:  nodeName: %  mesageType: %  size: % args: %\n", name, type, args.size, args)};
 		);
 	};
 
 
-	// hold synths references
-	~synths = Dictionary();
+/*
+	~connections.put("caca", "chumbide");
+	~connections.put("sheefaL", "sheefa");
+	~connections.put("sheefaR", "sheefa");
+	~connections.put("sheefaM", "sheefa");
+
+	~connections.postln;
+
+	~deleteConnection.value("sheefa");
+
+	~connections.postln;
+*/
 
 	// define some functions to handle actions
-	~createSource = {
-		|args|
-		var name;
-		name = args[2];
-		'creatingSource'.postln;
+	~createSource = { | args |
+		var sourceName;
+		sourceName = args[2];
+		'creating Source'.postln;
 
-		if (~synths.includesKey(name),
+		if (~synths.includesKey(sourceName),
 			{
 				'Not adding, synth exists'.postln;
 			},
 			{
 				//create node with default plugin
-				~synths.put(name, Synth.tail(s, \default));
+				~synths.put(sourceName, Synth.tail(s, \default));
 
-				~scbr.oscInterface.sourceOSC(name, ~sourceCallback);
+				~scbr.oscInterface.sourceOSC(sourceName, ~sourceCallback);
 
 				'adding synth'.postln;
 			}
 		);
 		~synths.postln;
 	};
+
+	~createConnection = { |sourceName listenerName |
+		var connectionName = sourceName ++ "->" ++ listenerName;
+
+
+		if (~connections.includesKey(connectionName),
+			{
+				'Not adding, connection exists'.postln;
+			},
+			{
+				postf("~createConnection:  connecting: %  to   %\n", sourceName, listenerName);
+				~connections.put(connectionName, sourceName);
+				~scbr.oscInterface.connectionOSC(connectionName, ~connectionCallback);
+				'adding connection'.postln;
+			}
+		);
+
+	};
+
+
 
 	// update a node's plugin
 	~setPlugin = { | name synth |
@@ -144,7 +242,6 @@ s.waitForBoot{
 	};
 
 	~setUri = { | name, value |
-
 		var charIndex, uriPath, type, temp;
 
 		// type://name (i.e. plugin://DustDust, file://<path>
@@ -163,7 +260,6 @@ s.waitForBoot{
 		);
 	};
 
-
 	// always a keyWord Value pair
 	~setProperty = { | nodeName property value |
 		//name.postln;
@@ -173,7 +269,7 @@ s.waitForBoot{
 		//~synths[name].postln;
 	};
 
-	~setState = { | nodeName state |
+	~setState = { | nodeName,  state |
 		if ( (state > 0),
 			{state = 1},
 			{state = 0}
@@ -187,7 +283,7 @@ s.waitForBoot{
 	// events RX:   /spatosc/core/source/nodename/event eventName v1...vN
 	// generates two messages to the node:
 	// see below
-	~setEvent = { | nodeName eventName args |
+	~setEvent = { | nodeName, eventName,  args |
 		var trigName = "t_"++eventName++"Bang";   // generate trigger name
 		trigName.postln;
 		if ( (args.size > 0) ,
@@ -202,24 +298,52 @@ s.waitForBoot{
 		)
 	};
 
-
-	~deleteSynth = {
-		arg name;
+	~deleteSynth = { | nodeName |
 		'deleting synth'.postln;
-		~synths[name].release;
-		~synths.removeAt(name);
-		~scbr.oscInterface.removeSourceOSC(name);
-
-
+		~synths[nodeName].release;
+		~synths.removeAt(nodeName);
+		~scbr.oscInterface.removeSourceOSC(nodeName);
+		~deleteConnections.value(nodeName);
 	};
-	s.sync;
 
+
+	//     ~deleteSynth.value(\sheefa);
+	//     ~deleteConnections.value(\sheefa);
+	//     ~connections.postln;
+
+	~deleteConnections = { | nodeName |
+		~connections.keysValuesDo { |key, value|
+			//value.postln;
+			//nodeName.postln;
+
+			if ((value.asSymbol == nodeName),
+				{
+					postf("~deleteConnections  for node: %\n", nodeName);
+					//item.postln;
+					//key.postln;
+					~scbr.oscInterface.removeConnectionOSC(key);
+					~connections.removeAt(key);
+					~connections.postln;
+				},
+				{ postf("~deleteConnections  CONNECTION NOT FOUND for node: %\n", nodeName); }
+			);
+		};
+	};
+
+
+	s.sync;
+	/*
+	~synths[\sheefa].set(\update, #[0,0,0,1,0]);
+	x = ~synths[\sheefa].get(\listenerName);
+	x.postln;
+	~synths[\sheefa].set(\listenerName, -1);
+	*/
 	//y.postln;
-//synth.tail(s, y);
-//Synth.tail(s, \PinkSin);
-//~synths.postln;
-//\PinkSin.postln;
-// y.put(s, Synth.tail(s, \PinkSin));
+	//synth.tail(s, y);
+	//Synth.tail(s, \PinkSin);
+	//~synths.postln;
+	//\PinkSin.postln;
+	// y.put(s, Synth.tail(s, \PinkSin));
 
 };
 )

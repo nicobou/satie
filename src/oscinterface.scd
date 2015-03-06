@@ -17,23 +17,55 @@
 
 		// main OSC method
 		~newOSC = {|self, id, cb, path|
-			"creating newOSC".postln;
-			OSCdef(id, cb, path, recvPort: 18032)
+			var idsym = id.asSymbol;
+			//postf("~newOSC id: % path: %\n",idsym,path);
+			OSCdef(idsym, cb, path, recvPort: 18032)
 		};
+
+		~deleteOSC = {|self, id|
+			//postf("~deleteOSC  id: %\n",id.asSymbol);
+			OSCdef(id.asSymbol ).clear.free;
+		};
+
 		// create all /core/source/*/ at once.
-		~sourceOSC = {|self, id, cb|
-			self.newOSC(id ++ \prop, cb,  "/spatosc/core/source" +/+ id +/+ "/prop");
-			self.newOSC(id ++ \uri, cb,  "/spatosc/core/source" +/+ id +/+ "/uri");
-			self.newOSC(id ++ \state, cb,  "/spatosc/core/source" +/+ id +/+ "/state");
-			self.newOSC(id ++ \event, cb,  "/spatosc/core/source" +/+ id +/+ "/event");
+		~sourceOSC = {|self, sourceName, cb|
+			self.newOSC(sourceName ++ \prop, cb,  "/spatosc/core/source" +/+ sourceName +/+ "/prop");
+			self.newOSC(sourceName ++ \uri, cb,  "/spatosc/core/source" +/+ sourceName +/+ "/uri");
+			self.newOSC(sourceName ++ \state, cb,  "/spatosc/core/source" +/+ sourceName +/+ "/state");
+			self.newOSC(sourceName ++ \event, cb,  "/spatosc/core/source" +/+ sourceName +/+ "/event");
 		};
+
+		// create connection hooks for connection messages
+		// /spatosc/core/connection/sourceNode->listenerNode/update azi elev delayMS gainDB lpHZ
+		// /spatosc/core/connection/sourceNode->listenerNode/spread  exp  // for incidence effect
+		~connectionOSC = {|self, connectionName, cb|
+			var path = "/spatosc/core/connection" +/+ connectionName;
+
+			//path.postln;
+			self.newOSC(connectionName ++ \update, cb,  path +/+ "update");
+			self.newOSC(connectionName ++ \spread, cb,  path +/+ "spread");
+		};
+
 		// try to remove the OSC definitions.
-		~removeSourceOSC = {|self, id|
-			OSCdef(id ++ \prop).clear.free;
-			OSCdef(id ++ \uri).clear.free;
-			OSCdef(id ++ \state).clear.free;
-			OSCdef(id ++ \event).clear.free;
+		~removeSourceOSC = {|self, sourceName|
+			self.deleteOSC(sourceName ++ \prop);
+			self.deleteOSC(sourceName ++ \uri);
+			self.deleteOSC(sourceName ++ \state);
+			self.deleteOSC(sourceName ++ \event);
 		};
+
+		//    OSCdef(\sheefa->myListenerupdate).clear.free;
+		//    OSCdef(\sheefa->myListenerspread).clear.free;
+
+		// try to remove the OSC definitions.
+		~removeConnectionOSC = {|self, connectionName|
+
+			//OSCdef((connectionName ++ \update).asSymbol ).clear.free;
+			//OSCdef((connectionName ++ \spread).asSymbol ).clear.free;
+			self.deleteOSC(connectionName ++ \update);
+			self.deleteOSC(connectionName ++ \spread);
+		};
+
 	});
 	e.know = true;
 	e;

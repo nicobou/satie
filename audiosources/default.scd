@@ -17,7 +17,7 @@
 
 
 ~name = \Default;
-~function = { arg amp=1, tremelo=10, t_noteOnBang, noteOn=#[2,60];
+~function = { arg listenerName = \myListener, amp=1, tremelo=10, t_noteOnBang, noteOn=#[2,60];
 	var signal, env;
 	env = EnvGen.ar(Env.perc(0.01, noteOn[0], 1), t_noteOnBang, doneAction:0);
 	amp*(PinkNoise.ar(0.1)* LFPulse.ar(tremelo) + (env*FSinOsc.ar((noteOn[1]).midicps)));
