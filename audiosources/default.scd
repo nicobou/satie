@@ -16,7 +16,7 @@
 
 
 
-~name = \Default;
+~name = \default;
 ~function = { arg listenerName = \myListener, amp=1, tremelo=10, t_noteOnBang, noteOn=#[2,60];
 	var signal, env;
 	env = EnvGen.ar(Env.perc(0.01, noteOn[0], 1), t_noteOnBang, doneAction:0);
