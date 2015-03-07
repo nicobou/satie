@@ -8,19 +8,19 @@ sleep 1
 oscsend localhost 18032 /spatosc/core sss connect sheefa myListener
 echo CONNECT TO LISTENER
 sleep 2
-oscsend localhost 18032 "/spatosc/core/connection/sheefa->myListener/update" fffff -10 0 0 1 0  # azi ele del gain hpf
+oscsend localhost 18032 "/spatosc/core/connection/sheefa->myListener/update" fffff -1 0 0 1 22050  # azi ele  gain del lpf
 echo PAN LEFT
 sleep 2
-oscsend localhost 18032 "/spatosc/core/connection/sheefa->myListener/update" fffff 10 0 0 1 0
+oscsend localhost 18032 "/spatosc/core/connection/sheefa->myListener/update" fffff 1 0 1 0 22050
 echo PAN RIGHT
 sleep 2
-oscsend localhost 18032 "/spatosc/core/connection/sheefa->myListener/update" fffff 0 0 0 2 0
-echo GAIN = 2
+oscsend localhost 18032 "/spatosc/core/connection/sheefa->myListener/update" fffff 0 0 2 0 1000
+echo GAIN = 2 LPF = 1000
 sleep 2
-oscsend localhost 18032 "/spatosc/core/connection/sheefa->myListener/update" fffff 0 0 0 .1 0
+oscsend localhost 18032 "/spatosc/core/connection/sheefa->myListener/update" fffff 0 0 .1 0 22050
 echo GAIN = .1
 sleep 2
-oscsend localhost 18032 "/spatosc/core/connection/sheefa->myListener/update" fffff 0 0 0 1 0
+oscsend localhost 18032 "/spatosc/core/connection/sheefa->myListener/update" fffff 0 0 1 0 22050
 echo GAIN = 1
 sleep 1
 oscsend localhost 18032 "/spatosc/core/connection/sheefa->myListener/spread" f 0

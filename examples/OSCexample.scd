@@ -10,6 +10,14 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+// debugging
+//  OSCFunc.trace(true);
+//  OSCFunc.trace(false);
+
+//NOTE: OSC RX message specification is based on the SPATOSC specification  (see:   http://code.sat.qc.ca/redmine/projects/spatosc/wiki/spec  )
+
+
 (
 s.waitForBoot{
 
@@ -37,7 +45,8 @@ s.waitForBoot{
 	//
 	~scbr.makeSynthDef(\pink, \PinkSin, [\stereoPanner, \monoSpat], [0, 2]);
 	~scbr.makeSynthDef(\dust, \DustDust, [\stereoPanner, \monoSpat], [0, 2]);
-	~scbr.makeSynthDef(\default, \Default, [\stereoListener], [0, 2]);
+	~scbr.makeSynthDef(\default, \default, [\stereoListener], [0, 2]);
+	~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [\stereoListener], [0, 2]);
 
 	// be sure the synthDef is compiled on the server
 	s.sync;
@@ -55,25 +64,53 @@ s.waitForBoot{
 
 
 	~coreCallback = {
-
 		arg msg;
 		var command;
-		//msg.postln;
 		command = msg[1];
-		//command.postln;
-
-		//postf("~coreCallback: command: %, msg: %, \n", command, msg);
+		postf("~coreCallback: command: %, msg: %, \n", command, msg);
 
 
-		// TO DO:   arg checking
 		switch (command,
-			'createSource', {~createSource.value(msg)},
-			'deleteNode', {~deleteSynth.value(msg[2])},
+			'createSource',
+			{
+				if ( (msg.size < 3 ) ,
+					{"~coreCallback: OSCrx createSource message missing values".warn;},
+					 // else
+					{
+						var sourceName = msg[2];
+						~createSource.value(sourceName);
+					}
+				)
+			},
+			'createSoundSource',   // this will be dropped as soon as spatOSC is updated to use the "createSource" message instead
+			{
+				if ( (msg.size < 3 ) ,
+					{"~coreCallback: OSCrx createSource message missing values".warn;},
+					 // else
+					{
+						var sourceName = msg[2];
+						~createSource.value(sourceName);
+					}
+				)
+			},
+			'deleteNode',
+			{
+				if ( (msg.size < 3 ) ,
+					{"~coreCallback: OSCrx deleteNode message missing values".warn;},
+					 // else
+					{
+						var sourceName = msg[2];
+						~deleteSynth.value(sourceName);
+					}
+				)
+			},
+			'clearScene', {~clearScene.value();},
 			'connect',
 			{
 				if ( (msg.size < 4 ) ,
 					{"~coreCallback: OSCrx connect message missing values".warn;},
-					{  // else
+					// else
+					{
 						var sourceName, listenerName;
 						sourceName = msg[2];
 						listenerName = msg[3];
@@ -98,7 +135,7 @@ s.waitForBoot{
 		//temp = value.asString.subStr(charIndex);
 		nodeName = connectionName.asString.subStr(0, charIndex-1);
 
-		postf("~connectionCallback:  connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
+		//postf("~connectionCallback:  connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
 
 		switch(type,
 			'update',
@@ -111,7 +148,7 @@ s.waitForBoot{
 						values.removeAt(0);
 
 				//postf("~connectionCallback:  nodeName: %  update:  argc: %  argv: %\n", nodeName, args.size, values);
-						values.postln;
+						//values.postln;
 						~synths[nodeName.asSymbol].set(\update, values);   // first pass the args
 					}
 				)
@@ -184,9 +221,7 @@ s.waitForBoot{
 */
 
 	// define some functions to handle actions
-	~createSource = { | args |
-		var sourceName;
-		sourceName = args[2];
+	~createSource = { | sourceName |
 		'creating Source'.postln;
 
 		if (~synths.includesKey(sourceName),
@@ -298,6 +333,18 @@ s.waitForBoot{
 		)
 	};
 
+	//  ~clearScene.value(0);
+
+	~clearScene = {
+		'deleting synth'.postln;
+		~synths.keysDo { |key |
+			//key.postln;
+
+			~deleteSynth.value(key)
+		};
+	};
+
+	// ~synths.postln;
 	~deleteSynth = { | nodeName |
 		'deleting synth'.postln;
 		~synths[nodeName].release;
