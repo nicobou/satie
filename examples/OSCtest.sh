@@ -17,8 +17,8 @@ sleep 2
 oscsend localhost 18032 "/spatosc/core/connection/sheefa->myListener/update" fffff 0 0 2 0 1000
 echo GAIN = 2 LPF = 1000
 sleep 2
-oscsend localhost 18032 "/spatosc/core/connection/sheefa->myListener/update" fffff 0 0 .1 0 22050
-echo GAIN = .1
+oscsend localhost 18032 "/spatosc/core/connection/sheefa->myListener/update" fffff 0 0 -12 0 22050
+echo GAIN = -12
 sleep 2
 oscsend localhost 18032 "/spatosc/core/connection/sheefa->myListener/update" fffff 0 0 1 0 22050
 echo GAIN = 1
@@ -38,10 +38,10 @@ sleep 1
 oscsend localhost 18032 /spatosc/core/source/sheefa/state f 1
 echo STATE = 1
 sleep 1
-oscsend localhost 18032 /spatosc/core/source/sheefa/event sff noteOn 1 60  echo
+oscsend localhost 18032 /spatosc/core/source/sheefa/event sff noteOn 60 1  
 echo NOTE ON = 1 60  : seconds midiPitch
 sleep 1
-oscsend localhost 18032 /spatosc/core/source/sheefa/event sff noteOn 5 76
+oscsend localhost 18032 /spatosc/core/source/sheefa/event sff noteOn 76 .5
 echo NOTE ON = 5 76  : seconds midiPitch
 sleep 2
 oscsend localhost 18032 /spatosc/core/source/sheefa/uri s plugin://pink
