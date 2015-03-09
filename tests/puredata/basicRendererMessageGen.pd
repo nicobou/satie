@@ -1,4 +1,4 @@
-#N canvas 548 22 923 917 10;
+#N canvas 564 22 923 917 10;
 #X obj 34 -34 tgl 20 0 empty empty success 25 10 0 10 -258113 -1 -1
 1 1;
 #X floatatom 248 338 5 0 0 0 - - -;
@@ -443,12 +443,18 @@ ear;
 ;
 #X msg 188 267 setURI mySound plugin://zkarpluck1;
 #X obj 629 376 s toSpatOSC;
-#X msg 630 344 sendNodeEvent mySound outLevel \$1;
 #X floatatom 630 307 5 0 0 0 - - -;
 #X msg 209 302 sendNodeEvent mySound noteOn 60 0.1;
-#X msg 534 255 sendNodeEvent mySound noteOn \$1 0.1;
 #X obj 776 179 vsl 15 128 0 127 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 6900 1;
+-1 -1 7100 1;
+#X obj 757 58 metro 500;
+#X obj 774 30 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+1;
+#X obj 765 98 random 24;
+#X obj 770 146 + 40;
+#X msg 534 255 sendNodeEvent mySound noteOn \$1 0.1;
+#X msg 628 343 sendNodeEvent mySound outLevel \$1;
+#X floatatom 835 238 5 0 0 0 - - -;
 #X connect 1 0 4 0;
 #X connect 2 0 4 1;
 #X connect 3 0 4 2;
@@ -479,8 +485,13 @@ ear;
 #X connect 47 0 13 0;
 #X connect 48 0 13 0;
 #X connect 50 0 13 0;
-#X connect 52 0 51 0;
-#X connect 53 0 52 0;
-#X connect 54 0 13 0;
-#X connect 55 0 51 0;
+#X connect 52 0 60 0;
+#X connect 53 0 13 0;
+#X connect 54 0 59 0;
+#X connect 55 0 57 0;
 #X connect 56 0 55 0;
+#X connect 57 0 58 0;
+#X connect 58 0 59 0;
+#X connect 59 0 51 0;
+#X connect 60 0 51 0;
+#X connect 61 0 55 1;

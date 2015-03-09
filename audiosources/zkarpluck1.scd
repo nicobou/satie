@@ -13,84 +13,198 @@
 // node.set.(t_noteOn 1);
 // NOTE: there is no array length checking, so be careful
 
+//o = OSCresponderNode(s.addr, '/tr', { |time, resp, msg| msg.postln }).add;
+//o.remove;  // when done, you need to clean up the OSCresponderNode
 
 
 
 ~name = \zkarpluck1;
-~function = { arg listenerName = \myListener, hpQ = 2.reciprocal, hpFq = 11, outLevel = -99, pWidth = 0, delayDecay = 2.reciprocal, delayMS = 10, t_noteOnBang = 0, noteOn=#[60,1];  // note gain
+~function = { arg listenerName = \myListener, outLevel = -99, lpFq = 12000, pWidth = 0,  combRTsec = 2, attkRiseMs = 0, attkDurMs = 1,  t_noteOnBang = 0, noteOn=#[60,1];  // note gain
 
-	//var transientEnv = [0, 1000.reciprocal, 1, -8];
-	var burstEnv, att = 0, dec = 0.001;
-	var signalOut;
+	var hpFq = 20;   // highpass for fb delay.
+	var burstEnv,attkSig;
+	var signalOut,attackEnv;
 	var midiPitch = noteOn[0];
-	var amp = noteOn[1];
+	var attkRiseSec = attkRiseMs*0.001;
+	var attkSec = attkDurMs * 0.001, attkExp = pWidth * 24;  // constant curve shape exp maximum
+	var attkAmp = noteOn[1].clip(0,1);
 	//var gain = shitfuck.dbamp;
-	var delayTime = [midiPitch, midiPitch + 12, midiPitch + 24].midicps.reciprocal;
+	//var combDelaySec = [midiPitch, midiPitch + 12].midicps.reciprocal;
+	var combDelaySec = midiPitch.midicps.reciprocal;
+	var fb,fbdel, log001 = log(0.001); // OPTIMISE
 
-	//outLevel.scope;
-	//SendTrig.kr(Impulse.kr(4), 0, outLevel);
-	//Env.perc(0, 1000.reciprocal, 1, -24).test.plot;
+	//combDelaySec.clip((SampleDur.ir * 4), 10000);
 
-	burstEnv = EnvGen.ar(Env.perc(0, 100.reciprocal, 10, pWidth), t_noteOnBang);
+	// calculate fb as a function of ringtime
+	fbdel = combRTsec.abs;
+	fbdel.clip(0.01, 10);  // avoid zero
+	fb = exp(log001 * combDelaySec / fbdel);
 
-	signalOut = PinkNoise.ar(burstEnv);
-	//signalOut = burstEnv*Decay.ar(Impulse.ar(1000, pWidth), dec );
-	//signalOut = (burstEnv*Impulse.ar(1000, pWidth)).scope;
+	//attackEnv = Env.perc(0, 0.001, 1, -24);
+	//attackEnv = Env.perc(attkRiseSec, [attkSec, attkSec], 1, [ attkExp + rand2(attkExp/4), attkExp + rand2(attkExp/4)]);
+	attackEnv = Env.perc(attkRiseSec, attkSec, 1, attkExp + rand2(attkExp/4));
+	burstEnv = EnvGen.ar(attackEnv, t_noteOnBang);
 
-	signalOut = 3.reciprocal * CombL.ar(signalOut, 1, delayTime, delayDecay);
-	outLevel.dbamp*BHiPass.ar(Mix.new(signalOut), hpFq, hpQ );
-	//DetectSilence.ar(signalOut, doneAction:0);
+	//attkSig = BLowPass.ar( PinkNoise.ar(burstEnv), lpFq, 1 );
+ 	//signalOut = CombL.ar(attkSig, 1, combDelaySec, combRTsec);
+
+	attkSig = PinkNoise.ar(burstEnv);
+    signalOut = LPF.ar(LocalIn.ar(1)+ attkSig,  lpFq.lag(0.3) ); //
+    signalOut = DelayC.ar(signalOut, 0.2, combDelaySec - ControlRate.ir.reciprocal);  // correct for buffer size
+	LocalOut.ar(fb*signalOut);
+
+    outLevel.dbamp*HPF.ar(Mix.new(signalOut), hpFq);
+
+	//DEBUG outLevel.scope;
+	//SendTrig.kr(Impulse.kr(4), 0, fb);
 };
 
-/*  for test of "prop" and "event" messages
+/*
+t.stop;
+a.free;
 
-a=~synths[\mySound];
+//  for test of "prop" and "event" messages
+{
+	a=~function.play;
+    s.sync;
+	a.set(\outLevel, 0 );
+	a.set(\noteOn, #[60, 1]);
+	t = Task({ { a.set(\t_noteOnBang, 1); 1.wait;}.loop });
+	t.start;
+}.fork;
+
+
+
+// make DEBUGGING SLIDER window
+
+
+
+w=Window.new("sheefa", Rect(30, 30, 400, 200)).front;
+w.view.decorator=FlowLayout(w.view.bounds);
+w.view.decorator.gap=8@2;
+
+g = EZSlider(w, 380@20, "Note ", ControlSpec(48, 84, \lin, 1, 60, \note));
+g.action_({ |ez| ( a.set(\noteOn, ez.value); a.set(\t_noteOnBang, 1); ) });
+
+h = EZSlider(w, 380@20, "combRT", ControlSpec(-20, 20, \lin, 0.01, 1));
+h.action_({ |ez| ( a.set(\combRTsec,  (ez.value)))});
+
+i = EZSlider(w, 380@20, "outLevel", ControlSpec(-60, 6, \lin, 0.5, -18));
+i.action_({ |ez| ( a.set(\outLevel, (ez.value)))});
+
+
+//j = EZSlider(w, 380@20, "hPassQ", ControlSpec(0, 4, \lin, 0.10, 1));
+//j.action_({ |ez| ( a.set(\hpQ, (ez.value)))});
+
+k = EZSlider(w, 380@20, "LPcutoff ", ControlSpec(0.1, 22050, \exp,1, 22050));
+k.action_({ |ez| ( a.set(\lpFq, ez.value))});
+
+l = EZSlider(w, 380@20, "pWidth", ControlSpec(-1, 1, \lin, 0.01, 0));
+l.action_({ |ez| ( a.set(\pWidth, ez.value))});
+
+m = EZSlider(w, 380@20, "attkDms", ControlSpec(0.5, 50, \lin, 0.5, 4));
+m.action_({ |ez| ( a.set(\attkDurMs, ez.value))});
+
+n = EZSlider(w, 380@20, "attkRms", ControlSpec(0, 50, \lin, 0.1 , 0));
+n.action_({ |ez| ( a.set(\attkRiseMs, ez.value))});
+
+
 
 a=~function.play;
+
+
+
+
+a=Synth.new(\sheefa);
+a=~synths[\sheefa];
+a=~synths[\mySound];
 
 a.set(\outLevel, 0 );
 a.set(\noteOn, #[60, 1]);   // accessed via the "event" message
 a.set(\t_noteOnBang, 1);
 
-// make DEBUGGING SLIDER window
+*/
 
-w=Window.new.front;
-w.view.decorator=FlowLayout(w.view.bounds);
-w.view.decorator.gap=2@2;
-
-g = EZSlider(w, 380@20, "Note ", ControlSpec(24, 60, \lin, 1, 36, \note));
-g.action_({ |ez| ( a.set(\noteOn, ez.value); a.set(\t_noteOnBang, 1); ) });
-
-h = EZSlider(w, label: "Decay");
-h.action_({ |ez| ( a.set(\delayDecay, LinLin.kr(ez.value, 0,1,1000.reciprocal, 20)); a.set(\t_noteOnBang, 1); ) });
-
-i = EZSlider(w, 380@20, "Output");
-i.action_({ |ez| ( a.set(\outLevel, LinLin.kr(ez.value, 0,1,-66, 0));) });
-
-
-j = EZSlider(w, label: "hPassQ");
-j.action_({ |ez| ( a.set(\hpQ, [ LinLin.kr(ez.value, 0,1,0, 1), 1]); ) });
-
-k = EZSlider(w, 380@20, "HPcutoff ", ControlSpec(0.1, 5000, \exp,0.01,1000,\Hz));
-k.action_({ |ez| ( a.set(\hpFq, ez.value))});
-
-l = EZSlider(w, 380@20, "pWidth ", ControlSpec(-24, 24, \lin, 1, 0));
-l.action_({ |ez| ( a.set(\pWidth, ez.value))});
-
+/*
+transientDur = 100.reciprocal, transientAmp
 
 o = OSCresponderNode(s.addr, '/tr', { |time, resp, msg| msg.postln }).add;
-
-
-
-
 o.remove;  // when done, you need to clean up the OSCresponderNode
 
 
 Env.perc(0, 100.reciprocal, 10, -24).test.plot;
 
+
+
+oscsend localhost 18032 /spatosc/core ss createSource sheefa
+oscsend localhost 18032 /spatosc/core sss connect sheefa myListener
+oscsend localhost 18032 /spatosc/core/source/sheefa/uri s plugin://zkarpluck1
+oscsend localhost 18032 "/spatosc/core/connection/sheefa->myListener/update" fffff 0 0 2 0 1000
+
+(
+// a synthdef browswer
+SynthDescLib.global.read;
+SynthDescLib.global.browse;
+)
+
 */
 
 
+/*
+//Define DWGPluckedStiff synthdef
+(
+SynthDef(\help_dwgplucked, { |out=0, freq=440, amp=0.5, gate=1, c3=20, pan=0,fB = 80|
+    var env = Env.new([0,1, 1, 0],[0.001,0.006, 0.0005],[5,-5, -8]);
+    var inp = amp * LFClipNoise.ar(2000) * EnvGen.ar(env,gate);
+    var son = DWGPluckedStiff.ar(freq, amp, gate,0.1,1,c3,inp,fB);
+    DetectSilence.ar(son, 0.001, doneAction:2);
+    Out.ar(out, Pan2.ar(son * 0.1, pan));
+}).add;
+)
 
+//Define DWGPlucked synthdef
+(
+SynthDef(\help_dwgplucked, { |out=0, freq=440, amp=0.5, gate=1, c3=20, pan=0|
+    var env = Env.new([0,1, 1, 0],[0.001,0.006, 0.0005],[5,-5, -8]);
+    var inp = amp * LFClipNoise.ar(2000) * EnvGen.ar(env,gate);
+    var son = DWGPlucked.ar(freq, amp, gate,0.1,1,c3,inp);
+    DetectSilence.ar(son, 0.001, doneAction:2);
+    Out.ar(out, Pan2.ar(son * 0.1, pan));
+}).add;
+)
+
+//Define DWGPlucked2 synthdef
+(
+SynthDef(\help_dwgplucked, { |out=0, freq=440, amp=0.5, gate=1, c3=20, pan=0|
+    var env = Env.new([0,1, 1, 0],[0.001,0.006, 0.0005],[5,-5, -8]);
+    var inp = amp * LFClipNoise.ar(2000) * EnvGen.ar(env,gate);
+    var son = DWGPlucked2.ar(freq, amp, gate,0.1,1,c3,inp);
+    DetectSilence.ar(son, 0.001, doneAction:2);
+    Out.ar(out, Pan2.ar(son * 0.1, pan));
+}).add;
+)
+
+//PLAY it.
+(
+a = Scale.new(
+    #[0, 1, 3, 5, 7, 8, 10],
+    12,
+    Tuning.new([0, 0.75, 2, 3.5, 4, 5, 6, 7, 8, 9, 10, 11]),
+    "Custom"
+);
+
+Pbind(
+    \instrument, \help_dwgplucked,
+    \scale ,a,
+    \delta , Pseq([1,0.5,0.5,0.5,0.5,0.5,0.5,1,0.5,0.5,1,1]*0.25,inf),
+    \dur , 2,
+    \degree, Pseq([1,8,8,8,8,8,8,-6,Prand([9,10,11],1),1,7,8]-8, inf),
+    \amp , Pwhite(0.2,0.8),
+    \c3 , Pseq([Pseq([1400],24),Pseq([300],24)],inf),
+    \pan , Pwhite(-1,1),
+).play;
+)
+
+*/
 
 

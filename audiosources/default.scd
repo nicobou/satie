@@ -17,10 +17,10 @@
 
 
 ~name = \default;
-~function = { arg listenerName = \myListener, amp=1, tremelo=10, t_noteOnBang, noteOn=#[2,60];
+~function = { arg listenerName = \myListener, amp=1, tremelo=10, t_noteOnBang, noteOn=#[60,1];
 	var signal, env;
-	env = EnvGen.ar(Env.perc(0.01, noteOn[0], 1), t_noteOnBang, doneAction:0);
-	amp*(PinkNoise.ar(0.1)* LFPulse.ar(tremelo) + (env*FSinOsc.ar((noteOn[1]).midicps)));
+	env = EnvGen.ar(Env.perc(0.01, noteOn[1], 1), t_noteOnBang, doneAction:0);
+	amp*(PinkNoise.ar(0.1)* LFPulse.ar(tremelo) + (env*FSinOsc.ar((noteOn[0]).midicps)));
 
 };
 
