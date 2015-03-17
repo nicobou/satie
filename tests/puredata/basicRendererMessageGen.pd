@@ -1,4 +1,4 @@
-#N canvas 564 22 923 917 10;
+#N canvas 606 22 1029 924 10;
 #X obj 34 -34 tgl 20 0 empty empty success 25 10 0 10 -258113 -1 -1
 1 1;
 #X floatatom 248 338 5 0 0 0 - - -;
@@ -446,7 +446,7 @@ ear;
 #X floatatom 630 307 5 0 0 0 - - -;
 #X msg 209 302 sendNodeEvent mySound noteOn 60 0.1;
 #X obj 776 179 vsl 15 128 0 127 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 7100 1;
+-1 -1 0 1;
 #X obj 757 58 metro 500;
 #X obj 774 30 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
@@ -455,6 +455,39 @@ ear;
 #X msg 534 255 sendNodeEvent mySound noteOn \$1 0.1;
 #X msg 628 343 sendNodeEvent mySound outLevel \$1;
 #X floatatom 835 238 5 0 0 0 - - -;
+#N canvas 832 26 836 665 PLUGIN_TEST 1;
+#X text -329 102 freq=440 \, amp=0.5 \, t_gate=0 \, pos = 0.14 \, c1
+= 1 \, c3=20 \, fb = 2 \;;
+#X msg 60 372 freq \$1;
+#X msg -257 141 amp \$1;
+#X msg -197 141 pos \$1;
+#X msg -137 144 c1 \$1;
+#X msg -87 143 c3 \$1;
+#X msg -29 142 fb \$1;
+#X obj 135 472 s toSpatOSC;
+#X obj 135 439 prepend sendNodeEvent;
+#X obj 135 408 prepend mySound;
+#X msg 140 121 t_gate 1;
+#X obj 140 88 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
+-1;
+#X obj 133 19 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+1;
+#X obj 167 45 metro 50;
+#X msg 224 98 bang \, bang;
+#X obj 59 210 vsl 15 128 80 1000 1 0 empty empty fq 0 -9 0 10 -262144
+-1 -1 11900 1;
+#X floatatom 59 352 5 0 0 0 - - -;
+#X connect 1 0 9 0;
+#X connect 8 0 7 0;
+#X connect 9 0 8 0;
+#X connect 10 0 9 0;
+#X connect 11 0 10 0;
+#X connect 12 0 13 0;
+#X connect 13 0 11 0;
+#X connect 14 0 10 0;
+#X connect 15 0 16 0;
+#X connect 15 0 1 0;
+#X restore 335 53 pd PLUGIN_TEST;
 #X connect 1 0 4 0;
 #X connect 2 0 4 1;
 #X connect 3 0 4 2;

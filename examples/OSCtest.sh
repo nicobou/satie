@@ -5,9 +5,12 @@ clear
 oscsend localhost 18032 /spatosc/core ss createSource sheefa
 echo CREATE SOURCE NODE SHEEFA
 sleep 1
+oscsend localhost 18032 /spatosc/core/source/sheefa/uri s plugin://default
+echo SET DEFAULT PLUGIN
+sleep 1
 oscsend localhost 18032 /spatosc/core sss connect sheefa myListener
 echo CONNECT TO LISTENER
-sleep 2
+sleep 1
 oscsend localhost 18032 "/spatosc/core/connection/sheefa->myListener/update" fffff -1 0 0 1 22050  # azi ele  gain del lpf
 echo PAN LEFT
 sleep 2
@@ -38,11 +41,17 @@ sleep 1
 oscsend localhost 18032 /spatosc/core/source/sheefa/state f 1
 echo STATE = 1
 sleep 1
-oscsend localhost 18032 /spatosc/core/source/sheefa/event sff noteOn 60 1  
-echo NOTE ON = 1 60  : seconds midiPitch
+oscsend localhost 18032 /spatosc/core/source/sheefa/event sff note  60 1
+echo SET NOTE VALUES: 60 1  : midiPitch  amp
+sleep .5
+oscsend localhost 18032 /spatosc/core/source/sheefa/event sf t_trigger 1
+echo TRIGGER NOTE
 sleep 1
-oscsend localhost 18032 /spatosc/core/source/sheefa/event sff noteOn 76 .5
-echo NOTE ON = 5 76  : seconds midiPitch
+oscsend localhost 18032 /spatosc/core/source/sheefa/event sff note 76 .5
+echo SET NOTE VALUES: 76 .5  :  midiPitch  amp
+sleep .5
+oscsend localhost 18032 /spatosc/core/source/sheefa/event sf t_trigger 1
+echo TRIGGER NOTE
 sleep 2
 oscsend localhost 18032 /spatosc/core/source/sheefa/uri s plugin://pink
 echo SET URI to  plugin://pink
@@ -65,3 +74,21 @@ sleep 3
 oscsend localhost 18032 /spatosc/core ss deleteNode sheefa
 echo DELETE NODE SHEEFA
 sleep 0
+
+
+
+oscsend localhost 18032 /spatosc/core ss createSource sheefa
+sleep 1
+oscsend localhost 18032 /spatosc/core sss connect sheefa myListener
+sleep 1
+oscsend localhost 18032 /spatosc/core/source/sheefa/uri s plugin://zkarpluck1
+sleep 1
+oscsend localhost 18032 /spatosc/core/source/sheefa/event sf t_gate 1
+sleep 1
+oscsend localhost 18032 /spatosc/core/source/sheefa/prop sf c3 1
+sleep
+oscsend localhost 18032 /spatosc/core/source/sheefa/event sf t_gate 1
+sleep 1
+oscsend localhost 18032 /spatosc/core/source/sheefa/prop sf c3 80
+sleep
+

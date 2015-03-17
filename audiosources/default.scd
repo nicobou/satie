@@ -17,10 +17,11 @@
 
 
 ~name = \default;
-~function = { arg listenerName = \myListener, amp=1, tremelo=10, t_noteOnBang, noteOn=#[60,1];
+~function = { arg amp=1, lfoHz=10, t_trigger=0, note=#[60,1];
 	var signal, env;
-	env = EnvGen.ar(Env.perc(0.01, noteOn[1], 1), t_noteOnBang, doneAction:0);
-	amp*(PinkNoise.ar(0.1)* LFPulse.ar(tremelo) + (env*FSinOsc.ar((noteOn[0]).midicps)));
+
+	env = EnvGen.ar(Env.perc(0.01, note[1], 1), t_trigger, doneAction:0);
+	amp*(PinkNoise.ar(0.1)* LFPulse.ar(lfoHz) + (env*FSinOsc.ar((note[0]).midicps)));
 
 };
 
@@ -30,6 +31,6 @@ a=~function.play;
 a.set(\tremelo, 20);   // accessed via the "prop" message
 a.set(\amp, 2.reciprocal);   // accessed via the "prop" message
 
-a.set(\noteOn, #[1,60]);   // accessed via the "event" message
-a.set(\t_noteOnBang, 1);
+a.set(\note, #[1,60]);   // accessed via the "event" message
+a.set(\t_trigger, 1);
 */
