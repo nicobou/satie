@@ -125,7 +125,7 @@ s.waitForBoot{
 	// /spatosc/core/connection/source->listener/update azi elev delayMS gainDB lpHZ
 	// /spatosc/core/connection/source->listener/spread  exp   // exponent for incidence effect
 	~connectionCallback = { | args |
-		var nodeName, connectionName, type, values, temp, charIndex;
+		var nodeName, connectionName, type, values, temp, charIndex, listenerName;
 		//args.postln;
 
 		connectionName = args[0].asString.split[4].asSymbol;
@@ -134,8 +134,11 @@ s.waitForBoot{
 
 		//temp = value.asString.subStr(charIndex);
 		nodeName = connectionName.asString.subStr(0, charIndex-1);
+		listenerName = connectionName.asString.subStr(charIndex+2,255 );
 
-		//postf("~connectionCallback:  connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
+		//listenerName.postln;
+
+		//postf("~connectionCallback:  sourceNode: %  listenerName: %  type: %  size: % args: %\n", nodeName, listenerName, type, args.size, args);
 
 		switch(type,
 			'update',

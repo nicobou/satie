@@ -15,108 +15,73 @@
 
 //o = OSCresponderNode(s.addr, '/tr', { |time, resp, msg| msg.postln }).add;
 //o.remove;  // when done, you need to clean up the OSCresponderNode
-//SendTrig.kr(Impulse.kr(4), 0, fb);
-
-//DEBUG outLevel.scope;
 
 
 
-/*
-freq
-amp 0 - 1
-gate  0, 1
-pos	 0 - 1;  pluck position
-c1	??  Inverse of DC decay time.
-c3	  ??  Hight frequency loss factor.
-inp	  SIGNAL
-release	   time in seconds.
-fB	 ??  Inharmonicity factor.
-*/
-//freq: 440, amp: 0.5, gate: 1, pos: 0.14, c1: 1, c3: 30, inp: 0, release: 0.1)
+~name = \zkarpluck0;
+~function = { arg listenerName = \myListener, outLevel = -99, lpFq = 12000, pWidth = 0,  combRTsec = 2, attkRiseMs = 0, attkDurMs = 1,  t_noteOnBang = 0, noteOn=#[60,1];  // note gain
 
+	var hpFq = 20;   // highpass for fb delay.
+	var burstEnv,attkSig;
+	var signalOut,attackEnv;
+	var midiPitch = noteOn[0];
+	var attkRiseSec = attkRiseMs*0.001;
+	var attkSec = attkDurMs * 0.001, attkExp = pWidth * 24;  // constant curve shape exp maximum
+	var attkAmp = noteOn[1].clip(0,1);
+	//var gain = shitfuck.dbamp;
+	//var combDelaySec = [midiPitch, midiPitch + 12].midicps.reciprocal;
+	var combDelaySec = midiPitch.midicps.reciprocal;
+	var fb,fbdel, log001 = log(0.001); // OPTIMISE
 
+	//combDelaySec.clip((SampleDur.ir * 4), 10000);
 
-~name = \zkarpluck1;
-// note:  when "autoFreeFlag" is an argument, a new copy of the synthdef will generated each time
-~function = { arg autoFreeFlag=1, freq=440, amp=0.5, t_gate=0, pos = 0.14, c1 = 1, c3=20, fb = 2;
-	var env,inp,son;
+	// calculate fb as a function of ringtime
+	fbdel = combRTsec.abs;
+	fbdel.clip(0.01, 10);  // avoid zero
+	fb = exp(log001 * combDelaySec / fbdel);
 
+	//attackEnv = Env.perc(0, 0.001, 1, -24);
+	//attackEnv = Env.perc(attkRiseSec, [attkSec, attkSec], 1, [ attkExp + rand2(attkExp/4), attkExp + rand2(attkExp/4)]);
+	attackEnv = Env.perc(attkRiseSec, attkSec, 1, attkExp + rand2(attkExp/4));
+	burstEnv = EnvGen.ar(attackEnv, t_noteOnBang);
+
+	//attkSig = BLowPass.ar( PinkNoise.ar(burstEnv), lpFq, 1 );
+ 	//signalOut = CombL.ar(attkSig, 1, combDelaySec, combRTsec);
+
+	attkSig = PinkNoise.ar(burstEnv);
+    signalOut = LPF.ar(LocalIn.ar(1)+ attkSig,  lpFq.lag(0.3) ); //
+    signalOut = DelayC.ar(signalOut, 0.2, combDelaySec - ControlRate.ir.reciprocal);  // correct for buffer size
+	LocalOut.ar(fb*signalOut);
+
+    outLevel.dbamp*HPF.ar(Mix.new(signalOut), hpFq);
+
+	//DEBUG outLevel.scope;
 	//SendTrig.kr(Impulse.kr(4), 0, fb);
-
-    env = Env.new([0,1, 1, 0],[0.001,0.006, 0.0005],[5,-5, -8]);
-    inp = amp * LFClipNoise.ar(2000) * EnvGen.ar(env,t_gate);
-    son = DWGPluckedStiff.ar(freq, amp, t_gate,pos,c1,c3,inp, fb);
-    DetectSilence.ar(son, 0.001, doneAction:2);
-	son;   // make sure this is last, so the sound is returned
-	 };
+};
 
 /*
 t.stop;
 a.free;
 
-
 //  for test of "prop" and "event" messages
 {
 	a=~function.play;
     s.sync;
-    a.set(\amp, 0.1);
-	a.set(\t_gate, 1 );
-	t = Task({ { a.set(\t_gate, 1); 0.2.wait;}.loop });
+	a.set(\outLevel, 0 );
+	a.set(\noteOn, #[60, 1]);
+	t = Task({ { a.set(\t_noteOnBang, 1); 1.wait;}.loop });
 	t.start;
 }.fork;
 
 
-//PLAY it.
-(
-a = Scale.new(
-    #[0, 1, 3, 5, 7, 8, 10],
-    12,
-    Tuning.new([0, 0.75, 2, 3.5, 4, 5, 6, 7, 8, 9, 10, 11]),
-    "Custom"
-);
 
-Pbind(
-    \instrument, \zkarpluck1,
-    \scale ,a,
-    \delta , Pseq([1,0.5,0.5,0.5,0.5,0.5,0.5,1,0.5,0.5,1,1]*0.25,inf),
-    \dur , 2,
-    \degree, Pseq([1,8,8,8,8,8,8,-6,Prand([9,10,11],1),1,7,8]-8, inf),
-    \amp , Pwhite(0.2,0.8),
-    \c3 , Pseq([Pseq([1400],24),Pseq([300],24)],inf),
-    //\pan , Pwhite(-1,1),
-).play;
-)
+// make DEBUGGING SLIDER window
+
 
 
 w=Window.new("sheefa", Rect(30, 30, 400, 200)).front;
 w.view.decorator=FlowLayout(w.view.bounds);
 w.view.decorator.gap=8@2;
-
-
-g = EZSlider(w, 380@20, "freq ", ControlSpec(20, 3000, \exp, 1, 440));
-g.action_({ |ez| ( a.set(\freq, ez.value);a.set(\t_gate, 1);)});
-
-
-h = EZSlider(w, 380@20, "amp", ControlSpec(0, 1, \lin, 0.01, 0.5));
-h.action_({ |ez| ( a.set(\amp, (ez.value)))});
-
-i = EZSlider(w, 380@20, "pos", ControlSpec(0.0, 1, \lin, 0.01, 0.14));
-i.action_({ |ez| ( a.set(\pos, (ez.value)))});
-
-j = EZSlider(w, 380@20, "c1", ControlSpec(0.0, 10, \lin, 0.01, 1));
-j.action_({ |ez| ( a.set(\c1, (ez.value)))});
-
-
-k = EZSlider(w, 380@20, "c3", ControlSpec(0.0, 100, \lin, 0.1, 20));
-k.action_({ |ez| ( a.set(\c3, (ez.value)))});
-
-l = EZSlider(w, 380@20, "fb", ControlSpec(0.0, 100, \lin, 0.1, 20));
-l.action_({ |ez| ( a.set(\fb, (ez.value)))});
-
-
-*/
-
-/*
 
 g = EZSlider(w, 380@20, "Note ", ControlSpec(48, 84, \lin, 1, 60, \note));
 g.action_({ |ez| ( a.set(\noteOn, ez.value); a.set(\t_noteOnBang, 1); ) });
@@ -146,6 +111,8 @@ n.action_({ |ez| ( a.set(\attkRiseMs, ez.value))});
 
 
 a=~function.play;
+
+
 
 
 a=Synth.new(\sheefa);
@@ -180,7 +147,20 @@ SynthDescLib.global.read;
 SynthDescLib.global.browse;
 )
 
+*/
 
+
+/*
+//Define DWGPluckedStiff synthdef
+(
+SynthDef(\help_dwgplucked, { |out=0, freq=440, amp=0.5, gate=1, c3=20, pan=0,fB = 80|
+    var env = Env.new([0,1, 1, 0],[0.001,0.006, 0.0005],[5,-5, -8]);
+    var inp = amp * LFClipNoise.ar(2000) * EnvGen.ar(env,gate);
+    var son = DWGPluckedStiff.ar(freq, amp, gate,0.1,1,c3,inp,fB);
+    DetectSilence.ar(son, 0.001, doneAction:2);
+    Out.ar(out, Pan2.ar(son * 0.1, pan));
+}).add;
+)
 
 //Define DWGPlucked synthdef
 (
@@ -204,12 +184,9 @@ SynthDef(\help_dwgplucked2, { |out=0, freq=440, amp=0.5, gate=1, c3=20, pan=0|
 }).add;
 )
 
-
-
-
 //PLAY it.
 (
-z = Scale.new(
+a = Scale.new(
     #[0, 1, 3, 5, 7, 8, 10],
     12,
     Tuning.new([0, 0.75, 2, 3.5, 4, 5, 6, 7, 8, 9, 10, 11]),
@@ -217,8 +194,8 @@ z = Scale.new(
 );
 
 Pbind(
-    \instrument, \sheefaSynth,
-    \scale ,z,
+    \instrument, \help_dwgplucked,
+    \scale ,a,
     \delta , Pseq([1,0.5,0.5,0.5,0.5,0.5,0.5,1,0.5,0.5,1,1]*0.25,inf),
     \dur , 2,
     \degree, Pseq([1,8,8,8,8,8,8,-6,Prand([9,10,11],1),1,7,8]-8, inf),
