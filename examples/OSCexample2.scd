@@ -17,8 +17,19 @@
 
 //NOTE: OSC RX message specification is based on the SPATOSC specification  (see:   http://code.sat.qc.ca/redmine/projects/spatosc/wiki/spec  )
 
-
+s.quit
 (
+s = Server.local;
+// Server.default;
+Server.supernova;
+o = Server.local.options;
+// Post the number of output channels
+// o.numOutputBusChannels.postln;
+o.numOutputBusChannels = 32;
+// o.memSize.postln;
+o.memSize = 2**20;
+o.blockSize = 2048;
+
 s.waitForBoot{
 
 	// finding source directory
@@ -43,10 +54,14 @@ s.waitForBoot{
 	// NEEDS IMPROVEMENT
 	// all plugins (synthDefs) have to be evaluated in "pre-runtime" here
 	//
-	~scbr.makeSynthDef(\pink, \PinkSin, [\stereoPanner, \monoSpat], [0, 2]);
-	~scbr.makeSynthDef(\dust, \DustDust, [\stereoPanner, \monoSpat], [0, 2]);
-	~scbr.makeSynthDef(\default, \default, [\stereoListener], [0, 2]);
-	~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [\stereoListener], [0, 2]);
+	// ~scbr.makeSynthDef(\pink, \PinkSin, [\stereoPanner, \monoSpat], [0, 2]);
+	// ~scbr.makeSynthDef(\dust, \DustDust, [\stereoPanner, \monoSpat], [0, 2]);
+	// ~scbr.makeSynthDef(\default, \default, [\stereoListener], [0]);
+	// ~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [\stereoListener], [0]);
+	~scbr.makeSynthDef(\pink, \PinkSin, [\domeVBAP], [0]);
+	~scbr.makeSynthDef(\dust, \DustDust, [\domeVBAP], [0]);
+	~scbr.makeSynthDef(\default, \default, [\domeVBAP], [0]);
+	~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [\domeVBAP], [0]);
 
 	// be sure the synthDef is compiled on the server
 	s.sync;
