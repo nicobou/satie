@@ -61,7 +61,7 @@ a.free;
     s.sync;
     a.set(\amp, 0.1);
 	a.set(\t_gate, 1 );
-	t = Task({ { a.set(\t_gate, 1); 0.2.wait;}.loop });
+	t = Task({ { a.set(\t_gate, 1); 1.wait; 	a=~function.play;  s.sync; }.loop });
 	t.start;
 }.fork;
 

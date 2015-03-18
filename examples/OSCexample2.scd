@@ -101,7 +101,7 @@ s.waitForBoot{
 					}
 				)
 			},
-			'clearScene', {~clearScene.value();},
+			'clear', {~clearScene.value();},
 			'connect',
 			{
 				if ( (msg.size < 4 ) ,
@@ -133,7 +133,7 @@ s.waitForBoot{
 		nodeName = connectionName.asString.subStr(0, charIndex-1);
 		//listenerName = connectionName.asString.subStr(charIndex+2,255 );
 
-		//postf("~connectionCallback:  connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
+		postf("~connectionCallback:  connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
 
 		switch(type,
 			'update',
@@ -169,7 +169,7 @@ s.waitForBoot{
 	};
 
 
-		// e.g  /spatosc/core/source/nodename/prop  key val
+	// e.g  /spatosc/core/source/nodename/prop  key val
 	~sourceCallback = {
 		| args |
 		var name, type, values, eventName, state;
@@ -183,7 +183,7 @@ s.waitForBoot{
 			'uri', {~setUri.value(name, args[1])},
 			'event',
 			{
-				postf("~sourceCallback:  nodeName: %  mesageType: %  size: % args: %\n", name, type, args.size, args);
+				//postf("~sourceCallback:  nodeName: %  mesageType: %  size: % args: %\n", name, type, args.size, args);
 				if ( (args.size < 2 ) ,
 					{"~setEvent: OSCrx message with no values".warn;},
 					{  // else
@@ -220,11 +220,11 @@ s.waitForBoot{
 			},
 			// else create new node
 			{
-				~nodename = sourceName.asSymbol;   // create node
 				~allNodes[sourceName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
 				~allConnections[sourceName.asSymbol] = Dictionary();   // create dict. for node's listener(s)
 				~allNodes[sourceName.asSymbol].put(\groupName, Group.new);  // create node-specific group and add to node dict.
 				~allNodes[sourceName.asSymbol].put(\state, Dictionary());  //  create dict. for node's properies state
+				~allNodes[sourceName.asSymbol].put(\pluginName, \nil);
 
 				~scbr.oscInterface.sourceOSC(sourceName.asSymbol, ~sourceCallback);
 
@@ -237,14 +237,14 @@ s.waitForBoot{
 	~createConnection = { |sourceName listenerName |
 		var connectionName = sourceName ++ "->" ++ listenerName;
 
-		if ( ~allConnections[sourceName.asSymbol].at(\listener) != nil,
+		if ( ~allConnections[sourceName.asSymbol].includesKey(\listener),
 			{
 				'Not adding, connection exists'.postln;
 			},
 			// else create new one
 			{
 				~allConnections[sourceName.asSymbol].put(\listener, Dictionary.newFrom(List[\update, #[0,0,0,1,22050], \spread, 1, \name, connectionName.asSymbol]));
-		    });
+		});
 		postf("~createConnection:  connecting: %  to   %\n", sourceName, listenerName);
 		~scbr.oscInterface.connectionOSC(connectionName, ~connectionCallback);
 		'adding connection'.postln;
@@ -260,18 +260,23 @@ s.waitForBoot{
 		postf("~setPlugin: instantiating plugin: %, for: %, \n", pluginName, nodeName);
 
 		~allNodes[nodeNameSym].at(\groupName).freeAll;   //  clear all active synthNodes in group
-		~allNodes[nodeName.asSymbol].at(\state).clear;   // clear node's properties states
+		~allNodes[nodeNameSym].at(\state).clear;   // clear node's properties states
 		~allNodes[nodeNameSym].put(\pluginName, pluginNameSym);   // set URI:
 		~allNodes[nodeNameSym].put(\autoFree, false);
 
 
 
 		//  create fresh node.
-		~allNodes[nodeNameSym].put(\pluginNode, Synth(~allNodes[nodeNameSym].at(\pluginName),nil,~allNodes[~nodename].at(\groupName),\addToHead));
+		~allNodes[nodeNameSym].put(\pluginNode, Synth(~allNodes[nodeNameSym].at(\pluginName),nil,~allNodes[nodeNameSym].at(\groupName),\addToHead));
 
 		// update node's connection to current values
-		~allNodes[nodeNameSym].at( \pluginNode ).set(\update, ~allConnections[nodeNameSym].at(\listener).at(\update));
-		~allNodes[nodeNameSym].at( \pluginNode ).set(\update, ~allConnections[nodeNameSym].at(\listener).at(\spread));
+
+		// make sure listener exists
+		if ( ~allConnections[nodeNameSym].includesKey(\listener) ,
+			{
+				~allNodes[nodeNameSym].at( \pluginNode ).set(\update, ~allConnections[nodeNameSym].at(\listener).at(\update));
+				~allNodes[nodeNameSym].at( \pluginNode ).set(\update, ~allConnections[nodeNameSym].at(\listener).at(\spread));
+		});
 
 
 
@@ -318,7 +323,7 @@ s.waitForBoot{
 	// always a keyWord Value pair
 	~setProperty = { | nodeName property value |
 		//name.postln;
-		postf("~setProperty: seting % of % to %\n", property, nodeName, value);
+		//postf("~setProperty: seting % of % to %\n", property, nodeName, value);
 		~allNodes[nodeName.asSymbol].at(\state).put(property.asSymbol, value);   // write propery state to node's state register
 		~allNodes[nodeName.asSymbol].at( \pluginNode ).set(property.asSymbol, value);   // set Prop  -- update node
 	};
@@ -331,9 +336,13 @@ s.waitForBoot{
 			{state = 0}
 		);
 		//postf("~setState: seting state of % to %\n", nodeName, state);
-		~allNodes[~nodename].at( \pluginNode ).run(state);
 
-		'setState called'.postln;
+		if (  ~allNodes[nodeName.asSymbol].includesKey( \pluginNode ),
+			{
+				~allNodes[nodeName.asSymbol].at( \pluginNode ).run(state);
+				'setState called'.postln;
+		});
+
 	};
 
 	// events RX:   /spatosc/core/source/nodename/event eventName v1...vN
@@ -344,58 +353,66 @@ s.waitForBoot{
 		var triggerFlag = false;
 
 
-		if (  eventName.asString.beginsWith("t_"), { triggerFlag = true});
-
-		if ( (valueCount > 1) ,   // pass list of values
-			{
-				~allNodes[nodeName.asSymbol].at( \pluginNode ).set(eventName, args);
-			},
-			// else  "active" triggering event,  such as
-			{
-				if ( (valueCount == 1) ,    // pass value
-					{
-						~allNodes[nodeName.asSymbol].at( \pluginNode ).set(eventName, args[0]);
-					},
-					// else  no args.. just pass 1
-					{
-						~allNodes[nodeName.asSymbol].at( \pluginNode ).set(eventName, 1);  // no args, just generate trigger event
-					}
-				);
-			}
-		);
-
-		// if \autoFree mode, and event has set triggerFlag,  create new instance of node's plugin (synthdef) for next time
-		if (  ~allNodes[nodeName.asSymbol].at(\autoFree)  && triggerFlag,
-			{
-				 'setEvent: \autoFree and triggeringFlag are TRUE, generating new synthdef instance'.postln;
-				// create new instance
-				~allNodes[nodeName.asSymbol].put(\pluginNode, Synth(~allNodes[~nodename].at(\pluginName),nil,~allNodes[~nodename].at(\groupName),\addToHead));
-
-				// update new node with current listener params
-				~allNodes[nodeName.asSymbol].at( \pluginNode ).set(\update, ~allConnections[nodeName.asSymbol].at(\listener).at(\update));
-				~allNodes[nodeName.asSymbol].at( \pluginNode ).set(\update, ~allConnections[nodeName.asSymbol].at(\listener).at(\spread));
-
-				// update new node with current node state
-				// ~allNodes[\sheefa].at(\state)
-				//~allNodes[\sheefa].at( \pluginNode ).inspect
+		// make sure plugin is defined
+		if (~allNodes[nodeName.asSymbol].includesKey( \pluginNode ), {
 
 
-				// copy node's current properties states to new instance
-				~allNodes[nodeName.asSymbol].at(\state).keysValuesDo { |key, value|
-					~allNodes[nodeName.asSymbol].at( \pluginNode ).set(key, value);
-					postln("the key: " ++ key ++ " the value: " ++ value)
+			if (  eventName.asString.beginsWith("t_"), { triggerFlag = true});
 
-				};
+			if ( (valueCount > 1) ,   // pass list of values
+				{
+					~allNodes[nodeName.asSymbol].at( \pluginNode ).set(eventName, args);
+				},
+				// else  "active" triggering event,  such as
+				{
+					if ( (valueCount == 1) ,    // pass value
+						{
+							~allNodes[nodeName.asSymbol].at( \pluginNode ).set(eventName, args[0]);
+						},
+						// else  no args.. just pass 1
+						{
+							~allNodes[nodeName.asSymbol].at( \pluginNode ).set(eventName, 1);  // no args, just generate trigger event
+						}
+					);
+				}
+			);
 
+			// if \autoFree mode, and event has set triggerFlag,  create new instance of node's plugin (synthdef) for next time
+			if (  ~allNodes[nodeName.asSymbol].at(\autoFree)  && triggerFlag,
+				{
+					//'setEvent: \autoFree and triggeringFlag are TRUE, generating new synthdef instance'.postln;
+					// create new instance
+					~allNodes[nodeName.asSymbol].put(\pluginNode, Synth(~allNodes[nodeName.asSymbol].at(\pluginName),nil,~allNodes[nodeName.asSymbol].at(\groupName),\addToHead));
+
+					// if listener exists, update new node with current params
+					if ( ~allConnections[nodeName.asSymbol].includesKey(\listener) , {
+						~allNodes[nodeName.asSymbol].at( \pluginNode ).set(\update, ~allConnections[nodeName.asSymbol].at(\listener).at(\update));
+						~allNodes[nodeName.asSymbol].at( \pluginNode ).set(\update, ~allConnections[nodeName.asSymbol].at(\listener).at(\spread));
+					});
+
+
+					// update new node with current node state
+					// ~allNodes[\sheefa].at(\state)
+					//~allNodes[\sheefa].at( \pluginNode ).inspect
+
+
+					// copy node's current properties states to new instance
+					~allNodes[nodeName.asSymbol].at(\state).keysValuesDo { |key, value|
+						~allNodes[nodeName.asSymbol].at( \pluginNode ).set(key, value);
+						//postln("the key: " ++ key ++ " the value: " ++ value)
+
+					};
+
+			});
 		});
 	};
 
 	//  ~clearScene.value(0);
 
 	~clearScene = {
-		'deleting synth'.postln;
+		'CLEARING SCENE'.postln;
 		~allNodes.keysDo { |key |
-			//key.postln;
+			key.postln;
 
 			~deleteSynth.value(key)
 		};
@@ -403,13 +420,16 @@ s.waitForBoot{
 
 	// ~allNodes.postln;
 	~deleteSynth = { | nodeName |
-		'deleting synth'.postln;
-		~allNodes[nodeName.asSymbol].at(\groupName).free;   //  clear group and all active synthNodes
-		~allNodes[nodeName.asSymbol].release;
-		~allNodes.removeAt(nodeName.asSymbol);
+		if ( ~allNodes.includesKey(nodeName) ,
+			{
+				'deleting synth'.postln;
+				~allNodes[nodeName.asSymbol].at(\groupName).free;   //  clear group and all active synthNodes
+				~allNodes[nodeName.asSymbol].release;
+				~allNodes.removeAt(nodeName.asSymbol);
 
-		~scbr.oscInterface.removeSourceOSC(nodeName);
-		~deleteConnections.value(nodeName);
+				//~scbr.oscInterface.removeSourceOSC(nodeName);
+				//~deleteConnections.value(nodeName);
+		});
 	};
 
 
@@ -432,19 +452,34 @@ s.waitForBoot{
 
 
 	s.sync;
-	/*
-	~allNodes[\sheefa].set(\update, #[0,0,0,1,0]);
-	x = ~allNodes[\sheefa].get(\listenerName);
-	x.postln;
-	~allNodes[\sheefa].set(\listenerName, -1);
-	*/
-	//y.postln;
-	//synth.tail(s, y);
-	//Synth.tail(s, \PinkSin);
-	//~allNodes.postln;
-	//\PinkSin.postln;
-	// y.put(s, Synth.tail(s, \PinkSin));
 
+	/*
+
+	~nodeName=\mySound;
+
+
+	~createSource.value(~nodeName);
+	~createConnection.value(~nodeName, "ear");
+	~setUri.value(~nodeName, "plugin://zkarpluck1");
+
+	~allNodes[~nodeName].at( \pluginNode ).run(1);
+
+	~deleteSynth.value(~nodeName);
+
+	~allNodes[~nodeName].at(\groupName).dump;
+
+	~allNodes[~nodeName].at( \pluginNode )
+	~allNodes[~nodeName].includesKey( \pluginNode )
+
+
+	~clearScene.value();
+
+
+
+
+
+
+	*/
 };
 )
 
