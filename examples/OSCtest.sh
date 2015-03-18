@@ -11,19 +11,22 @@ sleep 1
 oscsend localhost 18032 /spatosc/core sss connect mySound ear
 echo CONNECT TO LISTENER ear
 sleep 1
-oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff -1 0 0 1 22050  # azi ele  gain del lpf
+oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff -3 0 10 0 22050  # azi ele  gain del lpf
 echo PAN LEFT
 sleep 2
-oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff 1 0 1 0 22050
+oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff 0 0 10 0 22050  # azi ele  gain del lpf
+echo PAN CENTER
+sleep 2
+oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff 3 0 10 0 22050  # azi ele  gain del lpf
 echo PAN RIGHT
 sleep 2
-oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff 0 0 2 0 1000
+oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff 0 0 2 0 1000  # azi ele  gain del lpf
 echo GAIN = 2 LPF = 1000
 sleep 2
-oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff 0 0 -12 0 22050
+oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff 0 0 -12 0 22050  # azi ele  gain del lpf
 echo GAIN = -12
 sleep 2
-oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff 0 0 1 0 22050
+oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff 0 0 1 0 22050  # azi ele  gain del lpf
 echo GAIN = 1
 sleep 1
 oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/spread" f 0
@@ -54,7 +57,7 @@ oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_trigger 1
 echo TRIGGER NOTE
 sleep 2
 oscsend localhost 18032 /spatosc/core/source/mySound/uri s plugin://pink
-echo SET URI to  plugin://pink
+echo 'SET URI to  plugin://pink'
 sleep 3
 oscsend localhost 18032 /spatosc/core/source/mySound/prop sf sfreq 1000
 echo PROP:  sfreq = 1000
@@ -73,7 +76,7 @@ echo PROP:  density2 = 400
 sleep 3
 oscsend localhost 18032 /spatosc/core ss deleteNode mySound
 echo DELETE NODE SHEEFA
-sleep 0
+sleep 1
 
 
 
@@ -86,16 +89,16 @@ sleep 1
 oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_gate 1
 sleep 1
 oscsend localhost 18032 /spatosc/core/source/mySound/prop sf c3 1
-sleep
+sleep 1
 oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_gate 1
 sleep 1
 oscsend localhost 18032 /spatosc/core/source/mySound/prop sf c3 80
-sleep
-oscsend localhost 18032 /spatosc/core/source/mySound/prop sf amp .1
+sleep 1
+oscsend localhost 18032 /spatosc/core/source/mySound/prop sf amp 0.1
 sleep 1
 oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_gate 1
 sleep 1
-sleep oscsend localhost 18032 /spatosc/core/source/mySound/prop sf amp 1
+oscsend localhost 18032 /spatosc/core/source/mySound/prop sf amp 1
 sleep 1
 oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_gate 1
 sleep 1
