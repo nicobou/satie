@@ -13,25 +13,28 @@
 // node.set.(t_noteOn 1);
 // NOTE: there is no array length checking, so be careful
 
-//o = OSCresponderNode(s.addr, '/tr', { |time, resp, msg| msg.postln }).add;
-//o.remove;  // when done, you need to clean up the OSCresponderNode
-
+// o = OSCresponderNode(s.addr, '/tr', { |time, resp, msg| msg.postln }).add;
+// o.remove;  // when done, you need to clean up the OSCresponderNode
+// SendTrig.kr(Impulse.kr(4), 0, fb);
 
 
 ~name = \zkarpluck0;
-~function = { arg outputDB = 0, lpFq = 12000, pWidth = 0,  combRTsec = 2, attkRiseMs = 0, attkDurMs = 1,  t_gate = 0, note=#[60,1];  // note gain
+~function = { arg outputDB = 0, lpFq = 12000, pWidth = 0,  combRTsec = 1, attkRiseMs = 0, attkDurMs = 1,  t_gate = 0, note = #[60,1];  // note gain
 
 	var hpFq = 20;   // highpass for fb delay.
 	var burstEnv,attkSig;
 	var signalOut,attackEnv;
-	var midiPitch = note[0];
+	var freq = note[0].midicps;
+
 	var attkRiseSec = attkRiseMs*0.001;
 	var attkSec = attkDurMs * 0.001, attkExp = pWidth * 24;  // constant curve shape exp maximum
 	var attkAmp = note[1].clip(0,10);
-	//var gain = shitfuck.dbamp;
-	//var combDelaySec = [midiPitch, midiPitch + 12].midicps.reciprocal;
-	var combDelaySec = midiPitch.midicps.reciprocal;
+
+	var combDelaySec = freq.reciprocal;
 	var fb,fbdel, log001 = log(0.001); // OPTIMISE
+
+		//SendTrig.kr(Impulse.kr(1), 0, freq);
+
 
 	//combDelaySec.clip((SampleDur.ir * 4), 10000);
 

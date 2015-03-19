@@ -47,13 +47,13 @@ sleep 1
 oscsend localhost 18032 /spatosc/core/source/mySound/event sff note  60 1
 echo SET NOTE VALUES: 60 1  : midiPitch  amp
 sleep .5
-oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_trigger 1
+oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_gate 1
 echo TRIGGER NOTE
 sleep 1
 oscsend localhost 18032 /spatosc/core/source/mySound/event sff note 76 .5
 echo SET NOTE VALUES: 76 .5  :  midiPitch  amp
 sleep .5
-oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_trigger 1
+oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_gate 1
 echo TRIGGER NOTE
 sleep 2
 oscsend localhost 18032 /spatosc/core/source/mySound/uri s plugin://pink
@@ -89,15 +89,18 @@ sleep 1
 oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_gate 1
 sleep 1
 oscsend localhost 18032 /spatosc/core/source/mySound/prop sf c3 1
+oscsend localhost 18032 /spatosc/core/source/mySound/event sff note 65 1
 sleep 1
 oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_gate 1
 sleep 1
 oscsend localhost 18032 /spatosc/core/source/mySound/prop sf c3 80
+oscsend localhost 18032 /spatosc/core/source/mySound/event sff note 75 1
 sleep 1
 oscsend localhost 18032 /spatosc/core/source/mySound/prop sf amp 0.1
 sleep 1
 oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_gate 1
 sleep 1
+oscsend localhost 18032 /spatosc/core/source/mySound/event sff note 55 1
 oscsend localhost 18032 /spatosc/core/source/mySound/prop sf amp 1
 sleep 1
 oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_gate 1
@@ -119,7 +122,15 @@ oscsend localhost 18032 /spatosc/core/source/mySound/prop sf lpFq 2000
 sleep
 oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_gate 1
 sleep 1
-sleep oscsend localhost 18032 /spatosc/core/source/mySound/prop sf outputDB 6
+oscsend localhost 18032 /spatosc/core/source/mySound/prop sf outputDB 6
 sleep 1
 oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_gate 1
 sleep 1
+
+
+oscsend localhost 18032 /spatosc/core/source/"sourceC:spatOSCsource_0"/prop sf lfoHz 20
+
+
+
+
+
