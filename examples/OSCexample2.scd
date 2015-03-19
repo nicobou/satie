@@ -18,6 +18,7 @@
 //NOTE: OSC RX message specification is based on the SPATOSC specification  (see:   http://code.sat.qc.ca/redmine/projects/spatosc/wiki/spec  )
 
 s.quit
+
 (
 s = Server.local;
 // Server.default;
@@ -434,6 +435,7 @@ s.waitForBoot{
 
 			~deleteSynth.value(key)
 		};
+
 	};
 
 	// ~allNodes.postln;
@@ -445,8 +447,9 @@ s.waitForBoot{
 				~allNodes[nodeName.asSymbol].release;
 				~allNodes.removeAt(nodeName.asSymbol);
 
-				//~scbr.oscInterface.removeSourceOSC(nodeName);
-				//~deleteConnections.value(nodeName);
+				~scbr.oscInterface.removeSourceOSC(nodeName);
+
+				~deleteConnections.value(nodeName);
 		});
 	};
 

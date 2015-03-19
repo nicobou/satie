@@ -38,7 +38,7 @@ fB	 ??  Inharmonicity factor.
 
 ~name = \zkarpluck1;
 // note:  when "autoFreeFlag" is an argument, a new copy of the synthdef will generated each time
-~function = { arg autoFreeFlag=1, amp=0.5, t_gate=0, pos = 0.14, c1 = 1, c3=20, fb = 2, note=#[60,1];
+~function = { arg autoFreeFlag=1, amp=0.5, t_gate=0, pos = 0.14, c1 = 1, c3=20, fb = 2, note = #[60,1];
 	var env,inp,son;
 	var freq = note[0].midicps;
 
@@ -94,8 +94,8 @@ w.view.decorator=FlowLayout(w.view.bounds);
 w.view.decorator.gap=8@2;
 
 
-g = EZSlider(w, 380@20, "freq ", ControlSpec(20, 3000, \exp, 1, 440));
-g.action_({ |ez| ( a.set(\freq, ez.value);a.set(\t_gate, 1);)});
+g = EZSlider(w, 380@20, "pitch ", ControlSpec(40, 80, \lin, 1, 60));
+g.action_({ |ez| ( a.set(\note, [ ez.value, 1] );a.set(\t_gate, 1);)});
 
 
 h = EZSlider(w, 380@20, "amp", ControlSpec(0, 1, \lin, 0.01, 0.5));

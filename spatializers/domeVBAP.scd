@@ -19,7 +19,7 @@
 ~name = \domeVBAP;
 
 ~function = {|in = 0, update = #[ 0,0,0,1,22000 ], spread = 1 |  // note:  sholuld we provide an additional arg: customArray for additional params ???
-	var azi = LinLin.kr(update[0], -1.5707963267949, 1.5707963267949, -180, 180);   // radians to pan units -- to do:  need true rotation
+	var azi = LinLin.kr(update[0], -3.14159, 3.14159, -180, 180);   // radians to pan units -- to do:  need true rotation
 	var ele = LinLin.kr(update[1], -1.5707963267949, 1.5707963267949, -90 , 90);   // radians to pan units
 	var gain= (update[2]).dbamp;   // convert gainDB to gainAMP
 	var delay = update[3]* 0.001;    // convert to milliseconds
