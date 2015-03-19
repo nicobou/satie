@@ -19,15 +19,15 @@
 
 
 ~name = \zkarpluck0;
-~function = { arg listenerName = \myListener, outLevel = -99, lpFq = 12000, pWidth = 0,  combRTsec = 2, attkRiseMs = 0, attkDurMs = 1,  t_noteOnBang = 0, noteOn=#[60,1];  // note gain
+~function = { arg outputDB = 0, lpFq = 12000, pWidth = 0,  combRTsec = 2, attkRiseMs = 0, attkDurMs = 1,  t_gate = 0, note=#[60,1];  // note gain
 
 	var hpFq = 20;   // highpass for fb delay.
 	var burstEnv,attkSig;
 	var signalOut,attackEnv;
-	var midiPitch = noteOn[0];
+	var midiPitch = note[0];
 	var attkRiseSec = attkRiseMs*0.001;
 	var attkSec = attkDurMs * 0.001, attkExp = pWidth * 24;  // constant curve shape exp maximum
-	var attkAmp = noteOn[1].clip(0,1);
+	var attkAmp = note[1].clip(0,10);
 	//var gain = shitfuck.dbamp;
 	//var combDelaySec = [midiPitch, midiPitch + 12].midicps.reciprocal;
 	var combDelaySec = midiPitch.midicps.reciprocal;
@@ -42,8 +42,8 @@
 
 	//attackEnv = Env.perc(0, 0.001, 1, -24);
 	//attackEnv = Env.perc(attkRiseSec, [attkSec, attkSec], 1, [ attkExp + rand2(attkExp/4), attkExp + rand2(attkExp/4)]);
-	attackEnv = Env.perc(attkRiseSec, attkSec, 1, attkExp + rand2(attkExp/4));
-	burstEnv = EnvGen.ar(attackEnv, t_noteOnBang);
+	attackEnv = Env.perc(attkRiseSec, attkSec, 10, attkExp + rand2(attkExp/4));
+	burstEnv = EnvGen.ar(attackEnv, t_gate);
 
 	//attkSig = BLowPass.ar( PinkNoise.ar(burstEnv), lpFq, 1 );
  	//signalOut = CombL.ar(attkSig, 1, combDelaySec, combRTsec);
@@ -53,9 +53,10 @@
     signalOut = DelayC.ar(signalOut, 0.2, combDelaySec - ControlRate.ir.reciprocal);  // correct for buffer size
 	LocalOut.ar(fb*signalOut);
 
-    outLevel.dbamp*HPF.ar(Mix.new(signalOut), hpFq);
+	SendTrig.kr(Impulse.kr(4), 0, outputDB);
+    outputDB.dbamp*HPF.ar(Mix.new(signalOut), hpFq);
 
-	//DEBUG outLevel.scope;
+	//DEBUG outputDB.scope;
 	//SendTrig.kr(Impulse.kr(4), 0, fb);
 };
 
@@ -67,9 +68,9 @@ a.free;
 {
 	a=~function.play;
     s.sync;
-	a.set(\outLevel, 0 );
-	a.set(\noteOn, #[60, 1]);
-	t = Task({ { a.set(\t_noteOnBang, 1); 1.wait;}.loop });
+	a.set(\outputDB, 0 );
+	a.set(\note, #[60, 1]);
+	t = Task({ { a.set(\t_gate, 1); 1.wait;}.loop });
 	t.start;
 }.fork;
 
@@ -84,19 +85,19 @@ w.view.decorator=FlowLayout(w.view.bounds);
 w.view.decorator.gap=8@2;
 
 g = EZSlider(w, 380@20, "Note ", ControlSpec(48, 84, \lin, 1, 60, \note));
-g.action_({ |ez| ( a.set(\noteOn, ez.value); a.set(\t_noteOnBang, 1); ) });
+g.action_({ |ez| ( a.set(\note, [ez.value,1]); a.set(\t_gate, 1); ) });
 
 h = EZSlider(w, 380@20, "combRT", ControlSpec(-20, 20, \lin, 0.01, 1));
 h.action_({ |ez| ( a.set(\combRTsec,  (ez.value)))});
 
-i = EZSlider(w, 380@20, "outLevel", ControlSpec(-60, 6, \lin, 0.5, -18));
-i.action_({ |ez| ( a.set(\outLevel, (ez.value)))});
+i = EZSlider(w, 380@20, "outputDB", ControlSpec(-60, 6, \lin, 0.5, -18));
+i.action_({ |ez| ( a.set(\outputDB, (ez.value)))});
 
 
 //j = EZSlider(w, 380@20, "hPassQ", ControlSpec(0, 4, \lin, 0.10, 1));
 //j.action_({ |ez| ( a.set(\hpQ, (ez.value)))});
 
-k = EZSlider(w, 380@20, "LPcutoff ", ControlSpec(0.1, 22050, \exp,1, 22050));
+k = EZSlider(w, 380@20, "LPcutoff ", ControlSpec(600, 22050, \exp,1, 22050));
 k.action_({ |ez| ( a.set(\lpFq, ez.value))});
 
 l = EZSlider(w, 380@20, "pWidth", ControlSpec(-1, 1, \lin, 0.01, 0));
