@@ -102,3 +102,24 @@ oscsend localhost 18032 /spatosc/core/source/mySound/prop sf amp 1
 sleep 1
 oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_gate 1
 sleep 1
+oscsend localhost 18032 /spatosc/core s clear
+
+
+oscsend localhost 18032 /spatosc/core ss createSource mySound
+sleep 1
+oscsend localhost 18032 /spatosc/core sss connect mySound ear
+sleep 1
+oscsend localhost 18032 /spatosc/core/source/mySound/uri s plugin://zkarpluck0
+sleep 1
+oscsend localhost 18032 /spatosc/core/source/mySound/event sff note 75 1
+sleep 1
+oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_gate 1
+sleep 1
+oscsend localhost 18032 /spatosc/core/source/mySound/prop sf lpFq 2000
+sleep
+oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_gate 1
+sleep 1
+sleep oscsend localhost 18032 /spatosc/core/source/mySound/prop sf outputDB 6
+sleep 1
+oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_gate 1
+sleep 1

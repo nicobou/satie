@@ -17,11 +17,11 @@
 
 
 ~name = \default;
-~function = { arg amp=1, lfoHz=10, t_trigger=0, note=#[60,1];
+~function = { arg amp=1, lfoHz=10, t_gate=0, note=#[60,1];
 	var signal, env;
 
-	env = EnvGen.ar(Env.perc(0.01, note[1], 1), t_trigger, doneAction:0);
-	amp*(PinkNoise.ar(0.1)* LFPulse.ar(lfoHz) + (env*FSinOsc.ar((note[0]).midicps)));
+	env = EnvGen.ar(Env.perc(0.01, 0.3, 0.5), gate: t_gate, doneAction:0);
+	amp*(PinkNoise.ar(1)* LFPulse.ar(lfoHz) + (env*FSinOsc.ar((note[0]).midicps)));
 
 };
 

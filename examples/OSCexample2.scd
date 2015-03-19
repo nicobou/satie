@@ -61,7 +61,9 @@ s.waitForBoot{
 	~scbr.makeSynthDef(\pink, \PinkSin, [\domeVBAP], [0]);
 	~scbr.makeSynthDef(\dust, \DustDust, [\domeVBAP], [0]);
 	~scbr.makeSynthDef(\default, \default, [\domeVBAP], [0]);
+	~scbr.makeSynthDef(\zkarpluck0, \zkarpluck0, [\domeVBAP], [0]);
 	~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [\domeVBAP], [0]);
+
 
 	// be sure the synthDef is compiled on the server
 	s.sync;
@@ -148,7 +150,7 @@ s.waitForBoot{
 		nodeName = connectionName.asString.subStr(0, charIndex-1);
 		//listenerName = connectionName.asString.subStr(charIndex+2,255 );
 
-		postf("~connectionCallback:  connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
+		//postf("~connectionCallback:  connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
 
 		switch(type,
 			'update',
@@ -396,6 +398,7 @@ s.waitForBoot{
 			if (  ~allNodes[nodeName.asSymbol].at(\autoFree)  && triggerFlag,
 				{
 					//'setEvent: \autoFree and triggeringFlag are TRUE, generating new synthdef instance'.postln;
+					//postln("setEvent: \autoFree and triggeringFlag are TRUE, generating new synthdef instance:" ++nodeName );
 					// create new instance
 					~allNodes[nodeName.asSymbol].put(\pluginNode, Synth(~allNodes[nodeName.asSymbol].at(\pluginName),nil,~allNodes[nodeName.asSymbol].at(\groupName),\addToHead));
 
