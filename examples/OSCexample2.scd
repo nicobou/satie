@@ -17,19 +17,35 @@
 
 //NOTE: OSC RX message specification is based on the SPATOSC specification  (see:   http://code.sat.qc.ca/redmine/projects/spatosc/wiki/spec  )
 
-s.quit
+
+
+
 
 (
-s = Server.local;
-// Server.default;
-Server.supernova;
-o = Server.local.options;
-// Post the number of output channels
-// o.numOutputBusChannels.postln;
-o.numOutputBusChannels = 32;
-// o.memSize.postln;
-o.memSize = 2**20;
-o.blockSize = 2048;
+
+
+//  s.quit;
+
+// ~superNovaFlag = true;
+// ~domePlayback = true;
+
+
+if ( ~superNovaFlag != nil,
+	{
+		s = Server.local;
+
+		'using supernova server'.postln;
+		// Server.default;
+		Server.supernova;
+		o = Server.local.options;
+		// Post the number of output channels
+		// o.numOutputBusChannels.postln;
+		o.numOutputBusChannels = 32;
+		// o.memSize.postln;
+		o.memSize = 2**20;
+		o.blockSize = 2048;
+	}
+);
 
 s.waitForBoot{
 
@@ -52,19 +68,28 @@ s.waitForBoot{
 
 
 
-	// NEEDS IMPROVEMENT
-	// all plugins (synthDefs) have to be evaluated in "pre-runtime" here
-	//
-	// ~scbr.makeSynthDef(\pink, \PinkSin, [\stereoPanner, \monoSpat], [0, 2]);
-	// ~scbr.makeSynthDef(\dust, \DustDust, [\stereoPanner, \monoSpat], [0, 2]);
-	// ~scbr.makeSynthDef(\default, \default, [\stereoListener], [0]);
-	// ~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [\stereoListener], [0]);
-	~scbr.makeSynthDef(\pink, \PinkSin, [\domeVBAP], [0]);
-	~scbr.makeSynthDef(\dust, \DustDust, [\domeVBAP], [0]);
-	~scbr.makeSynthDef(\default, \default, [\domeVBAP], [0]);
-	~scbr.makeSynthDef(\zkarpluck0, \zkarpluck0, [\domeVBAP], [0]);
-	~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [\domeVBAP], [0]);
-
+	if ( ~domePlayback == nil,
+		{
+			// NEEDS IMPROVEMENT
+			// all plugins (synthDefs) have to be evaluated in "pre-runtime" here
+			//
+			'generating synthdefs'.postln;
+			~scbr.makeSynthDef(\pink, \PinkSin, [\stereoPanner, \monoSpat], [0, 2]);
+			~scbr.makeSynthDef(\dust, \DustDust, [\stereoPanner, \monoSpat], [0, 2]);
+			~scbr.makeSynthDef(\default, \default, [\stereoListener], [0]);
+			~scbr.makeSynthDef(\zkarpluck0, \zkarpluck0, [\stereoListener], [0]);
+			~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [\stereoListener], [0]);
+		},
+		// else evalualte for dome listeners
+		{
+			'generating synthdefs for dome'.postln;
+			~scbr.makeSynthDef(\pink, \PinkSin, [\domeVBAP], [0]);
+			~scbr.makeSynthDef(\dust, \DustDust, [\domeVBAP], [0]);
+			~scbr.makeSynthDef(\default, \default, [\domeVBAP], [0]);
+			~scbr.makeSynthDef(\zkarpluck0, \zkarpluck0, [\domeVBAP], [0]);
+			~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [\domeVBAP], [0]);
+		}
+	);
 
 	// be sure the synthDef is compiled on the server
 	s.sync;
@@ -302,12 +327,12 @@ s.waitForBoot{
 		a = SynthDescLib.global; // the global library of SynthDescs
 		x = a.synthDescs.at(pluginNameSym); // get the default SynthDesc
 
+
 		x.controls.do { |ctl| //[\name, ctl.name, \defaultValue, ctl.defaultValue].postln;
 			//ctl.value.postln;
 			if ( (ctl.name == \autoFreeFlag) && (ctl.defaultValue != 0 ),
 				{  'setting \autoFreeFlag == TRUE'.postln;
 					~allNodes[nodeNameSym].put(\autoFree, true);   // set status for node's synthdef to autoFree
-					// ~allNodes[\sheefa].at(\autoFree);
 				}
 			);
 		};
@@ -369,6 +394,8 @@ s.waitForBoot{
 	~setEvent = { | nodeName, eventName,  args |
 		var valueCount = args.size-1;
 		var triggerFlag = false;
+
+		//postln("~setEvent: node:" ++nodeName ++" event name:"++eventName++"  arg(s): "++ args );
 
 
 		// make sure plugin is defined
@@ -476,14 +503,22 @@ s.waitForBoot{
 
 	/*
 
-	~nodeName=\mySound;
+	~nodeName="sourceC:spatOSCsource_0".asSymbol;
 
 
 	~createSource.value(~nodeName);
 	~createConnection.value(~nodeName, "ear");
-	~setUri.value(~nodeName, "plugin://zkarpluck1");
+	~setUri.value(~nodeName, "plugin://zkarpluck0");
 
 	~allNodes[~nodeName].at( \pluginNode ).run(1);
+
+	~allNodes[~nodeName].at( \pluginNode ).set(\t_gate, 1);
+
+	~allNodes[~nodeName].at( \pluginNode ).set(\outputDB, 18);
+
+
+	~allNodes[~nodeName].at( \pluginNode ).dump;
+
 
 	~deleteSynth.value(~nodeName);
 
