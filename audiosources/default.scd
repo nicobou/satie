@@ -21,7 +21,8 @@
 	var signal, env;
 
 	env = EnvGen.ar(Env.perc(0.01, 0.3, 0.5), gate: t_gate, doneAction:0);
-	amp*(PinkNoise.ar(1)* LFPulse.ar(lfoHz) + (env*FSinOsc.ar((note[0]).midicps)));
+	//amp*(PinkNoise.ar(1)* LFPulse.ar(lfoHz) + (env*FSinOsc.ar((note[0]).midicps)));
+	amp*(PinkNoise.ar(1)* LFPulse.ar(lfoHz));
 
 };
 

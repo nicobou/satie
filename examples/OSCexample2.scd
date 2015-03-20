@@ -17,8 +17,8 @@
 
 //NOTE: OSC RX message specification is based on the SPATOSC specification  (see:   http://code.sat.qc.ca/redmine/projects/spatosc/wiki/spec  )
 
-
-
+s.makeGui;
+s.reboot;
 
 
 (
@@ -26,8 +26,8 @@
 
 //  s.quit;
 
-// ~superNovaFlag = true;
-// ~domePlayback = true;
+~superNovaFlag = true;
+~domePlayback = true;
 
 
 if ( ~superNovaFlag != nil,
@@ -42,7 +42,7 @@ if ( ~superNovaFlag != nil,
 		// o.numOutputBusChannels.postln;
 		o.numOutputBusChannels = 32;
 		// o.memSize.postln;
-		o.memSize = 2**20;
+		o.memSize = 2**22;
 		o.blockSize = 2048;
 	}
 );
@@ -265,7 +265,7 @@ s.waitForBoot{
 			{
 				~allNodes[sourceName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
 				~allConnections[sourceName.asSymbol] = Dictionary();   // create dict. for node's listener(s)
-				~allNodes[sourceName.asSymbol].put(\groupName, Group.new);  // create node-specific group and add to node dict.
+				~allNodes[sourceName.asSymbol].put(\groupName, ParGroup.new);  // create node-specific group and add to node dict.
 				~allNodes[sourceName.asSymbol].put(\state, Dictionary());  //  create dict. for node's properies state
 				~allNodes[sourceName.asSymbol].put(\pluginName, \nil);
 
@@ -277,9 +277,16 @@ s.waitForBoot{
 		~allNodes.postln;
 	};
 
+	// ~allNodes.size;
+	// ~allConnections.size;
+
 	~createConnection = { |sourceName listenerName |
 		var connectionName = sourceName ++ "->" ++ listenerName;
-
+		if (~allConnections.includesKey(sourceName.asSymbol),
+			{},
+			{
+				~allConnections[sourceName.asSymbol] = Dictionary();
+		});
 		if ( ~allConnections[sourceName.asSymbol].includesKey(\listener),
 			{
 				'Not adding, connection exists'.postln;
@@ -395,7 +402,7 @@ s.waitForBoot{
 		var valueCount = args.size-1;
 		var triggerFlag = false;
 
-		//postln("~setEvent: node:" ++nodeName ++" event name:"++eventName++"  arg(s): "++ args );
+		postln("~setEvent: node:" ++nodeName ++" event name:"++eventName++"  arg(s): "++ args );
 
 
 		// make sure plugin is defined
