@@ -19,7 +19,7 @@
 
 
 ~name = \zkarpluck0;
-~function = { arg outputDB = 0, lpFq = 12000, pWidth = 0,  combRTsec = 1, attkRiseMs = 0, attkDurMs = 1,  t_gate = 0, note = #[60,1];  // note gain
+~function = { arg outputDB = 0, lpFq = 12000, pWidth = 0,  combRTsec = 0.1, attkRiseMs = 0, attkDurMs = 0.1,  t_gate = 0, note = #[60,1];  // note gain
 
 	var hpFq = 20;   // highpass for fb delay.
 	var burstEnv,attkSig;
@@ -76,6 +76,8 @@ a.free;
 	t = Task({ { a.set(\t_gate, 1); 1.wait;}.loop });
 	t.start;
 }.fork;
+
+
 
 
 
@@ -212,3 +214,35 @@ Pbind(
 */
 
 
+	/*
+
+	~nodeName="sourceC:spatOSCsource_0".asSymbol;
+
+
+	~createSource.value(~nodeName);
+	~createConnection.value(~nodeName, "ear");
+	~setUri.value(~nodeName, "plugin://zkarpluck0");
+
+	~allNodes[~nodeName].at( \pluginNode ).run(1);
+
+	~allNodes[~nodeName].at( \pluginNode ).set(\t_gate, 1);
+
+	~allNodes[~nodeName].at( \pluginNode ).set(\outputDB, 18);
+~allNodes[~nodeName].at( \pluginNode ).set(\combRTsec, 1);
+
+
+	~allNodes[~nodeName].at( \pluginNode ).dump;
+
+
+	~deleteSynth.value(~nodeName);
+
+	~allNodes[~nodeName].at(\groupName).dump;
+
+	~allNodes[~nodeName].at( \pluginNode )
+	~allNodes[~nodeName].includesKey( \pluginNode )
+
+
+	~clearScene.value();
+
+
+	*/
