@@ -16,8 +16,10 @@
 //o = OSCresponderNode(s.addr, '/tr', { |time, resp, msg| msg.postln }).add;
 //o.remove;  // when done, you need to clean up the OSCresponderNode
 //SendTrig.kr(Impulse.kr(4), 0, fb);
+// see OteyPiano
 
 //DEBUG outLevel.scope;
+//s.makeGui;
 
 
 
@@ -38,16 +40,16 @@ fB	 ??  Inharmonicity factor.
 
 ~name = \zkarpluck1;
 // note:  when "autoFreeFlag" is an argument, a new copy of the synthdef will generated each time
-~function = { arg autoFreeFlag=1, amp=0.5, t_gate=0, pos = 0.14, c1 = 1, c3=20, fb = 2, note = #[60,1];
+~function = { arg autoFreeFlag=1, amp=0.35, t_gate=1, pos = 0.14, c1 = 1, c3=20, fb = 2, note = #[60,1];
 	var env,inp,son;
 	var freq = note[0].midicps;
 
 	//SendTrig.kr(Impulse.kr(4), 0, fb);
 
-    env = Env.new([0,1, 1, 0],[0.001,0.006, 0.0005],[5,-5, -8]);
+	env = Env.perc(0.005,0.01,1,0);
     inp = amp * LFClipNoise.ar(2000) * EnvGen.ar(env,t_gate);
-    son = DWGPluckedStiff.ar(freq, amp, t_gate,pos,c1,c3,inp, fb);
-    DetectSilence.ar(son, 0.001, doneAction:2);
+    son = DWGPluckedStiff.ar(freq, amp, 1 ,pos,c1,c3,inp, 1 , fb);   // note:  "gate" arg fixed to constant of 1, to keep plugin alive, "relase" arg not used
+    //DetectSilence.ar(son, 0.001, doneAction:2);
 	son;   // make sure this is last, so the sound is returned
 	 };
 
@@ -56,15 +58,26 @@ t.stop;
 a.free;
 
 
+/*
+
 //  for test of "prop" and "event" messages
+
+
 {
 	a=~function.play;
     s.sync;
-    a.set(\amp, 0.1);
+    a.set(\amp, 1);
 	a.set(\t_gate, 1 );
-	t = Task({ { a.set(\t_gate, 1); 1.wait; 	a=~function.play;  s.sync; }.loop });
+//	t = Task({ { a.set(\t_gate, 1); 1.wait; 	a=~function.play;  s.sync; }.loop });
+	t = Task({ { a.set(\t_gate, 1); 0.2.wait; }.loop });
 	t.start;
 }.fork;
+
+
+a.set(\c1, 30);
+a.set(\c3, 50);
+
+*/
 
 
 //PLAY it.
@@ -94,7 +107,7 @@ w.view.decorator=FlowLayout(w.view.bounds);
 w.view.decorator.gap=8@2;
 
 
-g = EZSlider(w, 380@20, "pitch ", ControlSpec(40, 80, \lin, 1, 60));
+g = EZSlider(w, 380@20, "pitch ", ControlSpec(40, 110, \lin, 1, 60));
 g.action_({ |ez| ( a.set(\note, [ ez.value, 1] );a.set(\t_gate, 1);)});
 
 
@@ -102,13 +115,13 @@ h = EZSlider(w, 380@20, "amp", ControlSpec(0, 1, \lin, 0.01, 0.5));
 h.action_({ |ez| ( a.set(\amp, (ez.value)))});
 
 i = EZSlider(w, 380@20, "pos", ControlSpec(0.0, 1, \lin, 0.01, 0.14));
-i.action_({ |ez| ( a.set(\pos, (ez.value)))});
+i.action_({ |ez| ( a.set(\pos, (ez.value));a.set(\t_gate, 1))});
 
 j = EZSlider(w, 380@20, "c1", ControlSpec(0.0, 10, \lin, 0.01, 1));
 j.action_({ |ez| ( a.set(\c1, (ez.value)))});
 
 
-k = EZSlider(w, 380@20, "c3", ControlSpec(0.0, 100, \lin, 0.1, 20));
+k = EZSlider(w, 380@20, "c3", ControlSpec(0.1, 22050, \exp,1, 22050));
 k.action_({ |ez| ( a.set(\c3, (ez.value)))});
 
 l = EZSlider(w, 380@20, "fb", ControlSpec(0.0, 100, \lin, 0.1, 20));
