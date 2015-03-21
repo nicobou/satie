@@ -44,14 +44,14 @@ p.stop
 
 
 (
-SynthDef(\prayer_bell, { |outbus, t_trig = 1, sing_switch = 0, freq = 2434, amp = 0.5, decayscale = 1, lag = 10, i_doneAction = 0|
+SynthDef(\prayer_bell, { |outbus, t_trig = 1, sing_switch = 0, freq = 2434, amp = 0.5, decayscale = 1, lag = 0.01, i_doneAction = 0|
   var sig, input, first, freqscale, mallet, sing;
   freqscale = freq / 2434;
   freqscale = Lag3.kr(freqscale, lag);
   decayscale = Lag3.kr(decayscale, lag);
 
   mallet = LPF.ar(Trig.ar(t_trig, SampleDur.ir)!2, 10000 * freqscale);
-  sing = LPF.ar(
+ /* sing = LPF.ar(
     LPF.ar(
       {
         PinkNoise.ar * Integrator.kr(sing_switch * 0.001, 0.999).linexp(0, 1, 0.01, 1) * amp
@@ -59,7 +59,8 @@ SynthDef(\prayer_bell, { |outbus, t_trig = 1, sing_switch = 0, freq = 2434, amp 
       2434 * freqscale
     ) + Dust.ar(0.1), 10000 * freqscale
   ) * LFNoise1.kr(0.5).range(-45, -30).dbamp;
-  input = mallet + (sing_switch.clip(0, 1) * sing);
+*/ // input = mallet + (sing_switch.clip(0, 1) * sing);
+  input = mallet;
 
 
   sig = DynKlank.ar(`[
@@ -111,6 +112,24 @@ SynthDef(\prayer_bell, { |outbus, t_trig = 1, sing_switch = 0, freq = 2434, amp 
 }).add;
 )
 
+
+/*
+~bell1 = Synth(\prayer_bell, [\freq, 2434]);
+~bell2 = Synth(\prayer_bell, [\freq, 1436]);
+
+
+
+
+
+~bell1.set(\t_trig, 1, \freq, 2000);
+~bell1.set(\t_trig, 1, \decayscale, 0.07);
+
+~bell2.set(\t_trig, 1, \freq, 2435);
+
+
+~bell1.free;
+
+*/
 
 (
 Pdef(\bell_1,
