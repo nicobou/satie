@@ -1,4 +1,4 @@
-#N canvas -1129 0 1029 924 10;
+#N canvas 569 22 1029 924 10;
 #X floatatom 248 338 5 0 0 0 - - -;
 #X floatatom 287 338 5 0 0 0 - - -;
 #X floatatom 326 338 5 0 0 0 - - -;
@@ -447,7 +447,7 @@ exists;
 #X msg 534 255 sendNodeEvent mySound noteOn \$1 0.1;
 #X msg 628 343 sendNodeEvent mySound outLevel \$1;
 #X floatatom 835 238 5 0 0 0 - - -;
-#N canvas -1851 433 836 665 PLUGIN_TEST 1;
+#N canvas 0 433 836 665 PLUGIN_TEST 0;
 #X text -329 102 freq=440 \, amp=0.5 \, t_gate=0 \, pos = 0.14 \, c1
 = 1 \, c3=20 \, fb = 2 \;;
 #X msg 60 372 freq \$1;
@@ -465,12 +465,12 @@ exists;
 1;
 #X msg 224 98 bang \, bang;
 #X obj 59 210 vsl 15 128 80 1000 1 0 empty empty fq 0 -9 0 10 -262144
--1 -1 8200 1;
+-1 -1 0 1;
 #X floatatom 72 351 5 0 0 0 - - -;
 #X msg 105 182 300;
 #X msg 89 248 200;
 #X obj -88 219 vsl 15 128 0.001 1 1 0 empty empty amp 0 -9 0 10 -262144
--1 -1 7400 1;
+-1 -1 0 1;
 #X floatatom -75 360 5 0 0 0 - - -;
 #X msg -58 257 200;
 #X obj 167 45 metro 1000;
@@ -511,10 +511,10 @@ exists;
 #X msg 749 492 setActive mySound \$1;
 #X msg 45 93 createSource mySound \, setActive mySound 1 \, createListener
 ear;
-#X msg 188 267 setURI mySound plugin://zkarpluck1;
 #X msg 658 627 createSource mySound \, setActive mySound 1 \, createListener
 ear \, setURI mySound plugin://zkarpluck1;
 #X msg 643 572 createSource mySound;
+#X msg 188 267 setURI mySound plugin://labodomeTest;
 #X connect 0 0 3 0;
 #X connect 1 0 3 1;
 #X connect 2 0 3 2;
@@ -557,5 +557,5 @@ ear \, setURI mySound plugin://zkarpluck1;
 #X connect 63 0 64 0;
 #X connect 64 0 58 0;
 #X connect 65 0 10 0;
-#X connect 66 0 10 0;
-#X connect 68 0 58 0;
+#X connect 67 0 58 0;
+#X connect 68 0 10 0;

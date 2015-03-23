@@ -36,7 +36,7 @@ OSC RX message specification is based on the SPATOSC specification  (see:   http
 // Server.default.options.outDevice_("MADIface USB (23635751)")
 
 
-if ( ~superNovaFlag != nil,
+if ( ~labodome != nil,
 	{
 		o = Server.local.options;
 		o.device = "MADIface USB (23635751)";
@@ -99,7 +99,8 @@ s.waitForBoot{
 			~scbr.makeSynthDef(\default, \default, [\stereoListener], [0]);
 			~scbr.makeSynthDef(\zkarpluck0, \zkarpluck0, [\stereoListener], [0]);
 			~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [\stereoListener], [0]);
-		},
+			~scbr.makeSynthDef(\labodomeTest, \default, [\labodomeVBAP], [0]);
+	},
 		// else evalualte for dome listeners
 		{
 			'generating synthdefs for dome'.postln;
@@ -471,8 +472,11 @@ s.waitForBoot{
 
 	~createSource.value(~nodeName);
 
+	~createConnection.value(~nodeName, "ear");
 
-	~allNodes[~nodeName].put(\connectionState,  Array.with(0,0,0,1,15000,1));   // create client-side state register for connection values
+	~setUri.value(~nodeName, "plugin://labodomeTest");
+
+	~allNodes[~nodeName].put(\connectionState,  Array.with(90,0,0,1,15000,100));   // create client-side state register for connection values
 
 
 	~connectionState = ~allNodes[~nodeName].at(\connectionState);
@@ -487,11 +491,11 @@ s.waitForBoot{
 
 	 // \aziDeg, 0, \eleDeg, 0, \gainDB, 0, \delayMs, 1, \lpHz, 15000, \spread, 1  // default connection values
 
-	~createConnection.value(~nodeName, "ear");
+
 
 	~setUri.value(~nodeName, "plugin://default");
 
-	~setUri.value(~nodeName, "plugin://zkarpluck1");
+	~setUri.value(~nodeName, "plugin://labodomeTest");
 
 	~allNodes[~nodeName].at(\pluginName);
 
