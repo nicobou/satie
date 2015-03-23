@@ -12,22 +12,27 @@
 
 
 
-// note:  need to add smoothing for all parameters
-// note:  spread: not implemented yet -- note:  0 = full spread, 1 = normal, > 1 = narrower
-// note:  update vector:  azimuthRADIANS elevationRADIANS gainDB delayMS lpHZ
+// spat input args:
+// aziDeg degrees (-180 to 180)
+// elevDeg   degrees (-180 to 180)
+// gainDB  decibels
+// delaySec  seconds
+// lpHz    hertz
+// spread  units  (0 == directional, ....,  100 == omni)
 
-~function = {|in = 0, update = #[ 0,0,0,1,22000 ] , spread = 1 |
-	var azi = LinLin.kr(update[0], -1.5707963267949, 1.5707963267949,-1,1);   // radians to pan units -- to do:  need true rotation
-	var ele = LinLin.kr(update[1], -1.5707963267949, 1.5707963267949,-1,1);   // radians to pan units
-	var gain= (update[2]).dbamp;   // convert gainDB to gainAMP
-	var delay = update[3]* 0.001;    // convert to milliseconds
-	var lpf = update[4];
 
-	var slewRateDelay = 0.3; //  note: this needs to be improved ... smoother
-	var slewRateGain = 0.03;
-	var slewRateLpf = 0.3;
 
-	LPF.ar( Pan2.ar(DelayC.ar(gain.lag(slewRateGain) * in, maxdelaytime: 0.5, delaytime: delay.lag(slewRateDelay)), azi), lpf.lag(slewRateLpf));
+
+~function = {|in = 0, aziDeg = 0, eleDeg = 0, gainDB = 0, delayMs = 1, lpHz = 15000, spread = 1 |  // note:  sholuld we provide an additional arg: customArray for additional params ???
+	var gain= gainDB.dbamp;   // convert gainDB to gainAMP
+	var delay = delayMs * 0.001;    // convert to seconds
+
+	var slewDelay = 0.3; //  note: this needs to be improved ... smoother
+	var slewGain = 0.03;
+	var slewLp = 0.3;
+
+
+	LPF.ar( Pan2.ar(DelayC.ar(gain.lag(slewGain) * in, maxdelaytime: 0.5, delaytime: delay.lag(slewDelay)), aziDeg), lpHz.lag(slewLp));   // need to install spread param
 
 };
 

@@ -28,12 +28,12 @@
 		// @busShiftArray   position of the first bus to write
 		~makeSynthDef = {| self, name, srcfunc, destFunArray, busShiftArray = #[0] |
 			SynthDef(name,
-				{| gate = 1, update = #[0,0,0,1,22000 ], spread = 1 |      // can the "gate" arg name be changed to avoid conflicts with plugin-synthDefs that use it
+				{| gate = 1,  aziDeg = 0, eleDeg = 0, gainDB = 0, delayMs = 1, lpHz = 15000, spread = 1  |      // can the "gate" arg name be changed to avoid conflicts with plugin-synthDefs that use it
 					var in, env;
 					in = SynthDef.wrap(srcfunc);
 					env = Linen.kr(gate, 0.005, 1, 2, 2); // change:  fade in set to as short as possible for percussive cases
 					destFunArray.do{ arg item, i;
-						var out = SynthDef.wrap(item, prependArgs: [in, update, spread]);
+						var out = SynthDef.wrap(item, prependArgs: [in, aziDeg, eleDeg, gainDB, delayMs, lpHz, spread]);
 						//var out = SynthDef.wrap(item, prependArgs: [in, vol, delay, azi, ele]);
 						Out.ar(busShiftArray.wrapAt(i), env * out);
 					};
