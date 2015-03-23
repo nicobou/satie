@@ -40,7 +40,7 @@ fB	 ??  Inharmonicity factor.
 
 ~name = \zkarpluck1;
 // note:  when "autoFreeFlag" is an argument, a new copy of the synthdef will generated each time
-~function = { arg autoFreeFlag=1, amp=0.35, t_gate=1, pos = 0.14, c1 = 1, c3=20, fb = 2, note = #[60,1];
+~function = { arg autoFreeFlag=1, amp=0.35, t_gate=0, pos = 0.14, c1 = 1, c3=20, fb = 2, note = #[60,1];
 	var env,inp,son;
 	var freq = note[0].midicps;
 
