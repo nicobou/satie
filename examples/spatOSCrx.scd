@@ -30,9 +30,19 @@ OSC RX message specification is based on the SPATOSC specification  (see:   http
 
 //~superNovaFlag = true;
 //~domePlayback = true;
+ ~labodome = true;
 
 
-// Server.default.options.outDevice_("Soundflower (16ch)")
+// Server.default.options.outDevice_("MADIface USB (23635751)")
+
+
+if ( ~superNovaFlag != nil,
+	{
+		o = Server.local.options;
+		o.device = "MADIface USB (23635751)";
+		o.numOutputBusChannels = 32;
+		o.dump;
+});
 
 // Server.default.options.dump;
 
