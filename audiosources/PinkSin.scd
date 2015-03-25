@@ -13,5 +13,6 @@
 
 
 ~name = \PinkSin;
-~function = {| sfreq = 200|
-	PinkNoise.ar() + FSinOsc.ar(sfreq)};
+~function = {| sfreq = 200 |
+	PinkNoise.ar() + FSinOsc.ar(sfreq)
+};
