@@ -29,13 +29,15 @@
 
 
 
-~function = {|in = 0, aziDeg = 0, eleDeg = 0, gainDB = 0, delayMs = 1, lpHz = 15000, spread = 1 |  // note:  sholuld we provide an additional arg: customArray for additional params ???
+~function = {|in = 0, aziDeg = 0, eleDeg = 0, gainDB = 0, delayMs = 1, lpHz = 15000, spread = 1 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP
 	var delay = delayMs * 0.001;    // convert to seconds
-
 	var slewDelay = 0.3; //  note: this needs to be improved ... smoother
 	var slewGain = 0.03;
 	var slewLp = 0.3;
-
-	LPF.ar(DelayC.ar(gain.lag(slewGain) * in, maxdelaytime: 0.5, delaytime: delay.lag(slewDelay)),lpHz.lag(slewLp));
+	LPF.ar(
+		DelayC.ar(gain.lag(slewGain) * in,
+			maxdelaytime: 0.5,
+			delaytime: delay.lag(slewDelay)),
+		lpHz.lag(slewLp));
 };
