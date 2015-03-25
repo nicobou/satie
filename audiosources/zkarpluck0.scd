@@ -11,20 +11,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-// /spatosc/core/source/node/event play duration freq
-// becomes:
-// node.set.(noteON, [duration freq]);
-// node.set.(t_noteOn 1);
-// NOTE: there is no array length checking, so be careful
-
-// o = OSCresponderNode(s.addr, '/tr', { |time, resp, msg| msg.postln }).add;
-// o.remove;  // when done, you need to clean up the OSCresponderNode
-// SendTrig.kr(Impulse.kr(4), 0, fb);
-
 
 ~name = \zkarpluck0;
 ~function = { arg outputDB = 0, lpFq = 12000, pWidth = 0,  combRTsec = 0.1, attkRiseMs = 0, attkDurMs = 0.1,  t_gate = 0, note = #[60,1];  // note gain
-
 	var hpFq = 20;   // highpass for fb delay.
 	var burstEnv,attkSig;
 	var signalOut,attackEnv;
@@ -37,7 +26,7 @@
 	var combDelaySec = freq.reciprocal;
 	var fb,fbdel, log001 = log(0.001); // OPTIMISE
 
-		//SendTrig.kr(Impulse.kr(1), 0, freq);
+    //SendTrig.kr(Impulse.kr(1), 0, freq);
 
 
 	//combDelaySec.clip((SampleDur.ir * 4), 10000);
