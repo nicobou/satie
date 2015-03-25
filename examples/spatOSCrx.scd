@@ -21,26 +21,24 @@ this implementation is based on a one-listener model. In the future, we may wish
 OSC RX message specification is based on the SPATOSC specification  (see:   http://code.sat.qc.ca/redmine/projects/spatosc/wiki/spec  )
 */
 
-// /spatosc/core/source/node/event play duration freq
-// becomes:
-// node.set.(noteON, [duration freq]);
-// node.set.(t_noteOn 1);
-// NOTE: there is no array length checking, so be careful
-
-//o = OSCresponderNode(s.addr, '/tr', { |time, resp, msg| msg.postln }).add;
-//o.remove;  // when done, you need to clean up the OSCresponderNode
-//SendTrig.kr(Impulse.kr(4), 0, fb);
-// see OteyPiano
-
-//DEBUG outLevel.scope;
-//s.makeGui;
-
 //  s.makeGui;
 // s.reboot;
 
 
 (
-//  s.quit;
+/*
+
+s.quit;
+
+Server.default;
+
+Server.supernova;
+
+s.boot;
+
+
+*/
+
 
 //~superNovaFlag = true;
 //~domePlayback = true;
@@ -50,33 +48,39 @@ OSC RX message specification is based on the SPATOSC specification  (see:   http
 // Server.default.options.outDevice_("MADIface USB (23635751)")
 
 
+
+
+if ( ~superNovaFlag != nil,
+	{
+	Server.supernova;
+    o = Server.local.options;
+		// o.memSize = 2**18;
+		// o.blockSize = 2048;
+});
+
+
 if ( ~labodome != nil,
 	{
 		o = Server.local.options;
 		o.device = "MADIface USB (23635751)";
+		o.numOutputBusChannels = 24;
+		o.memSize = 2**18;
+		o.blockSize = 2048;
+		o.dump;
+});
+
+if ( ~domePlayback != nil,
+	{
+		o = Server.local.options;
+		//o.device = "MADIface USB (23635751)";
 		o.numOutputBusChannels = 32;
 		o.dump;
 });
 
 // Server.default.options.dump;
 
-if ( ~superNovaFlag != nil,
-	{
-		s = Server.local;
 
-		'using supernova server'.postln;
-		// Server.default;
-		Server.supernova;
-		o = Server.local.options;
-		// Post the number of output channels
-		// o.numOutputBusChannels.postln;
-		if ( ~domePlayback == nil,
-			{ o.numOutputBusChannels = 32;});
-		// o.memSize.postln;
-		o.memSize = 2**22;
-		o.blockSize = 2048;
-	}
-);
+
 
 s.waitForBoot{
 
@@ -96,6 +100,8 @@ s.waitForBoot{
 	// loading spatializer plugins
 	~scbr.pluginLoader.loadSpatPlugins(~rootSrcPath ++ "/spatializers/*.scd");
 	~scbr.pluginLoader.spatPlugins;
+
+
 
 	~scbr.makeSynthDef(\dummyPlugin, \emptySource, [\emptySpat], [0]);    // dummy synthdef, used for new nodes
 
@@ -141,6 +147,7 @@ s.waitForBoot{
 		var command;
 		command = msg[1];
 		postf("~coreCallback: command: %, msg: %, \n", command, msg);
+
 
 		switch (command,
 			'createSource',
@@ -204,8 +211,7 @@ s.waitForBoot{
 
 		//args.postln;
 
-		// this is terrible.  Suggests that the spatOSC message format is dumb:
-		connectionName = args[0].asString.split[4].asSymbol;
+		connectionName = args[0].asString.split[4].asSymbol;   // this is terrible.  Suggests that the spatOSC message format is dumb
 		type = args[0].asString.split[5].asSymbol;
 		charIndex = connectionName.asString.find("->");
 
@@ -347,6 +353,7 @@ s.waitForBoot{
 	};
 
 	// update a node's plugin (synthdef)
+	// note: if the source synthdef contains the argument "autoFreeFlag = 1", new instances of the synthdef will be generated each time an "event" message is received
 	~setPlugin = { | nodeName pluginName |
 
 		var nodeNameSym = nodeName.asSymbol;
@@ -391,6 +398,7 @@ s.waitForBoot{
 		uriPath = temp.asString.replace("://", "");
 
 		// postf("~setUri nodeName: %, type: %  value: %\n", name, type, uriPath);
+
 
 		// still needs to be expanded for soundfiles, adc, web etc..
 		switch( type,
@@ -467,7 +475,24 @@ s.waitForBoot{
 	};
 
 
+	~globalSetState = { | state |
+		'Setting Global state'.postln;
+		~allNodes.keysDo { |key |
+			//key.postln;
+
+			~allNodes[key].at( \pluginNode ).run(state);
+		};
+
+	};
+
+	s.sync;
+
 	/*  TEMP
+
+
+	~allNodes.size;
+	~globalSetState.value(0);
+	~globalSetState.value(1);
 
 	~nodeName="sourceC:spatOSCsource_0".asSymbol;
 
@@ -482,7 +507,7 @@ s.waitForBoot{
 
 	~createConnection.value(~nodeName, "ear");
 
-	~setUri.value(~nodeName, "plugin://labodomeTest");
+	~setUri.value(~nodeName, "plugin://default");
 
 	~allNodes[~nodeName].put(\connectionState,  Array.with(90,0,0,1,15000,100));   // create client-side state register for connection values
 
