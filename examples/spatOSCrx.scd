@@ -21,6 +21,20 @@ this implementation is based on a one-listener model. In the future, we may wish
 OSC RX message specification is based on the SPATOSC specification  (see:   http://code.sat.qc.ca/redmine/projects/spatosc/wiki/spec  )
 */
 
+// /spatosc/core/source/node/event play duration freq
+// becomes:
+// node.set.(noteON, [duration freq]);
+// node.set.(t_noteOn 1);
+// NOTE: there is no array length checking, so be careful
+
+//o = OSCresponderNode(s.addr, '/tr', { |time, resp, msg| msg.postln }).add;
+//o.remove;  // when done, you need to clean up the OSCresponderNode
+//SendTrig.kr(Impulse.kr(4), 0, fb);
+// see OteyPiano
+
+//DEBUG outLevel.scope;
+//s.makeGui;
+
 //  s.makeGui;
 // s.reboot;
 
@@ -83,8 +97,6 @@ s.waitForBoot{
 	~scbr.pluginLoader.loadSpatPlugins(~rootSrcPath ++ "/spatializers/*.scd");
 	~scbr.pluginLoader.spatPlugins;
 
-
-
 	~scbr.makeSynthDef(\dummyPlugin, \emptySource, [\emptySpat], [0]);    // dummy synthdef, used for new nodes
 
 	if ( ~domePlayback == nil,
@@ -129,7 +141,6 @@ s.waitForBoot{
 		var command;
 		command = msg[1];
 		postf("~coreCallback: command: %, msg: %, \n", command, msg);
-
 
 		switch (command,
 			'createSource',
@@ -193,7 +204,8 @@ s.waitForBoot{
 
 		//args.postln;
 
-		connectionName = args[0].asString.split[4].asSymbol;   // this is terrible.  Suggests that the spatOSC message format is dumb
+		// this is terrible.  Suggests that the spatOSC message format is dumb:
+		connectionName = args[0].asString.split[4].asSymbol;
 		type = args[0].asString.split[5].asSymbol;
 		charIndex = connectionName.asString.find("->");
 
@@ -335,7 +347,6 @@ s.waitForBoot{
 	};
 
 	// update a node's plugin (synthdef)
-	// note: if the source synthdef contains the argument "autoFreeFlag = 1", new instances of the synthdef will be generated each time an "event" message is received
 	~setPlugin = { | nodeName pluginName |
 
 		var nodeNameSym = nodeName.asSymbol;
@@ -380,7 +391,6 @@ s.waitForBoot{
 		uriPath = temp.asString.replace("://", "");
 
 		// postf("~setUri nodeName: %, type: %  value: %\n", name, type, uriPath);
-
 
 		// still needs to be expanded for soundfiles, adc, web etc..
 		switch( type,
@@ -456,8 +466,6 @@ s.waitForBoot{
 		});
 	};
 
-
-	s.sync;
 
 	/*  TEMP
 
