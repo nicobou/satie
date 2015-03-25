@@ -53,4 +53,9 @@ sudp apt-get install liblo-tools
 for i in `seq 180`; do oscsend localhost 3030 /azi i $i; done
 
 
-zack test write
+compiling SuperNova on OSX:
+————————————————————
+Versions of supercollider < 3.7 don’t seem to compile
+Refer to instructions in the README_OSX.md file  (use -DSUPERNOVA=ON, install Homebrew and deps. etc)
+Making the SC3-Plugins was straightforward. But you must copy the all the SC3 supernova plugins into your built superCollider.app/Content/Resources/Plugins folder, so they will be seen. 
+NOTE: make sure you have an Audio MIDI setup in which there are inputs and outputs defined

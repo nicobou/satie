@@ -26,43 +26,61 @@ OSC RX message specification is based on the SPATOSC specification  (see:   http
 
 
 (
-//  s.quit;
+/*
+
+s.quit;
+
+Server.default;
+
+Server.supernova;
+
+s.boot;
+
+
+*/
+
 
 //~superNovaFlag = true;
 //~domePlayback = true;
- ~labodome = true;
+// ~labodome = true;
 
 
 // Server.default.options.outDevice_("MADIface USB (23635751)")
+
+
+
+
+if ( ~superNovaFlag != nil,
+	{
+	Server.supernova;
+    o = Server.local.options;
+		// o.memSize = 2**18;
+		// o.blockSize = 2048;
+});
 
 
 if ( ~labodome != nil,
 	{
 		o = Server.local.options;
 		o.device = "MADIface USB (23635751)";
+		o.numOutputBusChannels = 24;
+		o.memSize = 2**18;
+		o.blockSize = 2048;
+		o.dump;
+});
+
+if ( ~domePlayback != nil,
+	{
+		o = Server.local.options;
+		//o.device = "MADIface USB (23635751)";
 		o.numOutputBusChannels = 32;
 		o.dump;
 });
 
 // Server.default.options.dump;
 
-if ( ~superNovaFlag != nil,
-	{
-		s = Server.local;
 
-		'using supernova server'.postln;
-		// Server.default;
-		Server.supernova;
-		o = Server.local.options;
-		// Post the number of output channels
-		// o.numOutputBusChannels.postln;
-		if ( ~domePlayback == nil,
-			{ o.numOutputBusChannels = 32;});
-		// o.memSize.postln;
-		o.memSize = 2**22;
-		o.blockSize = 2048;
-	}
-);
+
 
 s.waitForBoot{
 
@@ -457,9 +475,24 @@ s.waitForBoot{
 	};
 
 
+	~globalSetState = { | state |
+		'Setting Global state'.postln;
+		~allNodes.keysDo { |key |
+			//key.postln;
+
+			~allNodes[key].at( \pluginNode ).run(state);
+		};
+
+	};
+
 	s.sync;
 
 	/*  TEMP
+
+
+	~allNodes.size;
+	~globalSetState.value(0);
+	~globalSetState.value(1);
 
 	~nodeName="sourceC:spatOSCsource_0".asSymbol;
 
@@ -474,7 +507,7 @@ s.waitForBoot{
 
 	~createConnection.value(~nodeName, "ear");
 
-	~setUri.value(~nodeName, "plugin://labodomeTest");
+	~setUri.value(~nodeName, "plugin://default");
 
 	~allNodes[~nodeName].put(\connectionState,  Array.with(90,0,0,1,15000,100));   // create client-side state register for connection values
 
