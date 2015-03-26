@@ -1,3 +1,7 @@
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -7,19 +11,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-// /spatosc/core/source/node/event play duration freq
-// becomes:
-// node.set.(noteON, [duration freq]);
-// node.set.(t_noteOn 1);
-// NOTE: there is no array length checking, so be careful
-
-
-
-
-~name = \emptySource;    // this source is used as a default for newly created nodes
+~name = \emptySource;
 ~function = {
-	var dummy;
-
 	DC.ar(0);
-
 };
