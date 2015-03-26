@@ -1,3 +1,7 @@
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -6,22 +10,6 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-// /spatosc/core/source/node/event play duration freq
-// becomes:
-// node.set.(noteON, [duration freq]);
-// node.set.(t_noteOn 1);
-// NOTE: there is no array length checking, so be careful
-
-//o = OSCresponderNode(s.addr, '/tr', { |time, resp, msg| msg.postln }).add;
-//o.remove;  // when done, you need to clean up the OSCresponderNode
-//SendTrig.kr(Impulse.kr(4), 0, fb);
-// see OteyPiano
-
-//DEBUG outLevel.scope;
-//s.makeGui;
-
-
 
 /*
 freq
@@ -36,33 +24,21 @@ fB	 ??  Inharmonicity factor.
 */
 //freq: 440, amp: 0.5, gate: 1, pos: 0.14, c1: 1, c3: 30, inp: 0, release: 0.1)
 
-
-
 ~name = \zkarpluck1;
-// note:  when "autoFreeFlag" is an argument, a new copy of the synthdef will generated each time
-~function = { arg autoFreeFlag=1, amp=0.35, t_gate=0, pos = 0.14, c1 = 1, c3=20, fb = 2, note = #[60,1];
+
+~function = { arg amp=0.35, t_gate=0, pos = 0.14, c1 = 1, c3=20, fb = 2, note = #[60,1];
 	var env,inp,son;
 	var freq = note[0].midicps;
-
 	//SendTrig.kr(Impulse.kr(4), 0, fb);
-
 	env = Env.perc(0.005,0.01,1,0);
     inp = amp * LFClipNoise.ar(2000) * EnvGen.ar(env,t_gate);
-    son = DWGPluckedStiff.ar(freq, amp, 1 ,pos,c1,c3,inp, 1 , fb);   // note:  "gate" arg fixed to constant of 1, to keep plugin alive, "relase" arg not used
-    //DetectSilence.ar(son, 0.001, doneAction:2);
+	// note:  "gate" arg fixed to constant of 1, to keep plugin alive, "relase" arg not used:
+    son = DWGPluckedStiff.ar(freq, amp, 1 ,pos,c1,c3,inp, 1 , fb);
 	son;   // make sure this is last, so the sound is returned
 	 };
 
 /*
-t.stop;
-a.free;
-
-
-/*
-
 //  for test of "prop" and "event" messages
-
-
 {
 	a=~function.play;
     s.sync;
@@ -73,13 +49,12 @@ a.free;
 	t.start;
 }.fork;
 
-
 a.set(\c1, 30);
 a.set(\c3, 50);
 
 */
 
-
+/*
 //PLAY it.
 (
 a = Scale.new(
@@ -157,11 +132,7 @@ m.action_({ |ez| ( a.set(\attkDurMs, ez.value))});
 n = EZSlider(w, 380@20, "attkRms", ControlSpec(0, 50, \lin, 0.1 , 0));
 n.action_({ |ez| ( a.set(\attkRiseMs, ez.value))});
 
-
-
 a=~function.play;
-
-
 a=Synth.new(\sheefa);
 a=~synths[\sheefa];
 a=~synths[\mySound];
@@ -178,10 +149,7 @@ transientDur = 100.reciprocal, transientAmp
 o = OSCresponderNode(s.addr, '/tr', { |time, resp, msg| msg.postln }).add;
 o.remove;  // when done, you need to clean up the OSCresponderNode
 
-
 Env.perc(0, 100.reciprocal, 10, -24).test.plot;
-
-
 
 oscsend localhost 18032 /spatosc/core ss createSource sheefa
 oscsend localhost 18032 /spatosc/core sss connect sheefa myListener
@@ -193,7 +161,6 @@ oscsend localhost 18032 "/spatosc/core/connection/sheefa->myListener/update" fff
 SynthDescLib.global.read;
 SynthDescLib.global.browse;
 )
-
 
 
 //Define DWGPlucked synthdef
@@ -217,8 +184,6 @@ SynthDef(\help_dwgplucked2, { |out=0, freq=440, amp=0.5, gate=1, c3=20, pan=0|
     Out.ar(out, Pan2.ar(son * 0.1, pan));
 }).add;
 )
-
-
 
 
 //PLAY it.

@@ -26,13 +26,13 @@
 				spatSymbolArray.collect({ arg item, i;
 					self.pluginLoader.spatPlugins.at(item)}),
 				busShiftArray);
-			nil;
+			nil;  // return
 		};
 	});  // Environment.make
 	e.know = true;
 	e.pluginLoader = ~scbrPlugins.value();
 	e.synthDefFactory = ~scbrFactory.value();
 	e.oscInterface = ~cOSCMaker.value();
-	e;
+	e;  // return
 };  // scbrMaker
 )
