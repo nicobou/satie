@@ -1,4 +1,4 @@
-// This program is free software: you can redistribute it and/or modify
+//// This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
@@ -11,9 +11,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-// debugging
-//  OSCFunc.trace(true);
-//  OSCFunc.trace(false);
+/* debugging
+ OSCFunc.trace(true);
+ OSCFunc.trace(false);
+*/
 
 /*
 NOTES:
@@ -54,8 +55,9 @@ if ( ~superNovaFlag != nil,
 	{
 	Server.supernova;
     o = Server.local.options;
-		// o.memSize = 2**18;
-		// o.blockSize = 2048;
+		o.memSize = 2**18;
+		//o.blockSize = 2048;
+		o.dump;
 });
 
 
@@ -434,15 +436,22 @@ s.waitForBoot{
 
 		//postln("~setEvent: node:" ++nodeName ++" event name:"++eventName++"  arg(s): "++ args );
 
-		if ( (valueCount == 1) ,    // pass value
+		if ( (valueCount >= 1) ,    // pass vector
 			{
-				~allNodes[nodeName.asSymbol].at( \pluginNode ).set(eventName, args[0]);
+				~allNodes[nodeName.asSymbol].at( \pluginNode ).set(eventName, args);
 			},
-			// else  no args.. just pass 1
+			// else
 			{
-				~allNodes[nodeName.asSymbol].at( \pluginNode ).set(eventName, 1);  // no args, just generate trigger event
-			}
-		);
+				if ( (valueCount == 1) ,    // pass value
+					{
+						~allNodes[nodeName.asSymbol].at( \pluginNode ).set(eventName, args[0]);
+					},
+					// else  no args.. just pass 1
+					{
+						~allNodes[nodeName.asSymbol].at( \pluginNode ).set(eventName, 1);  // no args, just generate trigger event
+					}
+				);
+		});
 	};
 
 
@@ -482,8 +491,17 @@ s.waitForBoot{
 
 			~allNodes[key].at( \pluginNode ).run(state);
 		};
-
 	};
+
+		~globalSet = { | param, value |
+		'Setting Global state'.postln;
+		~allNodes.keysDo { |key |
+			//key.postln;
+
+			~allNodes[key].at( \pluginNode ).set(param,value);
+		};
+	};
+
 
 	s.sync;
 
@@ -495,6 +513,7 @@ s.waitForBoot{
 	~globalSetState.value(1);
 
 	~nodeName="sourceC:spatOSCsource_0".asSymbol;
+	~nodeName="ball_0:spatOSCsource_1".asSymbol;
 
 	~nodeName=\sheefa;
 
@@ -509,13 +528,41 @@ s.waitForBoot{
 
 	~setUri.value(~nodeName, "plugin://default");
 
+		~setUri.value(~nodeName, "plugin://zkarpluck1");
+
+	~allNodes[~nodeName].at( \pluginNode ).set(\note, [60,1,0.5]);
+		~allNodes[~nodeName].at( \pluginNode ).set(\t_trig, 1);
+
+
+
+	// EXTREME
+	~globalSet.value(\c1, 0.1);
+	~globalSet.value(\c3,1);
+
+		// NORMAL
+	~globalSet.value(\c1, 1);
+	~globalSet.value(\c3,7);
+
+
+
+
+	~globalSet.value(\fb, 100);
+
+	~globalSet.value(\pos, 0);
+	~globalSet.value(\pos, 0.5);
+	~globalSet.value(\pos, 1);
+
+		~globalSet.value(\gainDB, 0);
+
+
+
+
 	~allNodes[~nodeName].put(\connectionState,  Array.with(90,0,0,1,15000,100));   // create client-side state register for connection values
 
 
 	~connectionState = ~allNodes[~nodeName].at(\connectionState);
 
 
-	~connectionState[5] = 222;
 
 	~allNodes[~nodeName].at(\connectionState)[4];
 
@@ -555,7 +602,16 @@ s.waitForBoot{
 	~allNodes[~nodeName].includesKey( \pluginNode )
 
 
-	~connectionCallback.value( ["/spatosc/core/connection/"++ ~connectionName ++"/spread", 5]);
+		~allNodes[~nodeName].at( \pluginNode ).set(\gainDB, 0);
+
+	~sourceCallback.value( ["/spatosc/core/source/"++ ~nodeName ++"/event", \note, 50, 0.01,1]);
+	~sourceCallback.value( ["/spatosc/core/source/"++ ~nodeName ++"/event", \t_trig, 1]);
+
+	~allNodes[~nodeName].at( \pluginNode ).set(\note, [60,0.2,0]);
+		~allNodes[~nodeName].at( \pluginNode ).set(\t_trig, 1);
+
+
+~connectionCallback.value( ["/spatosc/core/connection/"++ ~connectionName ++"/spread", 5]);
 
 
 	~deleteSynth.value(~nodeName);

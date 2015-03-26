@@ -11,6 +11,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+/* debugging
+ OSCFunc.trace(true);    // show OSC RX
+ OSCFunc.trace(false);
+
+o = OSCresponderNode(s.addr, '/tr', { |time, resp, msg| msg.postln }).add;
+o.remove;  // when done, you need to clean up the OSCresponderNode
+
+SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
+
+*/
+
 /*
 freq
 amp 0 - 1
@@ -26,14 +37,21 @@ fB	 ??  Inharmonicity factor.
 
 ~name = \zkarpluck1;
 
-~function = { arg amp=0.35, t_gate=0, pos = 0.14, c1 = 1, c3=20, fb = 2, note = #[60,1];
+~function = {  | t_trig=0, c1 = 1, c3=20, fb = 2, note = #[60, 1, 0.5]  |   // note: pitch force incidence
 	var env,inp,son;
 	var freq = note[0].midicps;
-	//SendTrig.kr(Impulse.kr(4), 0, fb);
+	var amp = note[1];
+	var pos = note[2] * 0.5; // unitVal * positionRange
+	var hfqLoss= c3 + (1-amp)*c3*2;  // add more dampening when amplitude gets low
+	var idecay = c1 +  (1-amp)*c1;  //  reduce decay when amplitude gets low
+
+
+	//SendTrig.kr(Impulse.kr(1), 0, amp);
 	env = Env.perc(0.005,0.01,1,0);
-    inp = amp * LFClipNoise.ar(2000) * EnvGen.ar(env,t_gate);
+    inp = amp * LFClipNoise.ar(2000) * EnvGen.ar(env,t_trig);
+
 	// note:  "gate" arg fixed to constant of 1, to keep plugin alive, "relase" arg not used:
-    son = DWGPluckedStiff.ar(freq, amp, 1 ,pos,c1,c3,inp, 1 , fb);
+    son = DWGPluckedStiff.ar(freq, amp, 1 ,pos,idecay,hfqLoss,inp, 1 , fb);
 	son;   // make sure this is last, so the sound is returned
 	 };
 
@@ -43,9 +61,9 @@ fB	 ??  Inharmonicity factor.
 	a=~function.play;
     s.sync;
     a.set(\amp, 1);
-	a.set(\t_gate, 1 );
-//	t = Task({ { a.set(\t_gate, 1); 1.wait; 	a=~function.play;  s.sync; }.loop });
-	t = Task({ { a.set(\t_gate, 1); 0.2.wait; }.loop });
+	a.set(\t_trig, 1 );
+//	t = Task({ { a.set(\t_trig, 1); 1.wait; 	a=~function.play;  s.sync; }.loop });
+	t = Task({ { a.set(\t_trig, 1); 0.2.wait; }.loop });
 	t.start;
 }.fork;
 
@@ -83,14 +101,16 @@ w.view.decorator.gap=8@2;
 
 
 g = EZSlider(w, 380@20, "pitch ", ControlSpec(40, 110, \lin, 1, 60));
-g.action_({ |ez| ( a.set(\note, [ ez.value, 1] );a.set(\t_gate, 1);)});
+g.action_({ |ez| ( a.set(\note, [ ez.value, 1, 0.5 ] );a.set(\t_trig, 1);)});
 
 
 h = EZSlider(w, 380@20, "amp", ControlSpec(0, 1, \lin, 0.01, 0.5));
 h.action_({ |ez| ( a.set(\amp, (ez.value)))});
 
+/*
 i = EZSlider(w, 380@20, "pos", ControlSpec(0.0, 1, \lin, 0.01, 0.14));
-i.action_({ |ez| ( a.set(\pos, (ez.value));a.set(\t_gate, 1))});
+i.action_({ |ez| ( a.set(\pos, (ez.value));a.set(\t_trig, 1))});
+*/
 
 j = EZSlider(w, 380@20, "c1", ControlSpec(0.0, 10, \lin, 0.01, 1));
 j.action_({ |ez| ( a.set(\c1, (ez.value)))});
@@ -107,30 +127,6 @@ l.action_({ |ez| ( a.set(\fb, (ez.value)))});
 
 /*
 
-g = EZSlider(w, 380@20, "Note ", ControlSpec(48, 84, \lin, 1, 60, \note));
-g.action_({ |ez| ( a.set(\noteOn, ez.value); a.set(\t_noteOnBang, 1); ) });
-
-h = EZSlider(w, 380@20, "combRT", ControlSpec(-20, 20, \lin, 0.01, 1));
-h.action_({ |ez| ( a.set(\combRTsec,  (ez.value)))});
-
-i = EZSlider(w, 380@20, "outLevel", ControlSpec(-60, 6, \lin, 0.5, -18));
-i.action_({ |ez| ( a.set(\outLevel, (ez.value)))});
-
-
-//j = EZSlider(w, 380@20, "hPassQ", ControlSpec(0, 4, \lin, 0.10, 1));
-//j.action_({ |ez| ( a.set(\hpQ, (ez.value)))});
-
-k = EZSlider(w, 380@20, "LPcutoff ", ControlSpec(0.1, 22050, \exp,1, 22050));
-k.action_({ |ez| ( a.set(\lpFq, ez.value))});
-
-l = EZSlider(w, 380@20, "pWidth", ControlSpec(-1, 1, \lin, 0.01, 0));
-l.action_({ |ez| ( a.set(\pWidth, ez.value))});
-
-m = EZSlider(w, 380@20, "attkDms", ControlSpec(0.5, 50, \lin, 0.5, 4));
-m.action_({ |ez| ( a.set(\attkDurMs, ez.value))});
-
-n = EZSlider(w, 380@20, "attkRms", ControlSpec(0, 50, \lin, 0.1 , 0));
-n.action_({ |ez| ( a.set(\attkRiseMs, ez.value))});
 
 a=~function.play;
 a=Synth.new(\sheefa);
@@ -139,12 +135,10 @@ a=~synths[\mySound];
 
 a.set(\outLevel, 0 );
 a.set(\noteOn, #[60, 1]);   // accessed via the "event" message
-a.set(\t_noteOnBang, 1);
+a.set(\t_t_trig, 1);
 
-*/
 
-/*
-transientDur = 100.reciprocal, transientAmp
+
 
 o = OSCresponderNode(s.addr, '/tr', { |time, resp, msg| msg.postln }).add;
 o.remove;  // when done, you need to clean up the OSCresponderNode
