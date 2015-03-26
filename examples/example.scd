@@ -11,6 +11,32 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+
+//  s.makeGui;
+
+// Server.default;
+
+
+
+
+if ( true,
+	{
+
+	Server.supernova;
+
+    o = Server.local.options;
+		o.device = "MADIface USB (23635751)";
+		o.memSize = 2**18;
+		o.numOutputBusChannels = 32;
+
+		//o.blockSize = 2048;
+		o.dump;
+});
+
+s.quit;
+
+
 s.reboot;
 (
 s.waitForBoot{
@@ -58,7 +84,7 @@ s.waitForBoot{
 )
 
 
-/*
+
 w=Window.new("sheefa", Rect(30, 30, 400, 200)).front;
 w.view.decorator=FlowLayout(w.view.bounds);
 w.view.decorator.gap=8@2;
@@ -77,11 +103,3 @@ i.action_({ |ez| ( y.set(\eleDeg, (ez.value)))});
 j = EZSlider(w, 380@20, "spread", ControlSpec(0, 100, \lin, 0.1, 1));
 j.action_({ |ez| ( y.set(\spread, (ez.value)))});
 
-
-k = EZSlider(w, 380@20, "c3", ControlSpec(0.1, 22050, \exp,1, 22050));
-k.action_({ |ez| ( a.set(\c3, (ez.value)))});
-
-l = EZSlider(w, 380@20, "fb", ControlSpec(0.0, 100, \lin, 0.1, 20));
-l.action_({ |ez| ( a.set(\fb, (ez.value)))});
-
-*/
