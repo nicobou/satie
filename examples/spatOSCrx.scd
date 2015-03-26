@@ -41,8 +41,8 @@ s.boot;
 */
 
 
-//~superNovaFlag = true;
-//~domePlayback = true;
+~superNovaFlag = true;
+~domePlayback = true;
 // ~labodome = true;
 
 

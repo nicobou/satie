@@ -32,23 +32,56 @@ s.waitForBoot{
 	// here a PinkSin source spatialized by
 	//   - a stereo panner (starting channel 0)
 	//   - a monoSpat (starting channel 2)
-	~scbr.makeSynthDef(\fool, \PinkSin, [\stereoPanner, \monoSpat], [0, 2]);
+	//~scbr.makeSynthDef(\fool, \PinkSin, [\stereoPanner, \monoSpat], [0, 2]);
 	~scbr.makeSynthDef(\string, \zkarpluck1, [\stereoPanner, \monoSpat], [0, 2]);
+	~scbr.makeSynthDef(\fool, \default, [\domeVBAP], [0]);
 	// be sure the synthDef is compiled on the server
 	s.sync;
 
 	// initialization is done, create and remove a source + controls
 	y = Synth.tail(s, \fool);
 	// spat properties
-	y.set(\gainDB, -12);
+	y.set(\gainDB, 0);
 	y.set(\aziDeg, 0);
+	y.set(\eleDeg, 0);
+	y.set(\spread, 100);
+
 	// source property
 	y.set(\sfreq, 100);
 	// remove source
-	y.release;
+	//y.release;
 
 	z = Synth.tail(s, \string);
 	z.set(\t_gate, 0);
 	z.release;
 };  // s.waitForBoot
 )
+
+
+/*
+w=Window.new("sheefa", Rect(30, 30, 400, 200)).front;
+w.view.decorator=FlowLayout(w.view.bounds);
+w.view.decorator.gap=8@2;
+
+
+// g = EZSlider(w, 380@20, "pitch ", ControlSpec(40, 110, \lin, 1, 60));
+// g.action_({ |ez| ( a.set(\note, [ ez.value, 1, 0.5 ] );a.set(\t_trig, 1);)});
+
+
+h = EZSlider(w, 380@20, "azi", ControlSpec(-180, 180, \lin, 1, 0));
+h.action_({ |ez| ( y.set(\aziDeg, (ez.value)))});
+
+i = EZSlider(w, 380@20, "ele", ControlSpec(-90, 90, \lin, 1, 0));
+i.action_({ |ez| ( y.set(\eleDeg, (ez.value)))});
+
+j = EZSlider(w, 380@20, "spread", ControlSpec(0, 100, \lin, 0.1, 1));
+j.action_({ |ez| ( y.set(\spread, (ez.value)))});
+
+
+k = EZSlider(w, 380@20, "c3", ControlSpec(0.1, 22050, \exp,1, 22050));
+k.action_({ |ez| ( a.set(\c3, (ez.value)))});
+
+l = EZSlider(w, 380@20, "fb", ControlSpec(0.0, 100, \lin, 0.1, 20));
+l.action_({ |ez| ( a.set(\fb, (ez.value)))});
+
+*/
