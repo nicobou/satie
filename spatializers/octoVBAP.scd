@@ -1,0 +1,55 @@
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+// spat input args:
+// aziDeg degrees (-180 to 180)
+// elevDeg   degrees (-180 to 180)
+// gainDB  decibels
+// delaySec  seconds
+// lpHz    hertz
+// spread  units  (0 == directional, ....,  100 == omni)
+
+// dome speaker layout
+~spk8 = VBAPSpeakerArray.new(2, [-45, 45, 135, -135, 0, 90, 180, -90]); // 8 channel ring
+
+// {[-45, 45, 135, -135, 0, 90, 180, -90].do({|ang| x.set(\azi, ang); 1.wait; }) }.fork;
+
+
+
+~vbuf8 = Buffer.loadCollection(s, ~spk8.getSetsAndMatrices);
+
+~name = \octoVBAP;
+
+
+~function = {|in = 0, aziDeg = 0.5, gainDB = 0, delayMs = 1, lpHz = 15000, spread = 1 |
+	var gain= gainDB.dbamp;   // convert gainDB to gainAMP
+	var delay = delayMs * 0.001;    // convert to seconds
+	var slewDelay = 0.3; //  note: this needs to be improved ... smoother
+	var slewGain = 0.03;
+	var slewLp = 0.3;
+	VBAP.ar(numChans: ~spk8.numSpeakers,
+		in:	LPF.ar(
+			DelayC.ar(
+				gain.lag(slewGain) * in,
+				maxdelaytime: 0.5,
+				delaytime: delay.lag(slewDelay)),
+			lpHz.lag(slewLp)),
+		bufnum: ~vbuf8.bufnum,
+		azimuth: aziDeg,
+		spread: spread);
+};
+
+
+
+
+
