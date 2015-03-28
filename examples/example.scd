@@ -68,27 +68,43 @@ s.waitForBoot{
 	~scbr.makeSynthDef(\vbap31, \default, [\domeVBAP], [0]);
 	~scbr.makeSynthDef(\vbap8, \default, [\octoVBAP], [0]);
 	~scbr.makeSynthDef(\vbap24, \default, [\labodomeVBAP], [0]);
+	~scbr.makeSynthDef(\ztest1, \zkarpluck1, [\labodomeVBAP], [0]);
 
 
 	// be sure the synthDef is compiled on the server
 	s.sync;
 
 	// initialization is done, create and remove a source + controls
-	y = Synth.tail(s, \vbap31, [\spread,0]);
 
-	// y = Synth.tail(s, \vbap24, [\spread,0]);
+	// make a bunch of 'em
+	g = ParGroup.new;
+	//80.do ( {  Synth(\vbap31, [\spread,0] , g) });
+	100.do ( {  Synth(\ztest1, [\spread,0] , g) });
 
-	// y.dump;
-	// y.free;
+
+
+	// control 'em
+    g.set(\gainDB, -40);
+    g.set(\t_trig, 1);
+
+	// kille 'em all
+	g.freeAll;
+
+
+	// if it's a karpluck, pluck 'em
+	{
+	t = Task({ { g.set(\t_trig, 1); 0.2.wait; }.loop });
+	t.start;
+}.fork;
 
 
 
 	// spat properties
-	y.set(\gainDB, 10);
-	y.set(\aziDeg, 0);
-	y.set(\eleDeg, 90);
-	y.set(\spread, 0);
-	y.set(\lfoHz, 10000);
+	g.set(\gainDB, -40);
+	g.set(\aziDeg, 0);
+	g.set(\eleDeg, 90);
+	g.set(\spread, 0);
+	g.set(\lfoHz, 10000);
 
 	// source property
 	//y.set(\sfreq, 100);
@@ -102,32 +118,32 @@ s.waitForBoot{
 )
 
 
-// corresponding to the "Olie" speaker config
-y.set(\eleDeg, 90);
+// vbap testing,  corresponding to the "Olie" speaker config
+g.set(\eleDeg, 90);
 
-y.set(\eleDeg, 45);
+g.set(\eleDeg, 45);
 {[15,75,135,-165,-105,-45 ].do({|ang| y.set(\aziDeg, ang); 1.wait; }) }.fork;
 
 
-y.set(\eleDeg, 22.5);
+g.set(\eleDeg, 22.5);
 {[0, 30, 60, 90, 120, 150, 180, -150, -120, -90, -60, -30 ].do({|ang| y.set(\aziDeg, ang); 1.wait; }) }.fork;
 
-y.set(\eleDeg, 0);
+g.set(\eleDeg, 0);
 {[0, 30, 60, 90, 120, 150, 180, -150, -120, -90, -60, -30 ].do({|ang| y.set(\aziDeg, ang); 1.wait; }) }.fork;
 
 
 
-w=Window.new("sheefa", Rect(30, 30, 400, 100)).front;
+w=Window.new("group contrp;", Rect(30, 30, 400, 100)).front;
 w.view.decorator=FlowLayout(w.view.bounds);
 w.view.decorator.gap=8@2;
 
 
 h = EZSlider(w, 380@20, "azi", ControlSpec(-180, 180, \lin, 1, 0));
-h.action_({ |ez| ( y.set(\aziDeg, (ez.value)))});
+h.action_({ |ez| ( g.set(\aziDeg, (ez.value)))});
 
 i = EZSlider(w, 380@20, "ele", ControlSpec(-90, 90, \lin, 1, 0));
-i.action_({ |ez| ( y.set(\eleDeg, (ez.value)))});
+i.action_({ |ez| ( g.set(\eleDeg, (ez.value)))});
 
 j = EZSlider(w, 380@20, "spread", ControlSpec(0, 100, \lin, 0.1, 1));
-j.action_({ |ez| ( y.set(\spread, (ez.value)))});
+j.action_({ |ez| ( g.set(\spread, (ez.value)))});
 
