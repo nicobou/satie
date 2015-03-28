@@ -20,7 +20,7 @@
 
 
 
-if ( true,
+if ( false,
 	{
 
 	Server.supernova;
@@ -32,6 +32,11 @@ if ( true,
 
 		//o.blockSize = 2048;
 		o.dump;
+
+
+		s.boot;
+
+		s.quit;
 });
 
 s.quit;
@@ -59,39 +64,62 @@ s.waitForBoot{
 	//   - a stereo panner (starting channel 0)
 	//   - a monoSpat (starting channel 2)
 	//~scbr.makeSynthDef(\fool, \PinkSin, [\stereoPanner, \monoSpat], [0, 2]);
-	~scbr.makeSynthDef(\string, \zkarpluck1, [\stereoPanner, \monoSpat], [0, 2]);
-	~scbr.makeSynthDef(\fool, \default, [\domeVBAP], [0]);
+	//~scbr.makeSynthDef(\string, \zkarpluck1, [\stereoPanner, \monoSpat], [0, 2]);
+	~scbr.makeSynthDef(\vbap31, \default, [\domeVBAP], [0]);
+	~scbr.makeSynthDef(\vbap8, \default, [\octoVBAP], [0]);
+	~scbr.makeSynthDef(\vbap24, \default, [\labodomeVBAP], [0]);
+
+
 	// be sure the synthDef is compiled on the server
 	s.sync;
 
 	// initialization is done, create and remove a source + controls
-	y = Synth.tail(s, \fool);
+	y = Synth.tail(s, \vbap31, [\spread,0]);
+
+	// y = Synth.tail(s, \vbap24, [\spread,0]);
+
+	// y.dump;
+	// y.free;
+
+
+
 	// spat properties
-	y.set(\gainDB, 0);
+	y.set(\gainDB, 10);
 	y.set(\aziDeg, 0);
-	y.set(\eleDeg, 0);
-	y.set(\spread, 100);
+	y.set(\eleDeg, 90);
+	y.set(\spread, 0);
+	y.set(\lfoHz, 10000);
 
 	// source property
-	y.set(\sfreq, 100);
+	//y.set(\sfreq, 100);
 	// remove source
 	//y.release;
 
-	z = Synth.tail(s, \string);
-	z.set(\t_gate, 0);
-	z.release;
+	//z = Synth.tail(s, \string);
+	//z.set(\t_gate, 0);
+	//z.release;
 };  // s.waitForBoot
 )
 
 
+// corresponding to the "Olie" speaker config
+y.set(\eleDeg, 90);
 
-w=Window.new("sheefa", Rect(30, 30, 400, 200)).front;
+y.set(\eleDeg, 45);
+{[15,75,135,-165,-105,-45 ].do({|ang| y.set(\aziDeg, ang); 1.wait; }) }.fork;
+
+
+y.set(\eleDeg, 22.5);
+{[0, 30, 60, 90, 120, 150, 180, -150, -120, -90, -60, -30 ].do({|ang| y.set(\aziDeg, ang); 1.wait; }) }.fork;
+
+y.set(\eleDeg, 0);
+{[0, 30, 60, 90, 120, 150, 180, -150, -120, -90, -60, -30 ].do({|ang| y.set(\aziDeg, ang); 1.wait; }) }.fork;
+
+
+
+w=Window.new("sheefa", Rect(30, 30, 400, 100)).front;
 w.view.decorator=FlowLayout(w.view.bounds);
 w.view.decorator.gap=8@2;
-
-
-// g = EZSlider(w, 380@20, "pitch ", ControlSpec(40, 110, \lin, 1, 60));
-// g.action_({ |ez| ( a.set(\note, [ ez.value, 1, 0.5 ] );a.set(\t_trig, 1);)});
 
 
 h = EZSlider(w, 380@20, "azi", ControlSpec(-180, 180, \lin, 1, 0));

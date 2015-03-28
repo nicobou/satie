@@ -20,12 +20,13 @@
 // spread  units  (0 == directional, ....,  100 == omni)
 
 // labodome speaker layout
-~spk = VBAPSpeakerArray.new(3, [
+~spk24 = VBAPSpeakerArray.new(3, [
 [0, 90],
 [0, 60], [45, 60], [90, 60], [135, 60], [180, 60], [-135, 60], [-90, 60], [-45, 60],
 [0, 20], [45, 20], [90, 20], [135, 20], [180, 20], [-135, 20], [-90, 20], [-45, 20],
 [0, -15], [45, -15], [90, -15], [135, -15], [-135, -10], [-90, -10], [-45, -10],]);
-~vbuf = Buffer.loadCollection(s, ~spk.getSetsAndMatrices);
+
+~vbuf24 = Buffer.loadCollection(s, ~spk24.getSetsAndMatrices);
 
 ~name = \labodomeVBAP;
 
@@ -35,14 +36,14 @@
 	var slewDelay = 0.3; //  note: this needs to be improved ... smoother
 	var slewGain = 0.03;
 	var slewLp = 0.3;
-	VBAP.ar(numChans: ~spk.numSpeakers,
+	VBAP.ar(numChans: ~spk24.numSpeakers,
 		in:	LPF.ar(
 			DelayC.ar(
 				gain.lag(slewGain) * in,
 				maxdelaytime: 0.5,
 				delaytime: delay.lag(slewDelay)),
 			lpHz.lag(slewLp)),
-		bufnum: ~vbuf.bufnum,
+		bufnum: ~vbuf24.bufnum,
 		azimuth: aziDeg,
 		elevation: eleDeg,
 		spread: spread);

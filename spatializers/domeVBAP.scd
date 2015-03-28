@@ -20,28 +20,30 @@
 // spread  units  (0 == directional, ....,  100 == omni)
 
 // dome speaker layout
-// ~spkOli = VBAPSpeakerArray.new(3, [
-// 	[0, 90],
-// 	[15, 45], [75, 45], [135, 45], [-165, 45], [-105, 45], [-45, 45],
-// 	[0, 22.5], [30, 22.5], [60, 22.5], [90, 22.5], [120, 22.5], [150, 22.5], [180, 22.5], [-150, 22.5], [-120, 22.5], [-90, 22.5], [-60, 22.5], [-30, 22.5],
-// 	[0, 0], [30, 0], [60, 0], [90, 0], [120, 0], [150, 0], [180, 0], [-150, 0], [-120, 0], [-90, 0], [-60, 0], [-30, 0],
-// ]);
+
+// layout for domes developed by olie
+ ~spk31 = VBAPSpeakerArray.new(3, [
+ 	[0, 90],
+ 	[15, 45], [75, 45], [135, 45], [-165, 45], [-105, 45], [-45, 45],
+ 	[0, 22.5], [30, 22.5], [60, 22.5], [90, 22.5], [120, 22.5], [150, 22.5], [180, 22.5], [-150, 22.5], [-120, 22.5], [-90, 22.5], [-60, 22.5], [-30, 22.5],
+ 	[0, 0], [30, 0], [60, 0], [90, 0], [120, 0], [150, 0], [180, 0], [-150, 0], [-120, 0], [-90, 0], [-60, 0], [-30, 0],
+ ]);
 
 
-// layout for domes > 180 degrees elevation
-// ~spkZ =  VBAPSpeakerArray.new(3, [
+
+// layout for domes developed by z
+
+// ~spk31 =  VBAPSpeakerArray.new(3, [
 // 	[0, 90],
 // 	[-7.5, 55], [52.5, 55], [112.5, 55], [172.5, 55], [-127.5, 55], [-67.5, 55],
 // 	[7.5, 20], [37.5, 20], [67.5, 20], [97.5, 20], [127.5, 20], [157.5, 20], [-172.5, 20], [-142.5, 20], [-112.5, 20], [-82.5, 20], [-52.5, 20], [-22.5, 20],
-// 	[7.5, -15], [37.5, -15], [67.5, -15], [97.5, -15], [127.5, -15], [157.5, -15], [-172.5, -15], [-142.5, -15], [-112.5, -15], [-82.5, -15], [-52.5, -15], [-22.5, -15]
-// ]);
+// [7.5, -15], [37.5, -15], [67.5, -15], [97.5, -15], [127.5, -15], [157.5, -15], [-172.5, -15], [-142.5, -15], [-112.5, -15], [-82.5, -15], [-52.5, -15], [-22.5, -15] ]);
 
 
-~spkZ =  VBAPSpeakerArray.new(2, [ 0, 45, 90, 135, 180, -135, -90, -45 ]); // 5.1 array
+//  ~vbuf31.dump;
+//  ~spk31.dump;
 
-
-//~vbuf = Buffer.loadCollection(s, ~spkOli.getSetsAndMatrices);
-~vbuf = Buffer.loadCollection(s, ~spkZ.getSetsAndMatrices);
+~vbuf31 = Buffer.loadCollection(s, ~spk31.getSetsAndMatrices);
 
 ~name = \domeVBAP;
 
@@ -52,16 +54,16 @@
 	var slewDelay = 0.3; //  note: this needs to be improved ... smoother
 	var slewGain = 0.03;
 	var slewLp = 0.3;
-	VBAP.ar(numChans: ~spkZ.numSpeakers,
+	VBAP.ar(numChans: ~spk31.numSpeakers,
 		in:	LPF.ar(
 			DelayC.ar(
 				gain.lag(slewGain) * in,
 				maxdelaytime: 0.5,
 				delaytime: delay.lag(slewDelay)),
 			lpHz.lag(slewLp)),
-		bufnum: ~vbuf.bufnum,
+		bufnum: ~vbuf31.bufnum,
 		azimuth: aziDeg,
-		//elevation: eleDeg,
+		elevation: eleDeg,
 		spread: spread);
 };
 
