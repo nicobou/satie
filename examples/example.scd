@@ -26,7 +26,9 @@ if ( false,
 	Server.supernova;
 
     o = Server.local.options;
-		o.device = "MADIface USB (23635751)";
+		//o.device = "MADIface USB (23635751)";
+		o.device = "Soundflower (64ch)";
+
 		o.memSize = 2**18;
 		o.numOutputBusChannels = 32;
 
@@ -79,7 +81,7 @@ s.waitForBoot{
 	// make a bunch of 'em
 	g = ParGroup.new;
 	//80.do ( {  Synth(\vbap31, [\spread,0] , g) });
-	100.do ( {  Synth(\ztest1, [\spread,0] , g) });
+	100.do ( {  Synth(\vbap31, [\spread,0] , g) });
 
 
 
@@ -100,7 +102,7 @@ s.waitForBoot{
 
 
 	// spat properties
-	g.set(\gainDB, -40);
+	g.set(\gainDB, -30);
 	g.set(\aziDeg, 0);
 	g.set(\eleDeg, 90);
 	g.set(\spread, 0);
@@ -122,14 +124,14 @@ s.waitForBoot{
 g.set(\eleDeg, 90);
 
 g.set(\eleDeg, 45);
-{[15,75,135,-165,-105,-45 ].do({|ang| y.set(\aziDeg, ang); 1.wait; }) }.fork;
+{[15,75,135,-165,-105,-45 ].do({|ang| g.set(\aziDeg, ang); 1.wait; }) }.fork;
 
 
 g.set(\eleDeg, 22.5);
-{[0, 30, 60, 90, 120, 150, 180, -150, -120, -90, -60, -30 ].do({|ang| y.set(\aziDeg, ang); 1.wait; }) }.fork;
+{[0, 30, 60, 90, 120, 150, 180, -150, -120, -90, -60, -30 ].do({|ang| g.set(\aziDeg, ang); 1.wait; }) }.fork;
 
 g.set(\eleDeg, 0);
-{[0, 30, 60, 90, 120, 150, 180, -150, -120, -90, -60, -30 ].do({|ang| y.set(\aziDeg, ang); 1.wait; }) }.fork;
+{[0, 30, 60, 90, 120, 150, 180, -150, -120, -90, -60, -30 ].do({|ang| g.set(\aziDeg, ang); 1.wait; }) }.fork;
 
 
 
