@@ -1,4 +1,4 @@
-#N canvas 569 22 1029 924 10;
+#N canvas 1043 22 1327 1294 10;
 #X floatatom 248 338 5 0 0 0 - - -;
 #X floatatom 287 338 5 0 0 0 - - -;
 #X floatatom 326 338 5 0 0 0 - - -;
@@ -95,7 +95,7 @@ more precisely.;
 #X connect 4 0 5 0;
 #X connect 5 0 0 0;
 #X restore 464 -59 pd ABOUT_SCHEDULING;
-#N canvas 960 172 785 538 PHYSICAL_MODELLING_FACTORS 0;
+#N canvas 960 172 785 538 PHYSICAL_MODELLING_FACTORS 1;
 #X obj 35 5 cnv 15 300 500 empty empty connection_effects 20 12 0 14
 -233017 -66577 0;
 #X msg 72 169 0;
@@ -141,7 +141,6 @@ radious \, over which \, the rolloff effect is scaled back to normal.
 #X text 140 395 normal;
 #X text 154 413 more extreme;
 #X msg 121 413 200;
-#X msg 101 439 setIncidenceFactor mySound ear \$1;
 #X text 94 461 (indidence effect of source on listener);
 #X text 52 34 DISTANCE EFFECT;
 #X text 68 152 DOPPLER EFFECT;
@@ -159,6 +158,7 @@ radious \, over which \, the rolloff effect is scaled back to normal.
 1m radius;
 #X msg 381 260 5;
 #X text 409 261 incidence suppression zone extends to 5 * radius;
+#X msg 101 439 setIncidenceFactor mySound ear \$1;
 #X connect 1 0 5 0;
 #X connect 2 0 5 0;
 #X connect 5 0 6 0;
@@ -179,15 +179,15 @@ radious \, over which \, the rolloff effect is scaled back to normal.
 #X connect 30 0 31 0;
 #X connect 31 0 28 0;
 #X connect 32 0 30 0;
-#X connect 33 0 38 0;
-#X connect 34 0 38 0;
-#X connect 37 0 38 0;
-#X connect 38 0 6 0;
+#X connect 33 0 54 0;
+#X connect 34 0 54 0;
+#X connect 37 0 54 0;
+#X connect 48 0 22 0;
 #X connect 49 0 22 0;
-#X connect 50 0 22 0;
-#X connect 53 0 23 0;
+#X connect 52 0 23 0;
+#X connect 54 0 6 0;
 #X restore 464 -38 pd PHYSICAL_MODELLING_FACTORS;
-#N canvas 458 22 923 460 ADVANCED_CONNECTION_FEATURES 0;
+#N canvas 276 875 923 460 ADVANCED_CONNECTION_FEATURES 1;
 #X msg 80 78 \; toSpatOSC setAutoConnect \$1;
 #X obj 80 53 tgl 15 1 empty empty auto-connect 17 7 1 12 -262144 -1
 -1 1 1;
@@ -434,19 +434,7 @@ exists;
 #X msg 171 245 setURI mySound plugin://default;
 #X text 374 128 <-- Create a sound source and listener and set to Active
 ;
-#X obj 629 376 s toSpatOSC;
-#X floatatom 630 307 5 0 0 0 - - -;
 #X msg 209 302 sendNodeEvent mySound noteOn 60 0.1;
-#X obj 776 179 vsl 15 128 0 127 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 0 1;
-#X obj 757 58 metro 500;
-#X obj 774 30 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
-1;
-#X obj 765 98 random 24;
-#X obj 770 146 + 40;
-#X msg 534 255 sendNodeEvent mySound noteOn \$1 0.1;
-#X msg 628 343 sendNodeEvent mySound outLevel \$1;
-#X floatatom 835 238 5 0 0 0 - - -;
 #N canvas 0 433 836 665 PLUGIN_TEST 0;
 #X text -329 102 freq=440 \, amp=0.5 \, t_gate=0 \, pos = 0.14 \, c1
 = 1 \, c3=20 \, fb = 2 \;;
@@ -500,21 +488,43 @@ exists;
 #X restore 335 53 pd PLUGIN_TEST;
 #X obj 228 616 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
-#X obj 602 699 s toSpatOSC;
 #X obj 34 -34 tgl 20 0 empty empty success 25 10 0 10 -258113 -1 -1
 1 1;
 #X obj 83 -77 r toSpatOSC;
 #X text 88 -55 Usage: [spatosc s:translator s:oscUrl];
 #X obj 34 -56 spatosc;
-#X obj 764 454 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
-1;
-#X msg 749 492 setActive mySound \$1;
 #X msg 45 93 createSource mySound \, setActive mySound 1 \, createListener
 ear;
-#X msg 658 627 createSource mySound \, setActive mySound 1 \, createListener
-ear \, setURI mySound plugin://zkarpluck1;
-#X msg 643 572 createSource mySound;
 #X msg 188 267 setURI mySound plugin://labodomeTest;
+#X obj 892 138 until;
+#X obj 898 201 f;
+#X obj 928 201 + 1;
+#X msg 993 383 createSource testSource\$1 \, setActive testSource\$1
+1;
+#X obj 1029 616 s toSpatOSC;
+#X msg 1117 65 createListener ear;
+#X obj 1114 104 s toSpatOSC;
+#X msg 119 843 removeTranslator default;
+#X text 322 778 <- this is the default one created on startup;
+#X obj 61 914 s toSpatOSC;
+#X msg 45 784 addTranslator default BasicTranslator osc.udp://192.168.0.17:18032
+;
+#X obj 883 76 t f b;
+#X msg 932 107 0;
+#X msg 1058 29 clearScene;
+#X msg 881 34 40;
+#X floatatom 956 18 5 0 0 0 - - -;
+#X obj 928 46 f;
+#X obj 902 -51 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X msg 665 497 setIncidenceFactor testSource1 ear \$1;
+#X floatatom 665 448 5 0 0 0 - - -;
+#X msg 1015 415 setURI testSource\$1 plugin://default;
+#X msg 753 442 setNodeFloatProperty testSource\$1 fb 100 \, setNodeFloatProperty
+testSource\$1 c1 1 \, setNodeFloatProperty testSource\$1 c3 6;
+#X msg 1034 463 setURI testSource\$1 plugin://zkarpluck1;
+#X msg 787 340 setURI testSource\$1 plugin://default;
+#X obj 897 239 t f f f b;
 #X connect 0 0 3 0;
 #X connect 1 0 3 1;
 #X connect 2 0 3 2;
@@ -541,21 +551,33 @@ ear \, setURI mySound plugin://zkarpluck1;
 #X connect 41 0 10 0;
 #X connect 42 0 10 0;
 #X connect 43 0 10 0;
-#X connect 46 0 54 0;
+#X connect 45 0 10 0;
 #X connect 47 0 10 0;
-#X connect 48 0 53 0;
 #X connect 49 0 51 0;
-#X connect 50 0 49 0;
-#X connect 51 0 52 0;
-#X connect 52 0 53 0;
-#X connect 53 0 45 0;
-#X connect 54 0 45 0;
-#X connect 55 0 49 1;
-#X connect 57 0 10 0;
-#X connect 60 0 62 0;
-#X connect 62 0 59 0;
-#X connect 63 0 64 0;
-#X connect 64 0 58 0;
-#X connect 65 0 10 0;
-#X connect 67 0 58 0;
-#X connect 68 0 10 0;
+#X connect 51 0 48 0;
+#X connect 52 0 10 0;
+#X connect 53 0 10 0;
+#X connect 54 0 55 0;
+#X connect 55 0 56 0;
+#X connect 55 0 78 0;
+#X connect 56 0 55 1;
+#X connect 57 0 58 0;
+#X connect 59 0 60 0;
+#X connect 61 0 63 0;
+#X connect 64 0 63 0;
+#X connect 65 0 54 0;
+#X connect 65 1 66 0;
+#X connect 66 0 55 1;
+#X connect 67 0 60 0;
+#X connect 68 0 65 0;
+#X connect 69 0 70 1;
+#X connect 70 0 65 0;
+#X connect 71 0 70 0;
+#X connect 72 0 58 0;
+#X connect 73 0 72 0;
+#X connect 75 0 58 0;
+#X connect 77 0 58 0;
+#X connect 78 0 75 0;
+#X connect 78 1 77 0;
+#X connect 78 2 57 0;
+#X connect 78 3 59 0;
