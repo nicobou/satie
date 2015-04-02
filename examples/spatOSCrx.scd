@@ -120,7 +120,7 @@ s.waitForBoot{
 	if ( ~domePlayback == nil,
 		{
 			// NEEDS IMPROVEMENT
-			// all plugins (synthDefs) have to be evaluated in "pre-runtime" here
+			// all plugins (synthDefs) have to be evaluated in "pre-runtime" herea
 			//
 			'generating synthdefs'.postln;
 
@@ -129,6 +129,7 @@ s.waitForBoot{
 			~scbr.makeSynthDef(\default, \default, [\stereoListener], [0]);
 			~scbr.makeSynthDef(\zkarpluck0, \zkarpluck0, [\stereoListener], [0]);
 			~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [\stereoListener], [0]);
+			~scbr.makeSynthDef(\zbell1, \zbell1, [\stereoListener], [0]);
 			~scbr.makeSynthDef(\labodomeTest, \default, [\labodomeVBAP], [0]);
 	},
 		// else evalualte for dome listeners
@@ -139,6 +140,7 @@ s.waitForBoot{
 			~scbr.makeSynthDef(\default, \default, [\domeVBAP], [0]);
 			~scbr.makeSynthDef(\zkarpluck0, \zkarpluck0, [\domeVBAP], [0]);
 			~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [\domeVBAP], [0]);
+			~scbr.makeSynthDef(\zbell1, \zbell1, [\domeVBAP], [0]);
 		}
 	);
 
@@ -432,7 +434,7 @@ s.waitForBoot{
 		// postf("~setPlugin: : %,  node: %, \n", pluginName, nodeName);
 		// thisNode.at(\groupName).freeAll;   // DO NOT DO PER NODE  clear current synthNode(s) in group
 
-		thisNode.put(\pluginNode).free;     // kill off existing synthdef (plugin)
+		thisNode.at(\pluginNode).free;     // kill off existing synthdef (plugin)
 
 		// create fresh synthDef plugin.
 		thisNode.put(\pluginNode, Synth(~allNodes[nodeNameSym].at(\pluginName),nil,~allNodes[nodeNameSym].at(\groupName),\addToHead));
