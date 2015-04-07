@@ -53,10 +53,10 @@ s.reboot;
 
 ~superNovaFlag = true;
 
-//~domePlayback = true;
+~domePlayback = true;
 // ~labodome = true;
 //~outAudioDev = "Soundflower (64ch)";   //  for multi-channel testing without hardware on OSX
-//  ~outAudioDev = "MADIface USB (23635751)"     // for labodome or SATO
+  ~outAudioDev = "MADIface USB (23635751)";     // for labodome or SATO
 
 
 if ( ~superNovaFlag != nil,
@@ -130,6 +130,7 @@ s.waitForBoot{
 			~scbr.makeSynthDef(\zkarpluck0, \zkarpluck0, [\stereoListener], [0]);
 			~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [\stereoListener], [0]);
 			~scbr.makeSynthDef(\zbell1, \zbell1, [\stereoListener], [0]);
+			~scbr.makeSynthDef(\test, \testtone, [\stereoListener], [0]);
 			~scbr.makeSynthDef(\labodomeTest, \default, [\labodomeVBAP], [0]);
 	},
 		// else evalualte for dome listeners
@@ -140,6 +141,7 @@ s.waitForBoot{
 			~scbr.makeSynthDef(\default, \default, [\domeVBAP], [0]);
 			~scbr.makeSynthDef(\zkarpluck0, \zkarpluck0, [\domeVBAP], [0]);
 			~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [\domeVBAP], [0]);
+			~scbr.makeSynthDef(\test, \testtone,  [\domeVBAP], [0]);
 			~scbr.makeSynthDef(\zbell1, \zbell1, [\domeVBAP], [0]);
 		}
 	);
