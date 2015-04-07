@@ -51,7 +51,7 @@ fB	 ??  Inharmonicity factor.
     inp = amp * LFClipNoise.ar(2000) * EnvGen.ar(env,t_trig);
 
 	// note:  "gate" arg fixed to constant of 1, to keep plugin alive, "relase" arg not used:
-    son = DWGPluckedStiff.ar(freq, amp, 1 ,pos,idecay,hfqLoss,inp, 1 , fb);
+    son = DWGPluckedStiff.ar(freq, 10, 1 ,pos,idecay,hfqLoss,inp, 1 , fb);
 	son;   // make sure this is last, so the sound is returned
 	 };
 

@@ -25,8 +25,22 @@
 
 
 ~globalParGroup.set(\gainDB, -10);
-~globalParGroup.set(\c1, 0.1);
-~globalParGroup.set(\c3, 2);
+
+~globalSet.value(\c1, 0.1);
+~globalSet.value(\c3, 10);
+~globalSet.value(\fb, 100);
+~globalSet.value(\pos, 0.5);
+
+~globalSet.value(\gain, 3);
+
+~globalSet.value(\t_trig, 1);
+
+~globalSet.value(\spread, 10);
+
+
+
+
+
 ~globalParGroup.set(\t_trig, 1);
 	~clearScene.value();
 
@@ -36,9 +50,33 @@
 
        ~setUri.value(\testNode0, "plugin://zkarpluck1");
        ~setUri.value(\testNode0, "plugin://pink");
-      ~setPlugin.value(\testNode0, \default);
+~setPlugin.value("ball_0:spatOSCsource_1", \pink);
+~setPlugin.value("ball_0:spatOSCsource_1", \test);
+~setPlugin.value("ball_0:spatOSCsource_1", \zkarpluck1);
 
       ~setState.value(\testNode0, 1);
+
+
+
+
+w=Window.new("sheefa", Rect(30, 30, 400, 200)).front;
+w.view.decorator=FlowLayout(w.view.bounds);
+w.view.decorator.gap=8@2;
+
+
+
+h = EZSlider(w, 380@20, "azi", ControlSpec(-180, 180, \lin, 0.1, 0));
+h.action_({ |ez| ( ~globalSet.value(\aziDeg, (ez.value)))});
+
+i = EZSlider(w, 380@20, "elev", ControlSpec(-180, 180, \lin, 0.1, 0));
+i.action_({ |ez| ( ~globalSet.value(\eleDeg, (ez.value)))});
+
+j = EZSlider(w, 380@20, "spread", ControlSpec(0, 100, \lin, 0.1, 5));
+j.action_({ |ez| ( ~globalSet.value(\spread, (ez.value)))});
+
+
+
+
 
 
 
@@ -90,6 +128,19 @@ p.release;
 
 
 
+ SynthDef(\test, { arg freq = 440, amp = 1;
+	//var freqLag = Lag.kr(freq, 10);
+	Out.ar(0, SinOsc.ar(freq.lag(3), 0, amp));
+ }).add;
+
+
+
+>
+a = Synth(\test);
+a.set(\freq, 440, \amp, 0.8);
+
+a.set(\freq, 440);
+a.set(\freq, 240);
 
 
 
