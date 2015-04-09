@@ -1,17 +1,35 @@
-	// s.boot; s.makeGui;
+o = Server.local.options;
+o.device = "MADIface USB (23635751)";
+o.memSize = 2**18;
+o.numOutputBusChannels = 32;
 
-	~deleteSource.value(\testNode0);
+//o.blockSize = 2048;
+o.dump;
 
-	~dumpNodes.value();
+Server.supernova;
 
-	~allNodes.size;
+Server.default;
 
-	~clearScene.value();
+s.boot;
+s.quit;
+
+
+s.makeGui;
+
+s.meter;
+
+
+
+~dumpNodes.value();
+
+~allNodes.size;
+
+~clearScene.value();
 
 
 // generate N instances
 
-	100.do({ arg item;
+60.do({ arg item;
 	var nodename=("testNode"++item).asSymbol;
 	var connectionName = "testNode"++item++"->ear";
 
@@ -19,17 +37,54 @@
 	~createConnection.value(nodename, "ear");
 	~setUri.value(nodename, "plugin://zkarpluck1");
 	~connectionCallback.value( ["/spatosc/core/connection/"++ connectionName ++"/spread", 10]);
-		       });
+});
 
 
-
-
-~globalParGroup.set(\gainDB, -10);
-
-~globalSet.value(\c1, 0.1);
-~globalSet.value(\c3, 10);
+~globalParGroup.set(\gainDB, -40);
+~globalSet.value(\c1, 0.7);
+~globalSet.value(\c3, 3);
 ~globalSet.value(\fb, 100);
 ~globalSet.value(\pos, 0.5);
+
+
+t = Task({ {
+	~globalSet.value(\t_trig, 1);
+
+	60.do( { arg item;
+		var pitch = 55 + rand(50);
+		var nodename=("testNode"++item).asSymbol;
+		~setEvent.value(nodename, \note, [pitch,1,1]);
+	});
+
+	4.wait; }.loop });
+t.start;
+
+t.stop;
+
+
+
+
+
+w=Window.new("sheefa", Rect(30, 30, 400, 100)).front;
+w.view.decorator=FlowLayout(w.view.bounds);
+w.view.decorator.gap=8@2;
+
+
+
+h = EZSlider(w, 380@20, "azi", ControlSpec(-180, 180, \lin, 0.1, 0));
+h.action_({ |ez| ( ~globalSet.value(\aziDeg, (ez.value)))});
+
+i = EZSlider(w, 380@20, "elev", ControlSpec(-90, 90, \lin, 0.1, 0));
+i.action_({ |ez| ( ~globalSet.value(\eleDeg, (ez.value)))});
+
+j = EZSlider(w, 380@20, "spread", ControlSpec(0, 100, \lin, 0.1, 5));
+j.action_({ |ez| ( ~globalSet.value(\spread, (ez.value)))});
+
+
+
+
+
+
 
 ~globalSet.value(\gain, 3);
 
@@ -41,7 +96,16 @@
 
 
 
+	60.do( { arg item;
+	var pitch = 55 + rand(50);
+	var nodename=("testNode"++item).asSymbol;
+	~setEvent.value(nodename, \note, [pitch,1,1]);
+});
+
+
 ~globalParGroup.set(\t_trig, 1);
+
+
 	~clearScene.value();
 
 
@@ -56,23 +120,7 @@
 
       ~setState.value(\testNode0, 1);
 
-
-
-
-w=Window.new("sheefa", Rect(30, 30, 400, 200)).front;
-w.view.decorator=FlowLayout(w.view.bounds);
-w.view.decorator.gap=8@2;
-
-
-
-h = EZSlider(w, 380@20, "azi", ControlSpec(-180, 180, \lin, 0.1, 0));
-h.action_({ |ez| ( ~globalSet.value(\aziDeg, (ez.value)))});
-
-i = EZSlider(w, 380@20, "elev", ControlSpec(-180, 180, \lin, 0.1, 0));
-i.action_({ |ez| ( ~globalSet.value(\eleDeg, (ez.value)))});
-
-j = EZSlider(w, 380@20, "spread", ControlSpec(0, 100, \lin, 0.1, 5));
-j.action_({ |ez| ( ~globalSet.value(\spread, (ez.value)))});
+~deleteSource.value(\testNode0);
 
 
 
