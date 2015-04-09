@@ -36,17 +36,18 @@
 	var slewDelay = 0.3; //  note: this needs to be improved ... smoother
 	var slewGain = 0.03;
 	var slewLp = 0.3;
+
 	VBAP.ar(numChans: ~spk24.numSpeakers,
 		in:	LPF.ar(
 			DelayC.ar(
-				gain.lag(slewGain) * in,
+				Lag.kr(gain, slewGain) * in,
 				maxdelaytime: 0.5,
-				delaytime: delay.lag(slewDelay)),
-			lpHz.lag(slewLp)),
+				delaytime: Lag.kr(delay, slewDelay)),
+			Lag.kr(lpHz, slewLp)),
 		bufnum: ~vbuf24.bufnum,
-		azimuth: aziDeg,
-		elevation: eleDeg,
-		spread: spread);
+		azimuth: Lag.kr(aziDeg, 0.2),
+		elevation: Lag.kr(eleDeg,0.2),
+		spread: Lag.kr(spread, 0.2));
 };
 
 
