@@ -12,7 +12,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-// s.boot; s.makeGui;
+// s.reboot; s.makeGui;
 
 (
 s.waitForBoot{
@@ -41,37 +41,94 @@ s.waitForBoot{
 	// be sure the synthDef is compiled on the server
 	s.sync;
 
-	~group = ParGroup.new;
-	~group.freeAll;
-
-	50.do({
-		var
-		p = ProxySpace(s);
-		p.fadeTime = 0.02;
-		// p.use({
-		// 	~out = { SinOsc.ar(350, 0, 0.2) };
-		// });
-		p[\out].ar(0);  //  (init ~out) this ensure not extra bus is allocated. this must be the first reference of ~out
-		p[\out].group = ~group;
-		p[\out].source = \fool;  //this synthdef is already writing to first audio out
-		p[\out].bus.postln;  //no extra bus
-		nil;
-	});
-
-	~group.set(\gainDB, -60);
-
-	// initialization is done, create and remove a source + controls
-
-	// make a bunch of 'em
-	//g = Synth.head(s, \fool, [\spread,0]);
-
-	// spat properties
-	// g.set(\gainDB, -30);
-	// g.set(\aziDeg, );
-	// g.set(\eleDeg, 90);
-	// g.set(\spread, 0);
-	// g.set(\lfoHz, 10);
-
 };  // s.waitForBoot
 )
 
+// ******************** usage with JITlib & ProxySpace *********************
+(
+// creating a global ParGroup for supernova
+~group = ParGroup.new; // ~group.freeAll;
+// creating a global ProxySpace
+~prox = ProxySpace(s);
+// the proxyspace is going to be embedded in the global pargroup
+~prox.group = ~group;
+
+//instance factory
+~makeinstance = { | name = \out, p, src = \string |
+	p.fadeTime = 0.02;
+	// ensuring not extra bus is allocated:
+	// (must be the first reference of "name" in the proxyspace
+	p[name].ar(0);
+	p[name].source = src;
+	nil;
+};
+
+// test per instance set and group set
+~makeinstance.value(\test1, ~prox, \string);
+~makeinstance.value(\test2, ~prox, \string);
+
+// per instance set
+~prox[\test1].set(\gainDB, -30);
+~prox[\test2].set(\gainDB, -30);
+~prox[\test1].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
+~prox[\test2].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
+//group set
+~group.set(\aziDeg, 90);
+~group.set(\t_trig, 1);
+
+
+// CPU load test
+~groupCPU = ParGroup.new; // ~group.freeAll;
+// creating a global ProxySpace
+~proxCPU = ProxySpace(s);
+// the proxyspace is going to be embedded in the global pargroup
+~proxCPU.group = ~groupCPU;
+
+r = Routine({
+	loop {
+		~makeinstance.value(
+			(\test ++ rrand(0, 10000).asSymbol),
+			~proxCPU,
+			\string);
+		0.1.wait;
+}});
+// play until all CPU are loaded (~70%)
+// (no sound since string must be trigered)
+r.play;
+r.stop;
+
+// list ProxySpace internal proxies:
+~proxCPU.existingProxies;
+
+// triger each string sequentially
+~seqtrig = Routine({ ~proxCPU.existingProxies.do({ |item|
+		~proxCPU[item].set(
+			\t_trig, 1,
+			\note, rrand(42, 72), rrand(1, 2), rrand(0.1, 0.9));
+		rrand(0.05, 0.1).wait;
+	});});
+~groupCPU.set(\gainDB, -30);
+~seqtrig.play;
+~seqtrig.stop;
+
+// trig all once
+~groupCPU.set(\gainDB, -45);
+~groupCPU.set(\t_trig, 1);
+
+)
+
+// ****************** usage with synth creation ************************
+(
+// initialization is done, create and remove a source + controls
+g = Synth.head(s, \fool, [\spread,0]);
+
+// spat properties
+g.set(\gainDB, -30);
+g.set(\aziDeg, rrand(-180, 180));
+g.set(\eleDeg, 90);
+g.set(\spread, 0);
+g.set(\lfoHz, 10);
+
+// source properties
+g.set(\sfreq, rrand(200, 400));
+)
