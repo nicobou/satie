@@ -50,13 +50,25 @@ s.meter;
 
 SynthDef(\vbapTest,  { |freq = 440,  aziDeg = 0, eleDeg = 0, spread = 1, aziOffset=0|
 	Out.ar(  0,
-		0.01 * VBAP.ar(~spkTest.numSpeakers,
+		VBAP.ar(~spkTest.numSpeakers,
 			SinOsc.ar(freq),
 			~vbufTest.bufnum,
 			VarLag.kr(aziDeg+aziOffset, 0.2),
 			VarLag.kr(eleDeg,0.2),
 			VarLag.kr(spread, 0.2) ))}).add;
 
+
+
+SynthDef(\vbapTest2,  { |freq = 550,  aziDeg = 0, eleDeg = 0, spread = 1, aziOffset=0|
+	var gainVec;
+
+	gainVec = VBAP.kr(~spkTest.numSpeakers,
+			1.0,
+			~vbufTest.bufnum,
+			aziDeg,
+			eleDeg,
+			spread );
+	Out.ar(0, Lag.kr(gainVec, 0.06) * SinOsc.ar(freq))}).add;
 
 
 
@@ -66,11 +78,19 @@ SynthDef(\vbapTest,  { |freq = 440,  aziDeg = 0, eleDeg = 0, spread = 1, aziOffs
 
 
 
-100.do(   { arg item;
+1.do(   { arg item;
 	var offset = rand(360);
-	Synth.new(\vbapTest, [\freq, (200+offset), \aziOffset, offset], ~myGroup );
+	Synth.new(\vbapTest, [\freq, (333+offset), \aziOffset, offset], ~myGroup );
 	//syn.set(\freq, 220+offset);
 });
+
+
+1.do(   { arg item;
+	var offset = rand(360);
+	Synth.new(\vbapTest2, [\freq, (200+offset), \aziOffset, offset], ~myGroup );
+	//syn.set(\freq, 220+offset);
+});
+
 
 
 
