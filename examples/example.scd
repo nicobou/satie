@@ -13,7 +13,7 @@
 
 
 // s.reboot; s.makeGui;
-
+s.meter
 (
 s.waitForBoot{
 
@@ -34,9 +34,9 @@ s.waitForBoot{
 	// here a PinkSin source spatialized by
 	//   - a stereo panner (starting channel 0)
 	//   - a monoSpat (starting channel 2)
-	~scbr.makeSynthDef(\fool, \PinkSin, [\stereoPanner, \monoSpat], [0, 2]);
-	~scbr.makeSynthDef(\string, \zkarpluck1, [\stereoPanner, \monoSpat], [0, 2]);
-
+	//~scbr.makeSynthDef(\fool, \PinkSin, [\stereoPanner, \monoSpat], [0, 2]);
+	//~scbr.makeSynthDef(\string, \zkarpluck1, [\stereoPanner, \monoSpat], [0, 2]);
+	~scbr.makeSynthDef(\string, \zkarpluck1, [\domeVBAP], [0]);
 
 	// be sure the synthDef is compiled on the server
 	s.sync;
@@ -85,7 +85,9 @@ s.waitForBoot{
 ~proxCPU.group = ~groupCPU;
 
 r = Routine({
-	loop {
+	//100.do
+	loop
+	{
 		~makeinstance.value(
 			(\test ++ rrand(0, 10000).asSymbol),
 			~proxCPU,
@@ -114,11 +116,36 @@ r.stop;
 // trig all once
 ~groupCPU.set(\gainDB, -45);
 ~groupCPU.set(\t_trig, 1);
+~groupCPU.set(\t_trig, 1,
+	\note, rrand(42, 72), rrand(1, 2), rrand(0.1, 0.9),
+	\aziDeg, rrand(-180,180),
+	\eleDeg, rrand(0,90));
+
+// change with gui
+~allTrig = Routine({ 1800.do({ |item|
+	~groupCPU.set(\t_trig, 1,
+		\note, rrand(42, 72), rrand(1, 2), rrand(0.1, 0.9));
+	0.2.wait;
+});});
+~allTrig.play;
+
+w=Window.new("sheefa", Rect(30, 30, 400, 100)).front;
+w.view.decorator=FlowLayout(w.view.bounds);
+w.view.decorator.gap=8@2;
+h = EZSlider(w, 380@20, "azi", ControlSpec(-180, 180, \lin, 0.1, 0));
+h.action_({ |ez| ( ~groupCPU.set(\aziDeg, (ez.value)))});
+i = EZSlider(w, 380@20, "elev", ControlSpec(-90, 90, \lin, 0.1, 0));
+i.action_({ |ez| ( ~groupCPU.set(\eleDeg, (ez.value)))});
+j = EZSlider(w, 380@20, "spread", ControlSpec(0, 100, \lin, 0.1, 5));
+j.action_({ |ez| ( ~groupCPU.set(\spread, (ez.value)))});
+
+
 
 )
 
 // ****************** usage with synth creation ************************
 (
+
 // initialization is done, create and remove a source + controls
 g = Synth.head(s, \fool, [\spread,0]);
 
@@ -131,4 +158,24 @@ g.set(\lfoHz, 10);
 
 // source properties
 g.set(\sfreq, rrand(200, 400));
+
+// CPU load test
+// creating a global ParGroup for supernova
+~groupCPU = ParGroup.new; // ~group.freeAll;
+r = Routine({
+	loop {
+		Synth.head(~groupCPU, \string);
+		0.1.wait;
+}});
+// play until all CPU are loaded (~70%)
+// (no sound since string must be trigered)
+r.play;
+r.stop;
+
+// trig all once
+~groupCPU.set(\gainDB, -45);
+~groupCPU.set(\t_trig, 1,
+	\note, rrand(42, 72), rrand(1, 2), rrand(0.1, 0.9),
+	\aziDeg, rrand(-180,180),
+	\eleDeg, rrand(0,90));
 )
