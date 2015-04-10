@@ -60,12 +60,22 @@ s.waitForBoot{
 	// (must be the first reference of "name" in the proxyspace
 	p[name].ar(0);
 	p[name].source = src;
-	nil;
+	^nil;
 };
-
+~cleaninstance = { | name = \out, p |
+	p.[name].free();
+	~prox.removeAt(\test3);
+	^nil;
+};
 // test per instance set and group set
 ~makeinstance.value(\test1, ~prox, \string);
 ~makeinstance.value(\test2, ~prox, \string);
+~makeinstance.value(\test3, ~prox, \string);
+
+// list ProxySpace internal proxies:
+~prox.existingProxies;
+~cleaninstance.value(\test3, ~prox);
+~prox.existingProxies;
 
 // per instance set
 ~prox[\test1].set(\gainDB, -30);
