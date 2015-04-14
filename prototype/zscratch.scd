@@ -41,10 +41,17 @@ s.meter;
 
 
 ~globalParGroup.set(\gainDB, -40);
-~globalSet.value(\c1, 0.7);
-~globalSet.value(\c3, 3);
 ~globalSet.value(\fb, 100);
 ~globalSet.value(\pos, 0.5);
+
+
+~globalSet.value(\c1, 0.2);
+~globalSet.value(\c3, 8);
+
+
+~globalSet.value(\c1, 0.2);
+~globalSet.value(\c3, 3);
+
 
 
 t = Task({ {
@@ -173,6 +180,20 @@ p.release;
 
 	~clearScene.value();
 
+
+0.001.degrad
+
+
+		~allNodes.keysDo { |key |
+			var nodeSym = key;
+			//postf("node: %  \n", key);
+			~allNodes[nodeSym].keysDo { | key |
+			if ( key == \connectionState,
+				{
+					postf(" %:   %  =  % \n",nodeSym,  key, ~allNodes[nodeSym].at(key));
+			});
+			};
+		};
 
 
 
