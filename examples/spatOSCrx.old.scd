@@ -44,7 +44,7 @@ s.reboot;
 
 
 
-~synthdefCreationLatency = 0.5;    // the time interval between the creation of a synthdef (plugin) and the opening of its connection RX gate
+~synthdefCreationLatency = 1.0;    // the time interval between the creation of a synthdef (plugin) and the opening of its connection RX gate
 
 ~globalParGroup = ParGroup.new;  // for now, we use just one global parGroup, for reasons of efficiency
 
@@ -53,10 +53,13 @@ s.reboot;
 
 ~superNovaFlag = true;
 
-~domePlayback = true;
-// ~labodome = true;
+~domePlaybackFormat = \domeVBAP;       // for sato
+//~domePlaybackFormat = \labodomeVBAP;      // for labodome
+
+
 //~outAudioDev = "Soundflower (64ch)";   //  for multi-channel testing without hardware on OSX
-  ~outAudioDev = "MADIface USB (23635751)";     // for labodome or SATO
+
+~outAudioDev = "MADIface USB (23635751)";     // for labodome or SATO
 
 
 if ( ~superNovaFlag != nil,
@@ -76,16 +79,7 @@ if ( ~outAudioDev != nil ,
 
    // o.device = "MADIface USB (23635751)";     // set for dome or labodome
 
-
-if ( ~labodome != nil,
-	{
-		o.numOutputBusChannels = 24;
-		o.memSize = 2**19;
-		o.blockSize = 2048;
-		// o.dump;
-});
-
-if ( ~domePlayback != nil,
+if ( ~domePlaybackFormat != nil,
 	{
 		o.memSize = 2**19;
 		o.blockSize = 2048;
@@ -117,7 +111,7 @@ s.waitForBoot{
 
 	~scbr.makeSynthDef(\dummyPlugin, \emptySource, [\emptySpat], [0]);    // dummy synthdef, used for new nodes
 
-	if ( ~domePlayback == nil,
+	if ( ~domePlaybackFormat == nil,
 		{
 			// NEEDS IMPROVEMENT
 			// all plugins (synthDefs) have to be evaluated in "pre-runtime" herea
@@ -135,14 +129,14 @@ s.waitForBoot{
 	},
 		// else evalualte for dome listeners
 		{
-			'generating synthdefs for dome'.postln;
-			~scbr.makeSynthDef(\pink, \PinkSin, [\domeVBAP], [0]);
-			~scbr.makeSynthDef(\dust, \DustDust, [\domeVBAP], [0]);
-			~scbr.makeSynthDef(\default, \default, [\domeVBAP], [0]);
-			~scbr.makeSynthDef(\zkarpluck0, \zkarpluck0, [\domeVBAP], [0]);
-			~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [\domeVBAP], [0]);
-			~scbr.makeSynthDef(\test, \testtone,  [\domeVBAP], [0]);
-			~scbr.makeSynthDef(\zbell1, \zbell1, [\domeVBAP], [0]);
+			postf("generating synthdefs for %\n", ~domePlaybackFormat);
+			~scbr.makeSynthDef(\pink, \PinkSin, [~domePlaybackFormat], [0]);
+			~scbr.makeSynthDef(\dust, \DustDust, [~domePlaybackFormat], [0]);
+			~scbr.makeSynthDef(\default, \default, [~domePlaybackFormat], [0]);
+			~scbr.makeSynthDef(\zkarpluck0, \zkarpluck0, [~domePlaybackFormat], [0]);
+			~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [~domePlaybackFormat], [0]);
+			~scbr.makeSynthDef(\test, \testtone,  [~domePlaybackFormat], [0]);
+			~scbr.makeSynthDef(\zbell1, \zbell1, [~domePlaybackFormat], [0]);
 		}
 	);
 
@@ -251,9 +245,12 @@ s.waitForBoot{
 						values = args;
 						//values.removeAt(0);
 
+						eleDeg= values[2].raddeg;
+						if (eleDeg == 0, { eleDeg = 0.06});    // TREEIBLE KLUGE TO KEEP VBAP FROM EXPLODING
+
 						// get values from vector, and write to connectionState
 						connectionState[0] = aziDeg = values[1].raddeg;
-						connectionState[1] = eleDeg= values[2].raddeg;
+						connectionState[1] = eleDeg;
 						connectionState[2] = gainDB = values[3];
 						connectionState[3] = delayMs = values[4];
 						connectionState[4] = lpHz = values[5];
@@ -383,7 +380,7 @@ s.waitForBoot{
 	};
 
 	~pluginStatus = { | nodeName, status |
-		postf("~pluginStatus: setting % stats to % \n", nodeName, status);
+		//postf("~pluginStatus: setting % stats to % \n", nodeName, status);
 		~allNodes[nodeName.asSymbol].put(\pluginReady, status);
 
 		if (  ~allNodes[nodeName.asSymbol].at(\pluginReady),   // refresh connection values in synthdef  ??
@@ -593,11 +590,13 @@ s.waitForBoot{
 					postf("\t : %  =  % \n",  key, ~allNodes[nodeSym].at(key));
 			};
 		};
-
 	};
 
 
 	s.sync;
+
+
+
 
 
 	/*  TEMP
