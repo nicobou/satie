@@ -53,8 +53,8 @@ s.reboot;
 
 ~superNovaFlag = true;
 
-~domePlaybackFormat = \domeVBAP;       // for sato
-//~domePlaybackFormat = \labodomeVBAP;      // for labodome
+//~domePlaybackFormat = \domeVBAP;       // for sato
+~domePlaybackFormat = \labodomeVBAP;      // for labodome
 
 
 //~outAudioDev = "Soundflower (64ch)";   //  for multi-channel testing without hardware on OSX
@@ -149,7 +149,7 @@ s.waitForBoot{
 
 	// dictionarys for nodes
 	~allNodes = Dictionary();        //  ~allNodes.postln;
-	~allConnections = Dictionary();   // separate for faster access  // ~allConnections.postln;
+	//~allConnections = Dictionary();   // separate for faster access  // ~allConnections.postln;
 
 
 	~coreCallback = {
@@ -332,11 +332,8 @@ s.waitForBoot{
 			{
 				postf("~createSource:   %\n", sourceName);
 				~allNodes[sourceName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
-				~allConnections[sourceName.asSymbol] = Dictionary();   // create dict. for node's listener(s)
 
-//				~allNodes[sourceName.asSymbol].put(\groupName, ParGroup.new);  // create node-specific group and add to node dict.
-				~allNodes[sourceName.asSymbol].put(\groupName, ~globalParGroup);  // create node-specific group and add to node dict.
-
+				~allNodes[sourceName.asSymbol].put(\groupName, ~globalParGroup);  // add to prexisting parGroup
 
 				~allNodes[sourceName.asSymbol].put(\pluginName, \dummyPlugin);
 				~allNodes[sourceName.asSymbol].put(\pluginReady, false);  // this flag is used to keep messages from being prematurely sent to synthdefs (not yet instantiated on server)

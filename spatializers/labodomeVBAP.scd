@@ -30,25 +30,30 @@
 
 ~name = \labodomeVBAP;
 
-~function = {|in = 0, aziDeg = 0, eleDeg = 0, gainDB = 0, delayMs = 1, lpHz = 15000, spread = 1 |
+~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = 0, delayMs = 1, lpHz = 15000, spread = 1 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP
 	var delay = delayMs * 0.001;    // convert to seconds
 	var slewDelay = 0.3; //  note: this needs to be improved ... smoother
-	var slewGain = 0.03;
+	var slewGain = 0.05;
 	var slewLp = 0.3;
+	var panWeights;
+	var outsig;
 
-	VBAP.ar(numChans: ~spk24.numSpeakers,
-		in:	LPF.ar(
-			DelayC.ar(
-				Lag.kr(gain, slewGain) * in,
-				maxdelaytime: 0.5,
-				delaytime: Lag.kr(delay, slewDelay)),
-			Lag.kr(lpHz, slewLp)),
+	outsig = LPF.ar(
+		DelayC.ar(
+			Lag.kr(gain, slewGain) * in,
+			maxdelaytime: 0.5,
+			delaytime: Lag.kr(delay, slewDelay)),
+		Lag.kr(lpHz, slewLp));
+
+	panWeights = VBAP.kr(numChans: ~spk24.numSpeakers,
+		in: 1.0,
 		bufnum: ~vbuf24.bufnum,
-		azimuth: Lag.kr(aziDeg, 0.2),
-		elevation: Lag.kr(eleDeg,0.2),
-		spread: Lag.kr(spread, 0.2));
-};
+		azimuth: aziDeg,
+		elevation: eleDeg,
+		spread: spread );
 
+	outsig * Lag.kr(panWeights, 0.030);
+};
 
 
