@@ -23,6 +23,7 @@ s.meter;
 ~dumpNodes.value();
 
 ~allNodes.size;
+~allConnections.size;
 
 ~clearScene.value();
 

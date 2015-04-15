@@ -19,7 +19,7 @@
 // lpHz    hertz
 // spread  units  (0 == directional, ....,  100 == omni)
 
-// dome speaker layout
+// Octo 2D speaker layout
 ~spk8 = VBAPSpeakerArray.new(2, [-45, 45, 135, -135, 0, 90, 180, -90]); // 8 channel ring
 
 // {[-45, 45, 135, -135, 0, 90, 180, -90].do({|ang| x.set(\azi, ang); 1.wait; }) }.fork;
@@ -30,25 +30,31 @@
 
 ~name = \octoVBAP;
 
-
-~function = {|in = 0, aziDeg = 0.5, gainDB = 0, delayMs = 1, lpHz = 15000, spread = 1 |
+~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = 0, delayMs = 1, lpHz = 15000, spread = 1 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP
 	var delay = delayMs * 0.001;    // convert to seconds
 	var slewDelay = 0.3; //  note: this needs to be improved ... smoother
-	var slewGain = 0.03;
+	var slewGain = 0.05;
 	var slewLp = 0.3;
-	VBAP.ar(numChans: ~spk8.numSpeakers,
-		in:	LPF.ar(
-			DelayC.ar(
-				gain.lag(slewGain) * in,
-				maxdelaytime: 0.5,
-				delaytime: delay.lag(slewDelay)),
-			lpHz.lag(slewLp)),
+	var panWeights;
+	var outsig;
+
+	outsig = LPF.ar(
+		DelayC.ar(
+			Lag.kr(gain, slewGain) * in,
+			maxdelaytime: 0.5,
+			delaytime: Lag.kr(delay, slewDelay)),
+		Lag.kr(lpHz, slewLp));
+
+	panWeights = VBAP.kr(numChans: ~spk8.numSpeakers,
+		in: 1.0,
 		bufnum: ~vbuf8.bufnum,
 		azimuth: aziDeg,
-		spread: spread);
-};
+		elevation: eleDeg,
+		spread: spread );
 
+	outsig * Lag.kr(panWeights, 0.030);
+};
 
 
 
