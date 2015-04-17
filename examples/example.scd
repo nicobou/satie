@@ -13,7 +13,7 @@
 
 
 // s.reboot; s.makeGui;
-s.meter
+s.meter;
 (
 s.waitForBoot{
 
@@ -37,6 +37,7 @@ s.waitForBoot{
 	//~scbr.makeSynthDef(\fool, \PinkSin, [\stereoPanner, \monoSpat], [0, 2]);
 	//~scbr.makeSynthDef(\string, \zkarpluck1, [\stereoPanner, \monoSpat], [0, 2]);
 	~scbr.makeSynthDef(\string, \zkarpluck1, [\domeVBAP], [0]);
+	~scbr.makeSynthDef(\pinksin, \PinkSin, [\domeVBAP], [0]);
 
 	// be sure the synthDef is compiled on the server
 	s.sync;
@@ -50,12 +51,12 @@ s.waitForBoot{
 ~group = ParGroup.new; // ~group.freeAll;
 // creating a global ProxySpace
 ~prox = ProxySpace(s);
+~prox.fadeTime = 0.02;
 // the proxyspace is going to be embedded in the global pargroup
 ~prox.group = ~group;
 
 //instance factory
 ~makeinstance = { | name = \out, p, src = \string |
-	p.fadeTime = 0.02;
 	// ensuring not extra bus is allocated:
 	// (must be the first reference of "name" in the proxyspace
 	p[name].ar(0);
@@ -63,14 +64,15 @@ s.waitForBoot{
 	^nil;
 };
 ~cleaninstance = { | name = \out, p |
-	p.[name].free();
-	~prox.removeAt(\test3);
+	p[name].release();
+	// fadeTime must be higher than SATIE internal fadeTime:
+	p.[name].clear(0.03);
 	^nil;
 };
 // test per instance set and group set
 ~makeinstance.value(\test1, ~prox, \string);
 ~makeinstance.value(\test2, ~prox, \string);
-~makeinstance.value(\test3, ~prox, \string);
+~makeinstance.value(\test3, ~prox, \pinksin);
 
 // list ProxySpace internal proxies:
 ~prox.existingProxies;
@@ -91,23 +93,13 @@ s.waitForBoot{
 ~groupCPU = ParGroup.new; // ~group.freeAll;
 // creating a global ProxySpace
 ~proxCPU = ProxySpace(s);
+~proxCPU.fadeTime = 0.02;
 // the proxyspace is going to be embedded in the global pargroup
 ~proxCPU.group = ~groupCPU;
 
-r = Routine({
-	//100.do
-	loop
-	{
-		~makeinstance.value(
-			(\test ++ rrand(0, 10000).asSymbol),
-			~proxCPU,
-			\string);
-		0.1.wait;
-}});
 // play until all CPU are loaded (~70%)
 // (no sound since string must be trigered)
-r.play;
-r.stop;
+~makeinstance.value((\test ++ rrand(0, 10000).asSymbol), ~proxCPU, \string);
 
 // list ProxySpace internal proxies:
 ~proxCPU.existingProxies;
@@ -131,7 +123,6 @@ r.stop;
 	\aziDeg, rrand(-180,180),
 	\eleDeg, rrand(0,90));
 
-// change with gui
 ~allTrig = Routine({ 1800.do({ |item|
 	~groupCPU.set(\t_trig, 1,
 		\note, rrand(42, 72), rrand(1, 2), rrand(0.1, 0.9));
@@ -139,6 +130,7 @@ r.stop;
 });});
 ~allTrig.play;
 
+// change with gui
 w=Window.new("sheefa", Rect(30, 30, 400, 100)).front;
 w.view.decorator=FlowLayout(w.view.bounds);
 w.view.decorator.gap=8@2;
