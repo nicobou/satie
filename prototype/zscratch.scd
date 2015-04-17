@@ -1,55 +1,93 @@
-o = Server.local.options;
-o.device = "MADIface USB (23635751)";
-o.memSize = 2**18;
-o.numOutputBusChannels = 32;
-
-//o.blockSize = 2048;
-o.dump;
-
-Server.supernova;
-
-Server.default;
-
-s.boot;
-s.quit;
-
-
 s.makeGui;
+~superNovaFlag = true;
 
-s.meter;
-
-Mix
-
-z = SynthDef(\zverb, {|mix = 0.25, room = 0.15, damp = 0.5|
-    Out.ar(0,
-        Mix.fill(24,FreeVerb.ar(
-			            Decay.ar(In.ar(100,1), 0.25, LFCub.ar(1200, 0, 0.1)), // mono src
-            mix, // mix 0-1
-            room, // room 0-1
-            damp // damp 0-1 duh
-        ) ! 2 // fan out...
-	    ));
-}).play
+//~domePlaybackFormat = \domeVBAP;       // for sato
+~domePlaybackFormat = \labodomeVBAP;      // for labodome
 
 
-z.set(\mix, 1);
-z.set(\damp, 0.1);
-z.free;
+//~outAudioDev = "Soundflower (64ch)";   //  for multi-channel testing without hardware on OSX
 
-a = Synth(\zverb);
+~outAudioDev = "MADIface USB (23635751)";     // for labodome or SATO
 
 
+if ( ~superNovaFlag != nil,
+	{
+	Server.supernova;
+});
+
+	o = Server.local.options;   // set up options
+    o.memSize = 2**19;        // probably should just leave this the same for everyting
+	//o.blockSize = 2048;
+
+
+if ( ~outAudioDev != nil ,
+{
+	o.device = ~outAudioDev;
+});
+
+   // o.device = "MADIface USB (23635751)";     // set for dome or labodome
+
+if ( ~domePlaybackFormat != nil,
+	{
+		o.memSize = 2**19;
+		o.blockSize = 2048;
+		o.numOutputBusChannels = 32;
+		// o.dump;
+});
 
 
 
 
+
+
+~allNodes.size;
+~allNodes.clear;
+
+~allNodes;
 
 ~dumpNodes.value();
 
-~allNodes.size;
-~allConnections.size;
 
 ~clearScene.value();
+
+
+~createSource.value(\testNode0);
+~setUri.value(\testNode0, "plugin://pink");
+
+
+
+~deleteSource.value(\testNode0);
+
+
+~clearNode.value(\testNode0);
+
+~clearScene.value();
+
+
+~setUri.value(\testNode0, "plugin://zkarpluck1");
+~setUri.value(\testNode0, "plugin://pink");
+
+
+~group.set(\t_trig, 1);
+
+
+
+~setState.value(\testNode0, 1);
+
+
+
+~allNodes[\testNode0];
+
+~allNodes.removeAt(\testNode0);
+
+
+~cleaninstance.value(\testNode0, ~prox);
+
+~clearNode.value(\testNode0);
+~dumpNodes.value();
+
+
+
 
 
 // generate N instances
@@ -58,14 +96,16 @@ a = Synth(\zverb);
 	var nodename=("testNode"++item).asSymbol;
 	var connectionName = "testNode"++item++"->ear";
 
-	~createSource.value(nodename);
-	~createConnection.value(nodename, "ear");
+	nodename.postln;
+
+	//~createSource.value(nodename);
+	//~createConnection.value(nodename, "ear");
 	~setUri.value(nodename, "plugin://zkarpluck1");
-	~connectionCallback.value( ["/spatosc/core/connection/"++ connectionName ++"/spread", 10]);
+	~connectionCallback.value( ["/spatosc/core/connection/"++ connectionName ++"/spread", 5]);
 });
 
 
-~globalParGroup.set(\gainDB, -40);
+~group.set(\gainDB, -40);
 ~globalSet.value(\fb, 100);
 ~globalSet.value(\pos, 0.5);
 
@@ -172,26 +212,6 @@ l.action_({ |ez| (  ~globalSet.value(\fb, (ez.value)))});
 });
 
 
-~globalParGroup.set(\t_trig, 1);
-
-
-	~clearScene.value();
-
-
-
-	~createSource.value(\testNode0);
-
-       ~setUri.value(\testNode0, "plugin://zkarpluck1");
-       ~setUri.value(\testNode0, "plugin://pink");
-~setPlugin.value("ball_0:spatOSCsource_1", \pink);
-~setPlugin.value("ball_0:spatOSCsource_1", \test);
-~setPlugin.value("ball_0:spatOSCsource_1", \zkarpluck1);
-
-      ~setState.value(\testNode0, 1);
-
-~deleteSource.value(\testNode0);
-
-
 
 
 
@@ -211,29 +231,13 @@ l.action_({ |ez| (  ~globalSet.value(\fb, (ez.value)))});
 ~connectionCallback.value( ["/spatosc/core/connection/"++ "testNode0->ear" ++"/spread", 10]);
 ~connectionCallback.value( ["/spatosc/core/connection/"++ "testNode0->ear" ++"/update", 90,0,-0,1,14000]);
 
-		~globalParGroup.freeAll;
+~globalParGroup.freeAll;
 
 
 	~globalSet.value(\gainDB, -10);
 	~globalSet.value(\c3, 2);
 
 ~globalSetState.value(0);
-
-
-p = ~allNodes[\testNode0].at(\proxy);
-
-	p[\gainDB] = 0;
-
-	p[\out].source = \fool;
-    p[\out].set(\gainDB, -20);
-
-	p[\out].pause;
-p.release;
-
-
-~globalParGroup.set(\gainDB, -20);
-
-
 
 
 	~dumpNodes.value();
@@ -275,33 +279,6 @@ a.set(\freq, 240);
 
 
 
-
-
-				~allNodes[\testNode0] = Dictionary();   // create node  -- create node-specific dict.
-
-				~allNodes[\testNode0].put(\groupName, ~zgroup);  // create node-specific group and add to node dict.
-				p = ProxySpace(s);
-				p.fadeTime = 0.02;
-				p[\out].ar(0);  //    this prevents an extra bus being allocated. this must be the first reference of ~out
-				p[\out].group = ~globalParGroup;  //~zgroup;
-				~allNodes[\testNode0].put(\pluginName, \nil);
-				~allNodes[\testNode0].put(\proxy, p);
-
-
-
-
-p = ~allNodes[\testNode0].at(\proxy);
-
-	p[\outDB] = -3;
-
-	p[\out].source = \fool;
-	p[\out].source = \nil;
-
-~allNodes[\testNode0].at(\proxy).[\out].source = \foo1;
-
-		~zgroup.set(\gainDB, -0);
-
-		~zgroup.freeAll;
 
 
 

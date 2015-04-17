@@ -74,6 +74,32 @@ s.waitForBoot{
 ~makeinstance.value(\test2, ~prox, \string);
 ~makeinstance.value(\test3, ~prox, \pinksin);
 
+
+
+//  No itteration possible
+
+20.do({ arg item;
+	var nodename=("testNode"++item).asSymbol;
+	postf("creating % \n", nodename);
+	~makeinstance.value(nodename.asSymbol, ~prox, \pinksin);
+});
+
+
+//  No itteration possible  -- even when scheduled...
+fork {
+    3.do {  arg item;
+
+		var nodename=("testNode"++item).asSymbol;
+		postf("creating % \n", nodename);
+		~makeinstance.value(nodename.asSymbol, ~prox, \pinksin);
+
+        1.wait;
+    };
+    "DONE".postln;
+}
+
+
+
 // list ProxySpace internal proxies:
 ~prox.existingProxies;
 ~cleaninstance.value(\test3, ~prox);
