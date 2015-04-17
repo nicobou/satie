@@ -33,7 +33,7 @@
 					var in, env;
 					in = SynthDef.wrap(srcfunc);
 					// fade in set to as short as possible for percussive cases
-					env = Linen.kr(gate, 0.005, 1, 2, 2);
+					env = Linen.kr(gate, 0.005, 1, 0.01, 2);
 					destFunArray.do{ arg item, i;
 						var out = SynthDef.wrap(item, prependArgs: [in, aziDeg, eleDeg, gainDB, delayMs, lpHz, spread]);
 						//var out = SynthDef.wrap(item, prependArgs: [in, vol, delay, azi, ele]);
