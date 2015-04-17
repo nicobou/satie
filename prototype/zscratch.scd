@@ -18,6 +18,30 @@ s.makeGui;
 
 s.meter;
 
+Mix
+
+z = SynthDef(\zverb, {|mix = 0.25, room = 0.15, damp = 0.5|
+    Out.ar(0,
+        Mix.fill(24,FreeVerb.ar(
+			            Decay.ar(In.ar(100,1), 0.25, LFCub.ar(1200, 0, 0.1)), // mono src
+            mix, // mix 0-1
+            room, // room 0-1
+            damp // damp 0-1 duh
+        ) ! 2 // fan out...
+	    ));
+}).play
+
+
+z.set(\mix, 1);
+z.set(\damp, 0.1);
+z.free;
+
+a = Synth(\zverb);
+
+
+
+
+
 
 
 ~dumpNodes.value();
@@ -87,6 +111,43 @@ i.action_({ |ez| ( ~globalSet.value(\eleDeg, (ez.value)))});
 
 j = EZSlider(w, 380@20, "spread", ControlSpec(0, 100, \lin, 0.1, 5));
 j.action_({ |ez| ( ~globalSet.value(\spread, (ez.value)))});
+
+
+
+
+
+
+
+
+
+w=Window.new("sheefa", Rect(30, 30, 400, 120)).front;
+w.view.decorator=FlowLayout(w.view.bounds);
+w.view.decorator.gap=8@2;
+
+
+g = EZSlider(w, 380@20, "pitch ", ControlSpec(40, 110, \lin, 1, 60));
+g.action_({ |ez| (  ~globalSet.value(\note, [ ez.value, 1, 0.5 ] );  ~globalSet.value(\t_trig, 1);)});
+
+
+h = EZSlider(w, 380@20, "amp", ControlSpec(0, 1, \lin, 0.01, 0.5));
+h.action_({ |ez| (  ~globalSet.value(\amp, (ez.value)))});
+
+/*
+i = EZSlider(w, 380@20, "pos", ControlSpec(0.0, 1, \lin, 0.01, 0.14));
+i.action_({ |ez| (  ~globalSet.value(\pos, (ez.value));  ~globalSet.value(\t_trig, 1))});
+*/
+
+j = EZSlider(w, 380@20, "c1", ControlSpec(0.05, 20, \lin, 0.01, 1));
+j.action_({ |ez| (  ~globalSet.value(\c1, (ez.value)))});
+
+
+k = EZSlider(w, 380@20, "c3", ControlSpec(0.05, 20, \lin, 0.01, 1));
+k.action_({ |ez| (  ~globalSet.value(\c3, (ez.value)))});
+
+l = EZSlider(w, 380@20, "fb", ControlSpec(0.0, 100, \lin, 0.1, 20));
+l.action_({ |ez| (  ~globalSet.value(\fb, (ez.value)))});
+
+
 
 
 

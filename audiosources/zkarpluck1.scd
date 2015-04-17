@@ -52,6 +52,7 @@ fB	 ??  Inharmonicity factor.
 
 	// note:  "gate" arg fixed to constant of 1, to keep plugin alive, "relase" arg not used:
     son = DWGPluckedStiff.ar(freq, 10, 1 ,pos,idecay,hfqLoss,inp, 1 , fb);
+	// Out.ar(100, son);
 	son;   // make sure this is last, so the sound is returned
 	 };
 
