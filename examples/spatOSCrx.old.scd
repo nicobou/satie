@@ -22,9 +22,13 @@ this implementation is based on a one-listener model. In the future, we may wish
 OSC RX message specification is based on the SPATOSC specification  (see:   http://code.sat.qc.ca/redmine/projects/spatosc/wiki/spec  )
 */
 
-//  s.makeGui;
-// s.reboot;
+/*
 
+s.makeGui;
+s.meter
+
+ s.reboot;
+*/
 
 (
 /*
