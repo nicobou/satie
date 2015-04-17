@@ -38,6 +38,7 @@ s.waitForBoot{
 	//~scbr.makeSynthDef(\string, \zkarpluck1, [\stereoPanner, \monoSpat], [0, 2]);
 	~scbr.makeSynthDef(\string, \zkarpluck1, [\domeVBAP], [0]);
 	~scbr.makeSynthDef(\pinksin, \PinkSin, [\domeVBAP], [0]);
+	~scbr.makeSynthDef(\testtone, \testtone, [\domeVBAP], [0]);
 
 	// be sure the synthDef is compiled on the server
 	s.sync;
@@ -51,7 +52,7 @@ s.waitForBoot{
 ~group = ParGroup.new; // ~group.freeAll;
 // creating a global ProxySpace
 ~prox = ProxySpace(s);
-~prox.fadeTime = 0.02;
+~prox.fadeTime = 2;
 // the proxyspace is going to be embedded in the global pargroup
 ~prox.group = ~group;
 
@@ -73,6 +74,8 @@ s.waitForBoot{
 ~makeinstance.value(\test1, ~prox, \string);
 ~makeinstance.value(\test2, ~prox, \string);
 ~makeinstance.value(\test3, ~prox, \pinksin);
+// change test3 source
+~makeinstance.value(\test3, ~prox, \testtone);
 
 
 
