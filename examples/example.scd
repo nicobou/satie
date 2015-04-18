@@ -70,6 +70,11 @@ s.waitForBoot{
 	p.[name].clear(0.03);
 	nil;
 };
+~pauseinstance = { | name = \out, p |
+	p[name].release();
+	nil;
+};
+
 // test per instance set and group set
 ~makeinstance.value(\test1, ~prox, \string);
 ~makeinstance.value(\test2, ~prox, \string);
@@ -99,8 +104,13 @@ fork {
 
 // list ProxySpace internal proxies:
 ~prox.existingProxies;
-~cleaninstance.value(\test3, ~prox);
+~cleaninstance.value(\test2, ~prox);
 ~prox.existingProxies;
+
+//pause instance
+~prox[\test3].set(\gainDB, -30);
+~pauseinstance.value(\test3,~prox);
+~makeinstance.value(\test3, ~prox, \testtone);
 
 // per instance set
 ~prox[\test1].set(\gainDB, -30);
