@@ -62,13 +62,13 @@ s.waitForBoot{
 	// (must be the first reference of "name" in the proxyspace
 	p[name].ar(0);
 	p[name].source = src;
-	^nil;
+	nil;
 };
 ~cleaninstance = { | name = \out, p |
 	p[name].release();
 	// fadeTime must be higher than SATIE internal fadeTime:
 	p.[name].clear(0.03);
-	^nil;
+	nil;
 };
 // test per instance set and group set
 ~makeinstance.value(\test1, ~prox, \string);
@@ -77,22 +77,18 @@ s.waitForBoot{
 // change test3 source
 ~makeinstance.value(\test3, ~prox, \testtone);
 
-
-
-//  No itteration possible
-
+//  Creation with itteration
 20.do({ arg item;
 	var nodename=("testNode"++item).asSymbol;
 	postf("creating % \n", nodename);
 	~makeinstance.value(nodename.asSymbol, ~prox, \pinksin);
 });
 
-
-//  No itteration possible  -- even when scheduled...
+//  Scheduled creation
 fork {
     3.do {  arg item;
 
-		var nodename=("testNode"++item).asSymbol;
+		var nodename=("testNodesched"++item).asSymbol;
 		postf("creating % \n", nodename);
 		~makeinstance.value(nodename.asSymbol, ~prox, \pinksin);
 
@@ -100,8 +96,6 @@ fork {
     };
     "DONE".postln;
 }
-
-
 
 // list ProxySpace internal proxies:
 ~prox.existingProxies;
