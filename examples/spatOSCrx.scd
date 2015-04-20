@@ -10,12 +10,6 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-/* debugging
- OSCFunc.trace(true);
- OSCFunc.trace(false);
-*/
-
 /*
 NOTES:
 this implementation is based on a one-listener model. In the future, we may wish to exapnd this to integrate more than one.  In such a case, proivision will have to be made so that multiple listener synth-defs can be defined.
@@ -23,64 +17,41 @@ OSC RX message specification is based on the SPATOSC specification  (see:   http
 */
 
 /*
-
 s.makeGui;
 s.meter
 
  s.reboot;
-*/
-
-(
-/*
-
-s.quit;
-
-Server.default;
-
-Server.supernova;
-
-s.boot;
-s.reboot;
-
 ~allNodes.size;
 */
 
-
-
-
-~synthdefCreationLatency = 1.0;    // the time interval between the creation of a synthdef (plugin) and the opening of its connection RX gate
-
-
-
+(
 // set these flags depending on your environment
 
 ~superNovaFlag = true;
 
 //~domePlaybackFormat = \domeVBAP;       // for sato
-~domePlaybackFormat = \labodomeVBAP;      // for labodome
-
+//~domePlaybackFormat = \labodomeVBAP;      // for labodome
 
 //~outAudioDev = "Soundflower (64ch)";   //  for multi-channel testing without hardware on OSX
-
-~outAudioDev = "MADIface USB (23635751)";     // for labodome or SATO
+//~outAudioDev = "MADIface USB (23635751)";     // for labodome or SATO
 
 
 if ( ~superNovaFlag != nil,
 	{
-	Server.supernova;
+		Server.supernova;
 });
 
-	o = Server.local.options;   // set up options
-    o.memSize = 2**19;        // probably should just leave this the same for everyting
-	//o.blockSize = 2048;
+o = Server.local.options;   // set up options
+o.memSize = 2**19;        // probably should just leave this the same for everyting
+//o.blockSize = 2048;
 
 
 if ( ~outAudioDev != nil ,
-{
-	o.device = ~outAudioDev;
+	{
+		o.device = ~outAudioDev;
 });
 
-   // o.device = "MADIface USB (23635751)";     // set for dome or labodome
+// o.device = "MADIface USB (23635751)";     // set for dome or labodome
 
 if ( ~domePlaybackFormat != nil,
 	{
@@ -89,8 +60,6 @@ if ( ~domePlaybackFormat != nil,
 		o.numOutputBusChannels = 32;
 		// o.dump;
 });
-
-// Server.default.options.dump;
 
 
 s.waitForBoot{
@@ -129,7 +98,7 @@ s.waitForBoot{
 			~scbr.makeSynthDef(\zbell1, \zbell1, [\stereoListener], [0]);
 			~scbr.makeSynthDef(\test, \testtone, [\stereoListener], [0]);
 			~scbr.makeSynthDef(\labodomeTest, \default, [\labodomeVBAP], [0]);
-	},
+		},
 		// else evalualte for dome listeners
 		{
 			postf("generating synthdefs for %\n", ~domePlaybackFormat);
@@ -152,36 +121,35 @@ s.waitForBoot{
 
 	// ******************** usage with JITlib & ProxySpace *********************
 
-// creating a global ParGroup for supernova
-~group = ParGroup.new; // ~group.freeAll;
-// creating a global ProxySpace
-~prox = ProxySpace(s);
-~prox.fadeTime = 2;
-// the proxyspace is going to be embedded in the global pargroup
-~prox.group = ~group;
+	// creating a global ParGroup for supernova
+	~group = ParGroup.new; // ~group.freeAll;
+	// creating a global ProxySpace
+	~prox = ProxySpace(s);
+	~prox.fadeTime = 2;
+	// the proxyspace is going to be embedded in the global pargroup
+	~prox.group = ~group;
 
-//instance factory
-~makeinstance = { | name = \out, p, src = \string |
-	// ensuring not extra bus is allocated:
-	// (must be the first reference of "name" in the proxyspace
-	p[name].ar(0);
-	p[name].source = src;
-	nil;
-};
-~cleaninstance = { | name = \out, p |
-	p[name].release();
-	// fadeTime must be higher than SATIE internal fadeTime:
-	p.[name].clear(0.03);
-	nil;
-};
-~pauseinstance = { | name = \out, p |
-	p[name].release();
-	nil;
-};
+	//instance factory
+	~makeinstance = { | name = \out, p, src = \string |
+		// ensuring not extra bus is allocated:
+		// (must be the first reference of "name" in the proxyspace
+		p[name].ar(0);
+		p[name].source = src;
+		nil;
+	};
+	~cleaninstance = { | name = \out, p |
+		p[name].release();
+		// fadeTime must be higher than SATIE internal fadeTime:
+		p.[name].clear(0.03);
+		nil;
+	};
+	~pauseinstance = { | name = \out, p |
+		p[name].release();
+		nil;
+	};
 
 	// dictionarys for nodes
 	~allNodes = Dictionary();        //  ~allNodes.postln;
-
 
 
 	~coreCallback = {
@@ -242,17 +210,11 @@ s.waitForBoot{
 	};
 
 
-	// ~connectionCallback = { | args |       // for debugging
-	// 	~processConnection.value( args );
-	// };
-
-
-	// /spatosc/core/connection/source->listener/update azi elev delayMS gainDB lpHZ
+	// /spatosc/core/connection/source->listener/update azi elev gainDB delayMS  lpHZ
 	// /spatosc/core/connection/source->listener/spread  exp   // exponent for incidence effect
 	~connectionCallback = { | args |
 		var nodeName, listenerName, connectionName, type, temp, charIndex;
 		var aziDeg, eleDeg, gainDB, delayMs, lpHz, spread;
-		//var proxy;
 
 		//args.postln;
 		connectionName = args[0].asString.split[4].asSymbol;   // this is terrible.  ThespatOSC message format could be improved here
@@ -260,10 +222,7 @@ s.waitForBoot{
 		charIndex = connectionName.asString.find("->");
 
 		nodeName = connectionName.asString.subStr(0, charIndex-1);
-
 		//postf("~connectionCallback:  connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
-
-		// proxy = ~allNodes[nodeName.asSymbol].at(\proxy);
 
 		switch(type,
 			'update',
@@ -279,8 +238,6 @@ s.waitForBoot{
 						delayMs = args[4];
 						lpHz = args[5];
 
-						//proxy[\out].set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB, \delayMs, delayMs, \lpHz, lpHz);
-
 						~prox[nodeName.asSymbol].set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB, \delayMs, delayMs, \lpHz, lpHz);
 
 					}
@@ -292,9 +249,7 @@ s.waitForBoot{
 					{
 						//postf("~connectionCallback:  connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
 						spread = args[1];  // get values from vector, and write to connectionState
-						//args.postln;
 						~prox[nodeName.asSymbol].set(\spread, spread);
-
 					},
 					// else
 					{"~connectionCallback: OSCrx spread message with no values".warn; })
@@ -343,11 +298,9 @@ s.waitForBoot{
 		);
 	};
 
-	//~globalParGroup = ParGroup.new;  // for now, we use just one global parGroup, for reasons of efficiency
-
 	// define some functions to handle actions
 	~createSource = { | sourceName |
-			if (~allNodes.includesKey(sourceName),
+		if (~allNodes.includesKey(sourceName),
 			{
 				postf("~createSource:   % exists, no action\n", sourceName);
 			},
@@ -364,7 +317,6 @@ s.waitForBoot{
 				//'adding synth'.postln;
 			}
 		);
-		//~allNodes.postln;
 	};
 
 	~createConnection = { |sourceName listenerName |
@@ -398,7 +350,7 @@ s.waitForBoot{
 
 		// this assignment will automatically kill off the previous one; all the proxy's current synthdef state will be copied to the new one
 		~makeinstance.value(nodeName.asSymbol, ~prox, pluginName.asSymbol);
-		};
+	};
 
 
 	// value is a uri path:   file://~/Desktop/sheefa8.aif, plugin://testnoise~ , adc://1
@@ -417,7 +369,7 @@ s.waitForBoot{
 		// still needs to be expanded for soundfiles, adc, web etc..
 		switch( type,
 			"plugin", {
-					~setPlugin.value(name.asSymbol, uriPath)
+				~setPlugin.value(name.asSymbol, uriPath)
 
 			},
 			// "file", {~setPlugin.value(name, uriPath)}  not implemented yet
@@ -430,7 +382,6 @@ s.waitForBoot{
 		var thisProxy = ~allNodes[nodeName.asSymbol].at(\proxy);
 
 		//postf("~setProperty: seting % of % to %\n", property, nodeName, value);
-		//thisProxy[\out].set(property.asSymbol, value);   // set Prop  -- update synthDef plugin
 		~prox[nodeName.asSymbol].set(property.asSymbol, value);
 	};
 
@@ -468,7 +419,6 @@ s.waitForBoot{
 					// else  no args.. just pass 1
 					{
 						~prox[nodeName.asSymbol].set(eventName.asSymbol, 1);
-						//thisProxy[\out].set(eventName, 1);  // no args, just add one to generate trigger event
 					}
 				);
 		});
@@ -487,9 +437,9 @@ s.waitForBoot{
 			~clearNode.value(key);
 		};
 		// now remove all nodes in the global dictionary
-/*		nodelist.do { | key |
-			postf("removing:  node: %  from dictionary\n",  key);
-			~allNodes.removeAt(key);
+		/*		nodelist.do { | key |
+		postf("removing:  node: %  from dictionary\n",  key);
+		~allNodes.removeAt(key);
 		};*/
 		//~allNodes.removeEvery();
 
@@ -501,10 +451,8 @@ s.waitForBoot{
 		if ( ~allNodes.includesKey(nodeName.asSymbol) ,
 			{
 				~clearNode.value(nodeName.asSymbol);
-					//	'REMOVE NODE'.postln;
-
+				//	'REMOVE NODE'.postln;
 				~allNodes.removeAt(nodeName.asSymbol);     // remove node from global dictionary
-
 		});
 	};
 
@@ -515,10 +463,7 @@ s.waitForBoot{
 
 		~cleaninstance.value(nameSym, ~prox);
 
-		//'CLEAR NODE'.postln;
-
-		// 'deleting synth'.postln;
-		//postf("~deleting:  node: % and connection: %\n",  nodeName, connectionName);
+		//postf("~clearing:  node: % and connection: %\n",  nodeName, connectionName);
 
 		// disconnect callbacks
 		if (node.includesKey(\connectionName),
@@ -553,7 +498,7 @@ s.waitForBoot{
 			var nodeSym = key;
 			postf("node: %  \n", key);
 			~allNodes[nodeSym].keysDo { | key |
-					postf("\t : %  =  % \n",  key, ~allNodes[nodeSym].at(key));
+				postf("\t : %  =  % \n",  key, ~allNodes[nodeSym].at(key));
 			};
 		};
 	};
@@ -600,7 +545,7 @@ s.waitForBoot{
 	~clearScene.value();
 
 
-// generate N instances
+	// generate N instances
 
 	1.do({ arg item;
 	var nodename=("testNode"++item).asSymbol;
@@ -610,22 +555,10 @@ s.waitForBoot{
 	//~createConnection.value(nodename, "ear");
 	~setUri.value(nodename, "plugin://default");
 	//~connectionCallback.value( ["/spatosc/core/connection/"++ connectionName ++"/spread", 10]);
-		       });
+	});
 
 
 	~createSource.value(\testNode0);
-
-	p = ~allNodes[\testNode0].at(\proxy);
-
-	p[\outDB] = -3;
-
-	p[\out].source = \fool;
-		~globalParGroup.set(\gainDB, -0);
-
-		~globalParGroup.freeAll;
-
-
-
 
 	~setUri.value(\testNode0, "plugin://default");
 
@@ -643,19 +576,19 @@ s.waitForBoot{
 
 
 
-w=Window.new("group contrp;", Rect(30, 30, 400, 100)).front;
-w.view.decorator=FlowLayout(w.view.bounds);
-w.view.decorator.gap=8@2;
+	w=Window.new("group contrp;", Rect(30, 30, 400, 100)).front;
+	w.view.decorator=FlowLayout(w.view.bounds);
+	w.view.decorator.gap=8@2;
 
 
-h = EZSlider(w, 380@20, "azi", ControlSpec(-180, 180, \lin, 1, 0));
-h.action_({ |ez| ( ~globalSet.value(\aziDeg, (ez.value)))});
+	h = EZSlider(w, 380@20, "azi", ControlSpec(-180, 180, \lin, 1, 0));
+	h.action_({ |ez| ( ~globalSet.value(\aziDeg, (ez.value)))});
 
-i = EZSlider(w, 380@20, "ele", ControlSpec(-90, 90, \lin, 1, 0));
-i.action_({ |ez| (~globalSet.value(\eleDeg, (ez.value)))});
+	i = EZSlider(w, 380@20, "ele", ControlSpec(-90, 90, \lin, 1, 0));
+	i.action_({ |ez| (~globalSet.value(\eleDeg, (ez.value)))});
 
-j = EZSlider(w, 380@20, "spread", ControlSpec(0, 100, \lin, 0.1, 1));
-j.action_({ |ez| ( ~globalSet.value(\spread, (ez.value)))});
+	j = EZSlider(w, 380@20, "spread", ControlSpec(0, 100, \lin, 0.1, 1));
+	j.action_({ |ez| ( ~globalSet.value(\spread, (ez.value)))});
 
 
 
@@ -668,7 +601,7 @@ j.action_({ |ez| ( ~globalSet.value(\spread, (ez.value)))});
 
 	~allNodes[~nodeName].at(\connectionState)[4];
 
-	 // \aziDeg, 0, \eleDeg, 0, \gainDB, 0, \delayMs, 1, \lpHz, 15000, \spread, 1  // default connection values
+	// \aziDeg, 0, \eleDeg, 0, \gainDB, 0, \delayMs, 1, \lpHz, 15000, \spread, 1  // default connection values
 
 
 
@@ -707,10 +640,10 @@ j.action_({ |ez| ( ~globalSet.value(\spread, (ez.value)))});
 	~sourceCallback.value( ["/spatosc/core/source/"++ ~nodeName ++"/event", \t_trig, 1]);
 
 	~allNodes[~nodeName].at( \pluginNode ).set(\note, [60,0.2,0]);
-		~allNodes[~nodeName].at( \pluginNode ).set(\t_trig, 1);
+	~allNodes[~nodeName].at( \pluginNode ).set(\t_trig, 1);
 
 
-~connectionCallback.value( ["/spatosc/core/connection/"++ ~connectionName ++"/spread", 5]);
+	~connectionCallback.value( ["/spatosc/core/connection/"++ ~connectionName ++"/spread", 5]);
 
 
 	~deleteSynth.value(~nodeName);

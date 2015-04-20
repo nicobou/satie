@@ -1,6 +1,9 @@
 s.makeGui;
 s.meter;
 
+Server.default.options.dump;
+
+
 
 ~superNovaFlag = true;
 
@@ -152,8 +155,8 @@ t.stop;
 
 
 
-~globalSet.value(\c1, 0.11);
-~globalSet.value(\c3, 4.1);
+~globalSet.value(\c1, 0.7);
+~globalSet.value(\c3, 3);
 
 
 
