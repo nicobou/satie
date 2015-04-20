@@ -1,5 +1,11 @@
 s.makeGui;
+s.meter;
+
+
 ~superNovaFlag = true;
+
+
+
 
 //~domePlaybackFormat = \domeVBAP;       // for sato
 ~domePlaybackFormat = \labodomeVBAP;      // for labodome
@@ -105,17 +111,35 @@ if ( ~domePlaybackFormat != nil,
 });
 
 
-~group.set(\gainDB, -40);
-~globalSet.value(\fb, 100);
+~globalSet.value(\fb, 0);
 ~globalSet.value(\pos, 0.5);
 
 
-~globalSet.value(\c1, 0.2);
-~globalSet.value(\c3, 8);
 
+~globalSet.value(\c1, 0.11);
+~globalSet.value(\c3, 4.1);
+
+
+
+~globalSet.value(\c1, 0.15);
+~globalSet.value(\c3, 4.51);
+~globalSet.value(\fb, 0);
+
+
+~globalSet.value(\c1, 0.2);
+~globalSet.value(\c3, 6);
 
 ~globalSet.value(\c1, 0.2);
 ~globalSet.value(\c3, 3);
+
+~globalSet.value(\c1, 0.2);
+~globalSet.value(\c3, 3);
+
+// lantern zoner
+
+~globalSet.value(\c1, 0.11);
+~globalSet.value(\c3, 3);
+~globalSet.value(\fb, 100);
 
 
 
@@ -169,15 +193,15 @@ g = EZSlider(w, 380@20, "pitch ", ControlSpec(40, 110, \lin, 1, 60));
 g.action_({ |ez| (  ~globalSet.value(\note, [ ez.value, 1, 0.5 ] );  ~globalSet.value(\t_trig, 1);)});
 
 
-h = EZSlider(w, 380@20, "amp", ControlSpec(0, 1, \lin, 0.01, 0.5));
-h.action_({ |ez| (  ~globalSet.value(\amp, (ez.value)))});
-
+// h = EZSlider(w, 380@20, "amp", ControlSpec(0, 1, \lin, 0.01, 0.5));
+// h.action_({ |ez| (  ~globalSet.value(\amp, (ez.value)))});
+//
 /*
 i = EZSlider(w, 380@20, "pos", ControlSpec(0.0, 1, \lin, 0.01, 0.14));
 i.action_({ |ez| (  ~globalSet.value(\pos, (ez.value));  ~globalSet.value(\t_trig, 1))});
 */
 
-j = EZSlider(w, 380@20, "c1", ControlSpec(0.05, 20, \lin, 0.01, 1));
+j = EZSlider(w, 380@20, "c1", ControlSpec(0.05, 5, \lin, 0.01, 1));
 j.action_({ |ez| (  ~globalSet.value(\c1, (ez.value)))});
 
 
@@ -188,6 +212,8 @@ l = EZSlider(w, 380@20, "fb", ControlSpec(0.0, 100, \lin, 0.1, 20));
 l.action_({ |ez| (  ~globalSet.value(\fb, (ez.value)))});
 
 
+m = EZSlider(w, 380@20, "spread", ControlSpec(0, 100, \lin, 0.1, 5));
+m.action_({ |ez| ( ~globalSet.value(\spread, (ez.value)))});
 
 
 

@@ -46,7 +46,7 @@ s.reboot;
 */
 
 
-
+s.makeGui;
 
 ~synthdefCreationLatency = 1.0;    // the time interval between the creation of a synthdef (plugin) and the opening of its connection RX gate
 
@@ -57,8 +57,8 @@ s.reboot;
 
 ~superNovaFlag = true;
 
-//~domePlaybackFormat = \domeVBAP;       // for sato
-~domePlaybackFormat = \labodomeVBAP;      // for labodome
+~domePlaybackFormat = \domeVBAP;       // for sato
+//~domePlaybackFormat = \labodomeVBAP;      // for labodome
 
 
 //~outAudioDev = "Soundflower (64ch)";   //  for multi-channel testing without hardware on OSX

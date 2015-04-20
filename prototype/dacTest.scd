@@ -15,6 +15,7 @@ SynthDef(\speakerMapTest, { |out, gate=1|
 //~dacTestSyn = Synth(\speakerMapTest, [\out, 0,]); // play out through hardware output bus 0 (see Out.help)
 //~dacTestSyn.release; // releases and frees the synth (if doneAction is > 2; see EnvGen)
 
+~panDur=0.4;
 
 ~channelCount=2;
 
@@ -24,14 +25,14 @@ SynthDef(\speakerMapTest, { |out, gate=1|
 ~dacTestSyn = Synth(\speakerMapTest, [\out, item,]); // play out through hardware output bus 0 (see Out.help)
 
       // item.postln;
-            0.33.wait;
+            ~panDur.wait;
 ~dacTestSyn.release;
         });
     }
 });
 
 
-~dacTestWindow=Window.new("dac testing", Rect(30, 30, 400, 60)).front;
+~dacTestWindow=Window.new("dac testing", Rect(30, 30, 400, 90)).front;
 ~dacTestWindow.view.decorator=FlowLayout(~dacTestWindow.view.bounds);
 ~dacTestWindow.view.decorator.gap=8@2;
 
@@ -58,6 +59,9 @@ SynthDef(\speakerMapTest, { |out, gate=1|
 
 ~chanCountSlider = EZSlider(~dacTestWindow, 380@20, "channels", ControlSpec(0, 31, \lin, 1, 2));
 ~chanCountSlider.action_({ |ez| (  ~channelCount = ez.value;   )});
+
+~panDurSlider = EZSlider(~dacTestWindow, 380@20, "panDuration", ControlSpec(0.05, 2, \lin, 0.02, 0.4));
+~panDurSlider.action_({ |ez| (  ~panDur = ez.value;   )});
 
 
 
