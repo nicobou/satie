@@ -150,33 +150,34 @@ s.waitForBoot{
 	~scbr.oscInterface.newOSC(\createSoundSource, ~coreCallback, "/spatosc/core");
 
 
-	// creating a global ParGroup for supernova
-	~group = ParGroup.new; // ~group.freeAll;
+	// ******************** usage with JITlib & ProxySpace *********************
 
-	// creating a global ProxySpace
-	~prox = ProxySpace(s);
-	~prox.fadeTime = 0.02;
+// creating a global ParGroup for supernova
+~group = ParGroup.new; // ~group.freeAll;
+// creating a global ProxySpace
+~prox = ProxySpace(s);
+~prox.fadeTime = 2;
+// the proxyspace is going to be embedded in the global pargroup
+~prox.group = ~group;
 
-	// the proxyspace is going to be embedded in the global pargroup
-	~prox.group = ~group;
-
-	//instance factory
-	~makeinstance = { | name = \out, p, src = \string |
-		// ensuring not extra bus is allocated:
-		// (must be the first reference of "name" in the proxyspace
-		p[name].ar(0);
-		p[name].source = src;
-		^nil;
-	};
-
-	~cleaninstance = { | name = \out, p |
-		p[name].release();
-		// fadeTime must be higher than SATIE internal fadeTime:
-		p.[name].clear(0.1);
-		^nil;
-	};
-
-
+//instance factory
+~makeinstance = { | name = \out, p, src = \string |
+	// ensuring not extra bus is allocated:
+	// (must be the first reference of "name" in the proxyspace
+	p[name].ar(0);
+	p[name].source = src;
+	nil;
+};
+~cleaninstance = { | name = \out, p |
+	p[name].release();
+	// fadeTime must be higher than SATIE internal fadeTime:
+	p.[name].clear(0.03);
+	nil;
+};
+~pauseinstance = { | name = \out, p |
+	p[name].release();
+	nil;
+};
 
 	// dictionarys for nodes
 	~allNodes = Dictionary();        //  ~allNodes.postln;
@@ -485,19 +486,12 @@ s.waitForBoot{
 
 			~clearNode.value(key);
 		};
-
-
-
 		// now remove all nodes in the global dictionary
 /*		nodelist.do { | key |
 			postf("removing:  node: %  from dictionary\n",  key);
 			~allNodes.removeAt(key);
 		};*/
-
-
 		//~allNodes.removeEvery();
-
-
 
 		~allNodes.clear();
 		~allNodes.size;
@@ -507,7 +501,7 @@ s.waitForBoot{
 		if ( ~allNodes.includesKey(nodeName.asSymbol) ,
 			{
 				~clearNode.value(nodeName.asSymbol);
-						'REMOVE NODE'.postln;
+					//	'REMOVE NODE'.postln;
 
 				~allNodes.removeAt(nodeName.asSymbol);     // remove node from global dictionary
 
@@ -521,7 +515,7 @@ s.waitForBoot{
 
 		~cleaninstance.value(nameSym, ~prox);
 
-		'CLEAR NODE'.postln;
+		//'CLEAR NODE'.postln;
 
 		// 'deleting synth'.postln;
 		//postf("~deleting:  node: % and connection: %\n",  nodeName, connectionName);
@@ -536,11 +530,9 @@ s.waitForBoot{
 		//  clear node's local dictionary
 		// maybe this is unnecessary
 		nodeKeys.do { | key |
-			postf("removing node keys:  node: %   key %  \n",  nameSym, key);
+			//postf("removing node keys:  node: %   key %  \n",  nameSym, key);
 			node.removeAt(key);
 		};
-
-
 	};
 
 

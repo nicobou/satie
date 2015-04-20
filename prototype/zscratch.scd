@@ -62,7 +62,7 @@ if ( ~domePlaybackFormat != nil,
 
 
 
-~deleteSource.value(\testNode0);
+~deleteSource.value(\testNode2);
 
 
 ~clearNode.value(\testNode0);
@@ -98,17 +98,53 @@ if ( ~domePlaybackFormat != nil,
 
 // generate N instances
 
-60.do({ arg item;
+100.do({ arg item;
 	var nodename=("testNode"++item).asSymbol;
 	var connectionName = "testNode"++item++"->ear";
-
-	nodename.postln;
-
-	//~createSource.value(nodename);
-	//~createConnection.value(nodename, "ear");
+	//postf("creating: "++nodename++"\n");
+	~createSource.value(nodename);
+	~createConnection.value(nodename, "ear");
 	~setUri.value(nodename, "plugin://zkarpluck1");
 	~connectionCallback.value( ["/spatosc/core/connection/"++ connectionName ++"/spread", 5]);
+	~connectionCallback.value( ["/spatosc/core/connection/"++ connectionName++"/update", 45,0,-80,1,14000]);
 });
+~allNodes.size;
+
+
+// delete instances
+100.do({ arg item;
+	var nodename=("testNode"++item).asSymbol;
+	~deleteSource.value( nodename );
+});
+~allNodes.size;
+
+
+
+t = Task({ {
+
+	100.do( { arg item;
+		var pitch = 55 + rand(50);
+		var nodename=("testNode"++item).asSymbol;
+		~setEvent.value(nodename, \note, [pitch,1,1]);
+		~setEvent.value(nodename, \t_trig, 1);
+		0.1.wait;
+	});
+	//~globalSet.value(\t_trig, 1);
+
+	0.wait; }.loop });
+t.start;
+
+t.stop;
+
+
+~allNodes.size;
+
+
+
+
+	~globalSet.value(\gainDB, -80);
+
+
 
 
 ~globalSet.value(\fb, 0);
@@ -143,37 +179,23 @@ if ( ~domePlaybackFormat != nil,
 
 
 
-t = Task({ {
-	~globalSet.value(\t_trig, 1);
-
-	60.do( { arg item;
-		var pitch = 55 + rand(50);
-		var nodename=("testNode"++item).asSymbol;
-		~setEvent.value(nodename, \note, [pitch,1,1]);
-	});
-
-	4.wait; }.loop });
-t.start;
-
-t.stop;
 
 
 
 
-
-w=Window.new("sheefa", Rect(30, 30, 400, 100)).front;
-w.view.decorator=FlowLayout(w.view.bounds);
-w.view.decorator.gap=8@2;
-
+v=Window.new("location", Rect(30, 30, 400, 100)).front;
+v.view.decorator=FlowLayout(v.view.bounds);
+v.view.decorator.gap=8@2;
 
 
-h = EZSlider(w, 380@20, "azi", ControlSpec(-180, 180, \lin, 0.1, 0));
+
+h = EZSlider(v, 380@20, "azi", ControlSpec(-180, 180, \lin, 0.1, 0));
 h.action_({ |ez| ( ~globalSet.value(\aziDeg, (ez.value)))});
 
-i = EZSlider(w, 380@20, "elev", ControlSpec(-90, 90, \lin, 0.1, 0));
+i = EZSlider(v, 380@20, "elev", ControlSpec(-90, 90, \lin, 0.1, 0));
 i.action_({ |ez| ( ~globalSet.value(\eleDeg, (ez.value)))});
 
-j = EZSlider(w, 380@20, "spread", ControlSpec(0, 100, \lin, 0.1, 5));
+j = EZSlider(v, 380@20, "spread", ControlSpec(0, 100, \lin, 0.1, 5));
 j.action_({ |ez| ( ~globalSet.value(\spread, (ez.value)))});
 
 
@@ -184,7 +206,7 @@ j.action_({ |ez| ( ~globalSet.value(\spread, (ez.value)))});
 
 
 
-w=Window.new("sheefa", Rect(30, 30, 400, 120)).front;
+w=Window.new("voicing", Rect(30, 30, 400, 140)).front;
 w.view.decorator=FlowLayout(w.view.bounds);
 w.view.decorator.gap=8@2;
 
@@ -196,10 +218,11 @@ g.action_({ |ez| (  ~globalSet.value(\note, [ ez.value, 1, 0.5 ] );  ~globalSet.
 // h = EZSlider(w, 380@20, "amp", ControlSpec(0, 1, \lin, 0.01, 0.5));
 // h.action_({ |ez| (  ~globalSet.value(\amp, (ez.value)))});
 //
-/*
+
+
 i = EZSlider(w, 380@20, "pos", ControlSpec(0.0, 1, \lin, 0.01, 0.14));
-i.action_({ |ez| (  ~globalSet.value(\pos, (ez.value));  ~globalSet.value(\t_trig, 1))});
-*/
+i.action_({ |ez| (  ~globalSet.value(\pos, (ez.value)))});
+
 
 j = EZSlider(w, 380@20, "c1", ControlSpec(0.05, 5, \lin, 0.01, 1));
 j.action_({ |ez| (  ~globalSet.value(\c1, (ez.value)))});
@@ -210,10 +233,6 @@ k.action_({ |ez| (  ~globalSet.value(\c3, (ez.value)))});
 
 l = EZSlider(w, 380@20, "fb", ControlSpec(0.0, 100, \lin, 0.1, 20));
 l.action_({ |ez| (  ~globalSet.value(\fb, (ez.value)))});
-
-
-m = EZSlider(w, 380@20, "spread", ControlSpec(0, 100, \lin, 0.1, 5));
-m.action_({ |ez| ( ~globalSet.value(\spread, (ez.value)))});
 
 
 
@@ -227,11 +246,11 @@ m.action_({ |ez| ( ~globalSet.value(\spread, (ez.value)))});
 
 ~globalSet.value(\spread, 10);
 
+~globalSet.set(\gainDB, -40);
 
 
 
-
-	60.do( { arg item;
+	200.do( { arg item;
 	var pitch = 55 + rand(50);
 	var nodename=("testNode"++item).asSymbol;
 	~setEvent.value(nodename, \note, [pitch,1,1]);
