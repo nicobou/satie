@@ -57,13 +57,13 @@ s.makeGui;
 
 ~superNovaFlag = true;
 
-~domePlaybackFormat = \domeVBAP;       // for sato
+//~domePlaybackFormat = \domeVBAP;       // for sato
 //~domePlaybackFormat = \labodomeVBAP;      // for labodome
 
 
 //~outAudioDev = "Soundflower (64ch)";   //  for multi-channel testing without hardware on OSX
 
-~outAudioDev = "MADIface USB (23635751)";     // for labodome or SATO
+//~outAudioDev = "MADIface USB (23635751)";     // for labodome or SATO
 
 
 if ( ~superNovaFlag != nil,
