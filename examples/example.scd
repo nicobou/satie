@@ -13,16 +13,20 @@
 
 
 // s.reboot; s.makeGui;
-s.meter;
+// s.meter;
+// ~scbr.auxbus.scope;
+
 (
 s.waitForBoot{
-
 	// finding source directory
 	~rootSrcPath = thisProcess.nowExecutingPath.dirname ++ "/..";
 	(~rootSrcPath ++ "/src/*.scd").pathMatch.do({arg item; item.loadPaths});
 
+	~num_aux_bus = 5;
 	// creating a sc-basic-renderer
-	~scbr = ~scbrMaker.value(~rootSrcPath);
+	~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus);
+	// printing internal aux array with bus indexes
+	~scbr.aux;
 	// loading source plugins
 	~scbr.pluginLoader.loadAudioPlugins(~rootSrcPath ++ "/audiosources/*.scd");
 	// see the loaded plugins in the console
@@ -34,11 +38,18 @@ s.waitForBoot{
 	// here a PinkSin source spatialized by
 	//   - a stereo panner (starting channel 0)
 	//   - a monoSpat (starting channel 2)
-	//~scbr.makeSynthDef(\fool, \PinkSin, [\stereoPanner, \monoSpat], [0, 2]);
+	~scbr.makeSynthDef(\fool, \PinkSin, [\stereoPanner, \monoSpat], [0, 2]);
+
 	//~scbr.makeSynthDef(\string, \zkarpluck1, [\stereoPanner, \monoSpat], [0, 2]);
 	~scbr.makeSynthDef(\string, \zkarpluck1, [\domeVBAP], [0]);
 	~scbr.makeSynthDef(\pinksin, \PinkSin, [\domeVBAP], [0]);
 	~scbr.makeSynthDef(\testtone, \testtone, [\domeVBAP], [0]);
+	// writing to all aux busses (first is starting a 0):
+	~scbr.makeSynthDef(\string_all_aux, \zkarpluck1, [\domeVBAP], [0], ~scbr.aux);
+	// writing to only to the third audio bus
+	~scbr.makeSynthDef(\string_third_aux, \zkarpluck1, [\domeVBAP], [0], [~scbr.aux[2]]);
+	// spatilized reverb (input will be set at creation):
+	~scbr.makeSynthDef(\busreverb, \freeverb, [\stereoPanner], [0]);
 
 	// be sure the synthDef is compiled on the server
 	s.sync;
@@ -48,13 +59,6 @@ s.waitForBoot{
 
 // ******************** usage with JITlib & ProxySpace *********************
 (
-// creating a global ParGroup for supernova
-~group = ParGroup.new; // ~group.freeAll;
-// creating a global ProxySpace
-~prox = ProxySpace(s);
-~prox.fadeTime = 2;
-// the proxyspace is going to be embedded in the global pargroup
-~prox.group = ~group;
 
 //instance factory
 ~makeinstance = { | name = \out, p, src = \string |
@@ -75,41 +79,34 @@ s.waitForBoot{
 	nil;
 };
 
+// *** creation & control ***
+// creating a global ParGroup for supernova
+~group = ParGroup.new; // ~group.freeAll;
+// creating a global ProxySpace
+~prox = ProxySpace(s);
+~prox.fadeTime = 2;
+// the proxyspace is going to be embedded in the global pargroup
+~prox.group = ~group;
+
 // test per instance set and group set
 ~makeinstance.value(\test1, ~prox, \string);
 ~makeinstance.value(\test2, ~prox, \string);
 ~makeinstance.value(\test3, ~prox, \pinksin);
+
 // change test3 source
 ~makeinstance.value(\test3, ~prox, \testtone);
-
-//  Creation with itteration
-20.do({ arg item;
-	var nodename=("testNode"++item).asSymbol;
-	postf("creating % \n", nodename);
-	~makeinstance.value(nodename.asSymbol, ~prox, \pinksin);
-});
-
-//  Scheduled creation
-fork {
-    3.do {  arg item;
-
-		var nodename=("testNodesched"++item).asSymbol;
-		postf("creating % \n", nodename);
-		~makeinstance.value(nodename.asSymbol, ~prox, \pinksin);
-
-        1.wait;
-    };
-    "DONE".postln;
-}
 
 // list ProxySpace internal proxies:
 ~prox.existingProxies;
 ~cleaninstance.value(\test2, ~prox);
 ~prox.existingProxies;
+~makeinstance.value(\test2, ~prox, \string);
+~prox.existingProxies;
 
 //pause instance
 ~prox[\test3].set(\gainDB, -30);
-~pauseinstance.value(\test3,~prox);
+~pauseinstance.value(\test3, ~prox);
+~prox.existingProxies;
 ~makeinstance.value(\test3, ~prox, \testtone);
 
 // per instance set
@@ -120,9 +117,43 @@ fork {
 //group set
 ~group.set(\aziDeg, 90);
 ~group.set(\t_trig, 1);
+~group.set(\gainDB, -50);
 
+// *** busses ***
+~groupBus = ParGroup.new(); // ~group.freeAll;
+// creating a global ProxySpace
+~proxBus = ProxySpace(s);
+~proxBus.fadeTime = 2;
+// the proxyspace is going to be embedded in the global pargroup
+~proxBus.group = ~groupBus;
 
-// CPU load test
+~proxBus.existingProxies;
+~makeinstance.value(\test1, ~proxBus, \string_third_aux);
+~makeinstance.value(\test2, ~proxBus, \string_third_aux);
+~groupBus.set(\gainDB, -10);
+~proxBus[\test1].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
+~proxBus[\test2].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
+
+~groupEffect = ParGroup.new(addAction: \addToTail); // ~group.freeAll;
+// creating a global ProxySpace
+~proxEffect = ProxySpace(s);
+~proxEffect.fadeTime = 2;
+// the proxyspace is going to be embedded in the global pargroup
+~proxEffect.group = ~groupEffect;
+// reverb from third aux bus
+~proxEffect[\rev].set(\in, ~scbr.aux[2]);
+~proxEffect[\rev].set(\mix, 1);  //wet only
+~proxEffect[\rev].set(\room, 0.9);
+~proxEffect[\rev].set(\damp, 1);
+~proxEffect[\rev].set(\aziDeg, -180);
+~proxEffect[\rev].set(\gainDB, -20);
+~makeinstance.value(\rev, ~proxEffect, \busreverb);
+
+// play with reverb
+~proxBus[\test1].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
+~proxBus[\test2].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
+
+// *** CPU load test ***
 ~groupCPU = ParGroup.new; // ~group.freeAll;
 // creating a global ProxySpace
 ~proxCPU = ProxySpace(s);
@@ -132,7 +163,14 @@ fork {
 
 // play until all CPU are loaded (~70%)
 // (no sound since string must be trigered)
-~makeinstance.value((\test ++ rrand(0, 10000).asSymbol), ~proxCPU, \string);
+r = Routine {
+	loop {
+		~makeinstance.value((\test ++ rrand(0, 10000).asSymbol), ~proxCPU, \string);
+		0.1.wait;
+	}
+};
+r.play;
+r.stop;
 
 // list ProxySpace internal proxies:
 ~proxCPU.existingProxies;

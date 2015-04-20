@@ -12,24 +12,29 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (
-~scbrMaker = { | srcPath = "."|
+~scbrMaker = { | numAudioAux = 0 |
 	var e = Environment.make({
 		// TODO use try catch with this
 		~pluginLoader;
 		~synthDefFactory;
 		~cOSCMaker;
+		~auxbus;
+		~aux;
 
-		~makeSynthDef = { | self, name, srcSymbol, spatSymbolArray, busShiftArray = #[0] |
+		~makeSynthDef = { | self, name, srcSymbol, spatSymbolArray, busShiftArray = #[0], toBusArray = #[] |
 			// TODO try catch
 			self.synthDefFactory.makeSynthDef(name,
 				self.pluginLoader.audioPlugins.at(srcSymbol),
 				spatSymbolArray.collect({ arg item, i;
 					self.pluginLoader.spatPlugins.at(item)}),
-				busShiftArray);
+				busShiftArray,
+				toBusArray);
 			nil;  // return
 		};
 	});  // Environment.make
 	e.know = true;
+	e.auxbus = Bus.audio(s, numAudioAux);
+	e.aux = Array.fill(numAudioAux, {arg i; e.auxbus.index + i });
 	e.pluginLoader = ~scbrPlugins.value();
 	e.synthDefFactory = ~scbrFactory.value();
 	e.oscInterface = ~cOSCMaker.value();

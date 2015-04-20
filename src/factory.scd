@@ -26,7 +26,13 @@
 		// @destfunArray    an array of function reading the mono signal
 		//                  from the source and write computed signals to outbus
 		// @busShiftArray   position of the first bus to write
-		~makeSynthDef = {| self, name, srcfunc, destFunArray, busShiftArray = #[0] |
+		// @toBusArray      send src to busses which indexes are in the array
+		~makeSynthDef = {| self,
+			name,
+			srcfunc,
+			destFunArray,
+			busShiftArray = #[0],
+			toBusArray = #[] |
 			SynthDef(name,
 				// can the "gate" arg name be changed to avoid conflicts with plugin-synthDefs that use it
 				{| gate = 1,  aziDeg = 0, eleDeg = 0, gainDB = 0, delayMs = 1, lpHz = 15000, spread = 1  |
@@ -34,6 +40,11 @@
 					in = SynthDef.wrap(srcfunc);
 					// fade in set to as short as possible for percussive cases
 					env = Linen.kr(gate, 0.005, 1, 0.01, 2);
+					//in -> busses
+					toBusArray.do {arg item;
+						Out.ar(item, env * in);
+					};
+					// in -> dest
 					destFunArray.do{ arg item, i;
 						var out = SynthDef.wrap(item, prependArgs: [in, aziDeg, eleDeg, gainDB, delayMs, lpHz, spread]);
 						//var out = SynthDef.wrap(item, prependArgs: [in, vol, delay, azi, ele]);
