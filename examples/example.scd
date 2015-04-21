@@ -14,7 +14,6 @@
 
 // s.reboot; s.makeGui;
 // s.meter;
-// ~scbr.auxbus.scope;
 
 (
 s.waitForBoot{
@@ -27,6 +26,7 @@ s.waitForBoot{
 	~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus);
 	// printing internal aux array with bus indexes
 	~scbr.aux;
+    // ~scbr.auxbus.scope;
 	// loading source plugins
 	~scbr.pluginLoader.loadAudioPlugins(~rootSrcPath ++ "/audiosources/*.scd");
 	// see the loaded plugins in the console

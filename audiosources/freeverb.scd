@@ -12,6 +12,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ~name = \freeverb;
-~function = { arg in, mix=0.0, room=0.5, damp=0.5;
+~function = { arg in, mix=1.0, room=0.5, damp=0.5;
 	FreeVerb.ar(In.ar(in), mix, room, damp);
 };
