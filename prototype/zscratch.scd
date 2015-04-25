@@ -45,10 +45,6 @@ if ( ~domePlaybackFormat != nil,
 });
 
 
-
-
-
-
 ~allNodes.size;
 ~allNodes.clear;
 
@@ -98,20 +94,33 @@ if ( ~domePlaybackFormat != nil,
 
 
 
+~clearScene.value();
 
 // generate N instances
 
-100.do({ arg item;
-	var nodename=("testNode"++item).asSymbol;
+// "ball_142:spatOSCsource_143"
+
+150.do({ arg item;
+	var nodename=("ball_"++item++":spatOSCsource_"++(item+1)).asSymbol;
 	var connectionName = "testNode"++item++"->ear";
 	//postf("creating: "++nodename++"\n");
 	~createSource.value(nodename);
-	~createConnection.value(nodename, "ear");
+	~createConnection.value(nodename, "listener:spatOSClistener_0");
 	~setUri.value(nodename, "plugin://zkarpluck1");
-	~connectionCallback.value( ["/spatosc/core/connection/"++ connectionName ++"/spread", 5]);
-	~connectionCallback.value( ["/spatosc/core/connection/"++ connectionName++"/update", 45,0,-80,1,14000]);
+	//~connectionCallback.value( ["/spatosc/core/connection/"++ connectionName ++"/spread", 5]);
+	//~connectionCallback.value( ["/spatosc/core/connection/"++ connectionName++"/update", 45,0,-80,1,14000]);
+
 });
 ~allNodes.size;
+
+
+	~connectionName = ~reverbName++"->listener:spatOSClistener_0";
+~connectionCallback.value( ["/spatosc/core/connection/"++ ~connectionName++"/update", 45,0,-30,1,14000]);
+
+~sourceCallback.value( ["/spatosc/core/source/"++~reverbName++"/prop", "outputDB", -30] );
+
+
+
 
 
 // delete instances
@@ -141,8 +150,22 @@ t.stop;
 
 
 ~allNodes.size;
+~allNodes.dump;
 
 
+//mix=1.0, room=0.5, damp=0.5
+
+//~setUri.value(~reverbName.asSymbol, "plugin://busreverb");
+
+
+
+~setProperty.value(~reverbName, \in, ~scbr.aux[0]);
+~setProperty.value(~reverbName, \outputDB, 10);
+~setProperty.value(~reverbName, \mix, 1);  //wet only
+~setProperty.value(~reverbName, \room, 0.8);
+~setProperty.value(~reverbName, \damp, 0.1);
+~setProperty.value(~reverbName, \aziDeg, -180);
+~setProperty.value(~reverbName, \gainDB, -0);
 
 
 	~globalSet.value(\gainDB, -80);
@@ -155,13 +178,27 @@ t.stop;
 
 
 
-~globalSet.value(\c1, 0.7);
-~globalSet.value(\c3, 3);
 
 
 
+// harp 1
+~globalSet.value(\c1, 0.4);
+~globalSet.value(\c3, 5);
+~globalSet.value(\fb, 0);
+
+// harp 2
+~globalSet.value(\c1, 0.38);
+~globalSet.value(\c3, 6.11);
+~globalSet.value(\fb, 0);
+
+// harp 3 (longer dur)
 ~globalSet.value(\c1, 0.15);
 ~globalSet.value(\c3, 4.51);
+~globalSet.value(\fb, 0);
+
+// harp 3 (feather)
+~globalSet.value(\c1, 0.15);
+~globalSet.value(\c3, 9.51);
 ~globalSet.value(\fb, 0);
 
 
@@ -174,13 +211,16 @@ t.stop;
 ~globalSet.value(\c1, 0.2);
 ~globalSet.value(\c3, 3);
 
-// lantern zoner
 
+// lantern zoner
 ~globalSet.value(\c1, 0.11);
 ~globalSet.value(\c3, 3);
 ~globalSet.value(\fb, 100);
 
-
+// lantern zoner (shorter)
+~globalSet.value(\c1, 0.7);
+~globalSet.value(\c3, 3);
+~globalSet.value(\fb, 100);
 
 
 

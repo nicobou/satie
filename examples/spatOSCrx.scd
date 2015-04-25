@@ -20,6 +20,7 @@ OSC RX message specification is based on the SPATOSC specification  (see:   http
 s.makeGui;
 s.meter
 
+s.dump
  s.reboot;
 ~allNodes.size;
 */
@@ -30,10 +31,10 @@ s.meter
 ~superNovaFlag = true;
 
 //~domePlaybackFormat = \domeVBAP;       // for sato
-//~domePlaybackFormat = \labodomeVBAP;      // for labodome
+~domePlaybackFormat = \labodomeVBAP;      // for labodome
 
 //~outAudioDev = "Soundflower (64ch)";   //  for multi-channel testing without hardware on OSX
-//~outAudioDev = "MADIface USB (23635751)";     // for labodome or SATO
+~outAudioDev = "MADIface USB (23635751)";     // for labodome or SATO
 
 
 if ( ~superNovaFlag != nil,
@@ -64,19 +65,20 @@ if ( ~domePlaybackFormat != nil,
 
 s.waitForBoot{
 
+
 	// finding source directory
 	~rootSrcPath = thisProcess.nowExecutingPath.dirname ++ "/..";
 	(~rootSrcPath ++ "/src/*.scd").pathMatch.do({arg item; item.loadPaths});
 
+	~num_aux_bus = 5;
 	// creating a sc-basic-renderer
-	~scbr = ~scbrMaker.value(~rootSrcPath);
-
+	~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus);
+	// printing internal aux array with bus indexes
+	~scbr.aux;
 	// loading source plugins
 	~scbr.pluginLoader.loadAudioPlugins(~rootSrcPath ++ "/audiosources/*.scd");
-
 	// see the loaded plugins in the console
-	~scbr.pluginLoader.audioPlugins.postln;
-
+	~scbr.pluginLoader.audioPlugins;
 	// loading spatializer plugins
 	~scbr.pluginLoader.loadSpatPlugins(~rootSrcPath ++ "/spatializers/*.scd");
 	~scbr.pluginLoader.spatPlugins;
@@ -106,9 +108,12 @@ s.waitForBoot{
 			~scbr.makeSynthDef(\dust, \DustDust, [~domePlaybackFormat], [0]);
 			~scbr.makeSynthDef(\default, \default, [~domePlaybackFormat], [0]);
 			~scbr.makeSynthDef(\zkarpluck0, \zkarpluck0, [~domePlaybackFormat], [0]);
-			~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [~domePlaybackFormat], [0]);
+			//~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [~domePlaybackFormat], [0]);
 			~scbr.makeSynthDef(\test, \testtone,  [~domePlaybackFormat], [0]);
 			~scbr.makeSynthDef(\zbell1, \zbell1, [~domePlaybackFormat], [0]);
+			~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [~domePlaybackFormat], [0], [~scbr.aux[0]]);
+			~scbr.makeSynthDef(\busreverb, \freeverb, [~domePlaybackFormat], [0]);
+
 		}
 	);
 
@@ -121,13 +126,43 @@ s.waitForBoot{
 
 	// ******************** usage with JITlib & ProxySpace *********************
 
-	// creating a global ParGroup for supernova
-	~group = ParGroup.new; // ~group.freeAll;
-	// creating a global ProxySpace
-	~prox = ProxySpace(s);
-	~prox.fadeTime = 2;
-	// the proxyspace is going to be embedded in the global pargroup
-	~prox.group = ~group;
+
+		if ( ~prox == nil,
+		{
+
+		// creating a global ProxySpace
+			~prox = ProxySpace(s);
+			~prox.fadeTime = 2;
+
+			// creating a global SOURCE ParGroup for supernova
+			~group = ParGroup.new; // ~group.freeAll;
+
+			// the proxyspace is going to be embedded in the global pargroup
+			~prox.group = ~group;
+	});
+
+
+	if ( ~proxEffect == nil,
+		{
+			// creating a global ProxySpace for effects
+			~proxEffect = ProxySpace(s);
+			~proxEffect.fadeTime = 2;
+
+			// creating a global EFFECT ParGroup for supernova,  located at tail of chain
+			~groupEffect = ParGroup.new(addAction: \addToTail);
+
+			// the proxyspace is going to be embedded in the global pargroup
+			~proxEffect.group = ~groupEffect;
+	});
+
+
+	// pre-makeinstance
+
+	~premakeinstance = { | name = \out, p |
+
+		p[name].set(\initialize, 1);
+			nil;
+	};
 
 	//instance factory
 	~makeinstance = { | name = \out, p, src = \string |
@@ -215,6 +250,7 @@ s.waitForBoot{
 	~connectionCallback = { | args |
 		var nodeName, listenerName, connectionName, type, temp, charIndex;
 		var aziDeg, eleDeg, gainDB, delayMs, lpHz, spread;
+		var thisProxy;
 
 		//args.postln;
 		connectionName = args[0].asString.split[4].asSymbol;   // this is terrible.  ThespatOSC message format could be improved here
@@ -223,6 +259,8 @@ s.waitForBoot{
 
 		nodeName = connectionName.asString.subStr(0, charIndex-1);
 		//postf("~connectionCallback:  connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
+
+		thisProxy = ~allNodes[nodeName.asSymbol].at(\proxy);
 
 		switch(type,
 			'update',
@@ -238,7 +276,7 @@ s.waitForBoot{
 						delayMs = args[4];
 						lpHz = args[5];
 
-						~prox[nodeName.asSymbol].set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB, \delayMs, delayMs, \lpHz, lpHz);
+						thisProxy[nodeName.asSymbol].set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB, \delayMs, delayMs, \lpHz, lpHz);
 
 					}
 				)
@@ -249,7 +287,7 @@ s.waitForBoot{
 					{
 						//postf("~connectionCallback:  connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
 						spread = args[1];  // get values from vector, and write to connectionState
-						~prox[nodeName.asSymbol].set(\spread, spread);
+						thisProxy[nodeName.asSymbol].set(\spread, spread);
 					},
 					// else
 					{"~connectionCallback: OSCrx spread message with no values".warn; })
@@ -299,6 +337,10 @@ s.waitForBoot{
 	};
 
 	// define some functions to handle actions
+
+		~reverbName="resonance-SC:spatOSCsource_1";  //  HACK to set up rvb node
+
+
 	~createSource = { | sourceName |
 		if (~allNodes.includesKey(sourceName),
 			{
@@ -308,16 +350,29 @@ s.waitForBoot{
 			{
 				postf("~createSource:   %\n", sourceName);
 				~allNodes[sourceName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
-				~allNodes[sourceName.asSymbol].put(\plugin, \dummyPlugin);
+				~allNodes[sourceName.asSymbol].put(\plugin, \nil);
 
-				~makeinstance.value(sourceName.asSymbol, ~prox, \dummyPlugin);   // generates  a proxyspace node using dummy
 
-				~scbr.oscInterface.sourceOSC(sourceName.asSymbol, ~sourceCallback);   // create OSC callback for this source
+				if (~reverbName.asSymbol == sourceName.asSymbol,   // set EFFECTS proxy
+					{
+						postf("~createSource: setting  EFFECTS GROUP proxy  node %\n", sourceName);
+						~allNodes[sourceName.asSymbol].put(\proxy, ~proxEffect );
+						~proxEffect[sourceName.asSymbol].set(\in, ~scbr.aux[0]);  //  HACK to set up rvb node
 
-				//'adding synth'.postln;
-			}
-		);
-	};
+					},
+					// else set normal proxy
+					{
+					~allNodes[sourceName.asSymbol].put(\proxy, ~prox );
+
+			});
+			//~makeinstance.value(sourceName.asSymbol, ~prox, \dummyPlugin);   // generates  a proxyspace node using dummy
+			~premakeinstance.value(sourceName.asSymbol,  ~allNodes[sourceName.asSymbol].at(\proxy));
+	});
+	~scbr.oscInterface.sourceOSC(sourceName.asSymbol, ~sourceCallback);   // create OSC callback for this source
+
+	//'adding synth'.postln;
+};
+
 
 	~createConnection = { |sourceName listenerName |
 		var connectionName = sourceName ++ "->" ++ listenerName;
@@ -344,12 +399,24 @@ s.waitForBoot{
 
 
 	// update a node's plugin (synthdef)
+
+
 	~setPlugin = { | nodeName pluginName |
 
 		~allNodes[nodeName.asSymbol].put(\plugin, pluginName.asSymbol);
 
+		postf("~setPlugin: setting plugin % for node %\n", pluginName, nodeName);
 		// this assignment will automatically kill off the previous one; all the proxy's current synthdef state will be copied to the new one
-		~makeinstance.value(nodeName.asSymbol, ~prox, pluginName.asSymbol);
+
+	/*	if (~reverbName.asSymbol == nodeName.asSymbol,
+			{
+				postf("~setPlugin: setting \in param node %\n", nodeName);
+				~prox[nodeName.asSymbol].set(\in, ~scbr.aux[0]);  //  HACK to set up rvb node
+			});
+*/
+
+				~makeinstance.value(nodeName.asSymbol, ~allNodes[nodeName.asSymbol].at(\proxy) , pluginName.asSymbol);
+
 	};
 
 
@@ -382,7 +449,8 @@ s.waitForBoot{
 		var thisProxy = ~allNodes[nodeName.asSymbol].at(\proxy);
 
 		//postf("~setProperty: seting % of % to %\n", property, nodeName, value);
-		~prox[nodeName.asSymbol].set(property.asSymbol, value);
+
+		thisProxy[nodeName.asSymbol].set(property.asSymbol, value);
 	};
 
 
@@ -390,8 +458,13 @@ s.waitForBoot{
 	~setState = { | nodeName,  state |
 		var thisProxy = ~allNodes[nodeName.asSymbol].at(\proxy);
 		if ( (state > 0),
-			//{thisProxy[\out].resume},
-			//{thisProxy[\out].pause}
+			{
+				~makeinstance.value(nodeName.asSymbol, thisProxy, ~allNodes[nodeName.asSymbol].at(\plugin).asSymbol);
+			},
+			//else turn state off
+			{
+				~pauseinstance.value(nodeName.asSymbol, thisProxy );
+			}
 		);
 		//postf("~setState: seting state of % to %\n", nodeName, state);
 	};
@@ -406,7 +479,7 @@ s.waitForBoot{
 		if ( (valueCount >= 1) ,    // pass vector
 			{
 
-				~prox[nodeName.asSymbol].set(eventName.asSymbol, args);
+				thisProxy[nodeName.asSymbol].set(eventName.asSymbol, args);
 
 				//thisProxy[\out].set(eventName, args);
 			},
@@ -418,7 +491,7 @@ s.waitForBoot{
 					},
 					// else  no args.. just pass 1
 					{
-						~prox[nodeName.asSymbol].set(eventName.asSymbol, 1);
+						thisProxy[nodeName.asSymbol].set(eventName.asSymbol, 1);
 					}
 				);
 		});
@@ -460,8 +533,9 @@ s.waitForBoot{
 		var node = ~allNodes[nameSym];
 		var connectionName = node.at(\connectionName);
 		var nodeKeys = node.keys;
+		var thisProxy = ~allNodes[nameSym].at(\proxy);
 
-		~cleaninstance.value(nameSym, ~prox);
+		~cleaninstance.value(nameSym, thisProxy);
 
 		//postf("~clearing:  node: % and connection: %\n",  nodeName, connectionName);
 
@@ -505,6 +579,29 @@ s.waitForBoot{
 
 
 	s.sync;
+
+
+		// HACK:   create reverb EFFECTS node and set input to  relative aux 0
+/*
+	 ~reverbName="resonance-SC:spatOSCsource_1";
+	 ~createSource.value(~reverbName.asSymbol);
+	 ~createConnection.value(~reverbName.asSymbol, "listener:spatOSClistener_0");
+	 ~prox[~reverbName.asSymbol].set(\in, ~scbr.aux[0]);
+
+	 ~makeinstance.value(~reverbName.asSymbol, ~prox, \busreverb);
+
+		 ~makeinstance.value(\sheefaRev, ~prox, \busreverb);
+
+	postf("makeing % instance \n", ~reverbName);
+	*/
+
+	//
+	// ~allNodes[~reverbName.asSymbol].at(\plugin);
+
+	//~setUri.value(~reverbName.asSymbol, "plugin://busreverb");
+	//~prox[~reverbName].set(\gainDB, 0);
+	//~prox[~reverbName].set(\outputDB, 0);
+
 
 
 	/*  TEMP
@@ -563,7 +660,6 @@ s.waitForBoot{
 	~setUri.value(\testNode0, "plugin://default");
 
 
-
 	~globalSet.value(\fb, 100);
 
 	~globalSet.value(\pos, 0);
@@ -572,85 +668,6 @@ s.waitForBoot{
 
 	~globalSet.value(\gainDB, -30);
 	~globalSet.value(\spread, 10);
-
-
-
-
-	w=Window.new("group contrp;", Rect(30, 30, 400, 100)).front;
-	w.view.decorator=FlowLayout(w.view.bounds);
-	w.view.decorator.gap=8@2;
-
-
-	h = EZSlider(w, 380@20, "azi", ControlSpec(-180, 180, \lin, 1, 0));
-	h.action_({ |ez| ( ~globalSet.value(\aziDeg, (ez.value)))});
-
-	i = EZSlider(w, 380@20, "ele", ControlSpec(-90, 90, \lin, 1, 0));
-	i.action_({ |ez| (~globalSet.value(\eleDeg, (ez.value)))});
-
-	j = EZSlider(w, 380@20, "spread", ControlSpec(0, 100, \lin, 0.1, 1));
-	j.action_({ |ez| ( ~globalSet.value(\spread, (ez.value)))});
-
-
-
-	~allNodes[~nodeName].put(\connectionState,  Array.with(90,0,0,1,15000,100));   // create client-side state register for connection values
-	~connectionState = ~allNodes[~nodeName].at(\connectionState);
-
-
-	~allNodes[~nodeName].at(\connectionState)[4];
-
-
-	~allNodes[~nodeName].at(\connectionState)[4];
-
-	// \aziDeg, 0, \eleDeg, 0, \gainDB, 0, \delayMs, 1, \lpHz, 15000, \spread, 1  // default connection values
-
-
-
-	~setUri.value(~nodeName, "plugin://default");
-
-	~setUri.value(~nodeName, "plugin://labodomeTest");
-
-	~allNodes[~nodeName].at(\pluginName);
-
-	~allNodes[~nodeName].at( \pluginNode ).run(1);
-
-	~allNodes[~nodeName].at( \pluginNode ).set(\t_gate, 1);
-
-	~allNodes[~nodeName].at( \pluginNode ).set(\outputDB, 18);
-
-
-	~allNodes[~nodeName].at( \pluginNode ).set(\spread, 9);
-
-	~allNodes[~nodeName].at( \pluginNode ).get(\spread, { arg value; ("spread is now:" + value ).postln });
-
-
-	~spread.postln;
-
-	~allNodes[~nodeName].at( \pluginNode ).dump;
-
-	~allNodes[~nodeName].at(\groupName).dump;
-
-	~allNodes[~nodeName].at( \pluginNode )
-
-	~allNodes[~nodeName].includesKey( \pluginNode )
-
-
-	~allNodes[~nodeName].at( \pluginNode ).set(\gainDB, 0);
-
-	~sourceCallback.value( ["/spatosc/core/source/"++ ~nodeName ++"/event", \note, 50, 0.01,1]);
-	~sourceCallback.value( ["/spatosc/core/source/"++ ~nodeName ++"/event", \t_trig, 1]);
-
-	~allNodes[~nodeName].at( \pluginNode ).set(\note, [60,0.2,0]);
-	~allNodes[~nodeName].at( \pluginNode ).set(\t_trig, 1);
-
-
-	~connectionCallback.value( ["/spatosc/core/connection/"++ ~connectionName ++"/spread", 5]);
-
-
-	~deleteSynth.value(~nodeName);
-	~clearScene.value();
-
-
-
 
 
 	*/
