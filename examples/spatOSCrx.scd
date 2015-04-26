@@ -43,9 +43,8 @@ if ( ~superNovaFlag != nil,
 		Server.supernova;
 });
 
-o = Server.local.options;   // set up options
+o = Server.local.options;   // default set up options
 o.memSize = 2**19;        // probably should just leave this the same for everyting
-//o.blockSize = 2048;
 
 
 if ( ~outAudioDev != nil ,
@@ -55,7 +54,7 @@ if ( ~outAudioDev != nil ,
 
 // o.device = "MADIface USB (23635751)";     // set for dome or labodome
 
-if ( ~listeningFormat != nil,
+if ( (~listeningFormat == \domeVBAP || ~listeningFormat == \labodomeVBAP) ,
 	{
 		o.memSize = 2**19;
 		o.blockSize = 2048;
