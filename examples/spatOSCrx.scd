@@ -30,11 +30,12 @@ s.dump
 
 ~superNovaFlag = true;
 
-//~domePlaybackFormat = \domeVBAP;       // for sato
-~domePlaybackFormat = \labodomeVBAP;      // for labodome
+//~listeningFormat = \domeVBAP;       // for sato
+//~listeningFormat = \labodomeVBAP;      // for labodome
+~listeningFormat = \stereoListener;      // for labodome
 
 //~outAudioDev = "Soundflower (64ch)";   //  for multi-channel testing without hardware on OSX
-~outAudioDev = "MADIface USB (23635751)";     // for labodome or SATO
+//~outAudioDev = "MADIface USB (23635751)";     // for labodome or SATO
 
 
 if ( ~superNovaFlag != nil,
@@ -54,7 +55,7 @@ if ( ~outAudioDev != nil ,
 
 // o.device = "MADIface USB (23635751)";     // set for dome or labodome
 
-if ( ~domePlaybackFormat != nil,
+if ( ~listeningFormat != nil,
 	{
 		o.memSize = 2**19;
 		o.blockSize = 2048;
@@ -85,12 +86,12 @@ s.waitForBoot{
 
 	~scbr.makeSynthDef(\dummyPlugin, \emptySource, [\emptySpat], [0]);    // dummy synthdef, used for new nodes
 
-	if ( ~domePlaybackFormat == nil,
+	if ( ~listeningFormat == nil,
 		{
 			// NEEDS IMPROVEMENT
 			// all plugins (synthDefs) have to be evaluated in "pre-runtime" herea
 			//
-			'generating synthdefs'.postln;
+			'NO LISTENING FORMAT SELECTED : generating synthdefs'.postln;
 
 			~scbr.makeSynthDef(\pink, \PinkSin, [\stereoPanner, \monoSpat], [0, 2]);
 			~scbr.makeSynthDef(\dust, \DustDust, [\stereoPanner, \monoSpat], [0, 2]);
@@ -99,20 +100,19 @@ s.waitForBoot{
 			~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [\stereoListener], [0]);
 			~scbr.makeSynthDef(\zbell1, \zbell1, [\stereoListener], [0]);
 			~scbr.makeSynthDef(\test, \testtone, [\stereoListener], [0]);
-			~scbr.makeSynthDef(\labodomeTest, \default, [\labodomeVBAP], [0]);
 		},
 		// else evalualte for dome listeners
 		{
-			postf("generating synthdefs for %\n", ~domePlaybackFormat);
-			~scbr.makeSynthDef(\pink, \PinkSin, [~domePlaybackFormat], [0]);
-			~scbr.makeSynthDef(\dust, \DustDust, [~domePlaybackFormat], [0]);
-			~scbr.makeSynthDef(\default, \default, [~domePlaybackFormat], [0]);
-			~scbr.makeSynthDef(\zkarpluck0, \zkarpluck0, [~domePlaybackFormat], [0]);
-			//~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [~domePlaybackFormat], [0]);
-			~scbr.makeSynthDef(\test, \testtone,  [~domePlaybackFormat], [0]);
-			~scbr.makeSynthDef(\zbell1, \zbell1, [~domePlaybackFormat], [0]);
-			~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [~domePlaybackFormat], [0], [~scbr.aux[0]]);
-			~scbr.makeSynthDef(\busreverb, \freeverb, [~domePlaybackFormat], [0]);
+			postf("generating synthdefs for %\n", ~listeningFormat);
+			~scbr.makeSynthDef(\pink, \PinkSin, [~listeningFormat], [0]);
+			~scbr.makeSynthDef(\dust, \DustDust, [~listeningFormat], [0]);
+			~scbr.makeSynthDef(\default, \default, [~listeningFormat], [0]);
+			~scbr.makeSynthDef(\zkarpluck0, \zkarpluck0, [~listeningFormat], [0]);
+			//~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [~listeningFormat], [0]);
+			~scbr.makeSynthDef(\test, \testtone,  [~listeningFormat], [0]);
+			~scbr.makeSynthDef(\zbell1, \zbell1, [~listeningFormat], [0]);
+			~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [~listeningFormat], [0], [~scbr.aux[0]]);
+			~scbr.makeSynthDef(\busreverb, \freeverb, [~listeningFormat], [0]);
 
 		}
 	);
@@ -156,14 +156,6 @@ s.waitForBoot{
 	});
 
 
-	// pre-makeinstance
-
-	~premakeinstance = { | name = \out, p |
-
-		p[name].set(\initialize, 1);
-			nil;
-	};
-
 	//instance factory
 	~makeinstance = { | name = \out, p, src = \string |
 		// ensuring not extra bus is allocated:
@@ -197,22 +189,47 @@ s.waitForBoot{
 			'createSource',
 			{
 				if ( (msg.size < 3 ) ,
-					{"~coreCallback: OSCrx createSource message missing values".warn;},
+					{"~coreCallback: OSCrx createSource message missing values".warn;
+						postf("CREATESOURCE MESS LEN: %", msg.size);
+
+					},
 					// else
 					{
 						var sourceName = msg[2];
-						~createSource.value(sourceName);
+						var uriName;
+
+						if (msg.size == 3,
+							{
+								uriName = "";
+							},
+							// else
+							{
+								uriName = msg[3];
+						});
+
+						~createSource.value(sourceName, uriName);
 					}
 				)
 			},
 			'createSoundSource',   // this will be dropped as soon as spatOSC is updated to use the "createSource" message instead
 			{
 				if ( (msg.size < 3 ) ,
-					{"~coreCallback: OSCrx createSource message missing values".warn;},
+					{"~coreCallback: OSCrx createSource message missing values".warn;
+					},
 					// else
 					{
 						var sourceName = msg[2];
-						~createSource.value(sourceName);
+						var uriName;
+
+						if (msg.size == 3,
+							{
+								uriName = "";
+							},
+							// else
+							{
+								uriName = msg[3];
+						});
+						~createSource.value(sourceName, uriName);
 					}
 				)
 			},
@@ -341,18 +358,19 @@ s.waitForBoot{
 		~reverbName="resonance-SC:spatOSCsource_1";  //  HACK to set up rvb node
 
 
-	~createSource = { | sourceName |
+	~createSource = { | sourceName uriName |
 		if (~allNodes.includesKey(sourceName),
 			{
-				postf("~createSource:   % exists, no action\n", sourceName);
+				postf("~createSource:   % exists, no action \n", sourceName);
 			},
 			// else create new node
 			{
-				postf("~createSource:   %\n", sourceName);
+				postf("~createSource:   %  with uri: %\n", sourceName, uriName);
 				~allNodes[sourceName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
 				~allNodes[sourceName.asSymbol].put(\plugin, \nil);
 
 
+				// assign proxy space
 				if (~reverbName.asSymbol == sourceName.asSymbol,   // set EFFECTS proxy
 					{
 						postf("~createSource: setting  EFFECTS GROUP proxy  node %\n", sourceName);
@@ -362,16 +380,25 @@ s.waitForBoot{
 					},
 					// else set normal proxy
 					{
-					~allNodes[sourceName.asSymbol].put(\proxy, ~prox );
+						~allNodes[sourceName.asSymbol].put(\proxy, ~prox );
 
-			});
-			//~makeinstance.value(sourceName.asSymbol, ~prox, \dummyPlugin);   // generates  a proxyspace node using dummy
-			~premakeinstance.value(sourceName.asSymbol,  ~allNodes[sourceName.asSymbol].at(\proxy));
-	});
-	~scbr.oscInterface.sourceOSC(sourceName.asSymbol, ~sourceCallback);   // create OSC callback for this source
+					}
+				);
 
-	//'adding synth'.postln;
-};
+				// now set a plugin to complete instance creation
+				if (uriName == "",
+					{
+						~setPlugin.value(sourceName.asSymbol,\dummyPlugin);
+					},
+					// else
+					{
+						~setUri.value(sourceName.asSymbol,uriName.asSymbol);
+					}
+				);
+				~scbr.oscInterface.sourceOSC(sourceName.asSymbol, ~sourceCallback);   // create OSC callback for this source
+			}
+		);
+	};
 
 
 	~createConnection = { |sourceName listenerName |
@@ -402,45 +429,62 @@ s.waitForBoot{
 
 
 	~setPlugin = { | nodeName pluginName |
+		var validPluginName = pluginName;
 
-		~allNodes[nodeName.asSymbol].put(\plugin, pluginName.asSymbol);
+		//postf("~setPlugin: node: %    NEW: %  CURRENT: % \n", nodeName, pluginName.asSymbol, ~allNodes[nodeName.asSymbol].at(\plugin).asSymbol);
 
-		postf("~setPlugin: setting plugin % for node %\n", pluginName, nodeName);
-		// this assignment will automatically kill off the previous one; all the proxy's current synthdef state will be copied to the new one
 
-	/*	if (~reverbName.asSymbol == nodeName.asSymbol,
+		// NEED A REAL SYNTH DEF CHECK HERE- set the \dummyPlugin if it fails
+		if ( validPluginName.asString == "", { validPluginName = \dummyPlugin; });
+
+
+		if (validPluginName.asSymbol != ~allNodes[nodeName.asSymbol].at(\plugin).asSymbol,
 			{
-				postf("~setPlugin: setting \in param node %\n", nodeName);
-				~prox[nodeName.asSymbol].set(\in, ~scbr.aux[0]);  //  HACK to set up rvb node
-			});
-*/
 
-				~makeinstance.value(nodeName.asSymbol, ~allNodes[nodeName.asSymbol].at(\proxy) , pluginName.asSymbol);
+				~allNodes[nodeName.asSymbol].put(\plugin, validPluginName.asSymbol);
+
+				~makeinstance.value(nodeName.asSymbol, ~allNodes[nodeName.asSymbol].at(\proxy) , validPluginName.asSymbol);
+			},
+			{
+				//postf("~setPlugin: ignoring set plugin % for node % : plugin already set \n", pluginName, nodeName);
+			}
+		);
 
 	};
 
 
 	// value is a uri path:   file://~/Desktop/sheefa8.aif, plugin://testnoise~ , adc://1
-	~setUri = { | name, value |
-		var charIndex, uriPath, type, temp;
+	~setUri = { | nodeName, uriPath |
+		var charIndex, uriName, type, temp;
 
 		// type://name (i.e. plugin://DustDust, file://<path>
 
-		charIndex = value.asString.find("://");
+		// check URI name to make sure its valid
 
-		temp = value.asString.subStr(charIndex);
-		type = value.asString.subStr(0, charIndex-1);
-		uriPath = temp.asString.replace("://", "");
-
-		//postf("~setUri nodeName: %, type: %  plugName: %\n", name, type, uriPath);
-		// still needs to be expanded for soundfiles, adc, web etc..
-		switch( type,
-			"plugin", {
-				~setPlugin.value(name.asSymbol, uriPath)
-
+		if (uriPath.asString.contains("plugin://") == false,
+			{
+				postf("~setUri: WARNING: node: %  bad URI format : %,  setting to \dummyPlugin", nodeName, uriPath);
+				~setPlugin.value(nodeName.asSymbol, \dummyPlugin);
 			},
-			// "file", {~setPlugin.value(name, uriPath)}  not implemented yet
-		);
+
+			// else  // path ok, proceed
+			{
+				charIndex = uriPath.asString.find("://");
+
+				temp = uriPath.asString.subStr(charIndex);
+				type = uriPath.asString.subStr(0, charIndex-1);
+				uriName = temp.asString.replace("://", "");
+
+				//postf("~setUri nodeName: %, type: %  plugName: %\n", name, type, uriPath);
+				// still needs to be expanded for soundfiles, adc, web etc..
+				switch( type,
+					"plugin", {
+						~setPlugin.value(nodeName.asSymbol, uriName)
+
+					},
+					// "file", {~setPlugin.value(name, uriPath)}  not implemented yet
+				);
+		});
 	};
 
 
