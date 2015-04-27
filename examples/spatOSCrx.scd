@@ -30,9 +30,9 @@ s.dump
 
 ~superNovaFlag = true;
 
-//~listeningFormat = \domeVBAP;       // for sato
+~listeningFormat = \domeVBAP;       // for sato
 //~listeningFormat = \labodomeVBAP;      // for labodome
-~listeningFormat = \stereoListener;      // for labodome
+//~listeningFormat = \stereoListener;      // for labodome
 
 //~outAudioDev = "Soundflower (64ch)";   //  for multi-channel testing without hardware on OSX
 //~outAudioDev = "MADIface USB (23635751)";     // for labodome or SATO
@@ -47,19 +47,28 @@ o = Server.local.options;   // default set up options
 o.memSize = 2**19;        // probably should just leave this the same for everyting
 
 
-if ( ~outAudioDev != nil ,
-	{
-		o.device = ~outAudioDev;
-});
 
 // o.device = "MADIface USB (23635751)";     // set for dome or labodome
 
-if ( (~listeningFormat == \domeVBAP || ~listeningFormat == \labodomeVBAP) ,
+if ( ~listeningFormat == \domeVBAP,
 	{
-		o.memSize = 2**19;
-		o.blockSize = 2048;
 		o.numOutputBusChannels = 32;
+		~outAudioDev = "MADIface USB (23635751)";
 		// o.dump;
+});
+
+if ( ~listeningFormat == \labodomeVBAP,
+	{
+		o.numOutputBusChannels = 32;
+		~outAudioDev = "MADIface USB (23635751)";
+		// o.dump;
+});
+
+
+
+if ( ~outAudioDev != nil ,
+	{
+		o.device = ~outAudioDev;
 });
 
 

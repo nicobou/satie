@@ -134,19 +134,20 @@ if ( ~domePlaybackFormat != nil,
 
 t = Task({ {
 
-	100.do( { arg item;
+	149.do( { arg item;
 		var pitch = 55 + rand(50);
-		var nodename=("testNode"++item).asSymbol;
+		var nodename=("ball_"++item++":spatOSCsource_"++(item+1)).asSymbol;
 		~setEvent.value(nodename, \note, [pitch,1,1]);
 		~setEvent.value(nodename, \t_trig, 1);
+		item.postln;
 		0.1.wait;
 	});
 	//~globalSet.value(\t_trig, 1);
 
 	0.wait; }.loop });
 t.start;
-
 t.stop;
+
 
 
 ~allNodes.size;
