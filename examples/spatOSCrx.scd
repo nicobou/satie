@@ -30,9 +30,9 @@ s.dump
 
 ~superNovaFlag = true;
 
-~listeningFormat = \domeVBAP;       // for sato
+//~listeningFormat = \domeVBAP;       // for sato
 //~listeningFormat = \labodomeVBAP;      // for labodome
-//~listeningFormat = \stereoListener;      // for labodome
+~listeningFormat = \stereoListener;      // for labodome
 
 //~outAudioDev = "Soundflower (64ch)";   //  for multi-channel testing without hardware on OSX
 //~outAudioDev = "MADIface USB (23635751)";     // for labodome or SATO
@@ -59,7 +59,7 @@ if ( ~listeningFormat == \domeVBAP,
 
 if ( ~listeningFormat == \labodomeVBAP,
 	{
-		o.numOutputBusChannels = 32;
+		o.numOutputBusChannels = 24;
 		~outAudioDev = "MADIface USB (23635751)";
 		// o.dump;
 });
@@ -130,6 +130,16 @@ s.waitForBoot{
 
 	OSCdef(\createSoundSource).clear.free;  // just in case newOSC will be re-evaluated.
 	~scbr.oscInterface.newOSC(\createSoundSource, ~coreCallback, "/spatosc/core");
+
+~scbr.oscInterface.removeBasicRendererOSC(\brOSC);
+~scbr.oscInterface.basicRendererOSC(\brOSC,~basicRendererCallback);
+
+	~basicRendererCallback = {
+		arg msg;
+		var command;
+		command = msg[1];
+		postf("~basicRendererCallback: command: %, msg: %, \n", command, msg);
+	};
 
 
 	// ******************** usage with JITlib & ProxySpace *********************
@@ -619,14 +629,32 @@ s.waitForBoot{
 		~group.set(param.asSymbol, value);
 	};
 
+
+
+
+	~dumpConnections = {
+		var undefined = 0;
+
+		~allNodes.keysDo { |key |
+			var nodeSym = key;
+			postf("node: %  :   ", key);
+			postf("\t : node:   %  connectionName:    % \n",  key, ~allNodes[nodeSym].at(\connectionName));
+
+		};
+	};
+
+
 	~dumpNodes = {
+		var connections = 0;
 		~allNodes.keysDo { |key |
 			var nodeSym = key;
 			postf("node: %  \n", key);
 			~allNodes[nodeSym].keysDo { | key |
 				postf("\t : %  =  % \n",  key, ~allNodes[nodeSym].at(key));
+				if  (key == \connectionName, { connections = connections + 1; });
 			};
 		};
+		postf(" %  nodes,    % connections\n",  ~allNodes.size, connections);
 	};
 
 
@@ -635,6 +663,14 @@ s.waitForBoot{
 
 		// HACK:   create reverb EFFECTS node and set input to  relative aux 0
 /*
+
+
+	~dumpNodes.value();
+
+		~dumpConnections.value();
+
+
+
 	 ~reverbName="resonance-SC:spatOSCsource_1";
 	 ~createSource.value(~reverbName.asSymbol);
 	 ~createConnection.value(~reverbName.asSymbol, "listener:spatOSClistener_0");
@@ -687,11 +723,13 @@ s.waitForBoot{
 
 	~deleteSource.value(\testNode8);
 
-	~dumpNodes.value();
+
 
 	~allNodes.size;
 
 	~clearScene.value();
+
+	~allNodes
 
 
 	// generate N instances

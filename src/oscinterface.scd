@@ -66,6 +66,19 @@
 			self.deleteOSC(connectionName ++ \spread);
 		};
 
+				//  /a.renderer    for control messages to the renderer
+		~basicRendererOSC = {|self, id, cb|
+				//path.postln;
+			self.newOSC(id, cb,  "/a.renderer");
+		};
+			// try to remove the OSC definitions.
+
+		~removeBasicRendererOSC = {|self, id|
+			self.deleteOSC(id);
+		};
+
+
+
 	});
 	e.know = true;
 	e;
