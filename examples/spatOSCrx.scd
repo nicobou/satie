@@ -30,9 +30,10 @@ s.dump
 
 ~superNovaFlag = true;
 
+~listeningFormat = \octoVBAP;       // octo
 //~listeningFormat = \domeVBAP;       // for sato
 //~listeningFormat = \labodomeVBAP;      // for labodome
-~listeningFormat = \stereoListener;      // for labodome
+//~listeningFormat = \stereoListener;      // for labodome
 
 //~outAudioDev = "Soundflower (64ch)";   //  for multi-channel testing without hardware on OSX
 //~outAudioDev = "MADIface USB (23635751)";     // for labodome or SATO
