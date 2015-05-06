@@ -20,8 +20,8 @@
 // spread  units  (0 == directional, ....,  100 == omni)
 
 // Octo 2D speaker layout
-~spk8 = VBAPSpeakerArray.new(2, [-45, 45, 135, -135, 0, 90, 180, -90]); // 8 channel ring
-
+// ~spk8 = VBAPSpeakerArray.new(2, [-45, 45, 135, -135, 0, 90, 180, -90]); // 8 channel ring
+~spk8 = VBAPSpeakerArray.new(2, [0, 45, 90, 135, 180, -135, -90, -45]); // 8 channel ring
 // {[-45, 45, 135, -135, 0, 90, 180, -90].do({|ang| x.set(\azi, ang); 1.wait; }) }.fork;
 
 
