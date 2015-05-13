@@ -9,6 +9,50 @@ Server.default.options.dump;
 
 
 
+OSCdef(\createBasicRendererListener).clear.free;  // just in case newOSC will be re-evaluated.
+	~scbr.oscInterface.newOSC(\createBasicRendererListener, ~basicRendererCallback, "/a.renderer");
+
+
+
+~basicRendererCallback = {
+	arg msg;
+	var command;
+	command = msg[1];
+	postf("~basicRendererCallback: command: %, msg: %, \n", command, msg);
+
+	switch (command,
+		'createSource',
+		{
+			if ( (msg.size < 3 ) ,
+				{"~basicRendererCallback: OSCrx createSource message missing values".warn;
+					postf("CREATESOURCE MESS LEN: %", msg.size);
+
+				},
+				// else
+				{
+					var sourceName = msg[2];
+					var uriName;
+
+					if (msg.size == 3,
+						{
+							uriName = "";
+						},
+						// else
+						{
+							uriName = msg[3];
+					});
+
+					~createSource.value(sourceName, uriName);
+				}
+			)
+		}
+	);
+};
+
+
+
+
+
 
 //~domePlaybackFormat = \domeVBAP;       // for sato
 ~domePlaybackFormat = \labodomeVBAP;      // for labodome

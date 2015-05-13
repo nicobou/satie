@@ -50,7 +50,7 @@ echo  'SET URI to  plugin://zkarpluck1'
 sleep 1
 oscsend localhost 18032 /spatosc/core/source/mySound/event sff note  60 1
 echo  SET NOTE VALUES: 60 1  : midiPitch  amp
-oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_gate 1
+oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_trig 1
 echo  TRIGGER NOTE
 sleep 1
 oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff 0 0 3 0 22050  # azi ele  gainDB del lpf
@@ -58,7 +58,7 @@ echo PAN CENTER, GAIN = 3db
 sleep 1
 oscsend localhost 18032 /spatosc/core/source/mySound/event sff note 76 .5
 echo  SET NOTE VALUES: 76 .5  :  midiPitch  amp
-oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_gate 1
+oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_trig 1
 echo  TRIGGER NOTE
 sleep 1
 oscsend localhost 18032 /spatosc/core/source/mySound/uri s plugin://pink
@@ -82,31 +82,27 @@ sleep 1
 oscsend localhost 18032 /spatosc/core ss deleteNode mySound
 echo  DELETE NODE SHEEFA
 
-
-
-
-
 oscsend localhost 18032 /spatosc/core ss createSource mySound
 sleep 1
 oscsend localhost 18032 /spatosc/core sss connect mySound ear
 sleep 1
 oscsend localhost 18032 /spatosc/core/source/mySound/uri s plugin://zkarpluck1
-oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_gate 1
+oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_trig 1
 sleep 2
 oscsend localhost 18032 /spatosc/core/source/mySound/prop sf c3 1
 oscsend localhost 18032 /spatosc/core/source/mySound/event sff note 65 1
-oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_gate 1
+oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_trig 1
 sleep 2
 oscsend localhost 18032 /spatosc/core/source/mySound/prop sf c3 80
 oscsend localhost 18032 /spatosc/core/source/mySound/event sff note 75 1
-oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_gate 1
+oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_trig 1
 sleep 2
 oscsend localhost 18032 /spatosc/core/source/mySound/prop sf amp 0.1
-oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_gate 1
+oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_trig 1
 sleep 2
 oscsend localhost 18032 /spatosc/core/source/mySound/event sff note 55 1
 oscsend localhost 18032 /spatosc/core/source/mySound/prop sf amp 1
-oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_gate 1
+oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_trig 1
 sleep 4
 oscsend localhost 18032 /spatosc/core s clear
 echo done
