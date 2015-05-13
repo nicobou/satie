@@ -22,7 +22,7 @@ s.meter
 
 s.dump
  s.reboot;
-~allNodes.size;
+~allSourceNodes.size;
 */
 
 (
@@ -30,9 +30,9 @@ s.dump
 
 ~superNovaFlag = true;
 
-~listeningFormat = \domeVBAP;       // for sato
+//~listeningFormat = \domeVBAP;       // for sato
 //~listeningFormat = \labodomeVBAP;      // for labodome
-//~listeningFormat = \stereoListener;      // for labodome
+~listeningFormat = \stereoListener;      // for labodome
 
 //~outAudioDev = "Soundflower (64ch)";   //  for multi-channel testing without hardware on OSX
 //~outAudioDev = "MADIface USB (23635751)";     // for labodome or SATO
@@ -183,8 +183,9 @@ s.waitForBoot{
 		nil;
 	};
 
-	// dictionarys for nodes
-	~allNodes = Dictionary();        //  ~allNodes.postln;
+	// dictionarys for source nodes
+	~allSourceNodes = Dictionary();        //  ~allSourceNodes.postln;
+	~allGroupNodes = Dictionary();        //  ~allGroups.postln;
 
 
 	~coreCallback = {
@@ -219,25 +220,17 @@ s.waitForBoot{
 					}
 				)
 			},
-			'createSoundSource',   // this will be dropped as soon as spatOSC is updated to use the "createSource" message instead
+			'createGroup',
 			{
 				if ( (msg.size < 3 ) ,
 					{"~coreCallback: OSCrx createSource message missing values".warn;
+						postf("CREATESOURCE MESS LEN: %", msg.size);
+
 					},
 					// else
 					{
 						var sourceName = msg[2];
-						var uriName;
-
-						if (msg.size == 3,
-							{
-								uriName = "";
-							},
-							// else
-							{
-								uriName = msg[3];
-						});
-						~createSource.value(sourceName, uriName);
+						~createGroup.value(sourceName);
 					}
 				)
 			},
@@ -247,8 +240,12 @@ s.waitForBoot{
 					{"~coreCallback: OSCrx deleteNode message missing values".warn;},
 					// else
 					{
-						var sourceName = msg[2];
-						~deleteSource.value(sourceName);
+						var nodeName = msg[2];
+
+						if (~allGroupNodes.includesKey(nodeName.asSymbol),
+							{   ~deleteGroup.value(nodeName);  },
+							// else
+							{  ~deleteSource.value(nodeName);   });
 					}
 				)
 			},
@@ -285,7 +282,7 @@ s.waitForBoot{
 		nodeName = connectionName.asString.subStr(0, charIndex-1);
 		//postf("~connectionCallback:  connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
 
-		thisProxy = ~allNodes[nodeName.asSymbol].at(\proxy);
+		thisProxy = ~allSourceNodes[nodeName.asSymbol].at(\proxy);
 
 		switch(type,
 			'update',
@@ -335,7 +332,7 @@ s.waitForBoot{
 			'uri', {~setUri.value(name, args[1])},
 			'event',
 			{
-				//postf("~sourceCallback:  nodeName: %  mesageType: %  size: % args: %\n", name, type, args.size, args);
+				postf("~sourceCallback:  nodeName: %  mesageType: %  size: % args: %\n", name, type, args.size, args);
 				if ( (args.size < 2 ) ,
 					{"~setEvent: OSCrx message with no values".warn;},
 					{  // else
@@ -351,13 +348,76 @@ s.waitForBoot{
 			{
 				if ( (args.size > 1) ,
 					{
-						state = args[2];
-						eventName = args[1];
-						~setState.value(name, eventName, args[2]);
+						state = args[1];
+						~setState.value(name, state);
 					},
 					{"~setState: OSCrx message with no values".warn; })  // else
 			},
 			{postf("~sourceCallback:  UNMATCHED:  nodeName: %  mesageType: %  size: % args: %\n", name, type, args.size, args)};
+		);
+	};
+
+		// e.g  /spatosc/core/group/nodename/prop  key val
+	~groupCallback = {
+		| args |
+		var name, type, values, eventName, state;
+		name = args[0].asString.split[4].asSymbol;
+		type = args[0].asString.split[5].asSymbol;
+
+		'~groupCallback'.postln;
+
+		switch(type,
+			'prop',
+			{
+				//~setProperty.value(name, args[1], args[2])
+				postf("~groupCallback:  nodeName: %  setProp: %  key: % value: %\n", name, args[1], args[2]);
+			},
+			'uri',
+			{
+				postf("~groupCallback:  nodeName: %  setUri: %  \n", name, args[1]);
+				// ~setUri.value(name, args[1])
+
+
+			},
+			'event',
+			{
+				postf("~groupCallback:  nodeName: %  set event: %  size: % args: %\n", name, type, args.size, args);
+				if ( (args.size < 2 ) ,
+					{"~setEvent: OSCrx message with no values".warn;},
+					{  // else
+						values = args;
+						eventName = args[1];
+						values.removeAt(0);
+						values.removeAt(0);
+						//~setEvent.value(name, eventName, values);
+					}
+				)
+			},
+			'state',
+			{
+				if ( (args.size > 1) ,
+					{
+						state = args[1];
+						//eventName = args[1];
+						//~setState.value(name, state);
+						postf("~groupCallback:  node: %  set state: % \n", name, state);
+					},
+					{"~groupCallback: OSCrx message with no values".warn; })  // else
+			},
+			'add',
+			{
+				postf("~groupCallback:  nodeName: %  add member: %  \n", name, args[1]);
+				~addMember.value(name, args[1])
+
+
+			},
+			'drop',
+			{
+				postf("~groupCallback:  nodeName: %  drop member: %  \n", name, args[1]);
+				~dropMember.value(name, args[1])
+
+
+			},{postf("~groupCallback:  UNMATCHED:  nodeName: %  mesageType: %  size: % args: %\n", name, type, args.size, args)};
 		);
 	};
 
@@ -367,28 +427,28 @@ s.waitForBoot{
 
 
 	~createSource = { | sourceName uriName |
-		if (~allNodes.includesKey(sourceName),
+		if (~allSourceNodes.includesKey(sourceName),
 			{
 				postf("~createSource:   % exists, no action \n", sourceName);
 			},
 			// else create new node
 			{
 				postf("~createSource:   %  with uri: %\n", sourceName, uriName);
-				~allNodes[sourceName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
-				~allNodes[sourceName.asSymbol].put(\plugin, \nil);
+				~allSourceNodes[sourceName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
+				~allSourceNodes[sourceName.asSymbol].put(\plugin, \nil);
 
 
 				// assign proxy space
 				if (~reverbName.asSymbol == sourceName.asSymbol,   // set EFFECTS proxy
 					{
 						postf("~createSource: setting  EFFECTS GROUP proxy  node %\n", sourceName);
-						~allNodes[sourceName.asSymbol].put(\proxy, ~proxEffect );
+						~allSourceNodes[sourceName.asSymbol].put(\proxy, ~proxEffect );
 						~proxEffect[sourceName.asSymbol].set(\in, ~scbr.aux[0]);  //  HACK to set up rvb node
 
 					},
 					// else set normal proxy
 					{
-						~allNodes[sourceName.asSymbol].put(\proxy, ~prox );
+						~allSourceNodes[sourceName.asSymbol].put(\proxy, ~prox );
 
 					}
 				);
@@ -409,26 +469,46 @@ s.waitForBoot{
 	};
 
 
+	~createGroup = { | groupName |
+		if (~allSourceNodes.includesKey(groupName),
+			{
+				postf("~createGroup:   % exists, no action \n", groupName);
+			},
+			// else create new node
+			{
+				postf("~createGroupNode:   % \n", groupName);
+				~allGroupNodes[groupName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
+				~allGroupNodes[groupName.asSymbol].put(\members, List() );  // create dict for members
+				//~allGroupNodes[groupName.asSymbol].put(\plugin, \nil);
+
+				//  set normal proxy
+
+				~allGroupNodes[groupName.asSymbol].put(\proxy, ~prox );
+
+				~scbr.oscInterface.groupOSC(groupName.asSymbol, ~groupCallback);   // create OSC callback for this source
+		});
+	};
+
 	~createConnection = { |sourceName listenerName |
 		var connectionName = sourceName ++ "->" ++ listenerName;
 
-		if (  ~allNodes.includesKey(sourceName.asSymbol) == false ,
+		if (  ~allSourceNodes.includesKey(sourceName.asSymbol) == false ,
 			// source not defined  ???
 			{
 				postf("warning: ~createConnection: SOURCE % not defined \n", sourceName);
 		});
 
-		if ( ~allNodes[sourceName.asSymbol].includesKey(\connectionName),
+		if ( ~allSourceNodes[sourceName.asSymbol].includesKey(\connectionName),
 			{
 				'~createConnection:  connection already exists, no action taken'.postln;
 			},
 			// else create new one,  and a corresponding OSC callback
 			{
-				~allNodes[sourceName.asSymbol].put(\connectionName, connectionName.asSymbol);
+				~allSourceNodes[sourceName.asSymbol].put(\connectionName, connectionName.asSymbol);
 
-				~scbr.oscInterface.connectionOSC(~allNodes[sourceName.asSymbol].at(\connectionName),~connectionCallback );
+				~scbr.oscInterface.connectionOSC(~allSourceNodes[sourceName.asSymbol].at(\connectionName),~connectionCallback );
 
-				// postf("~createConnection: creating callback for  %  ", ~allNodes[sourceName.asSymbol].at(\connectionName));
+				// postf("~createConnection: creating callback for  %  ", ~allSourceNodes[sourceName.asSymbol].at(\connectionName));
 		});
 	};
 
@@ -439,19 +519,19 @@ s.waitForBoot{
 	~setPlugin = { | nodeName pluginName |
 		var validPluginName = pluginName;
 
-		//postf("~setPlugin: node: %    NEW: %  CURRENT: % \n", nodeName, pluginName.asSymbol, ~allNodes[nodeName.asSymbol].at(\plugin).asSymbol);
+		//postf("~setPlugin: node: %    NEW: %  CURRENT: % \n", nodeName, pluginName.asSymbol, ~allSourceNodes[nodeName.asSymbol].at(\plugin).asSymbol);
 
 
 		// NEED A REAL SYNTH DEF CHECK HERE- set the \dummyPlugin if it fails
 		if ( validPluginName.asString == "", { validPluginName = \dummyPlugin; });
 
 
-		if (validPluginName.asSymbol != ~allNodes[nodeName.asSymbol].at(\plugin).asSymbol,
+		if (validPluginName.asSymbol != ~allSourceNodes[nodeName.asSymbol].at(\plugin).asSymbol,
 			{
 
-				~allNodes[nodeName.asSymbol].put(\plugin, validPluginName.asSymbol);
+				~allSourceNodes[nodeName.asSymbol].put(\plugin, validPluginName.asSymbol);
 
-				~makeinstance.value(nodeName.asSymbol, ~allNodes[nodeName.asSymbol].at(\proxy) , validPluginName.asSymbol);
+				~makeinstance.value(nodeName.asSymbol, ~allSourceNodes[nodeName.asSymbol].at(\proxy) , validPluginName.asSymbol);
 			},
 			{
 				//postf("~setPlugin: ignoring set plugin % for node % : plugin already set \n", pluginName, nodeName);
@@ -498,7 +578,7 @@ s.waitForBoot{
 
 	// always a keyWord Value pair
 	~setProperty = { | nodeName property value |
-		var thisProxy = ~allNodes[nodeName.asSymbol].at(\proxy);
+		var thisProxy = ~allSourceNodes[nodeName.asSymbol].at(\proxy);
 
 		//postf("~setProperty: seting % of % to %\n", property, nodeName, value);
 
@@ -508,10 +588,10 @@ s.waitForBoot{
 
 	// enable/disable node
 	~setState = { | nodeName,  state |
-		var thisProxy = ~allNodes[nodeName.asSymbol].at(\proxy);
+		var thisProxy = ~allSourceNodes[nodeName.asSymbol].at(\proxy);
 		if ( (state > 0),
 			{
-				~makeinstance.value(nodeName.asSymbol, thisProxy, ~allNodes[nodeName.asSymbol].at(\plugin).asSymbol);
+				~makeinstance.value(nodeName.asSymbol, thisProxy, ~allSourceNodes[nodeName.asSymbol].at(\plugin).asSymbol);
 			},
 			//else turn state off
 			{
@@ -524,7 +604,7 @@ s.waitForBoot{
 	// events RX:   /spatosc/core/source/nodename/event eventName v1...vN
 	~setEvent = { | nodeName, eventName,  args |
 		var valueCount = args.size-1;
-		var thisProxy = ~allNodes[nodeName.asSymbol].at(\proxy);
+		var thisProxy = ~allSourceNodes[nodeName.asSymbol].at(\proxy);
 
 		//postln("~setEvent: node:" ++nodeName ++" event name:"++eventName++"  arg(s): "++ args );
 
@@ -549,43 +629,112 @@ s.waitForBoot{
 		});
 	};
 
+	~addMember = { |  groupName, memberName |
+		var memberList = ~allGroupNodes[groupName].at(\members);
+		memberList.add(memberName.asSymbol);
+		//postf("~addMember: group % adding member %\n", groupName, memberName);
+		// ~groupCopyState(groupName, memberName);
+	};
+
+
+	~dropMember = { | groupName, memberName |
+		var memberList = ~allGroupNodes[groupName].at(\members);
+		var memberNameSym = memberName.asSymbol;
+		var index = -1 ;
+
+		memberList.do({ arg item, i;
+			if ( item == memberNameSym,
+				{ index = i });
+
+		});
+		if (index > -1,
+			{
+				memberList.removeAt(index);
+				memberList.postln;
+				postf("~~dropMember: group % dropping member %\n", groupName, memberName);
+		},
+			// else
+			{
+				postf("~dropMember: group % member % not found \n", groupName, memberName);
+		});
+	};
+
+
+
+
 
 	~clearScene = {
-		var nodelist = ~allNodes.keys;
+		var nodelist = ~allSourceNodes.keys;
 		'CLEARING SCENE'.postln;
 
 		// first flush all nodes
-		~allNodes.keysDo { |key |
+		~allSourceNodes.keysDo { |key |
 			key.postln;
 
 
-			~clearNode.value(key);
+			~clearSourceNode.value(key);
 		};
 		// now remove all nodes in the global dictionary
 		/*		nodelist.do { | key |
 		postf("removing:  node: %  from dictionary\n",  key);
-		~allNodes.removeAt(key);
+		~allSourceNodes.removeAt(key);
 		};*/
-		//~allNodes.removeEvery();
+		//~allSourceNodes.removeEvery();
 
-		~allNodes.clear();
-		~allNodes.size;
+		~allSourceNodes.clear();
+		~allSourceNodes.size;
 	};
 
 	~deleteSource = { | nodeName |
-		if ( ~allNodes.includesKey(nodeName.asSymbol) ,
+		if ( ~allSourceNodes.includesKey(nodeName.asSymbol) ,
 			{
-				~clearNode.value(nodeName.asSymbol);
+				~clearSourceNode.value(nodeName.asSymbol);
 				//	'REMOVE NODE'.postln;
-				~allNodes.removeAt(nodeName.asSymbol);     // remove node from global dictionary
+				~allSourceNodes.removeAt(nodeName.asSymbol);     // remove node from global dictionary
 		});
 	};
 
-	~clearNode= { | nameSym |
-		var node = ~allNodes[nameSym];
+		~deleteGroup = { | nodeName |
+		if ( ~allGroupNodes.includesKey(nodeName.asSymbol) ,
+			{
+				~clearGroupNode.value(nodeName.asSymbol);
+				postf("~deleteGroup:  group node: % \n",  nodeName);
+				~allGroupNodes.removeAt(nodeName.asSymbol);     // remove node from global dictionary
+		});
+	};
+
+	~clearGroupeNode= { | nameSym |
+		var node = ~allGroupNodes[nameSym];
+		//var connectionName = node.at(\connectionName);
+		var nodeKeys = node.keys;
+		var thisProxy = ~allGroupNodes[nameSym].at(\proxy);
+		var memberList = ~allGroupNodes[nameSym].at(\members);
+
+
+		//~cleaninstance.value(nameSym, thisProxy);
+
+		//postf("~clearGroupeNode:  group node: % \n",  nameSym);
+
+		// disconnect callbacks
+
+		~scbr.oscInterface.removeGroupOSC(nameSym);
+		//  clear node's local dictionary
+		// maybe this is unnecessary
+
+		memberList.clear();
+
+		nodeKeys.do { | key |
+			postf("removing node keys:  node: %   key %  \n",  nameSym, key);
+			node.removeAt(key);
+		};
+	};
+
+
+		~clearSourceNode= { | nameSym |
+		var node = ~allSourceNodes[nameSym];
 		var connectionName = node.at(\connectionName);
 		var nodeKeys = node.keys;
-		var thisProxy = ~allNodes[nameSym].at(\proxy);
+		var thisProxy = ~allSourceNodes[nameSym].at(\proxy);
 
 		~cleaninstance.value(nameSym, thisProxy);
 
@@ -606,10 +755,9 @@ s.waitForBoot{
 		};
 	};
 
-
 	~globalSetState = { | state |
 		'Setting Global state'.postln;
-		~allNodes.keysDo { |key |
+		~allSourceNodes.keysDo { |key |
 			//key.postln;
 			~setState.value(key, state);
 		};
@@ -619,12 +767,29 @@ s.waitForBoot{
 		~group.set(param.asSymbol, value);
 	};
 
-	~dumpNodes = {
-		~allNodes.keysDo { |key |
+		~dumpNodes = {
+		~allSourceNodes.keysDo { |key |
 			var nodeSym = key;
 			postf("node: %  \n", key);
-			~allNodes[nodeSym].keysDo { | key |
-				postf("\t : %  =  % \n",  key, ~allNodes[nodeSym].at(key));
+			~allSourceNodes[nodeSym].keysDo { | key |
+				postf("\t : %  =  % \n",  key, ~allSourceNodes[nodeSym].at(key));
+			};
+		};
+	};
+
+	~dumpGroup = {
+		~allGroupNodes.keysDo { |key |
+			var nodeSym = key;
+			var memberList = ~allGroupNodes[nodeSym].at(\members);
+
+			postf("Group node: %  members: \n", nodeSym);
+			memberList.do { | key |
+				postf("\t : %  \n",  key);
+			};
+
+			postf("node: %  \n", key);
+			~allGroupNodes[nodeSym].keysDo { | key |
+				postf("\t : %  =  % \n",  key, ~allGroupNodes[nodeSym].at(key));
 			};
 		};
 	};
@@ -632,6 +797,8 @@ s.waitForBoot{
 
 	s.sync;
 
+
+	// ~dumpGroup.value();
 
 		// HACK:   create reverb EFFECTS node and set input to  relative aux 0
 /*
@@ -648,7 +815,7 @@ s.waitForBoot{
 	*/
 
 	//
-	// ~allNodes[~reverbName.asSymbol].at(\plugin);
+	// ~allSourceNodes[~reverbName.asSymbol].at(\plugin);
 
 	//~setUri.value(~reverbName.asSymbol, "plugin://busreverb");
 	//~prox[~reverbName].set(\gainDB, 0);
@@ -658,7 +825,7 @@ s.waitForBoot{
 
 	/*  TEMP
 
-	~allNodes.size;
+	~allSourceNodes.size;
 	~globalSetState.value(0);
 	~globalSetState.value(1);
 
@@ -681,7 +848,7 @@ s.waitForBoot{
 	~setUri.value(~nodeName, "plugin://zkarpluck1");
 
 
-	~allNodes[~nodeName].release;
+	~allSourceNodes[~nodeName].release;
 
 
 
@@ -689,7 +856,7 @@ s.waitForBoot{
 
 	~dumpNodes.value();
 
-	~allNodes.size;
+	~allSourceNodes.size;
 
 	~clearScene.value();
 

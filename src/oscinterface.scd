@@ -35,6 +35,17 @@
 			self.newOSC(sourceName ++ \event, cb,  "/spatosc/core/source" +/+ sourceName +/+ "/event");
 		};
 
+
+		// create all /core/source/*/ at once.
+		~groupOSC = {|self, groupName, cb|
+			self.newOSC(groupName ++ \prop, cb,  "/spatosc/core/group" +/+ groupName +/+ "/prop");
+			self.newOSC(groupName ++ \uri, cb,  "/spatosc/core/group" +/+ groupName +/+ "/uri");
+			self.newOSC(groupName ++ \state, cb,  "/spatosc/core/group" +/+ groupName +/+ "/state");
+			self.newOSC(groupName ++ \event, cb,  "/spatosc/core/group" +/+ groupName +/+ "/event");
+			self.newOSC(groupName ++ \add, cb,  "/spatosc/core/group" +/+ groupName +/+ "/add");
+			self.newOSC(groupName ++ \drop, cb,  "/spatosc/core/group" +/+ groupName +/+ "/drop");
+		};
+
 		// create connection hooks for connection messages
 		// /spatosc/core/connection/sourceNode->listenerNode/update azi elev delayMS gainDB lpHZ
 		// /spatosc/core/connection/sourceNode->listenerNode/spread  exp  // for incidence effect
@@ -54,8 +65,16 @@
 			self.deleteOSC(sourceName ++ \event);
 		};
 
-		//    OSCdef(\sheefa->myListenerupdate).clear.free;
-		//    OSCdef(\sheefa->myListenerspread).clear.free;
+		// try to remove the OSC definitions.
+		~removeGroupOSC = {|self, groupName|
+			self.deleteOSC(groupName ++ \prop);
+			self.deleteOSC(groupName ++ \uri);
+			self.deleteOSC(groupName ++ \state);
+			self.deleteOSC(groupName ++ \event);
+			self.deleteOSC(groupName ++ \add);
+			self.deleteOSC(groupName ++ \drop);
+		};
+
 
 		// try to remove the OSC definitions.
 		~removeConnectionOSC = {|self, connectionName|
