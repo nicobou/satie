@@ -42,8 +42,8 @@ s.waitForBoot{
 
 	//~scbr.makeSynthDef(\string, \zkarpluck1, [\stereoPanner, \monoSpat], [0, 2]);
 	~scbr.makeSynthDef(\string, \zkarpluck1, [\domeVBAP], [0]);
-	~scbr.makeSynthDef(\pinksin, \PinkSin, [\domeVBAP], [0]);
-	~scbr.makeSynthDef(\testtone, \testtone, [\domeVBAP], [0]);
+	~scbr.makeSynthDef(\pinksin, \PinkSin, [\stereoPanner], [0]);
+	~scbr.makeSynthDef(\testtone, \testtone, [\stereoPanner], [0]);
 	// writing to all aux busses (first is starting a 0):
 	~scbr.makeSynthDef(\string_all_aux, \zkarpluck1, [\domeVBAP], [0], ~scbr.aux);
 	// writing to only to the third audio bus
@@ -57,127 +57,63 @@ s.waitForBoot{
 };  // s.waitForBoot
 )
 
-// ******************** usage with JITlib & ProxySpace *********************
+// ************** usage with Satie  groups (JITlib & ProxySpace) **************
 (
 
-//instance factory
-~makeinstance = { | name = \out, p, src = \string |
-	// ensuring not extra bus is allocated:
-	// (must be the first reference of "name" in the proxyspace
-	p[name].ar(0);
-	p[name].source = src;
-	nil;
-};
-~cleaninstance = { | name = \out, p |
-	p[name].release();
-	// fadeTime must be higher than SATIE internal fadeTime:
-	p.[name].clear(0.03);
-	nil;
-};
-~pauseinstance = { | name = \out, p |
-	p[name].release();
-	nil;
-};
-
-// *** creation & control ***
-// creating a global ParGroup for supernova
-~group = ParGroup.new; // ~group.freeAll;
-// creating a global ProxySpace
-~prox = ProxySpace(s);
-~prox.fadeTime = 2;
-// the proxyspace is going to be embedded in the global pargroup
-~prox.group = ~group;
-
 // test per instance set and group set
-~makeinstance.value(\test1, ~prox, \string);
-~makeinstance.value(\test2, ~prox, \string);
-~makeinstance.value(\test3, ~prox, \pinksin);
+// (here using \default group since no group name is given as makeInstance Third arguments)
+~scbr.makeInstance(\test1, \string);
+~scbr.makeInstance(\test2, \string);
+~scbr.makeInstance(\test3, \pinksin);
 
 // change test3 source
-~makeinstance.value(\test3, ~prox, \testtone);
+~scbr.makeInstance(\test3, \testtone);
 
-// list ProxySpace internal proxies:
-~prox.existingProxies;
-~cleaninstance.value(\test2, ~prox);
-~prox.existingProxies;
-~makeinstance.value(\test2, ~prox, \string);
-~prox.existingProxies;
+// using default group
+~defaultGroup = ~scbr.satieGroups[\default];  // Satie Groups are actually ProxySpace
+// list internal instances from default group (internal instances are NodeProxy instances):
+~defaultGroup.existingProxies;
 
-//pause instance
-~prox[\test3].set(\gainDB, -30);
-~pauseinstance.value(\test3, ~prox);
-~prox.existingProxies;
-~makeinstance.value(\test3, ~prox, \testtone);
+// removing an instance
+~scbr.cleanInstance(\test2);
+~defaultGroup.existingProxies;
+~scbr.makeInstance(\test2, \string);
+~defaultGroup.existingProxies;
+
+//set an a value of an instance
+~defaultGroup.[\test3].set(\gainDB, -30);
+~scbr.pauseInstance(\test3);
+~defaultGroup.existingProxies;
+~scbr.makeInstance(\test3, \testtone);
 
 // per instance set
-~prox[\test1].set(\gainDB, -30);
-~prox[\test2].set(\gainDB, -30);
-~prox[\test1].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
-~prox[\test2].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
+~defaultGroup.[\test1].set(\gainDB, -30);
+~defaultGroup.[\test2].set(\gainDB, -30);
+~defaultGroup.[\test1].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
+~defaultGroup.[\test2].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
 //group set
-~group.set(\aziDeg, 90);
-~group.set(\t_trig, 1);
-~group.set(\gainDB, -50);
+~defaultGroup.group.set(\aziDeg, 90);
+~defaultGroup.group.set(\t_trig, 1);
+~defaultGroup.group.set(\gainDB, -20);
 
-// *** busses ***
-~groupBus = ParGroup.new(); // ~group.freeAll;
-// creating a global ProxySpace
-~proxBus = ProxySpace(s);
-~proxBus.fadeTime = 2;
-// the proxyspace is going to be embedded in the global pargroup
-~proxBus.group = ~groupBus;
-
-~proxBus.existingProxies;
-~makeinstance.value(\test1, ~proxBus, \string_third_aux);
-~makeinstance.value(\test2, ~proxBus, \string_third_aux);
-~groupBus.set(\gainDB, -10);
-~proxBus[\test1].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
-~proxBus[\test2].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
-
-~groupEffect = ParGroup.new(addAction: \addToTail); // ~group.freeAll;
-// creating a global ProxySpace
-~proxEffect = ProxySpace(s);
-~proxEffect.fadeTime = 2;
-// the proxyspace is going to be embedded in the global pargroup
-~proxEffect.group = ~groupEffect;
-// reverb from third aux bus
-~proxEffect[\rev].set(\in, ~scbr.aux[2]);
-~proxEffect[\rev].set(\mix, 1);  //wet only
-~proxEffect[\rev].set(\room, 0.9);
-~proxEffect[\rev].set(\damp, 1);
-~proxEffect[\rev].set(\aziDeg, -180);
-~proxEffect[\rev].set(\gainDB, -20);
-~makeinstance.value(\rev, ~proxEffect, \busreverb);
-
-// play with reverb
-~proxBus[\test1].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
-~proxBus[\test2].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
-
-// *** CPU load test ***
-~groupCPU = ParGroup.new; // ~group.freeAll;
-// creating a global ProxySpace
-~proxCPU = ProxySpace(s);
-~proxCPU.fadeTime = 0.02;
-// the proxyspace is going to be embedded in the global pargroup
-~proxCPU.group = ~groupCPU;
-
+// ********** CPU load test (use supernova with increased memory allocation) *********
 // play until all CPU are loaded (~70%)
 // (no sound since string must be trigered)
+
+// creating a custom group:
+~groupCPU = ~scbr.makeSatieGroup(\cpuTest);
 r = Routine {
 	loop {
-		~makeinstance.value((\test ++ rrand(0, 10000).asSymbol), ~proxCPU, \string);
+		~scbr.makeInstance((\test ++ rrand(0, 10000).asSymbol), \string, \cpuTest);
 		0.1.wait;
 	}
 };
 r.play;
 r.stop;
 
-// list ProxySpace internal proxies:
-~proxCPU.existingProxies;
-
-// triger each string sequentially
-~seqtrig = Routine({ ~proxCPU.existingProxies.do({ |item|
-		~proxCPU[item].set(
+// then triger each string sequentially
+~seqtrig = Routine({ ~groupCPU.existingProxies.do({ |item|
+		~groupCPU[item].set(
 			\t_trig, 1,
 			\note, rrand(42, 72), rrand(1, 2), rrand(0.1, 0.9));
 		rrand(0.05, 0.1).wait;
@@ -187,19 +123,12 @@ r.stop;
 ~seqtrig.stop;
 
 // trig all once
-~groupCPU.set(\gainDB, -45);
-~groupCPU.set(\t_trig, 1);
-~groupCPU.set(\t_trig, 1,
+~groupCPU.group.set(\gainDB, -45);
+~groupCPU.group.set(\t_trig, 1);
+~groupCPU.group.set(\t_trig, 1,
 	\note, rrand(42, 72), rrand(1, 2), rrand(0.1, 0.9),
 	\aziDeg, rrand(-180,180),
 	\eleDeg, rrand(0,90));
-
-~allTrig = Routine({ 1800.do({ |item|
-	~groupCPU.set(\t_trig, 1,
-		\note, rrand(42, 72), rrand(1, 2), rrand(0.1, 0.9));
-	0.2.wait;
-});});
-~allTrig.play;
 
 // change with gui
 w=Window.new("sheefa", Rect(30, 30, 400, 100)).front;
@@ -212,6 +141,40 @@ i.action_({ |ez| ( ~groupCPU.set(\eleDeg, (ez.value)))});
 j = EZSlider(w, 380@20, "spread", ControlSpec(0, 100, \lin, 0.1, 5));
 j.action_({ |ez| ( ~groupCPU.set(\spread, (ez.value)))});
 
+
+// // ******* spatialized effects  (read audio from a bus) ***
+// ~groupBus = ParGroup.new(); // ~group.freeAll;
+// // creating a global ProxySpace
+// ~proxBus = ProxySpace(s);
+// ~proxBus.fadeTime = 2;
+// // the proxyspace is going to be embedded in the global pargroup
+// ~proxBus.group = ~groupBus;
+//
+// ~proxBus.existingProxies;
+// ~makeinstance.value(\test1, ~proxBus, \string_third_aux);
+// ~makeinstance.value(\test2, ~proxBus, \string_third_aux);
+// ~groupBus.set(\gainDB, -10);
+// ~proxBus[\test1].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
+// ~proxBus[\test2].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
+//
+// ~groupEffect = ParGroup.new(addAction: \addToTail); // ~group.freeAll;
+// // creating a global ProxySpace
+// ~proxEffect = ProxySpace(s);
+// ~proxEffect.fadeTime = 2;
+// // the proxyspace is going to be embedded in the global pargroup
+// ~proxEffect.group = ~groupEffect;
+// // reverb from third aux bus
+// ~proxEffect[\rev].set(\in, ~scbr.aux[2]);
+// ~proxEffect[\rev].set(\mix, 1);  //wet only
+// ~proxEffect[\rev].set(\room, 0.9);
+// ~proxEffect[\rev].set(\damp, 1);
+// ~proxEffect[\rev].set(\aziDeg, -180);
+// ~proxEffect[\rev].set(\gainDB, -20);
+// ~makeinstance.value(\rev, ~proxEffect, \busreverb);
+//
+// // play with reverb
+// ~proxBus[\test1].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
+// ~proxBus[\test2].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
 
 
 )

@@ -18,6 +18,8 @@
 		~pluginLoader;
 		~synthDefFactory;
 		~cOSCMaker;
+		~defaultSatieGroup;
+		~satieGroups = Dictionary.new;
 		~auxbus;
 		~aux;
 
@@ -31,13 +33,47 @@
 				toBusArray);
 			nil;  // return
 		};
+
+		~makeSatieGroup = { | self, name |
+			// creating a global ProxySpace
+			var prox = ProxySpace(s);
+			prox.fadeTime = 0.5;
+			// the proxyspace is going to be embedded in the global pargroup
+			prox.group = ParGroup.new;
+			self.satieGroups.put(name.asSymbol, prox);
+			prox;
+		};
+
+		~makeInstance = { | self, name, synthDefName, prox = \default |
+			// ensuring not extra bus is allocated:
+			// (must be the first reference of "name" in the proxyspace
+			self.satieGroups[prox][name].ar(0);
+			self.satieGroups[prox][name].source = synthDefName;
+			nil;
+		};
+
+		~cleanInstance = { | self, name, prox = \default |
+			self.satieGroups[prox][name].release();
+			// fadeTime must be higher than SATIE internal fadeTime:
+			self.satieGroups[prox][name].clear(0.03);
+			nil;
+		};
+
+		~pauseInstance = { | self, name, prox = \default |
+			self.satieGroups[prox][name].release();
+			nil;
+		};
+
 	});  // Environment.make
+
 	e.know = true;
 	e.auxbus = Bus.audio(s, numAudioAux);
 	e.aux = Array.fill(numAudioAux, {arg i; e.auxbus.index + i });
 	e.pluginLoader = ~scbrPlugins.value();
 	e.synthDefFactory = ~scbrFactory.value();
 	e.oscInterface = ~cOSCMaker.value();
+	e.defaultSatieGroup = e.makeSatieGroup();
+	e.satieGroups.put(\default, e.defaultSatieGroup);
 	e;  // return
 };  // scbrMaker
 )
