@@ -30,6 +30,14 @@
 			};
 			nil;
 		};
+		~effectPlugins = Dictionary.new;
+		~loadEffectPlugins = { | self,  path = "./*.scd" |
+			path.pathMatch.do{ arg item;
+				item.loadPaths;
+				self.effectPlugins.put(~name.asSymbol, ~function);
+			};
+			nil;
+		};
 	});  // Environment.make
 	e.know = true;
 	e;

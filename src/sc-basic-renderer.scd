@@ -20,13 +20,28 @@
 		~cOSCMaker;
 		~defaultSatieGroup;
 		~satieGroups = Dictionary.new;
+		~effectSynthDef = Set.new;
 		~auxbus;
 		~aux;
 
+		// TODO try catch
 		~makeSynthDef = { | self, name, srcSymbol, spatSymbolArray, busShiftArray = #[0], toBusArray = #[] |
-			// TODO try catch
+			// selecting audio source or effect dictionay because
+			// make instance require effects to be added to tail
+			// and audio source to head
+			var dictionary;
+			if (nil != self.pluginLoader.audioPlugins.at(srcSymbol),
+				{
+					dictionary = self.pluginLoader.audioPlugins;
+				},
+				{
+					dictionary = self.pluginLoader.effectPlugins;
+					self.effectSynthDef.add(name.asSymbol);
+				}
+			); //  endif
+			// Factory
 			self.synthDefFactory.makeSynthDef(name,
-				self.pluginLoader.audioPlugins.at(srcSymbol),
+				dictionary.at(srcSymbol),
 				spatSymbolArray.collect({ arg item, i;
 					self.pluginLoader.spatPlugins.at(item)}),
 				busShiftArray,
@@ -34,12 +49,12 @@
 			nil;  // return
 		};
 
-		~makeSatieGroup = { | self, name |
+		~makeSatieGroup = { | self, name, addAction = \addToHead |
 			// creating a global ProxySpace
 			var prox = ProxySpace(s);
 			prox.fadeTime = 0.5;
 			// the proxyspace is going to be embedded in the global pargroup
-			prox.group = ParGroup.new;
+			prox.group = ParGroup.new(addAction: addAction);
 			self.satieGroups.put(name.asSymbol, prox);
 			prox;
 		};

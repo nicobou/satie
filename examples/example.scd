@@ -11,9 +11,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-// s.reboot; s.makeGui;
-// s.meter;
+Server.supernova;
+o = Server.local.options;
+o.numOutputBusChannels = 128;
+o.memSize = 2**20;
+o.blockSize = 2048;
+s.reboot;
+s.makeGui;
+s.meter;
 
 (
 s.waitForBoot{
@@ -29,11 +34,13 @@ s.waitForBoot{
     // ~scbr.auxbus.scope;
 	// loading source plugins
 	~scbr.pluginLoader.loadAudioPlugins(~rootSrcPath ++ "/audiosources/*.scd");
-	// see the loaded plugins in the console
-	~scbr.pluginLoader.audioPlugins;
+	~scbr.pluginLoader.audioPlugins;  // list audio plugins
 	// loading spatializer plugins
 	~scbr.pluginLoader.loadSpatPlugins(~rootSrcPath ++ "/spatializers/*.scd");
 	~scbr.pluginLoader.spatPlugins;
+	// loading effect plugins
+	~scbr.pluginLoader.loadEffectPlugins(~rootSrcPath ++ "/effects/*.scd");
+	~scbr.pluginLoader.effectPlugins;
 	// generating SynthDef that are going to be used,
 	// here a PinkSin source spatialized by
 	//   - a stereo panner (starting channel 0)
@@ -48,7 +55,7 @@ s.waitForBoot{
 	~scbr.makeSynthDef(\string_all_aux, \zkarpluck1, [\domeVBAP], [0], ~scbr.aux);
 	// writing to only to the third audio bus
 	~scbr.makeSynthDef(\string_third_aux, \zkarpluck1, [\domeVBAP], [0], [~scbr.aux[2]]);
-	// spatilized reverb (input will be set at creation):
+	// spatilized reverb effect (input will be set at creation):
 	~scbr.makeSynthDef(\busreverb, \freeverb, [\stereoPanner], [0]);
 
 	// be sure the synthDef is compiled on the server
@@ -70,31 +77,62 @@ s.waitForBoot{
 ~scbr.makeInstance(\test3, \testtone);
 
 // using default group
-~defaultGroup = ~scbr.satieGroups[\default];  // Satie Groups are actually ProxySpace
+~defaultProx = ~scbr.satieGroups[\default];  // Satie Groups are actually ProxySpace
 // list internal instances from default group (internal instances are NodeProxy instances):
-~defaultGroup.existingProxies;
+~defaultProx.existingProxies;
 
 // removing an instance
 ~scbr.cleanInstance(\test2);
-~defaultGroup.existingProxies;
+~defaultProx.existingProxies;
 ~scbr.makeInstance(\test2, \string);
-~defaultGroup.existingProxies;
+~defaultProx.existingProxies;
 
 //set an a value of an instance
-~defaultGroup.[\test3].set(\gainDB, -30);
+~defaultProx.[\test3].set(\gainDB, -30);
 ~scbr.pauseInstance(\test3);
-~defaultGroup.existingProxies;
+~defaultProx.existingProxies;
 ~scbr.makeInstance(\test3, \testtone);
 
 // per instance set
-~defaultGroup.[\test1].set(\gainDB, -30);
-~defaultGroup.[\test2].set(\gainDB, -30);
-~defaultGroup.[\test1].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
-~defaultGroup.[\test2].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
+~defaultProx.[\test1].set(\gainDB, -30);
+~defaultProx.[\test2].set(\gainDB, -30);
+~defaultProx.[\test1].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
+~defaultProx.[\test2].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
 //group set
-~defaultGroup.group.set(\aziDeg, 90);
-~defaultGroup.group.set(\t_trig, 1);
-~defaultGroup.group.set(\gainDB, -20);
+~defaultProx.group.set(\aziDeg, 90);
+~defaultProx.group.set(\t_trig, 1);
+~defaultProx.group.set(\gainDB, -20);
+// clean all
+~scbr.cleanInstance(\test1);
+~scbr.cleanInstance(\test2);
+~scbr.cleanInstance(\test3);
+~defaultProx.existingProxies;
+
+// ******* spatialized effects  (read audio from a bus) ***
+
+// making two trigered sound source
+~defaultProx = ~scbr.satieGroups[\default];
+~scbr.makeInstance(\test1, \string_third_aux);
+~scbr.makeInstance(\test2, \string_third_aux);
+~defaultProx.group.set(\gainDB, -20);
+~defaultProx[\test1].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
+~defaultProx[\test2].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
+
+// making a reverb effect
+// this need a specific group since
+// effects need to be added to tail
+~effectProx = ~scbr.makeSatieGroup(\effect, \addToTail);
+~effectProx[\rev].set(\in, ~scbr.aux[2]);  // reading bus created by Satie
+~effectProx[\rev].set(\mix, 1);  //wet only
+~effectProx[\rev].set(\room, 0.2);
+~effectProx[\rev].set(\damp, 1);
+~effectProx[\rev].set(\aziDeg, -180);
+~effectProx[\rev].set(\gainDB, -20);
+~scbr.makeInstance(\rev, \busreverb, \effect);
+
+// play with reverb
+~defaultProx[\test1].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
+~defaultProx[\test2].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
 
 // ********** CPU load test (use supernova with increased memory allocation) *********
 // play until all CPU are loaded (~70%)
@@ -118,7 +156,7 @@ r.stop;
 			\note, rrand(42, 72), rrand(1, 2), rrand(0.1, 0.9));
 		rrand(0.05, 0.1).wait;
 	});});
-~groupCPU.set(\gainDB, -30);
+~groupCPU.group.set(\gainDB, -30);
 ~seqtrig.play;
 ~seqtrig.stop;
 
@@ -135,47 +173,11 @@ w=Window.new("sheefa", Rect(30, 30, 400, 100)).front;
 w.view.decorator=FlowLayout(w.view.bounds);
 w.view.decorator.gap=8@2;
 h = EZSlider(w, 380@20, "azi", ControlSpec(-180, 180, \lin, 0.1, 0));
-h.action_({ |ez| ( ~groupCPU.set(\aziDeg, (ez.value)))});
+h.action_({ |ez| ( ~groupCPU.group.set(\aziDeg, (ez.value)))});
 i = EZSlider(w, 380@20, "elev", ControlSpec(-90, 90, \lin, 0.1, 0));
-i.action_({ |ez| ( ~groupCPU.set(\eleDeg, (ez.value)))});
+i.action_({ |ez| ( ~groupCPU.group.set(\eleDeg, (ez.value)))});
 j = EZSlider(w, 380@20, "spread", ControlSpec(0, 100, \lin, 0.1, 5));
-j.action_({ |ez| ( ~groupCPU.set(\spread, (ez.value)))});
-
-
-// // ******* spatialized effects  (read audio from a bus) ***
-// ~groupBus = ParGroup.new(); // ~group.freeAll;
-// // creating a global ProxySpace
-// ~proxBus = ProxySpace(s);
-// ~proxBus.fadeTime = 2;
-// // the proxyspace is going to be embedded in the global pargroup
-// ~proxBus.group = ~groupBus;
-//
-// ~proxBus.existingProxies;
-// ~makeinstance.value(\test1, ~proxBus, \string_third_aux);
-// ~makeinstance.value(\test2, ~proxBus, \string_third_aux);
-// ~groupBus.set(\gainDB, -10);
-// ~proxBus[\test1].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
-// ~proxBus[\test2].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
-//
-// ~groupEffect = ParGroup.new(addAction: \addToTail); // ~group.freeAll;
-// // creating a global ProxySpace
-// ~proxEffect = ProxySpace(s);
-// ~proxEffect.fadeTime = 2;
-// // the proxyspace is going to be embedded in the global pargroup
-// ~proxEffect.group = ~groupEffect;
-// // reverb from third aux bus
-// ~proxEffect[\rev].set(\in, ~scbr.aux[2]);
-// ~proxEffect[\rev].set(\mix, 1);  //wet only
-// ~proxEffect[\rev].set(\room, 0.9);
-// ~proxEffect[\rev].set(\damp, 1);
-// ~proxEffect[\rev].set(\aziDeg, -180);
-// ~proxEffect[\rev].set(\gainDB, -20);
-// ~makeinstance.value(\rev, ~proxEffect, \busreverb);
-//
-// // play with reverb
-// ~proxBus[\test1].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
-// ~proxBus[\test2].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
-
+j.action_({ |ez| ( ~groupCPU.group.set(\spread, (ez.value)))});
 
 )
 
