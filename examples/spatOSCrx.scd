@@ -30,11 +30,11 @@ s.dump
 
 ~superNovaFlag = true;
 
-~listeningFormat = \stereoListener;
+//~listeningFormat = \stereoListener;
 
 //~listeningFormat = \octoVBAP;       // octo
 //~listeningFormat = \domeVBAP;       // for sato
-//~listeningFormat = \labodomeVBAP;      // for labodome
+ ~listeningFormat = \labodomeVBAP;      // for labodome
 
 //~outAudioDev = "Soundflower (64ch)";   //  for multi-channel testing without hardware on OSX
 //~outAudioDev = "MADIface USB (23635751)";     // for labodome or SATO
@@ -99,6 +99,8 @@ s.waitForBoot{
 	// loading spatializer plugins
 	~scbr.pluginLoader.loadSpatPlugins(~rootSrcPath ++ "/spatializers/*.scd");
 	~scbr.pluginLoader.spatPlugins;
+	~scbr.pluginLoader.loadEffectPlugins(~rootSrcPath ++ "/effects/*.scd");
+	~scbr.pluginLoader.effectPlugins;
 
 	~scbr.makeSynthDef(\dummyPlugin, \emptySource, [\emptySpat], [0]);    // dummy synthdef, used for new nodes
 
@@ -350,7 +352,7 @@ s.waitForBoot{
 			'uri', {~setUri.value(name, args[1])},
 			'event',
 			{
-				postf("~sourceCallback:  nodeName: %  mesageType: %  size: % args: %\n", name, type, args.size, args);
+				//postf("~sourceCallback:  nodeName: %  mesageType: %  size: % args: %\n", name, type, args.size, args);
 				if ( (args.size < 2 ) ,
 					{"~setEvent: OSCrx message with no values".warn;},
 					{  // else
