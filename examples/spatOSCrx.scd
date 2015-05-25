@@ -16,6 +16,8 @@ this implementation is based on a one-listener model. In the future, we may wish
 OSC RX message specification is based on the SPATOSC specification  (see:   http://code.sat.qc.ca/redmine/projects/spatosc/wiki/spec  )
 */
 
+s.makeGui;
+
 /*
 s.makeGui;
 s.meter
@@ -30,11 +32,11 @@ s.reboot;
 
 ~superNovaFlag = true;
 
-//~listeningFormat = \stereoListener;
+~listeningFormat = \stereoListener;
 
 //~listeningFormat = \octoVBAP;       // octo
 //~listeningFormat = \domeVBAP;       // for sato
- ~listeningFormat = \labodomeVBAP;      // for labodome
+//~listeningFormat = \labodomeVBAP;      // for labodome
 
 //~outAudioDev = "Soundflower (64ch)";   //  for multi-channel testing without hardware on OSX
 //~outAudioDev = "MADIface USB (23635751)";     // for labodome or SATO
@@ -49,6 +51,8 @@ o = Server.local.options;   // default set up options
 o.memSize = 2**19;        // probably should just leave this the same for everyting
 
 
+~volume = s.volume;     // create hook to global audio engine volume / mute control
+~volume.setVolumeRange(-99, 18);
 
 // o.device = "MADIface USB (23635751)";     // set for dome or labodome
 
@@ -99,6 +103,7 @@ s.waitForBoot{
 	// loading spatializer plugins
 	~scbr.pluginLoader.loadSpatPlugins(~rootSrcPath ++ "/spatializers/*.scd");
 	~scbr.pluginLoader.spatPlugins;
+
 	~scbr.pluginLoader.loadEffectPlugins(~rootSrcPath ++ "/effects/*.scd");
 	~scbr.pluginLoader.effectPlugins;
 
@@ -111,13 +116,13 @@ s.waitForBoot{
 			//
 			'NO LISTENING FORMAT SELECTED : generating synthdefs'.postln;
 
-			~scbr.makeSynthDef(\pink, \PinkSin, [\stereoPanner, \monoSpat], [0, 2]);
+/*			~scbr.makeSynthDef(\pink, \PinkSin, [\stereoPanner, \monoSpat], [0, 2]);
 			~scbr.makeSynthDef(\dust, \DustDust, [\stereoPanner, \monoSpat], [0, 2]);
 			~scbr.makeSynthDef(\default, \default, [\stereoListener], [0]);
 			~scbr.makeSynthDef(\zkarpluck0, \zkarpluck0, [\stereoListener], [0]);
 			~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [\stereoListener], [0]);
 			~scbr.makeSynthDef(\zbell1, \zbell1, [\stereoListener], [0]);
-			~scbr.makeSynthDef(\test, \testtone, [\stereoListener], [0]);
+			~scbr.makeSynthDef(\test, \testtone, [\stereoListener], [0]);*/
 		},
 		// else evalualte for dome listeners
 		{
@@ -138,23 +143,80 @@ s.waitForBoot{
 	// be sure the synthDefs are compiled on the server
 	s.sync;
 
+	// get default group
+	~defaultProx = ~scbr.satieGroups[\default];  // Satie Groups are actually ProxySpace
+
+		// create special effects group located at tail
+	~effectProx = ~scbr.makeSatieGroup(\effect, \addToTail);
+
+	// list internal instances from default group (internal instances are NodeProxy instances):
+	// ~defaultProx.existingProxies;
+
+	// dictionarys for source nodes
+	~allSourceNodes = Dictionary();        //  ~allSourceNodes.postln;
+	~allGroupNodes = Dictionary();        //  ~allGroups.postln;
+
 	OSCdef(\createSoundSource).clear.free;  // just in case newOSC will be re-evaluated.
 	~scbr.oscInterface.newOSC(\createSoundSource, ~coreCallback, "/spatosc/core");
 
 	~scbr.oscInterface.removeBasicRendererOSC(\brOSC);
 	~scbr.oscInterface.basicRendererOSC(\brOSC,~basicRendererCallback);
 
+	//~createGroup.value(\default);
+
 	~basicRendererCallback = {
 		arg msg;
-		var command;
-		command = msg[1];
-		postf("~basicRendererCallback: command: %, msg: %, \n", command, msg);
+		var command = msg[1];
+		//postf("~basicRendererCallback: command: %, msg: %, \n", command, msg);
+
+		if (msg.size < 2,
+			{"~basicRendererCallback: empty message".warn;
+				postf("~basicRendererCallback MESS LEN: %", msg.size);
+
+			},
+			// else
+			{
+
+				switch (command,
+					'setVolume',
+					{
+						//postf("~basicRendererCallback setVolume: %\n", msg[2]);
+						if ( (msg.size < 3 ) ,
+							{"~basicRendererCallback: setVolume missing value".warn;
+								// postf("CREATESOURCE MESS LEN: %", msg.size);
+
+							},
+							// else
+							{
+								~volume.volume = msg[2];
+							}
+						)
+					},
+					'setMute',
+					{
+						//postf("~basicRendererCallback setMute: %\n", msg[2]);
+						if ( (msg.size < 3 ) ,
+							{"~basicRendererCallback: setMute missing value".warn;
+								// postf("CREATESOURCE MESS LEN: %", msg.size);
+
+							},
+							// else
+							{
+								if (msg [2] > 0,
+									{~volume.mute;},
+									// else
+									{~volume.unmute;});
+							}
+						)
+					}
+				);
+		});
 	};
 
 
 	// ******************** usage with JITlib & ProxySpace *********************
 
-
+/*
 		if ( ~prox == nil,
 		{
 
@@ -181,10 +243,10 @@ s.waitForBoot{
 
 			// the proxyspace is going to be embedded in the global pargroup
 			~proxEffect.group = ~groupEffect;
-	});
+	});*/
 
 
-	//instance factory
+/*	//instance factory
 	~makeinstance = { | name = \out, p, src = \string |
 		// ensuring not extra bus is allocated:
 		// (must be the first reference of "name" in the proxyspace
@@ -201,11 +263,8 @@ s.waitForBoot{
 	~pauseinstance = { | name = \out, p |
 		p[name].release();
 		nil;
-	};
+	};*/
 
-	// dictionarys for source nodes
-	~allSourceNodes = Dictionary();        //  ~allSourceNodes.postln;
-	~allGroupNodes = Dictionary();        //  ~allGroups.postln;
 
 
 	~coreCallback = {
@@ -217,40 +276,42 @@ s.waitForBoot{
 		switch (command,
 			'createSource',
 			{
+				postf("~coreCallback: command: %, messLen: %   msg: %, \n", command, msg.size, msg);
+
 				if ( (msg.size < 3 ) ,
 					{"~coreCallback: OSCrx createSource message missing values".warn;
-						postf("CREATESOURCE MESS LEN: %", msg.size);
+						postf("createSource MESS LEN: %", msg.size);
 
 					},
 					// else
 					{
 						var sourceName = msg[2];
-						var uriName;
+						var uriName = "";
+						var groupName = "";
 
-						if (msg.size == 3,
-							{
-								uriName = "";
-							},
-							// else
+						if (msg.size > 3,
 							{
 								uriName = msg[3];
 						});
 
-						~createSource.value(sourceName, uriName);
-					}
-				)
+						if (msg.size > 4,
+						{
+								groupName = msg[4];
+						});
+						~createSource.value(sourceName, uriName, groupName);
+					});
 			},
 			'createGroup',
 			{
 				if ( (msg.size < 3 ) ,
 					{"~coreCallback: OSCrx createSource message missing values".warn;
-						postf("CREATESOURCE MESS LEN: %", msg.size);
+						postf("createGroup MESS LEN: %", msg.size);
 
 					},
 					// else
 					{
-						var sourceName = msg[2];
-						~createGroup.value(sourceName);
+						var groupName = msg[2];
+						~createGroup.value(groupName);
 					}
 				)
 			},
@@ -384,7 +445,7 @@ s.waitForBoot{
 		name = args[0].asString.split[4].asSymbol;
 		type = args[0].asString.split[5].asSymbol;
 
-		'~groupCallback'.postln;
+		//'~groupCallback'.postln;
 
 		switch(type,
 			'prop',
@@ -446,14 +507,32 @@ s.waitForBoot{
 		~reverbName="resonance-SC:spatOSCsource_1";  //  HACK to set up rvb node
 
 
-	~createSource = { | sourceName uriName |
+
+	~createSource = { | sourceName, uriName , groupName = \default |
+
 		if (~allSourceNodes.includesKey(sourceName),
 			{
 				postf("~createSource:   % exists, no action \n", sourceName);
 			},
 			// else create new node
 			{
-				postf("~createSource:   %  with uri: %\n", sourceName, uriName);
+
+				if (groupName == "", { groupName = "default"; });   // make group name is ok
+
+				// check to see if group exists, if  not, create it
+				if ( ~scbr.satieGroups[groupName.asSymbol] == nil,
+					{
+						postf("~createSource_groupcheck:   source:%    group:  % undefined, CREATING GROUP NOW \n", sourceName, groupName);
+						~createGroup.value(groupName.asSymbol);
+					},
+					// else
+					{
+						postf("~createSource_groupcheck:  source:%    group:  % exists \n", sourceName, groupName);
+					}
+				);
+
+
+				postf("createSource:   %  with uri: %\n", sourceName, uriName, groupName);
 				~allSourceNodes[sourceName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
 				~allSourceNodes[sourceName.asSymbol].put(\plugin, \nil);
 
@@ -461,14 +540,16 @@ s.waitForBoot{
 				// assign proxy space
 				if (~reverbName.asSymbol == sourceName.asSymbol,   // set EFFECTS proxy
 					{
+						var proxy = ~scbr.satieGroups[\effect];
 						postf("~createSource: setting  EFFECTS GROUP proxy  node %\n", sourceName);
-						~allSourceNodes[sourceName.asSymbol].put(\proxy, ~proxEffect );
-						~proxEffect[sourceName.asSymbol].set(\in, ~scbr.aux[0]);  //  HACK to set up rvb node
+						~allSourceNodes[sourceName.asSymbol].put(\proxy, proxy );
+						~effectProx[sourceName.asSymbol].set(\in, ~scbr.aux[0]);  //  HACK to set up rvb node
 
 					},
 					// else set normal proxy
 					{
-						~allSourceNodes[sourceName.asSymbol].put(\proxy, ~prox );
+						var proxy = ~scbr.satieGroups[groupName.asSymbol];	  //
+						~allSourceNodes[sourceName.asSymbol].put(\proxy, proxy);
 
 					}
 				);
@@ -496,17 +577,31 @@ s.waitForBoot{
 			},
 			// else create new node
 			{
+				var groupProxy;
+				if ( groupName != \default,
+					{
+
+						groupProxy = ~scbr.makeSatieGroup(groupName.asSymbol);
+					},
+					// else
+					{
+						groupProxy = ~scbr.satieGroups[\default];
+					}
+				);
+
 				postf("~createGroupNode:   % \n", groupName);
 				~allGroupNodes[groupName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
 				~allGroupNodes[groupName.asSymbol].put(\members, List() );  // create dict for members
-				//~allGroupNodes[groupName.asSymbol].put(\plugin, \nil);
+				~allGroupNodes[groupName.asSymbol].put(\plugin, \nil);
 
-				//  set normal proxy
+				//  set group proxy
 
-				~allGroupNodes[groupName.asSymbol].put(\proxy, ~prox );
+				~allGroupNodes[groupName.asSymbol].put(\proxy, groupProxy );
+
 
 				~scbr.oscInterface.groupOSC(groupName.asSymbol, ~groupCallback);   // create OSC callback for this source
-		});
+			}
+		);
 	};
 
 	~createConnection = { |sourceName listenerName |
@@ -533,11 +628,10 @@ s.waitForBoot{
 	};
 
 
-	// update a node's plugin (synthdef)
-
-
+	// create or a node's plugin (synthdef)
 	~setPlugin = { | nodeName pluginName |
 		var validPluginName = pluginName;
+		var proxyName = ~scbr.getProxySym(~allSourceNodes[nodeName.asSymbol].at(\proxy));
 
 		//postf("~setPlugin: node: %    NEW: %  CURRENT: % \n", nodeName, pluginName.asSymbol, ~allSourceNodes[nodeName.asSymbol].at(\plugin).asSymbol);
 
@@ -551,7 +645,7 @@ s.waitForBoot{
 
 				~allSourceNodes[nodeName.asSymbol].put(\plugin, validPluginName.asSymbol);
 
-				~makeinstance.value(nodeName.asSymbol, ~allSourceNodes[nodeName.asSymbol].at(\proxy) , validPluginName.asSymbol);
+				~scbr.makeInstance(nodeName.asSymbol, validPluginName.asSymbol, proxyName.asSymbol);
 			},
 			{
 				//postf("~setPlugin: ignoring set plugin % for node % : plugin already set \n", pluginName, nodeName);
@@ -608,14 +702,14 @@ s.waitForBoot{
 
 	// enable/disable node
 	~setState = { | nodeName,  state |
-		var thisProxy = ~allSourceNodes[nodeName.asSymbol].at(\proxy);
+		var thisProxySym = ~scbr.getProxySym(~allSourceNodes[nodeName.asSymbol].at(\proxy));
 		if ( (state > 0),
 			{
-				~makeinstance.value(nodeName.asSymbol, thisProxy, ~allSourceNodes[nodeName.asSymbol].at(\plugin).asSymbol);
+				~scbr.makeInstance(nodeName.asSymbol, ~allSourceNodes[nodeName.asSymbol].at(\plugin).asSymbol, thisProxySym);
 			},
 			//else turn state off
 			{
-				~pauseinstance.value(nodeName.asSymbol, thisProxy );
+				~scbr.pauseInstance.value(nodeName.asSymbol, thisProxySym );
 			}
 		);
 		//postf("~setState: seting state of % to %\n", nodeName, state);
@@ -649,11 +743,22 @@ s.waitForBoot{
 		});
 	};
 
-	~addMember = { |  groupName, memberName |
+	~addMember = { |  groupName, nodeName |
 		var memberList = ~allGroupNodes[groupName].at(\members);
-		memberList.add(memberName.asSymbol);
-		//postf("~addMember: group % adding member %\n", groupName, memberName);
-		// ~groupCopyState(groupName, memberName);
+		var groupProxy = ~allGroupNodes[groupName].at(\proxy);
+		//
+
+
+		// check to see if member is already in group
+
+		// if not add it
+		// ~scbr.changeGroup(groupName, nodeName);   // assign source node to group's proxySpace
+		//  ~allSourceNodes[nodeName.asSymbol].put(\proxy, groupProxy);
+		memberList.add(nodeName.asSymbol);
+
+
+		//postf("~addMember: group % adding member %\n", groupName, nodeName);
+		// ~groupCopyState(groupName, nodeName);
 	};
 
 
@@ -701,6 +806,8 @@ s.waitForBoot{
 		};*/
 		//~allSourceNodes.removeEvery();
 
+		// NEED TO CLEAR ALL GROUPS TOO
+
 		~allSourceNodes.clear();
 		~allSourceNodes.size;
 	};
@@ -731,9 +838,9 @@ s.waitForBoot{
 		var memberList = ~allGroupNodes[nameSym].at(\members);
 
 
-		//~cleaninstance.value(nameSym, thisProxy);
+		//~cleaninstance(nameSym, thisProxy);
 
-		//postf("~clearGroupeNode:  group node: % \n",  nameSym);
+		postf("~clearGroupeNode:  group node: % \n",  nameSym);
 
 		// disconnect callbacks
 
@@ -754,11 +861,11 @@ s.waitForBoot{
 		var node = ~allSourceNodes[nameSym];
 		var connectionName = node.at(\connectionName);
 		var nodeKeys = node.keys;
-		var thisProxy = ~allSourceNodes[nameSym].at(\proxy);
+		var thisProxyName = ~scbr.getProxySym(~allSourceNodes[nameSym].at(\proxy));
 
-		~cleaninstance.value(nameSym, thisProxy);
+		~scbr.cleanInstance(nameSym,thisProxyName );
 
-		//postf("~clearing:  node: % and connection: %\n",  nodeName, connectionName);
+		postf("~clearing:  node: % and connection: %\n",  nameSym, connectionName);
 
 		// disconnect callbacks
 		if (node.includesKey(\connectionName),
@@ -813,7 +920,9 @@ s.waitForBoot{
 		};
 	};
 
-	~dumpGroup = {
+	~dumpGroups = {
+
+		postf("~dumpGroups: %  groups defined via OSCrx: \n", ~allGroupNodes.size);
 		~allGroupNodes.keysDo { |key |
 			var nodeSym = key;
 			var memberList = ~allGroupNodes[nodeSym].at(\members);
@@ -842,6 +951,8 @@ s.waitForBoot{
 
 	~dumpNodes.value();
 
+	~dumpGroups.value();
+
 		~dumpConnections.value();
 
 
@@ -851,9 +962,9 @@ s.waitForBoot{
 	 ~createConnection.value(~reverbName.asSymbol, "listener:spatOSClistener_0");
 	 ~prox[~reverbName.asSymbol].set(\in, ~scbr.aux[0]);
 
-	 ~makeinstance.value(~reverbName.asSymbol, ~prox, \busreverb);
+	 ~scbr.makeInstance(~reverbName.asSymbol,\busreverb, \effect);
 
-		 ~makeinstance.value(\sheefaRev, ~prox, \busreverb);
+
 
 	postf("makeing % instance \n", ~reverbName);
 	*/

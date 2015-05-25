@@ -79,6 +79,14 @@
 			nil;
 		};
 
+		~getProxySym = { | self, prox |
+			var proxSym = \default;
+			self.satieGroups.keysValuesDo { |key, value|
+				if ((value === prox ) && (key != \nil),
+					{ proxSym = key; });};
+			proxSym ;
+		};
+        
 	});  // Environment.make
 
 	e.know = true;
