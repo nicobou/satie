@@ -25,7 +25,7 @@ cd sc3-plugins/
 git submodule init && git submodule update
 mkdir build
 cd build
-cmake -DSC_PATH=../../SuperCollider-Source/ -DQUARKS=ON -DSUPERNOVA=ON ..
+cmake -DSC_PATH=../../SuperCollider-Source/ -DQUARKS=OFF -DSUPERNOVA=ON ..
 make -j8 && sudo make install
 
 

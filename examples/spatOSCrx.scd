@@ -23,7 +23,7 @@ s.makeGui;
 s.meter
 
 s.dump
- s.reboot;
+s.reboot;
 ~allSourceNodes.size;
 */
 
