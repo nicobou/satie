@@ -72,8 +72,9 @@ s.waitForBoot{
 ~scbr.makeInstance(\test1, \string);
 ~scbr.makeInstance(\test2, \string);
 ~scbr.makeInstance(\test3, \pinksin);
-~scbr.makeInstance(\f, \snd);
 ~scbr.cleanInstance(\test4);
+// play a file from disk
+~scbr.makeInstance(\f, \snd);
 
 // change test3 source
 ~scbr.makeInstance(\test3, \testtone);
@@ -86,8 +87,11 @@ s.waitForBoot{
 
 ~defaultProx.[\test1];
 
+// load a buffer to play a soundfile
 ~buf = Buffer.cueSoundFile(s, "/usr/share/sounds/alsa/Front_Center.wav", 0, 1);
-~defaultProx.[\f].set(\loop,1,\bufnum, ~buf.bufnum);
+// play the buffer without looping
+~defaultProx.[\f].set(\loop,0,\bufnum, ~buf.bufnum);
+// loop the previously played buffer
 ~defaultProx.[\f].set(\loop, 1);
 
 
