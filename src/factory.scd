@@ -26,40 +26,31 @@
 		// @destfunArray    an array of function reading the mono signal
 		//                  from the source and write computed signals to outbus
 		// @busShiftArray   position of the first bus to write
-		~makeSynthDef = {| self, name, srcfunc, destFunArray, busShiftArray = #[0] |
+		// @toBusArray      send src to busses which indexes are in the array
+		~makeSynthDef = {| self,
+			name,
+			srcfunc,
+			destFunArray,
+			busShiftArray = #[0],
+			toBusArray = #[] |
 			SynthDef(name,
-				{| gate = 1, vol = 1, delay = 0, azi = 0, ele = 0 |
+				// can the "gate" arg name be changed to avoid conflicts with plugin-synthDefs that use it
+				{| gate = 1,  aziDeg = 0, eleDeg = 0, gainDB = 0, delayMs = 1, lpHz = 15000, spread = 1  |
 					var in, env;
 					in = SynthDef.wrap(srcfunc);
-					env = Linen.kr(gate, 2, 1, 2, 2); // fade in/out the signal  FIXME change parameters
+					// fade in set to as short as possible for percussive cases
+					env = Linen.kr(gate, 0.005, 1, 0.01, 2);
+					//in -> busses
+					toBusArray.do {arg item;
+						Out.ar(item, env * in);
+					};
+					// in -> dest
 					destFunArray.do{ arg item, i;
-						var out = SynthDef.wrap(item, prependArgs: [in, vol, delay, azi, ele]);
+						var out = SynthDef.wrap(item, prependArgs: [in, aziDeg, eleDeg, gainDB, delayMs, lpHz, spread]);
+						//var out = SynthDef.wrap(item, prependArgs: [in, vol, delay, azi, ele]);
 						Out.ar(busShiftArray.wrapAt(i), env * out);
 					};
 			}).add;
-		};
-
-		// example test function, see test/test.scd
-		~test = {
-			var y;
-			// first generate the SynthDef
-			~make.value(\NSinNSin,
-				srcfunc: {|srcfreq = 4| Dust.ar(srcfreq)},
-				destFunArray: [
-					{|in = 0, vol, delay, azi, ele, room = 1| vol * FreeVerb.ar(in, room)},
-					{|in = 0, vol, delay, azi, ele, room2 = 0| vol * FreeVerb.ar(in, room2)}],
-				busShiftArray: [0,1]);
-			y = Synth.tail(s, \NSinNSin);
-			y;  // returning the synth
-			// control example
-			// y.set(\srcfreq, 8);
-			// y.set(\room, 0);
-			// y.set(\room, 1);
-			// y.set(\room2, 0);
-			// y.set(\room2, 20);
-			// y.set(\vol, 1);
-			// y.release;
-			// y.set(\gate, 0);
 		};
 	});
 	e.know = true;

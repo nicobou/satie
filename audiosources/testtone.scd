@@ -11,6 +11,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-~name = \DustDust;
-~function = {| density1 = 1, density2 = 10|
-	Dust.ar(density1) + (0.5 * Dust2.ar(density2))};
+
+~name = \testtone;
+~function = {| sfreq = 200 |
+	FSinOsc.ar(sfreq)
+};

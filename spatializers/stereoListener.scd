@@ -11,7 +11,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-~name = \stereoPanner;
+
+~name = \stereoListener;
 
 // spat input args:
 // aziDeg degrees (-180 to 180)
@@ -27,13 +28,11 @@
 	var slewDelay = 0.3; //  note: this needs to be improved ... smoother
 	var slewGain = 0.03;
 	var slewLp = 0.3;
-	LPF.ar(
-		Pan2.ar(
-			DelayC.ar(
-				gain.lag(slewGain) * in,
-				maxdelaytime: 0.5,
-				delaytime: delay.lag(slewDelay)),
-			aziDeg),
-		lpHz.lag(slewLp));
+	LPF.ar(Pan2.ar(DelayC.ar(
+		gain.lag(slewGain) * in,
+		maxdelaytime: 0.5,
+		delaytime: delay.lag(slewDelay)),
+		aziDeg),
+		lpHz.lag(slewLp));   // need to install spread param
 };
 

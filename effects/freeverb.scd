@@ -11,6 +11,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-~name = \DustDust;
-~function = {| density1 = 1, density2 = 10|
-	Dust.ar(density1) + (0.5 * Dust2.ar(density2))};
+~name = \freeverb;
+~function = { arg in, mix=1.0, room=0.5, damp=0.5, outputDB=0;
+	outputDB.dbamp *  FreeVerb.ar(In.ar(in), mix, room, damp);
+};

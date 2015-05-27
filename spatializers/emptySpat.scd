@@ -11,7 +11,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-~name = \stereoPanner;
 
 // spat input args:
 // aziDeg degrees (-180 to 180)
@@ -21,19 +20,8 @@
 // lpHz    hertz
 // spread  units  (0 == directional, ....,  100 == omni)
 
-~function = {|in = 0, aziDeg = 0, eleDeg = 0, gainDB = 0, delayMs = 1, lpHz = 15000, spread = 1 |
-	var gain= gainDB.dbamp;   // convert gainDB to gainAMP
-	var delay = delayMs * 0.001;    // convert to seconds
-	var slewDelay = 0.3; //  note: this needs to be improved ... smoother
-	var slewGain = 0.03;
-	var slewLp = 0.3;
-	LPF.ar(
-		Pan2.ar(
-			DelayC.ar(
-				gain.lag(slewGain) * in,
-				maxdelaytime: 0.5,
-				delaytime: delay.lag(slewDelay)),
-			aziDeg),
-		lpHz.lag(slewLp));
-};
+~name = \emptySpat;
 
+~function = {|in = 0, aziDeg = 0, eleDeg = 0, gainDB = 0, delayMs = 1, lpHz = 15000, spread = 1 |
+	DC.ar(0);
+};

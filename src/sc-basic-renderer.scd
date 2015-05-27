@@ -12,27 +12,90 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (
-~scbrMaker = { | srcPath = "."|
+~scbrMaker = { | numAudioAux = 0 |
 	var e = Environment.make({
 		// TODO use try catch with this
 		~pluginLoader;
 		~synthDefFactory;
 		~cOSCMaker;
+		~defaultSatieGroup;
+		~satieGroups = Dictionary.new;
+		~effectSynthDef = Set.new;
+		~auxbus;
+		~aux;
 
-		~makeSynthDef = { | self, name, srcSymbol, spatSymbolArray, busShiftArray = #[0] |
-			// TODO try catch
+		// TODO try catch
+		~makeSynthDef = { | self, name, srcSymbol, spatSymbolArray, busShiftArray = #[0], toBusArray = #[] |
+			// selecting audio source or effect dictionay because
+			// make instance require effects to be added to tail
+			// and audio source to head
+			var dictionary;
+			if (nil != self.pluginLoader.audioPlugins.at(srcSymbol),
+				{
+					dictionary = self.pluginLoader.audioPlugins;
+				},
+				{
+					dictionary = self.pluginLoader.effectPlugins;
+					self.effectSynthDef.add(name.asSymbol);
+				}
+			); //  endif
+			// Factory
 			self.synthDefFactory.makeSynthDef(name,
-				self.pluginLoader.audioPlugins.at(srcSymbol),
+				dictionary.at(srcSymbol),
 				spatSymbolArray.collect({ arg item, i;
 					self.pluginLoader.spatPlugins.at(item)}),
-				busShiftArray);
+				busShiftArray,
+				toBusArray);
+			nil;  // return
+		};
+
+		// returns proxySpace
+		~makeSatieGroup = { | self, name, addAction = \addToHead |
+			// creating a global ProxySpace
+			var prox = ProxySpace(s);
+			prox.fadeTime = 0.5;
+			// the proxyspace is going to be embedded in the global pargroup
+			prox.group = ParGroup.new(addAction: addAction);
+			self.satieGroups.put(name.asSymbol, prox);
+			prox;
+		};
+
+		~killSatieGroup = { | self, name |
+			self.satieGroups[name].end;
+			self.satieGroups[name].free;
+			self.satieGroups.removeAt(name);
+			nil;
+		};
+
+		// returns proxySpace
+		~makeInstance = { | self, name, synthDefName, prox = \default |
+			// ensuring not extra bus is allocated:
+			// (must be the first reference of "name" in the proxyspace
+			self.satieGroups[prox][name].ar(0);
+			self.satieGroups[prox][name].source = synthDefName;
+			self.satieGroups[prox][name];
+		};
+
+		~cleanInstance = { | self, name, prox = \default |
+			self.satieGroups[prox][name].release();
+			// fadeTime must be higher than SATIE internal fadeTime:
+			self.satieGroups[prox][name].clear(0.03);
+			nil;
+		};
+
+		~pauseInstance = { | self, name, prox = \default |
+			self.satieGroups[prox][name].release();
 			nil;
 		};
 	});  // Environment.make
+
 	e.know = true;
+	e.auxbus = Bus.audio(s, numAudioAux);
+	e.aux = Array.fill(numAudioAux, {arg i; e.auxbus.index + i });
 	e.pluginLoader = ~scbrPlugins.value();
 	e.synthDefFactory = ~scbrFactory.value();
 	e.oscInterface = ~cOSCMaker.value();
-	e;
+	e.defaultSatieGroup = e.makeSatieGroup(\default);
+	e;  // return
 };  // scbrMaker
 )
