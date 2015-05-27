@@ -57,16 +57,15 @@
 			// the proxyspace is going to be embedded in the global pargroup
 			prox.group = ParGroup.new(addAction: addAction);
 			self.satieGroups.put(name.asSymbol, prox);
-			prox;     //   ZK:  added this line so that the prox is returned
+			prox;
 		};
 
-
-		// ZK NEED SOMETHING LIKE THIS
 		~killSatieGroup = { | self, name |
-			// creating a global ProxySpace
-			self.satieGroups[name].group.free;
+			self.satieGroups[name].end;
+			self.satieGroups[name].free;
+			self.satieGroups.removeAt(name);
+			nil;
 		};
-
 
 		// returns proxySpace
 		~makeInstance = { | self, name, synthDefName, prox = \default |
@@ -88,8 +87,6 @@
 			self.satieGroups[prox][name].release();
 			nil;
 		};
-
-
 	});  // Environment.make
 
 	e.know = true;
@@ -98,8 +95,7 @@
 	e.pluginLoader = ~scbrPlugins.value();
 	e.synthDefFactory = ~scbrFactory.value();
 	e.oscInterface = ~cOSCMaker.value();
-	e.defaultSatieGroup = e.makeSatieGroup();   // zk:  do we need to say  makeSatieGroup(\default); ?????
-	e.satieGroups.put(\default, e.defaultSatieGroup);
+	e.defaultSatieGroup = e.makeSatieGroup(\default);
 	e;  // return
 };  // scbrMaker
 )
