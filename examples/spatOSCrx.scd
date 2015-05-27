@@ -92,8 +92,9 @@ s.waitForBoot{
 	(~rootSrcPath ++ "/src/*.scd").pathMatch.do({arg item; item.loadPaths});
 
 	~num_aux_bus = 5;
+	~oscSystem = \spatOSC;
 	// creating a sc-basic-renderer
-	~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus);
+	~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus, oscSystem: ~oscSystem);
 	// printing internal aux array with bus indexes
 	~scbr.aux;
 	// loading source plugins

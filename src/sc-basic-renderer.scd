@@ -12,7 +12,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (
-~scbrMaker = { | numAudioAux = 0 |
+~scbrMaker = { | numAudioAux = 0, oscSystem = \spatOSC |
 	var e = Environment.make({
 		// TODO use try catch with this
 		~pluginLoader;
@@ -49,7 +49,6 @@
 			nil;  // return
 		};
 
-		// returns proxySpace
 		~makeSatieGroup = { | self, name, addAction = \addToHead |
 			// creating a global ProxySpace
 			var prox = ProxySpace(s);
@@ -60,20 +59,12 @@
 			prox;
 		};
 
-		~killSatieGroup = { | self, name |
-			self.satieGroups[name].end;
-			self.satieGroups[name].free;
-			self.satieGroups.removeAt(name);
-			nil;
-		};
-
-		// returns proxySpace
 		~makeInstance = { | self, name, synthDefName, prox = \default |
 			// ensuring not extra bus is allocated:
 			// (must be the first reference of "name" in the proxyspace
 			self.satieGroups[prox][name].ar(0);
 			self.satieGroups[prox][name].source = synthDefName;
-			self.satieGroups[prox][name];
+			nil;
 		};
 
 		~cleanInstance = { | self, name, prox = \default |
@@ -87,6 +78,15 @@
 			self.satieGroups[prox][name].release();
 			nil;
 		};
+
+		~getProxySym = { | self, prox |
+			var proxSym = \default;
+			self.satieGroups.keysValuesDo { |key, value|
+				if ((value === prox ) && (key != \nil),
+					{ proxSym = key; });};
+			proxSym ;
+		};
+
 	});  // Environment.make
 
 	e.know = true;
@@ -94,8 +94,19 @@
 	e.aux = Array.fill(numAudioAux, {arg i; e.auxbus.index + i });
 	e.pluginLoader = ~scbrPlugins.value();
 	e.synthDefFactory = ~scbrFactory.value();
-	e.oscInterface = ~cOSCMaker.value();
-	e.defaultSatieGroup = e.makeSatieGroup(\default);
+	// e.oscInterface = ~cOSCMaker.value();
+	switch(oscSystem,
+		\spatOSC,
+		{
+			e.oscInterface = ~cOSCMaker.value();
+		},
+		\satieOSC,
+		{
+			e.oscInterface = ~satieOSCMaker.value();
+		}
+	);
+	e.defaultSatieGroup = e.makeSatieGroup();
+	e.satieGroups.put(\default, e.defaultSatieGroup);
 	e;  // return
 };  // scbrMaker
 )
