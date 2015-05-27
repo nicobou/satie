@@ -138,7 +138,7 @@ s.waitForBoot{
 // making a reverb effect
 // this need a specific group since
 // effects need to be added to tail
-~effectProx = ~scbr.makeSatieGroup(\effect, \addToTail);
+~effectProx = ~scbr.makeSatieGroup(\effect, \addToTail); all proxies (free and stop the moni
 ~effectProx[\rev].set(\in, ~scbr.aux[2]);  // reading bus created by Satie
 ~effectProx[\rev].set(\mix, 1);  //wet only
 ~effectProx[\rev].set(\room, 0.2);
@@ -185,6 +185,7 @@ r.stop;
 	\aziDeg, rrand(-180,180),
 	\eleDeg, rrand(0,90));
 
+Group
 // change with gui
 w=Window.new("sheefa", Rect(30, 30, 400, 100)).front;
 w.view.decorator=FlowLayout(w.view.bounds);
