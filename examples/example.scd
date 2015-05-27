@@ -57,6 +57,7 @@ s.waitForBoot{
 	~scbr.makeSynthDef(\string_third_aux, \zkarpluck1, [\domeVBAP], [0], [~scbr.aux[2]]);
 	// spatilized reverb effect (input will be set at creation):
 	~scbr.makeSynthDef(\busreverb, \freeverb, [\stereoPanner], [0]);
+	// streaming a soundfile from disk
 	~scbr.makeSynthDef(\snd, \sndFile, [\stereoPanner], [0]);
 	// be sure the synthDef is compiled on the server
 	s.sync;
@@ -73,8 +74,6 @@ s.waitForBoot{
 ~scbr.makeInstance(\test2, \string);
 ~scbr.makeInstance(\test3, \pinksin);
 ~scbr.cleanInstance(\test4);
-// play a file from disk
-~scbr.makeInstance(\f, \snd);
 
 // change test3 source
 ~scbr.makeInstance(\test3, \testtone);
@@ -87,13 +86,17 @@ s.waitForBoot{
 
 ~defaultProx.[\test1];
 
-// load a buffer to play a soundfile
+// play a file from disk
+~scbr.makeInstance(\f, \snd);
+// load a buffer to play a soundfile - only mono files
 ~buf = Buffer.cueSoundFile(s, "/usr/share/sounds/alsa/Front_Center.wav", 0, 1);
+~buf = Buffer.cueSoundFile(s, Platform.resourceDir +/+ "sounds/a11wlk01.wav", 0, 1);
 // play the buffer without looping
 ~defaultProx.[\f].set(\loop,0,\bufnum, ~buf.bufnum);
 // loop the previously played buffer
 ~defaultProx.[\f].set(\loop, 1);
-
+~scbr.cleanInstance(\f);
+~buf.free;
 
 // removing an instance
 ~scbr.cleanInstance(\test2);
