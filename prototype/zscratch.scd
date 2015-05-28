@@ -1,6 +1,150 @@
 s.makeGui;
 s.meter;
 
+
+~dumpSatieGroups.value();
+
+~dumpSatieGroups = {
+	var prox;
+	postf("~dumpSatieGroups\n");
+
+	~scbr.satieGroups.keysDo({ arg key;
+		prox = ~scbr.satieGroups[key];
+		postf("\t  proxySpace: %  group: %  existingProxies:% \n", key, prox.group, prox.existingProxies);
+
+		//prox.group.query;
+		//prox.postln;
+	});
+	nil;
+};
+
+
+
+
+
+
+~createSource: sourceA_0:  uri: plugin://default  group: pluck1_group
+
+
+~createSource.value(\sheefa, "uri: plugin://default", \pluck1_group);
+
+
+~removeGroup.value(\sheefa);
+
+~removeGroup = { | groupName  |
+	var groupNameSymb = groupName.asSymbol;
+		var index = -1 ;
+
+		~scbr.satieGroups.keysDo({ arg key, i;
+		key.postln;
+		if ( key == groupNameSymb,
+				{
+				postf(" FOUND % at item % \n", groupNameSymb, i);
+				index = i;
+
+		});
+
+
+		});
+		if (index > -1,
+			{
+				~scbr.satieGroups.removeAt(index);
+
+				postf("~removeGroup: group %\n", groupName);
+		},
+			// else
+			{
+				postf("~~removeGroup: group %  not found \n", groupName);
+		});
+					~scbr.satieGroups.postln; };
+
+
+~scbr.satieGroups.removeAt(0);
+
+
+
+	~dumpNodes.value();
+
+	~dumpGroups.value();
+
+~scbr.satieGroups
+
+
+
+	~scbr.satieGroups.do({ arg item, i;
+		 item.postln;
+	//item.clearAll;
+
+		});
+
+
+	~killSatieGroup = { |  name |
+			// creating a global ProxySpace
+			~scbr.satieGroups[name].group.free;
+		};
+
+
+
+~scbr.satieGroups.remov
+
+~theGroup = \sheefa;
+~theGroup = \pluck1_group;
+~theGroup = \effect;
+~theGroup = \default;
+~theGroup = \cpuTest;
+
+
+
+~scbr.satieGroups[\nil].group.query;
+
+
+~scbr.makeSatieGroup(~theGroup);
+
+~killSatieGroup.value( ~theGroup );
+
+
+~scbr.satieGroups[~theGroup].group.query;
+~scbr.satieGroups[~theGroup].existingProxies;
+~scbr.satieGroups[~theGroup].group.free;
+
+~scbr.satieGroups[~theGroup].remove;
+
+
+
+~allSourceNodes[\sourceB_3].at(\proxySymb)
+~allSourceNodes[\sourceD_2].at(\proxySymb)
+
+~scbr.oscInterface.removeSourceOSC(nameSym);
+
+
+
+~scbr.satieGroups[groupName.asSymbol];
+
+~scbr.satieGroups[\pluck1_group].free;
+~scbr.satieGroups[\pluck1_group].group.query;
+~scbr.satieGroups[\pluck1_group].existingProxies;
+
+
+
+~scbr.satieGroups[\default]
+~scbr.satieGroups[\nil]
+
+
+
+
+~scbr.cleanInstance(\sourceA_0, \pluck1_group)
+
+~scbr.satieGroups[\nil].existingProxies
+~scbr.satieGroups[\pluck1_group].existingProxies
+~scbr.satieGroups[\default].existingProxies
+
+
+~scbr.satieGroups[\pluck1_group].stop
+
+
+//UGen.browse
+//    Ndef.gui
+
 Server.default.options.dump;
 
 
