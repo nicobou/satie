@@ -10,13 +10,18 @@ SynthDescLib.global.browse;
 Quarks.gui;
 
 SequenceableCollection.browse;
+Server.default.options.dump;
 
 	~dumpNodes.value();
 
 	~dumpGroups.value();
 
 
-~defaultProx = ~scbr.satieGroups[\default];
+
+
+
+~defaultProx.group.
+
 
 ~defaultProx.["ball_1:spatOSCsource_3".asSymbol].set(\t_trig, 1)
 
@@ -117,3 +122,64 @@ SequenceableCollection.browse;
 ~scbr.cleanInstance(\sourceB_5, \pluck1_group);
 
 ~scbr.cleanInstance(\sourceC_1)
+
+
+
+~theGroup = \sheefa;
+~theGroup = \pluck1_group;
+~theGroup = \effect;
+~theGroup = \default;
+~theGroup = \cpuTest;
+
+
+
+~scbr.satieGroups[\nil].group.query;
+
+
+~scbr.makeSatieGroup(~theGroup);
+
+~killSatieGroup.value( ~theGroup );
+
+
+~scbr.satieGroups[~theGroup].group.query;
+~scbr.satieGroups[~theGroup].existingProxies;
+~scbr.satieGroups[~theGroup].group.free;
+
+~scbr.satieGroups[~theGroup].remove;
+
+
+
+~allSourceNodes[\sourceB_3].at(\proxySymb)
+~allSourceNodes[\sourceD_2].at(\proxySymb)
+
+~scbr.oscInterface.removeSourceOSC(nameSym);
+
+
+
+~scbr.satieGroups[groupName.asSymbol];
+
+~scbr.satieGroups[\pluck1_group].free;
+~scbr.satieGroups[\pluck1_group].group.query;
+~scbr.satieGroups[\pluck1_group].existingProxies;
+
+
+
+~scbr.satieGroups[\default]
+~scbr.satieGroups[\nil]
+
+
+
+
+~scbr.cleanInstance(\sourceA_0, \pluck1_group)
+
+~scbr.satieGroups[\nil].existingProxies
+~scbr.satieGroups[\pluck1_group].existingProxies
+~scbr.satieGroups[\default].existingProxies
+
+
+~scbr.satieGroups[\pluck1_group].stop;
+
+
+//UGen.browse
+//    Ndef.gui
+

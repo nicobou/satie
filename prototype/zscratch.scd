@@ -2,196 +2,89 @@ s.makeGui;
 s.meter;
 
 
-~dumpSatieGroups.value();
 
-~dumpSatieGroups = {
-	var prox;
-	postf("~dumpSatieGroups\n");
+w=Window.new("voicing", Rect(30, 30, 400, 140)).front;
+w.view.decorator=FlowLayout(w.view.bounds);
+w.view.decorator.gap=8@2;
 
-	~scbr.satieGroups.keysDo({ arg key;
-		prox = ~scbr.satieGroups[key];
-		postf("\t  proxySpace: %  group: %  existingProxies:% \n", key, prox.group, prox.existingProxies);
 
-		//prox.group.query;
-		//prox.postln;
-	});
-	nil;
-};
+g = EZSlider(w, 380@20, "pitch ", ControlSpec(40, 110, \lin, 1, 60));
+g.action_({ |ez| (  ~globalSet.value(\note, [ ez.value, 1, 0.5 ] );  ~globalSet.value(\t_trig, 1);)});
 
 
+// h = EZSlider(w, 380@20, "amp", ControlSpec(0, 1, \lin, 0.01, 0.5));
+// h.action_({ |ez| (  ~globalSet.value(\amp, (ez.value)))});
+//
 
 
+i = EZSlider(w, 380@20, "pos", ControlSpec(0.0, 1, \lin, 0.01, 0.14));
+i.action_({ |ez| (  ~globalSet.value(\pos, (ez.value)))});
 
 
-~createSource: sourceA_0:  uri: plugin://default  group: pluck1_group
+j = EZSlider(w, 380@20, "c1", ControlSpec(0.05, 5, \lin, 0.01, 1));
+j.action_({ |ez| (  ~globalSet.value(\c1, (ez.value)))});
 
 
-~createSource.value(\sheefa, "uri: plugin://default", \pluck1_group);
+k = EZSlider(w, 380@20, "c3", ControlSpec(0.05, 20, \lin, 0.01, 1));
+k.action_({ |ez| (  ~globalSet.value(\c3, (ez.value)))});
 
+l = EZSlider(w, 380@20, "fb", ControlSpec(0.0, 100, \lin, 0.1, 20));
+l.action_({ |ez| (  ~globalSet.value(\fb, (ez.value)))});
 
-~removeGroup.value(\sheefa);
 
-~removeGroup = { | groupName  |
-	var groupNameSymb = groupName.asSymbol;
-		var index = -1 ;
 
-		~scbr.satieGroups.keysDo({ arg key, i;
-		key.postln;
-		if ( key == groupNameSymb,
-				{
-				postf(" FOUND % at item % \n", groupNameSymb, i);
-				index = i;
 
-		});
 
 
-		});
-		if (index > -1,
-			{
-				~scbr.satieGroups.removeAt(index);
+// harp 1
+~globalSet.value(\c1, 0.4);
+~globalSet.value(\c3, 5);
+~globalSet.value(\fb, 0);
 
-				postf("~removeGroup: group %\n", groupName);
-		},
-			// else
-			{
-				postf("~~removeGroup: group %  not found \n", groupName);
-		});
-					~scbr.satieGroups.postln; };
+// harp 2
+~globalSet.value(\c1, 0.38);
+~globalSet.value(\c3, 6.11);
+~globalSet.value(\fb, 0);
 
+// harp 3 (longer dur)
+~globalSet.value(\c1, 0.15);
+~globalSet.value(\c3, 4.51);
+~globalSet.value(\fb, 0);
 
-~scbr.satieGroups.removeAt(0);
+// harp 3 (feather)
+~globalSet.value(\c1, 0.15);
+~globalSet.value(\c3, 9.51);
+~globalSet.value(\fb, 0);
 
 
+~globalSet.value(\c1, 0.2);
+~globalSet.value(\c3, 6);
 
-	~dumpNodes.value();
+~globalSet.value(\c1, 0.2);
+~globalSet.value(\c3, 3);
 
-	~dumpGroups.value();
+~globalSet.value(\c1, 0.2);
+~globalSet.value(\c3, 3);
 
-~scbr.satieGroups
 
+// lantern zoner
+~globalSet.value(\c1, 0.11);
+~globalSet.value(\c3, 3);
+~globalSet.value(\fb, 100);
 
+// lantern zoner (shorter)
+~globalSet.value(\c1, 0.7);
+~globalSet.value(\c3, 3);
+~globalSet.value(\fb, 100);
 
-	~scbr.satieGroups.do({ arg item, i;
-		 item.postln;
-	//item.clearAll;
 
-		});
 
 
-	~killSatieGroup = { |  name |
-			// creating a global ProxySpace
-			~scbr.satieGroups[name].group.free;
-		};
 
 
 
-~scbr.satieGroups.remov
 
-~theGroup = \sheefa;
-~theGroup = \pluck1_group;
-~theGroup = \effect;
-~theGroup = \default;
-~theGroup = \cpuTest;
 
-
-
-~scbr.satieGroups[\nil].group.query;
-
-
-~scbr.makeSatieGroup(~theGroup);
-
-~killSatieGroup.value( ~theGroup );
-
-
-~scbr.satieGroups[~theGroup].group.query;
-~scbr.satieGroups[~theGroup].existingProxies;
-~scbr.satieGroups[~theGroup].group.free;
-
-~scbr.satieGroups[~theGroup].remove;
-
-
-
-~allSourceNodes[\sourceB_3].at(\proxySymb)
-~allSourceNodes[\sourceD_2].at(\proxySymb)
-
-~scbr.oscInterface.removeSourceOSC(nameSym);
-
-
-
-~scbr.satieGroups[groupName.asSymbol];
-
-~scbr.satieGroups[\pluck1_group].free;
-~scbr.satieGroups[\pluck1_group].group.query;
-~scbr.satieGroups[\pluck1_group].existingProxies;
-
-
-
-~scbr.satieGroups[\default]
-~scbr.satieGroups[\nil]
-
-
-
-
-~scbr.cleanInstance(\sourceA_0, \pluck1_group)
-
-~scbr.satieGroups[\nil].existingProxies
-~scbr.satieGroups[\pluck1_group].existingProxies
-~scbr.satieGroups[\default].existingProxies
-
-
-~scbr.satieGroups[\pluck1_group].stop
-
-
-//UGen.browse
-//    Ndef.gui
-
-Server.default.options.dump;
-
-
-
-~superNovaFlag = true;
-
-
-
-OSCdef(\createBasicRendererListener).clear.free;  // just in case newOSC will be re-evaluated.
-	~scbr.oscInterface.newOSC(\createBasicRendererListener, ~basicRendererCallback, "/a.renderer");
-
-
-
-~basicRendererCallback = {
-	arg msg;
-	var command;
-	command = msg[1];
-	postf("~basicRendererCallback: command: %, msg: %, \n", command, msg);
-
-	switch (command,
-		'createSource',
-		{
-			if ( (msg.size < 3 ) ,
-				{"~basicRendererCallback: OSCrx createSource message missing values".warn;
-					postf("CREATESOURCE MESS LEN: %", msg.size);
-
-				},
-				// else
-				{
-					var sourceName = msg[2];
-					var uriName;
-
-					if (msg.size == 3,
-						{
-							uriName = "";
-						},
-						// else
-						{
-							uriName = msg[3];
-					});
-
-					~createSource.value(sourceName, uriName);
-				}
-			)
-		}
-	);
-};
 
 
 
@@ -370,65 +263,6 @@ t.stop;
 
 
 
-// harp 1
-~globalSet.value(\c1, 0.4);
-~globalSet.value(\c3, 5);
-~globalSet.value(\fb, 0);
-
-// harp 2
-~globalSet.value(\c1, 0.38);
-~globalSet.value(\c3, 6.11);
-~globalSet.value(\fb, 0);
-
-// harp 3 (longer dur)
-~globalSet.value(\c1, 0.15);
-~globalSet.value(\c3, 4.51);
-~globalSet.value(\fb, 0);
-
-// harp 3 (feather)
-~globalSet.value(\c1, 0.15);
-~globalSet.value(\c3, 9.51);
-~globalSet.value(\fb, 0);
-
-
-~globalSet.value(\c1, 0.2);
-~globalSet.value(\c3, 6);
-
-~globalSet.value(\c1, 0.2);
-~globalSet.value(\c3, 3);
-
-~globalSet.value(\c1, 0.2);
-~globalSet.value(\c3, 3);
-
-
-// lantern zoner
-~globalSet.value(\c1, 0.11);
-~globalSet.value(\c3, 3);
-~globalSet.value(\fb, 100);
-
-// lantern zoner (shorter)
-~globalSet.value(\c1, 0.7);
-~globalSet.value(\c3, 3);
-~globalSet.value(\fb, 100);
-
-
-
-
-
-v=Window.new("location", Rect(30, 30, 400, 100)).front;
-v.view.decorator=FlowLayout(v.view.bounds);
-v.view.decorator.gap=8@2;
-
-
-
-h = EZSlider(v, 380@20, "azi", ControlSpec(-180, 180, \lin, 0.1, 0));
-h.action_({ |ez| ( ~globalSet.value(\aziDeg, (ez.value)))});
-
-i = EZSlider(v, 380@20, "elev", ControlSpec(-90, 90, \lin, 0.1, 0));
-i.action_({ |ez| ( ~globalSet.value(\eleDeg, (ez.value)))});
-
-j = EZSlider(v, 380@20, "spread", ControlSpec(0, 100, \lin, 0.1, 5));
-j.action_({ |ez| ( ~globalSet.value(\spread, (ez.value)))});
 
 
 
@@ -437,34 +271,6 @@ j.action_({ |ez| ( ~globalSet.value(\spread, (ez.value)))});
 
 
 
-
-w=Window.new("voicing", Rect(30, 30, 400, 140)).front;
-w.view.decorator=FlowLayout(w.view.bounds);
-w.view.decorator.gap=8@2;
-
-
-g = EZSlider(w, 380@20, "pitch ", ControlSpec(40, 110, \lin, 1, 60));
-g.action_({ |ez| (  ~globalSet.value(\note, [ ez.value, 1, 0.5 ] );  ~globalSet.value(\t_trig, 1);)});
-
-
-// h = EZSlider(w, 380@20, "amp", ControlSpec(0, 1, \lin, 0.01, 0.5));
-// h.action_({ |ez| (  ~globalSet.value(\amp, (ez.value)))});
-//
-
-
-i = EZSlider(w, 380@20, "pos", ControlSpec(0.0, 1, \lin, 0.01, 0.14));
-i.action_({ |ez| (  ~globalSet.value(\pos, (ez.value)))});
-
-
-j = EZSlider(w, 380@20, "c1", ControlSpec(0.05, 5, \lin, 0.01, 1));
-j.action_({ |ez| (  ~globalSet.value(\c1, (ez.value)))});
-
-
-k = EZSlider(w, 380@20, "c3", ControlSpec(0.05, 20, \lin, 0.01, 1));
-k.action_({ |ez| (  ~globalSet.value(\c3, (ez.value)))});
-
-l = EZSlider(w, 380@20, "fb", ControlSpec(0.0, 100, \lin, 0.1, 20));
-l.action_({ |ez| (  ~globalSet.value(\fb, (ez.value)))});
 
 
 
