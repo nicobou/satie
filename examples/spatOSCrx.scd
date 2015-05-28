@@ -671,7 +671,7 @@ s.waitForBoot{
 
 		//postf("~setGroupProperty: seting % of % to %\n", property, groupName, value);
 
-		groupProxy.set(property.asSymbol, value);
+		groupProxy.group.set(property.asSymbol, value);
 	};
 
 	// enable/disable node
