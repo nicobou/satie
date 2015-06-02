@@ -238,6 +238,14 @@ r.stop;
 
 // ****************** usage with OSC ************************
 (
+
+/* try with:
+   oscsend localhost 18032  /SATIE sss createSoundSource pink pinksin default
+   oscsend localhost 18032  /SATIE ss deleteSoundSource pink
+
+   for creation and deletion
+*/
+
 ~createSoundSource = {| args |
 	var name = args[2].asSymbol;
 	var synth = args[3].asSymbol;
