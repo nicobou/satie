@@ -27,8 +27,9 @@ s.waitForBoot{
 	(~rootSrcPath ++ "/src/*.scd").pathMatch.do({arg item; item.loadPaths});
 
 	~num_aux_bus = 5;
+	~oscSys = \satieOSC;
 	// creating a sc-basic-renderer
-	~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus);
+	~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus, oscSystem: ~oscSys);
 	// printing internal aux array with bus indexes
 	~scbr.aux;
     // ~scbr.auxbus.scope;
@@ -138,7 +139,7 @@ s.waitForBoot{
 // making a reverb effect
 // this need a specific group since
 // effects need to be added to tail
-~effectProx = ~scbr.makeSatieGroup(\effect, \addToTail); all proxies (free and stop the moni
+~effectProx = ~scbr.makeSatieGroup(\effect, \addToTail);
 ~effectProx[\rev].set(\in, ~scbr.aux[2]);  // reading bus created by Satie
 ~effectProx[\rev].set(\mix, 1);  //wet only
 ~effectProx[\rev].set(\room, 0.2);
@@ -185,7 +186,6 @@ r.stop;
 	\aziDeg, rrand(-180,180),
 	\eleDeg, rrand(0,90));
 
-Group
 // change with gui
 w=Window.new("sheefa", Rect(30, 30, 400, 100)).front;
 w.view.decorator=FlowLayout(w.view.bounds);
@@ -234,4 +234,44 @@ r.stop;
 	\note, rrand(42, 72), rrand(1, 2), rrand(0.1, 0.9),
 	\aziDeg, rrand(-180,180),
 	\eleDeg, rrand(0,90));
+)
+
+// ****************** usage with OSC ************************
+(
+~createSoundSource = {| args |
+	var name = args[2].asSymbol;
+	var synth = args[3].asSymbol;
+	var proxy = args[4].asSymbol;
+	args.postln;
+	postf("creating source % using % and adding to group %\n", name, synth, proxy);
+	~scbr.makeInstance(name, synth, proxy);
+};
+
+~removeSoundSource = { |sourceName|
+	var name = sourceName;
+	postf("Removing and cleaning %\n", name);
+	~scbr.cleanInstance(name);
+};
+
+~coreCallback = { | msg |
+	var command = msg[1];
+	command.postln;
+	switch(command,
+		\createSoundSource,
+		{
+			var instanceName = msg[2];
+			postf("Creating a source: %\n", instanceName);
+			~scbr.oscInterface.createSourceOSC(instanceName, ~createSoundSource);
+		},
+		\deleteSoundSource,
+		{
+			var instanceName = msg[2];
+			postf("Removing OSC source: %\n", instanceName);
+			~scbr.oscInterface.removeSourceOSC(instanceName);
+			~removeSoundSource.value(instanceName);
+		}
+	)
+};
+~scbr.oscInterface.newOSC(\satieOSC, ~coreCallback);
+
 )
