@@ -1,0 +1,90 @@
+#+TITLE: SATIE OSC
+#+AUTHOR: Michał Seta
+#+EXPORT_TITLE: "SATIE OSC reference"
+#+LATEX_CLASS: article
+#+LATEX_CLASS_OPTIONS: [article]
+#+LATEX_HEADER: \oddsidemargin 0cm
+#+LATEX_HEADER: \evensidemargin 0cm
+#+LATEX_HEADER: \textwidth 15cm
+#+LATEX_HEADER: \topmargin -1cm
+#+LATEX_HEADER: \textheight 23.5cm
+#+LATEX_HEADER: \usepackage{fancyhdr}
+#+LATEX_HEADER: \pagestyle{fancy}
+#+LATEX_HEADER: \fancyhead{}
+#+LATEX_HEADER: \fancyhead[LE,RO]{SATIE OSC reference}
+#+LATEX_HEADER: \fancyhead[RE,LO]{[SAT]Metalab}
+#+LATEX_HEADER: \fancyfoot[CE,CO]{Michał Seta | e: mseta@sat.qc.ca }
+#+LATEX_HEADER: \usepackage{epic}
+#+OPTIONS: num:t
+#+OPTIONS: toc:t
+#+OPTIONS: author:nil
+#+OPTIONS: timestamp:t date:t d:nil <:nil p:nil tags:nil
+#+LANGUAGE: en
+\thispagestyle{fancy}
+
+* SATIE OSC
+
+** Address space
+- =/SATIE= - the root address space. At this level we can creaate synth instances and groups.
+  - =/default= - group level, only methods affecting a group of synths should be used. The group and synths must already be created. A group =default= is already created on the server and synth instances are placed in the =default= group automatically, unless a different group is specified.
+
+**  OSC messages
+
+*** createSoundSource
+- =createsoundSource= =name= =synthName= =groupName=
+  - creates an instance of a SATIE synthDef. /name/ is a unique identifier in the SATIE world, /synthName/ is the name of synth definition, /groupName/ is the name of the group the particular instance should be attached to. By default, new instances are placed in =default= group.
+
+*** deleteSoundSource
+- =deleteSoundSource= =name=
+  - delete a named instance from the SATIE server. /name/ is the uniquely identified synth instance.
+
+
+
+# \fbox{createSoundSource} \fbox{name} \fbox{synthName} \fbox{group}
+
+# #+BEGIN_SRC dot :file images/basicOSC.png :cmdline -Kdot -Tpng
+#   digraph G {
+#     rankdir=LR;
+#     edge[arrowtail=none, arrowhead=none];
+#     node[shape=plaintext]; createSoundSource; 
+#     node[shape=text, penwidth=0.5]; name, synthName, groupName;
+#     createSoundSource -> name -> synthName -> groupName;
+
+#   }
+#       digraph S{
+#       rankdir=LR;
+#       edge[arrowtail=none, arrowhead=none];
+#       node[shape=box]; createSoundSource; 
+#       node[shape=ellipse, penwidth=0.5]; name;
+#       deleteSoundSource -> name;
+#     }
+# #+END_SRC
+
+# #+RESULTS:
+# [[file:images/basicOSC.png]]
+
+# #+RESULTS:
+# [[file:images/basicOSC.png]]
+
+
+** Methods:
+- =makeInstance= : instanceName, callback
+- =cleanInstance=
+- =set=
+- =group.set=
+
+# *** Graphs
+# #+BEGIN_SRC dot :file images/address-space.png :cmdline -Kdot -Tpng
+#   graph{
+#   rankdir = LR;
+#   node [shape=box];
+#   "/SATIE" -> "/GROUP";
+#   "/SATIE" -> message;
+#   fontsize=12;
+#   }
+# #+END_SRC
+
+# #+RESULTS:
+# [[file:images/address-space.png]]
+
+
