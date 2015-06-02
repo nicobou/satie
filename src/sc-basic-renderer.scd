@@ -86,7 +86,6 @@
 					{ proxSym = key; });};
 			proxSym ;
 		};
-
 	});  // Environment.make
 
 	e.know = true;
@@ -98,10 +97,12 @@
 	switch(oscSystem,
 		\spatOSC,
 		{
+			postf("choosing cOSCMaker as osc interface\n");
 			e.oscInterface = ~cOSCMaker.value();
 		},
 		\satieOSC,
 		{
+			postf("choosing satieOSCMaker as osc interface\n");
 			e.oscInterface = ~satieOSCMaker.value();
 		}
 	);
