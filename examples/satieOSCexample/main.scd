@@ -30,3 +30,6 @@ s.waitForBoot {
 	"All files loaded".postln;
 } // waitForBoot
 )
+
+OSCdef.all;
+~scbr.satieGroups[\default].existingProxies;
