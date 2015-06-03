@@ -15,76 +15,47 @@
 #+LATEX_HEADER: \fancyhead[RE,LO]{[SAT]Metalab}
 #+LATEX_HEADER: \fancyfoot[CE,CO]{Michał Seta | e: mseta@sat.qc.ca }
 #+LATEX_HEADER: \usepackage{epic}
-#+OPTIONS: num:t
+#+OPTIONS: num:2
 #+OPTIONS: toc:t
 #+OPTIONS: author:nil
 #+OPTIONS: timestamp:t date:t d:nil <:nil p:nil tags:nil
 #+LANGUAGE: en
 \thispagestyle{fancy}
 
-* SATIE OSC
 
-** Address space
-- =/SATIE= - the root address space. At this level we can creaate synth instances and groups.
-  - =/default= - group level, only methods affecting a group of synths should be used. The group and synths must already be created. A group =default= is already created on the server and synth instances are placed in the =default= group automatically, unless a different group is specified.
+* Address space
+- /SATIE :: the root address space. At this level we can creaate synth instances and groups.
+  - /default :: group level, only methods affecting a group of synths should be used. The group and synths must already be created. A group =default= is already created on the server and synth instances are placed in the =default= group automatically, unless a different group is specified.
 
-**  OSC messages
+*  OSC messages
 
-*** createSoundSource
-- =createsoundSource= =name= =synthName= =groupName=
-  - creates an instance of a SATIE synthDef. /name/ is a unique identifier in the SATIE world, /synthName/ is the name of synth definition, /groupName/ is the name of the group the particular instance should be attached to. By default, new instances are placed in =default= group.
+** Handling sound sources
+*** createSoundSource name synthName [groupName]
+        
+creates an instance of a SATIE synthDef. 
 
-*** deleteSoundSource
-- =deleteSoundSource= =name=
-  - delete a named instance from the SATIE server. /name/ is the uniquely identified synth instance.
+- Arguments:
+  - name :: unique identifier for this synth
+  - synthName :: the reference name of the synth being used. The synth must have been compiled on the server with =~scbr.makeSynthDef= method before instantiating
+  - groupName :: (optional), the name of the group the synth instance will be attached to. If this parameter is omitted, it will be attached to the =default= group.
 
+*** removeSoundSource name 
+delete a named instance from the SATIE server. /name/ is the uniquely identified synth instance.
 
+- Arguments:
+  - name :: the named instance of the synth to remove
 
-# \fbox{createSoundSource} \fbox{name} \fbox{synthName} \fbox{group}
+** Handling groups
+*** createGroup name [doneAction]
+creates a new group named /name/ to which sound sources can be added. Groups in SATIE are actually SuperCollider's ProxySpace. 
 
-# #+BEGIN_SRC dot :file images/basicOSC.png :cmdline -Kdot -Tpng
-#   digraph G {
-#     rankdir=LR;
-#     edge[arrowtail=none, arrowhead=none];
-#     node[shape=plaintext]; createSoundSource; 
-#     node[shape=text, penwidth=0.5]; name, synthName, groupName;
-#     createSoundSource -> name -> synthName -> groupName;
-
-#   }
-#       digraph S{
-#       rankdir=LR;
-#       edge[arrowtail=none, arrowhead=none];
-#       node[shape=box]; createSoundSource; 
-#       node[shape=ellipse, penwidth=0.5]; name;
-#       deleteSoundSource -> name;
-#     }
-# #+END_SRC
-
-# #+RESULTS:
-# [[file:images/basicOSC.png]]
-
-# #+RESULTS:
-# [[file:images/basicOSC.png]]
-
-
-** Methods:
-- =makeInstance= : instanceName, callback
-- =cleanInstance=
-- =set=
-- =group.set=
-
-# *** Graphs
-# #+BEGIN_SRC dot :file images/address-space.png :cmdline -Kdot -Tpng
-#   graph{
-#   rankdir = LR;
-#   node [shape=box];
-#   "/SATIE" -> "/GROUP";
-#   "/SATIE" -> message;
-#   fontsize=12;
-#   }
-# #+END_SRC
-
-# #+RESULTS:
-# [[file:images/address-space.png]]
-
+- Arguments:
+  - name :: the name of the group to make
+  -  doneAction :: one of the following (please refer to SuperCollider documentation of *ParGroup*):
+      | =\addToHead=  | (the default) |
+      | =\addToTail=  |               |
+      | =\addAfter=   |               |
+      | =\addBefore=  |               |
+      | =\addBefore=  |               |
+      | =\addReplace= |               |
 
