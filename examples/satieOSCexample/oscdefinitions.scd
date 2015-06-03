@@ -15,28 +15,13 @@
 
 // ****************** usage with OSC ************************
 
-~createSoundSource = {| args |
-	var argSize = args.size;
-	var name = args[2].asSymbol;
-	var synth = args[3].asSymbol;
-	var proxy = \default;
-	args.postln;
-
-	case
-	{ argSize == 5 } {
-		proxy = args[4].asSymbol;
-		postf("creating source % using % and adding to group %\n", name, synth, proxy);
-		~scbr.makeInstance(name, synth, proxy);
-	}
-	{ argSize == 4 } {
-		postf("creating source % using % and adding to group %\n", name, synth, proxy);
-		~scbr.makeInstance(name, synth, proxy);
-	}
-	{ argSize < 4 } {
-		postf("Message reguires 4 or 5 arguments, there were only %\n", argSize);
-		postf("The message was: %\n", args);
-	}
-
+~createSoundSource = {| instanceName, synth, group |
+	var name = instanceName;
+	var syn = synth;
+	var proxy = group;
+	postf("creating source % using % and adding to group %\n", name, synth, proxy);
+	~scbr.makeInstance(name, synth, proxy);
+	~scbr.oscInterface.createSourceOSC(name, ~sourceOSC);
 };
 
 ~removeSoundSource = { |sourceName|
@@ -45,16 +30,68 @@
 	~scbr.cleanInstance(name);
 };
 
+~createGroup = { | groupName |
+	var name = groupName;
+	~scbr.makeSatieGroup(name);
+};
+
+
+~set = { | sourceName, property, value, group = \default |
+	// set parameters
+	var name = sourceName.asSymbol;
+	var param = property.asSymbol;
+	var val = value;
+	var sourceGroup = group;
+	~scbr.satieGroups[sourceGroup].[name].set(param, val);
+};
+
+~sourceOSC = { | args |
+	var group, name, props, cmd, size;
+	size = args.size;
+	props = args.copyRange(2, size - 1);
+	group = args[0].asString.split[1].asSymbol;
+	name = args[0].asString.split[2].asSymbol;
+	cmd = args[1];
+	switch(cmd,
+		\set,
+		{
+			props.pairsDo({ | prop, val |
+				~scbr.satieGroups[group].[name].set(prop.asSymbol, val);
+			});
+		}
+	);
+
+};
+
 ~coreCallback = { | msg |
-	var command = msg[1];
-	// postf("coreCallback argument: %\n", msg);
+	var command, instanceName, synth, group;
+	command = msg[1];
+	postf("coreCallback argument: %\n", msg);
 
 	switch(command,
 		\createSoundSource,
 		{
-			var instanceName = msg[2];
-			postf("Creating sound source: ---> %\n", instanceName);
-			~scbr.oscInterface.createSourceOSC(instanceName, ~createSoundSource);
+			instanceName = msg[2];
+			synth = msg[3];
+			postf("creating: %, %, based on message %\n", instanceName, synth, msg);
+			postf("there are % arguments \n", msg.size);
+			if ((msg.size < 4) ,
+				{
+					postf("wrong number of arguments %\n", msg);
+				},
+				{
+					postf("coreCallback creates %\n", msg);
+					case
+					{ msg.size > 4 } {
+						group = msg[4];
+					}
+					{ msg.size == 4 } {
+						group = \default;
+					};
+					postf("-------> % % % \n", instanceName, synth, group);
+					~createSoundSource.value(instanceName, synth, group);
+				}
+			)
 		},
 		\deleteSoundSource,
 		{

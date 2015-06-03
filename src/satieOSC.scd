@@ -17,9 +17,9 @@
 	var e = Environment.make({
 
 		// main OSC method
-		~newOSC = {|self, id, cb |
+		~newOSC = {|self, id, cb , path = \default|
 			var idsym = id.asSymbol;
-			OSCdef(idsym, cb, rootURI, recvPort: 18032)
+			OSCdef(idsym, cb, rootURI +/+ path, recvPort: 18032)
 		};
 
 		~deleteOSC = {|self, id|
@@ -28,8 +28,8 @@
 		};
 
 		// make a synth instance
-		~createSourceOSC = {|self, sourceName, cb|
-			self.newOSC(sourceName, cb,  rootURI +/+ sourceName);
+		~createSourceOSC = {|self, sourceName, cb, groupName = \default|
+			self.newOSC(sourceName, cb,  rootURI +/+ groupName +/+ sourceName);
 		};
 
 
