@@ -19,7 +19,7 @@
 		// main OSC method
 		~newOSC = {|self, id, cb , path = \default|
 			var idsym = id.asSymbol;
-			OSCdef(idsym, cb, rootURI +/+ path, recvPort: 18032)
+			OSCdef(idsym, cb, path, recvPort: 18032)
 		};
 
 		~deleteOSC = {|self, id|
