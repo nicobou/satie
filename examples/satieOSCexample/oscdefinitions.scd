@@ -22,6 +22,7 @@
 	postf("creating source % using % and adding to group %\n", name, synth, proxy);
 	~scbr.makeInstance(name, synth, proxy);
 	~scbr.oscInterface.createSourceOSC(name, ~sourceOSC);
+	~scbr.satieGroups;
 };
 
 ~removeSoundSource = { |sourceName|
@@ -41,22 +42,42 @@
 	var name = sourceName.asSymbol;
 	var param = property.asSymbol;
 	var val = value;
-	var sourceGroup = group;
-	~scbr.satieGroups[sourceGroup].[name].set(param, val);
+	var sourceGroup = group.asSymbol;
+	var proxy;
+	if (group == "", { sourceGroup = \default });
+	if (~scbr.satieGroups[sourceGroup] != nil,
+		{ postf("Group % exists\n", sourceGroup); },
+		{
+			postf("Group  % does not exist, creating one\n", sourceGroup);
+			~scbr.makeSatieGroup(sourceGroup);
+		}
+	);
+	if (~scbr.satieGroups[sourceGroup] != nil,
+		{	postf("Setting % of % in group % to %\n", param, name, sourceGroup, val);
+			~scbr.satieGroups[sourceGroup].[name].set(param, val);
+		},
+		{ "the group does not exist so not doing anything".postln; }
+	);
+	//proxy.[name].set(param, val);
+	// p.group.set(param, val);
+	//proxy.existingProxies;
 };
 
 ~sourceOSC = { | args |
 	var group, name, props, cmd, size;
+	args.postln;
 	size = args.size;
 	props = args.copyRange(2, size - 1);
-	group = args[0].asString.split[1].asSymbol;
-	name = args[0].asString.split[2].asSymbol;
+	group = args[0].asString.split[2].asSymbol;
+	name = args[0].asString.split[3].asSymbol;
 	cmd = args[1];
 	switch(cmd,
 		\set,
 		{
 			props.pairsDo({ | prop, val |
-				~scbr.satieGroups[group].[name].set(prop.asSymbol, val);
+				~prox.existingProxies;
+				//~scbr.satieGroups[group].[name].set(prop.asSymbol, val);
+				~set.value(name, prop, val, group);
 			});
 		}
 	);
@@ -104,5 +125,5 @@
 };
 
 s.sync;
-~scbr.oscInterface.newOSC(\satieOSC, ~coreCallback);
+~scbr.oscInterface.newOSC(\satieOSC, ~coreCallback, "/SATIE");
 
