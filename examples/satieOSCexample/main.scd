@@ -28,8 +28,10 @@ s.waitForBoot {
 	~files.do { |f| f.loadRelative ; s.sync;};
 	s.sync;
 	"All files loaded".postln;
-} // waitForBoot
+}; // waitForBoot
+
+
+
 )
 
 OSCdef.all;
-~scbr.satieGroups[\default].existingProxies;
