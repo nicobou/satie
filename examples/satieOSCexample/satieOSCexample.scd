@@ -45,7 +45,7 @@
 ~scbr.makeSynthDef(\fool, \PinkSin, [\stereoPanner, \monoSpat], [0, 2]);
 
 //~scbr.makeSynthDef(\string, \zkarpluck1, [\stereoPanner, \monoSpat], [0, 2]);
-~scbr.makeSynthDef(\string, \zkarpluck1, [\domeVBAP], [0]);
+~scbr.makeSynthDef(\string, \zkarpluck1, [\octoVBAP], [0]);
 ~scbr.makeSynthDef(\pinksin, \PinkSin, [\stereoPanner], [0]);
 ~scbr.makeSynthDef(\testtone, \testtone, [\stereoPanner], [0]);
 // writing to all aux busses (first is starting a 0):
