@@ -35,3 +35,4 @@ s.waitForBoot {
 )
 
 OSCdef.all;
+~scbr.satieGroups.existingProxies

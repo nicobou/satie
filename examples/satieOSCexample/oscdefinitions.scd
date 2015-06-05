@@ -19,16 +19,14 @@
 	var name = instanceName;
 	var syn = synth;
 	var sourceGroup = group;
-	if (~scbr.satieGroups[sourceGroup] != nil,
-		{ postf("Group % exists\n", sourceGroup); },
-		{
-			postf("Group  % does not exist, creating one\n", sourceGroup);
-			~scbr.makeSatieGroup(sourceGroup);
+	if (~groupExists.value(sourceGroup) == false,
+		{ postf("Group  % does not exist, creating one\n", sourceGroup);
+			~createGroup.value(sourceGroup);
 		}
 	);
 	postf("creating source % using % and adding to group %\n", name, synth, sourceGroup);
 	~scbr.makeInstance(name, synth, sourceGroup);
-	~scbr.oscInterface.createSourceOSC(name, ~sourceOSC);
+	~scbr.oscInterface.createSourceOSC(name, ~sourceOSC, group);
 };
 
 ~createGroup = { | groupName, addAction = \addToHead |
@@ -65,13 +63,12 @@
 	var val = value;
 	var sourceGroup = group.asSymbol;
 	var proxy;
-	if (group == "", { sourceGroup = \default });
-
-	if (~scbr.satieGroups[sourceGroup] != nil,
-		{	postf("Setting % of % in group % to %\n", param, name, sourceGroup, val);
+	if (~groupExists.value(sourceGroup),
+		{
+			postf("Setting % of % in group % to %\n", param, name, sourceGroup, val);
 			~scbr.satieGroups[sourceGroup].[name].set(param, val);
 		},
-		{ "the group does not exist so not doing anything".postln; }
+		{ "the group does not exist so not doing anything".postln }
 	);
 	//proxy.[name].set(param, val);
 	// p.group.set(param, val);
