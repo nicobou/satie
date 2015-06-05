@@ -29,7 +29,27 @@
 	postf("creating source % using % and adding to group %\n", name, synth, sourceGroup);
 	~scbr.makeInstance(name, synth, sourceGroup);
 	~scbr.oscInterface.createSourceOSC(name, ~sourceOSC);
-	~scbr.satieGroups;
+};
+
+~createGroup = { | groupName, addAction = \addToHead |
+	if (~groupExists.value(groupName),
+		{
+			postf("Group % exists\n", groupName);
+		},
+		{
+			postf("Group  % does not exist, creating one\n", groupName);
+			~scbr.makeSatieGroup(groupName, addAction);
+		}
+	);
+};
+
+~groupExists = { |groupName |
+	var ret;
+	if (~scbr.satieGroups[groupName] != nil,
+		{ ret = true },
+		{ ret = false}
+	);
+	ret;
 };
 
 ~removeSoundSource = { |sourceName|
@@ -37,12 +57,6 @@
 	postf("Removing and cleaning %\n", name);
 	~scbr.cleanInstance(name);
 };
-
-~createGroup = { | groupName |
-	var name = groupName;
-	~scbr.makeSatieGroup(name);
-};
-
 
 ~set = { | sourceName, property, value, group = \default |
 	// set parameters
@@ -87,6 +101,8 @@
 
 };
 
+// handle any OSC message
+// eg. /SATIE/ createSoundSource pluck string
 ~coreCallback = { | msg |
 	var command, instanceName, synth, group;
 	command = msg[1];
@@ -123,8 +139,20 @@
 			postf("Removing sound source: ---> %\n", instanceName);
 			~scbr.oscInterface.removeSourceOSC(instanceName);
 			~removeSoundSource.value(instanceName);
+		},
+		\createGroup,
+		{
+			var groupName, action;
+			groupName = msg[2];
+			if(msg[3] != nil,
+				{ action = msg[3] },
+				{ action = \addToHead }
+			);
+			if(~groupExists.value(groupName) == false,
+				{ 	~createGroup.value(groupName, action) }
+			);
 		}
-	)
+	);
 };
 
 s.sync;
