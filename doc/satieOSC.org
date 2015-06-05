@@ -24,8 +24,8 @@
 
 
 * Address space
-- /SATIE :: the root address space. At this level we can creaate synth instances and groups.
-  - /default :: group level, only methods affecting a group of synths should be used. The group and synths must already be created. A group =default= is already created on the server and synth instances are placed in the =default= group automatically, unless a different group is specified.
+- /SATIE :: the root address space. At this level we can create and delete synth instances and groups.
+  - /default :: group level, only methods affecting a group of synths should be used. The group and synths must already be created. A group =default= is already created on the server and synth instances are placed in the =default= group automatically, unless a different group is specified. 
 
 *  OSC messages
 
@@ -33,25 +33,48 @@
 *** createSoundSource name synthName [groupName]
         
 creates an instance of a SATIE synthDef. 
+- Receiver :: =/SATIE=
 
 - Arguments:
   - name :: unique identifier for this synth
   - synthName :: the reference name of the synth being used. The synth must have been compiled on the server with =~scbr.makeSynthDef= method before instantiating
   - groupName :: (optional), the name of the group the synth instance will be attached to. If this parameter is omitted, it will be attached to the =default= group.
 
-*** removeSoundSource name 
+*** deleteSoundSource name 
 delete a named instance from the SATIE server. /name/ is the uniquely identified synth instance.
+
+- Receiver :: =/SATIE=
 
 - Arguments:
   - name :: the named instance of the synth to remove
 
+*** set param value [param, value, ...]
+
+sets parameter values to a SATIE instance
+
+- Receiver :: =/SATIE/default=
+
+- Arguments
+  - param :: parameter to affect, dependent on the instrument. The common parameters are:
+             | Parameter  | Unit     | Description                                     |
+             |------------+----------+-------------------------------------------------|
+             | =gainDB=   | decibels | gain                                            |
+             | =aziDeg=   | degrees  | azimuth +/- 180                                 |
+             | =elevDeg=  | degrees  | elevation +/- 90                                |
+             | =delaySec= | seconds  | delay time for doppler effect                   |
+             | =lpHz=     | hertz    | low pass filter for for doppler                 |
+             | =spread=   | int      | panning spread, 0 - 100. 0 = narrow, 100 = omni |
+
+  - value :: parameter's value
+
+
 ** Handling groups
-*** createGroup name [doneAction]
+*** createGroup name [addAction]
 creates a new group named /name/ to which sound sources can be added. Groups in SATIE are actually SuperCollider's ProxySpace. 
 
 - Arguments:
   - name :: the name of the group to make
-  -  doneAction :: one of the following (please refer to SuperCollider documentation of *ParGroup*):
+  - addAction :: one of the following (please refer to SuperCollider documentation of *ParGroup*):
       | =\addToHead=  | (the default) |
       | =\addToTail=  |               |
       | =\addAfter=   |               |
