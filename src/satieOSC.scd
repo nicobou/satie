@@ -29,7 +29,14 @@
 
 		// make a synth instance
 		~createSourceOSC = {|self, sourceName, cb, groupName = \default|
-			self.newOSC(sourceName, cb,  rootURI +/+ groupName +/+ sourceName);
+			//self.newOSC(sourceName, cb,  rootURI +/+ groupName);
+ 			self.newOSC(groupName ++ sourceName, cb,  rootURI +/+ groupName +/+ sourceName);
+			if(OSCdef.all.includesKey(groupName) == false,
+				{
+					postf("IdentityDictionary does not include %, creating it\n", groupName);
+					self.makeGroup(groupName, cb);
+				}
+			);
 		};
 
 

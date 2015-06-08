@@ -49,7 +49,7 @@
 ~scbr.makeSynthDef(\pinksin, \PinkSin, [\stereoPanner], [0]);
 ~scbr.makeSynthDef(\testtone, \testtone, [\stereoPanner], [0]);
 // writing to all aux busses (first is starting a 0):
-~scbr.makeSynthDef(\string_all_aux, \zkarpluck1, [\domeVBAP], [0], ~scbr.aux);
+~scbr.makeSynthDef(\string_all_aux, \zkarpluck1, [\stereoPanner], [0], ~scbr.aux);
 // writing to only to the third audio bus
 ~scbr.makeSynthDef(\string_third_aux, \zkarpluck1, [\domeVBAP], [0], [~scbr.aux[2]]);
 // spatilized reverb effect (input will be set at creation):

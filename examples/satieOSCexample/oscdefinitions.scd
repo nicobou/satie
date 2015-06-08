@@ -56,23 +56,35 @@
 	~scbr.cleanInstance(name);
 };
 
-~set = { | sourceName, property, value, group = \default |
+~setInstance = { | sourceName, property, value, group = \default|
 	// set parameters
 	var name = sourceName.asSymbol;
 	var param = property.asSymbol;
 	var val = value;
 	var sourceGroup = group.asSymbol;
 	var proxy;
-	if (~groupExists.value(sourceGroup),
+	if (~groupExists.value(sourceGroup) == true,
 		{
 			postf("Setting % of % in group % to %\n", param, name, sourceGroup, val);
 			~scbr.satieGroups[sourceGroup].[name].set(param, val);
 		},
-		{ "the group does not exist so not doing anything".postln }
+		{ postf("the group % does not exist so not doing anything", sourceGroup); }
 	);
-	//proxy.[name].set(param, val);
-	// p.group.set(param, val);
-	//proxy.existingProxies;
+};
+
+~setGroup = { | group, property, value|
+	// set parameters
+	var param = property.asSymbol;
+	var val = value;
+	var sourceGroup = group.asSymbol;
+	var proxy;
+	if (~groupExists.value(sourceGroup) == true,
+		{
+			postf("setting group %'s param % to % \n", sourceGroup, param, val);
+			~scbr.satieGroups[sourceGroup].group.set(param, val);
+		},
+		{ postf("the group % does not exist so not doing anything", sourceGroup); }
+	);
 };
 
 ~sourceOSC = { | args |
@@ -85,13 +97,22 @@
 	cmd = args[1];
 	postf("properties to affect: %\n", props);
 	switch(cmd,
-		\set,
+		\setInstance,
 		{
 			props.pairsDo({ | prop, val |
-				~prox.existingProxies;
-				postf("set %'s % to %\n", name, prop, val);
+				//~prox.existingProxies;
+				postf("** instance: set %'s % to %\n", name, prop, val);
 				//~scbr.satieGroups[group].[name].set(prop.asSymbol, val);
-				~set.value(name, prop, val, group);
+				~setInstance.value(name, prop, val, group);
+			});
+		},
+		\setGroup,
+		{
+			props.pairsDo({ | prop, val |
+				//~prox.existingProxies;
+				postf("** group: set %'s % to %\n", group, prop, val);
+				//~scbr.satieGroups[group].[name].set(prop.asSymbol, val);
+				~setGroup.value(group, prop, val);
 			});
 		}
 	);
