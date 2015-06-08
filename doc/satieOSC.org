@@ -32,7 +32,7 @@
 ** Handling sound sources
 *** createSoundSource name synthName [groupName]
         
-creates an instance of a SATIE synthDef. 
+creates an instance of a SATIE synthDef. it also creates a group if the group does not exist.
 - Receiver :: =/SATIE=
 
 - Arguments:
@@ -48,11 +48,30 @@ delete a named instance from the SATIE server. /name/ is the uniquely identified
 - Arguments:
   - name :: the named instance of the synth to remove
 
-*** set param value [param, value, ...]
+*** setInstance param value [param, value, ...]
 
-sets parameter values to a SATIE instance
+sets parameter values to a SATIE instance. Any number of =param / value= pairs may be provided
 
-- Receiver :: =/SATIE/default=
+- Receiver :: =/SATIE/group/synth=
+
+- Arguments
+  - param :: parameter to affect, dependent on the instrument. The common parameters are:
+             | Parameter  | Unit     | Description                                     |
+             |------------+----------+-------------------------------------------------|
+             | =gainDB=   | decibels | gain                                            |
+             | =aziDeg=   | degrees  | azimuth +/- 180                                 |
+             | =elevDeg=  | degrees  | elevation +/- 90                                |
+             | =delaySec= | seconds  | delay time for doppler effect                   |
+             | =lpHz=     | hertz    | low pass filter for for doppler                 |
+             | =spread=   | int      | panning spread, 0 - 100. 0 = narrow, 100 = omni |
+
+  - value :: parameter's value
+
+*** setGroup param value [param, value, ...]
+
+sets parameter values to all synths in a group. Any number of =param / value= pairs may be provided
+
+- Receiver :: =/SATIE/group/=
 
 - Arguments
   - param :: parameter to affect, dependent on the instrument. The common parameters are:
