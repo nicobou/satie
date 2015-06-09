@@ -27,7 +27,7 @@
 			OSCdef(id.asSymbol ).free;
 		};
 
-		// make a synth instance
+		// make a synth instance and create its group if needed
 		~createSourceOSC = {|self, sourceName, cb, groupName = \default|
 			//self.newOSC(sourceName, cb,  rootURI +/+ groupName);
  			self.newOSC(groupName ++ sourceName, cb,  rootURI +/+ groupName +/+ sourceName);
