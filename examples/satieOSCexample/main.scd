@@ -29,10 +29,4 @@ s.waitForBoot {
 	s.sync;
 	"All files loaded".postln;
 }; // waitForBoot
-
-
-
 )
-
-OSCdef.all;
-~scbr.satieGroups.existingProxies

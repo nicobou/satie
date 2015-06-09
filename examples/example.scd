@@ -84,16 +84,19 @@ s.waitForBoot{
 // list internal instances from default group (internal instances are NodeProxy instances):
 ~defaultProx.existingProxies;
 
+~scbr.satieGroups[\default].[\test3].set(\gainDB, -10);
 
 ~defaultProx.[\test1];
 
 // play a file from disk
 ~scbr.makeInstance(\f, \snd);
 // load a buffer to play a soundfile - only mono files
-~buf = Buffer.cueSoundFile(s, "/usr/share/sounds/alsa/Front_Center.wav", 0, 1);
-~buf = Buffer.cueSoundFile(s, Platform.resourceDir +/+ "sounds/a11wlk01.wav", 0, 1);
+~playBuffers = (\alsaTest: Buffer.cueSoundFile(s, "/usr/share/sounds/alsa/Front_Center.wav", 0, 1), \boo: Buffer.cueSoundFile(s, Platform.resourceDir +/+ "sounds/a11wlk01.wav", 0, 1));
+// ~buf = Buffer.cueSoundFile(s, "/usr/share/sounds/alsa/Front_Center.wav", 0, 1);
+// ~buf = Buffer.cueSoundFile(s, Platform.resourceDir +/+ "sounds/a11wlk01.wav", 0, 1);
 // play the buffer without looping
-~defaultProx.[\f].set(\loop,0,\bufnum, ~buf.bufnum);
+~playBuffers[\boo]
+~defaultProx.[\f].set(\loop,0,\bufnum, ~playBuffers[\boo].bufnum);
 // loop the previously played buffer
 ~defaultProx.[\f].set(\loop, 1);
 ~scbr.cleanInstance(\f);

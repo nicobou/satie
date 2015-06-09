@@ -58,3 +58,7 @@
 ~scbr.makeSynthDef(\snd, \sndFile, [\stereoPanner], [0]);
 // be sure the synthDef is compiled on the server
 s.sync;
+~playBuffers = Dictionary();
+~playBuffers.add(\bleh -> Buffer.cueSoundFile(s, Platform.resourceDir +/+ "sounds/a11wlk01.wav", 0, 1));
+~playBuffers.add(\alsaTest -> Buffer.cueSoundFile(s, "/usr/share/sounds/alsa/Front_Center.wav", 0, 1));
+s.sync;

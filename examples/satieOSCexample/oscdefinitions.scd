@@ -13,8 +13,6 @@
 
 // This file is loaded automatically by main.scd
 
-// ****************** usage with OSC ************************
-
 ~createSoundSource = {| instanceName, synth, group = \default |
 	var name = instanceName;
 	var syn = synth;
@@ -60,7 +58,7 @@
 	// set parameters
 	var name = sourceName.asSymbol;
 	var param = property.asSymbol;
-	var val = value;
+	var val = ~handleBufProperty.value(property, value);
 	var sourceGroup = group.asSymbol;
 	var proxy;
 	if (~groupExists.value(sourceGroup) == true,
@@ -72,10 +70,26 @@
 	);
 };
 
+// kludge!
+~handleBufProperty = { |property, value|
+	// we need to handle the special case of passing a bufnum to sndFile.
+	// sndFile expects a bufnum with its context, either a Buffer object or, in our case, a dictionary entry
+	// so we construct the proper object here to allow the user simply call the dictionary entry.
+	// we assume the global object ~playBuffers
+	// FIXME: for some reason this does not propagate to setGroup
+	var val;
+	if (property == \bufnum,
+		{ val = ~playBuffers[value.asSymbol].bufnum;},
+		//{ ~playBuffers[\bleh]; },
+		{ val = value; }
+	);
+	val;
+};
+
 ~setGroup = { | group, property, value|
 	// set parameters
 	var param = property.asSymbol;
-	var val = value;
+	var val = ~handleBufProperty.value(property, value);
 	var sourceGroup = group.asSymbol;
 	var proxy;
 	if (~groupExists.value(sourceGroup) == true,
@@ -116,7 +130,6 @@
 			});
 		}
 	);
-
 };
 
 // handle any OSC message
