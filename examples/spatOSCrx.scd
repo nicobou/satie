@@ -420,7 +420,7 @@ s.waitForBoot{
 			},
 			'event',
 			{
-				//postf("~groupCallback:  nodeName: %  set event: %  size: % args: %\n", name, type, args.size, args);
+				postf("~groupCallback:  nodeName: %  set event: %  size: % args: %\n", name, type, args.size, args);
 				if ( (args.size < 2 ) ,
 					{"~setEvent: OSCrx message with no values".warn;},
 					{  // else
@@ -428,7 +428,7 @@ s.waitForBoot{
 						eventName = args[1];
 						values.removeAt(0);
 						values.removeAt(0);
-						//~setEvent.value(name, eventName, values);
+						~setGroupEvent.value(name, eventName, values);
 					}
 				)
 			},
@@ -688,6 +688,33 @@ s.waitForBoot{
 		);*/
 		//postf("~setState: seting state of % to %\n", nodeName, state);
 	};
+
+
+		// events RX:   /spatosc/core/source/nodename/event eventName v1...vN
+	~setGroupEvent = { | groupName, eventName,  args |
+		var valueCount = args.size;
+		var groupProxy = ~allGroupNodes[groupName.asSymbol].at(\proxy);
+
+		//postln("~setEvent: node:" ++nodeName ++" event name:"++eventName++"  arg(s): "++ args );
+
+		if ( (valueCount > 1) ,    // pass vector
+			{
+				groupProxy.group.set(eventName.asSymbol, args);
+			},
+			// else
+			{
+				if ( (valueCount == 1) ,    // pass value
+					{
+						groupProxy.group.set(eventName.asSymbol, args[0]);
+					},
+					// else  no args.. just pass 1
+					{
+						groupProxy.group.set(eventName.asSymbol, 1);
+					}
+				);
+		});
+	};
+
 
 	// events RX:   /spatosc/core/source/nodename/event eventName v1...vN
 	~setEvent = { | nodeName, eventName,  args |
