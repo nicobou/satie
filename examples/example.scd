@@ -59,6 +59,10 @@ s.waitForBoot{
 	// spatilized reverb effect (input will be set at creation):
 	~scbr.makeSynthDef(\busreverb, \freeverb, [\stereoPanner], [0]);
 	// streaming a soundfile from disk
+	~playBuffers = (
+		\alsaTest: Buffer.cueSoundFile(s, "/usr/share/sounds/alsa/Front_Center.wav", 0, 1),
+		\boo: Buffer.cueSoundFile(s, Platform.resourceDir +/+ "sounds/a11wlk01.wav", 0, 1)
+	);
 	~scbr.makeSynthDef(\snd, \sndFile, [\stereoPanner], [0]);
 	// be sure the synthDef is compiled on the server
 	s.sync;
@@ -90,6 +94,7 @@ s.waitForBoot{
 
 // play a file from disk
 ~scbr.makeInstance(\f, \snd);
+//~scbr.makeInstance(\f, \snd, [\bufnum, ~playBuffers[\boo]]);
 // load a buffer to play a soundfile - only mono files
 ~playBuffers = (\alsaTest: Buffer.cueSoundFile(s, "/usr/share/sounds/alsa/Front_Center.wav", 0, 1), \boo: Buffer.cueSoundFile(s, Platform.resourceDir +/+ "sounds/a11wlk01.wav", 0, 1));
 // ~buf = Buffer.cueSoundFile(s, "/usr/share/sounds/alsa/Front_Center.wav", 0, 1);

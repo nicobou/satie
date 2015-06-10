@@ -35,7 +35,7 @@
 			toBusArray = #[] |
 			SynthDef(name,
 				// can the "gate" arg name be changed to avoid conflicts with plugin-synthDefs that use it
-				{| gate = 1,  aziDeg = 0, eleDeg = 0, gainDB = 0, delayMs = 1, lpHz = 15000, spread = 1  |
+				{| gate = 1,  aziDeg = 0, eleDeg = 0, gainDB = 0, delayMs = 1, lpHz = 15000, spread = 1 |
 					var in, env;
 					in = SynthDef.wrap(srcfunc);
 					// fade in set to as short as possible for percussive cases
@@ -49,8 +49,8 @@
 						var out = SynthDef.wrap(item, prependArgs: [in, aziDeg, eleDeg, gainDB, delayMs, lpHz, spread]);
 						//var out = SynthDef.wrap(item, prependArgs: [in, vol, delay, azi, ele]);
 						Out.ar(busShiftArray.wrapAt(i), env * out);
-					};
-			}).add;
+					}
+			}, variants: (default: [])).add;
 		};
 	});
 	e.know = true;
