@@ -17,7 +17,8 @@ OSC RX message specification is based on the SPATOSC specification  (see:   http
 */
 
 s.makeGui;
-s.plotTree;
+
+if (~plotTree == nil,  { ~plotTree=s.plotTree;});
 
 /*
 s.makeGui;
@@ -33,10 +34,10 @@ s.dump
 
 ~superNovaFlag = true;
 
-~listeningFormat = \stereoListener;
+//~listeningFormat = \stereoListener;
 
 //~listeningFormat = \octoVBAP;       // octo
-//~listeningFormat = \domeVBAP;       // for sato
+~listeningFormat = \domeVBAP;       // for sato
 //~listeningFormat = \labodomeVBAP;      // for labodome
 
 //~outAudioDev = "Soundflower (64ch)";   //  for multi-channel testing without hardware on OSX
@@ -889,7 +890,7 @@ s.waitForBoot{
 	};
 
 	~globalSet = { | param, value |
-		~group.set(param.asSymbol, value);
+		~scbr.satieGroups[\default].group.set(param.asSymbol, value);
 	};
 
 
