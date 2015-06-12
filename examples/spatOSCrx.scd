@@ -18,6 +18,8 @@ OSC RX message specification is based on the SPATOSC specification  (see:   http
 
 s.makeGui;
 
+
+
 if (~plotTree == nil,  { ~plotTree=s.plotTree;});
 
 /*
@@ -32,12 +34,13 @@ s.dump
 (
 // set these flags depending on your environment
 
+~outAudioDev = nil;
 ~superNovaFlag = true;
 
-//~listeningFormat = \stereoListener;
+~listeningFormat = \stereoListener;
 
 //~listeningFormat = \octoVBAP;       // octo
-~listeningFormat = \domeVBAP;       // for sato
+//~listeningFormat = \domeVBAP;       // for sato
 //~listeningFormat = \labodomeVBAP;      // for labodome
 
 //~outAudioDev = "Soundflower (64ch)";   //  for multi-channel testing without hardware on OSX
@@ -51,6 +54,7 @@ if ( ~superNovaFlag != nil,
 
 o = Server.local.options;   // default set up options
 o.memSize = 2**19;        // probably should just leave this the same for everyting
+o.device = nil;  // default
 
 
 ~volume = s.volume;     // create hook to global audio engine volume / mute control
@@ -696,7 +700,7 @@ s.waitForBoot{
 		var valueCount = args.size;
 		var groupProxy = ~allGroupNodes[groupName.asSymbol].at(\proxy);
 
-		//postln("~setEvent: node:" ++nodeName ++" event name:"++eventName++"  arg(s): "++ args );
+		postln("~setGroupEvent: node:" ++groupName ++" event name:"++eventName++"  arg(s): "++ args );
 
 		if ( (valueCount > 1) ,    // pass vector
 			{
