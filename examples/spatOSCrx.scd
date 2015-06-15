@@ -18,6 +18,8 @@ OSC RX message specification is based on the SPATOSC specification  (see:   http
 
 s.makeGui;
 
+
+
 if (~plotTree == nil,  { ~plotTree=s.plotTree;});
 
 /*
@@ -32,12 +34,13 @@ s.dump
 (
 // set these flags depending on your environment
 
+~outAudioDev = nil;
 ~superNovaFlag = true;
 
-//~listeningFormat = \stereoListener;
+~listeningFormat = \stereoListener;
 
 //~listeningFormat = \octoVBAP;       // octo
-~listeningFormat = \domeVBAP;       // for sato
+//~listeningFormat = \domeVBAP;       // for sato
 //~listeningFormat = \labodomeVBAP;      // for labodome
 
 //~outAudioDev = "Soundflower (64ch)";   //  for multi-channel testing without hardware on OSX
@@ -51,6 +54,7 @@ if ( ~superNovaFlag != nil,
 
 o = Server.local.options;   // default set up options
 o.memSize = 2**19;        // probably should just leave this the same for everyting
+o.device = nil;  // default
 
 
 ~volume = s.volume;     // create hook to global audio engine volume / mute control
@@ -110,6 +114,8 @@ s.waitForBoot{
 
 	~scbr.pluginLoader.loadEffectPlugins(~rootSrcPath ++ "/effects/*.scd");
 	~scbr.pluginLoader.effectPlugins;
+
+	~oscInterface = ~cOSCMaker.value();
 
 	if ( ~listeningFormat == nil,
 		{
@@ -422,7 +428,7 @@ s.waitForBoot{
 			},
 			'event',
 			{
-				//postf("~groupCallback:  nodeName: %  set event: %  size: % args: %\n", name, type, args.size, args);
+				postf("~groupCallback:  nodeName: %  set event: %  size: % args: %\n", name, type, args.size, args);
 				if ( (args.size < 2 ) ,
 					{"~setEvent: OSCrx message with no values".warn;},
 					{  // else
@@ -430,7 +436,7 @@ s.waitForBoot{
 						eventName = args[1];
 						values.removeAt(0);
 						values.removeAt(0);
-						//~setEvent.value(name, eventName, values);
+						~setGroupEvent.value(name, eventName, values);
 					}
 				)
 			},
@@ -690,6 +696,33 @@ s.waitForBoot{
 		);*/
 		//postf("~setState: seting state of % to %\n", nodeName, state);
 	};
+
+
+		// events RX:   /spatosc/core/source/nodename/event eventName v1...vN
+	~setGroupEvent = { | groupName, eventName,  args |
+		var valueCount = args.size;
+		var groupProxy = ~allGroupNodes[groupName.asSymbol].at(\proxy);
+
+		postln("~setGroupEvent: node:" ++groupName ++" event name:"++eventName++"  arg(s): "++ args );
+
+		if ( (valueCount > 1) ,    // pass vector
+			{
+				groupProxy.group.set(eventName.asSymbol, args);
+			},
+			// else
+			{
+				if ( (valueCount == 1) ,    // pass value
+					{
+						groupProxy.group.set(eventName.asSymbol, args[0]);
+					},
+					// else  no args.. just pass 1
+					{
+						groupProxy.group.set(eventName.asSymbol, 1);
+					}
+				);
+		});
+	};
+
 
 	// events RX:   /spatosc/core/source/nodename/event eventName v1...vN
 	~setEvent = { | nodeName, eventName,  args |

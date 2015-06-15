@@ -12,12 +12,12 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (
-~scbrMaker = { | numAudioAux = 0, oscSystem = \spatOSC |
+~scbrMaker = { | numAudioAux = 0 |
 	var e = Environment.make({
 		// TODO use try catch with this
 		~pluginLoader;
 		~synthDefFactory;
-		~cOSCMaker;
+		//~cOSCMaker;
 		~defaultSatieGroup;
 		~satieGroups = Dictionary.new;
 		~effectSynthDef = Set.new;
@@ -93,19 +93,6 @@
 	e.aux = Array.fill(numAudioAux, {arg i; e.auxbus.index + i });
 	e.pluginLoader = ~scbrPlugins.value();
 	e.synthDefFactory = ~scbrFactory.value();
-	// e.oscInterface = ~cOSCMaker.value();
-	switch(oscSystem,
-		\spatOSC,
-		{
-			postf("choosing cOSCMaker as osc interface\n");
-			e.oscInterface = ~cOSCMaker.value();
-		},
-		\satieOSC,
-		{
-			postf("choosing satieOSCMaker as osc interface\n");
-			e.oscInterface = ~satieOSCMaker.value();
-		}
-	);
 	e.defaultSatieGroup = e.makeSatieGroup();
 	e.satieGroups.put(\default, e.defaultSatieGroup);
 	e;  // return

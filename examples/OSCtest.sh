@@ -1,8 +1,21 @@
 #!/bin/bash
 
+
+BASIC_TEST=1
+#PLUCK_TEST=1
+#GROUP_TEST=1
+
+
+
+
 # will create a node using the "default" plugin
 clear
+
+if [ $BASIC_TEST ] ; then
+
+echo TESTING BASIC SPATOSC COMMANDS
 sleep 2
+
 oscsend localhost 18032 /spatosc/core ss createSource mySound
 clear;  echo CREATE SOURCE NODE mySound
 sleep 1
@@ -81,6 +94,14 @@ echo  PROP:  density2 = 400
 sleep 1
 oscsend localhost 18032 /spatosc/core ss deleteNode mySound
 echo  DELETE NODE SHEEFA
+echo done
+fi
+
+if [ $PLUCK_TEST ] ; then
+
+echo TESTING PLUCK
+sleep 2
+
 
 oscsend localhost 18032 /spatosc/core ss createSource mySound
 sleep 1
@@ -106,6 +127,67 @@ oscsend localhost 18032 /spatosc/core/source/mySound/event sf t_trig 1
 sleep 4
 oscsend localhost 18032 /spatosc/core s clear
 echo done
+
+fi
+
+
+
+if [ $GROUP_TEST ] ; then
+
+echo TESTING GROUP
+sleep 2
+
+oscsend localhost 18032 /spatosc/core ss createGroup pluckGroup
+oscsend localhost 18032 /spatosc/core ssss createSource source1 "plugin://zkarpluck1" pluckGroup
+oscsend localhost 18032 /spatosc/core sss connect source1 ear
+oscsend localhost 18032 /spatosc/core/source/source1/event sff note 65 1
+
+oscsend localhost 18032 /spatosc/core ssss createSource source2 "plugin://zkarpluck1" pluckGroup
+oscsend localhost 18032 /spatosc/core sss connect source2 ear
+oscsend localhost 18032 /spatosc/core/source/source2/event sff note 69 1
+
+
+oscsend localhost 18032 /spatosc/core ssss createSource source3 "plugin://zkarpluck1" pluckGroup
+oscsend localhost 18032 /spatosc/core sss connect source3 ear
+oscsend localhost 18032 /spatosc/core/source/source3/event sff note 72 1
+
+
+
+
+
+#oscsend localhost 18032 /spatosc/core/source/source1/prop sf c3 1
+#oscsend localhost 18032 /spatosc/core/source/source1/event sff note 65 1
+sleep .5
+oscsend localhost 18032 /spatosc/core/group/pluckGroup/event sf t_trig 1
+sleep 1
+oscsend localhost 18032 /spatosc/core/group/pluckGroup/event sf t_trig 1
+sleep 1
+
+
+
+oscsend localhost 18032 /spatosc/core s clear
+
+echo done
+
+fi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
