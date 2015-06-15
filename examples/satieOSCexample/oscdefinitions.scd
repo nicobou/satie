@@ -24,7 +24,7 @@
 	);
 	postf("creating source % using % and adding to group %\n", name, synth, sourceGroup);
 	~scbr.makeInstance(name, synth, sourceGroup);
-	~scbr.oscInterface.createSourceOSC(name, ~sourceOSC, group);
+	~osc.createSourceOSC(name, ~sourceOSC, group);
 };
 
 ~createGroup = { | groupName, addAction = \addToHead |
@@ -168,7 +168,7 @@
 		{
 			var instanceName = msg[2];
 			postf("Removing sound source: ---> %\n", instanceName);
-			~scbr.oscInterface.removeSourceOSC(instanceName);
+			~osc.removeSourceOSC(instanceName);
 			~removeSoundSource.value(instanceName);
 		},
 		\createGroup,
@@ -187,5 +187,5 @@
 };
 
 s.sync;
-~scbr.oscInterface.newOSC(\satieOSC, ~coreCallback, "/SATIE");
+~osc.newOSC(\satieOSC, ~coreCallback, "/SATIE");
 

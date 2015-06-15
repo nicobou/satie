@@ -57,6 +57,7 @@
 // streaming a soundfile from disk
 ~scbr.makeSynthDef(\snd, \sndFile, [\stereoPanner], [0]);
 // be sure the synthDef is compiled on the server
+~osc = ~satieOSCMaker.value();
 s.sync;
 ~playBuffers = Dictionary();
 ~playBuffers.add(\bleh -> Buffer.cueSoundFile(s, Platform.resourceDir +/+ "sounds/a11wlk01.wav", 0, 1));
