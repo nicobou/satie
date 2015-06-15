@@ -98,6 +98,7 @@ s.waitForBoot{
 	(~rootSrcPath ++ "/src/*.scd").pathMatch.do({arg item; item.loadPaths});
 
 	~num_aux_bus = 5;
+	~oscSystem = \spatOSC;
 	// creating a sc-basic-renderer
 	if (~scbr == nil,{
 		~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus);});
