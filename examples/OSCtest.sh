@@ -1,9 +1,9 @@
 #!/bin/bash
 
 
-#BASIC_TEST=1
+BASIC_TEST=1
 #PLUCK_TEST=1
-GROUP_TEST=1
+#GROUP_TEST=1
 
 
 
