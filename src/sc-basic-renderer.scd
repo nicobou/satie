@@ -12,12 +12,12 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (
-~scbrMaker = { | numAudioAux = 0, oscSystem = \spatOSC |
+~scbrMaker = { | numAudioAux = 0 |
 	var e = Environment.make({
 		// TODO use try catch with this
 		~pluginLoader;
 		~synthDefFactory;
-		~cOSCMaker;
+		//~cOSCMaker;
 		~defaultSatieGroup;
 		~satieGroups = Dictionary.new;
 		~effectSynthDef = Set.new;
@@ -59,12 +59,21 @@
 			prox;
 		};
 
+        ~killSatieGroup = { | self, name |
+			self.satieGroups[name].end;
+			self.satieGroups[name].free;
+			self.satieGroups.removeAt(name);
+			nil;
+		};
+
+
 		~makeInstance = { | self, name, synthDefName, prox = \default |
 			// ensuring not extra bus is allocated:
 			// (must be the first reference of "name" in the proxyspace
 			self.satieGroups[prox][name].ar(0);
 			self.satieGroups[prox][name].source = synthDefName;
-			nil;
+			self.satieGroups[prox][name];
+			//nil;
 		};
 
 		~cleanInstance = { | self, name, prox = \default |
@@ -93,19 +102,6 @@
 	e.aux = Array.fill(numAudioAux, {arg i; e.auxbus.index + i });
 	e.pluginLoader = ~scbrPlugins.value();
 	e.synthDefFactory = ~scbrFactory.value();
-	// e.oscInterface = ~cOSCMaker.value();
-	switch(oscSystem,
-		\spatOSC,
-		{
-			postf("choosing cOSCMaker as osc interface\n");
-			e.oscInterface = ~cOSCMaker.value();
-		},
-		\satieOSC,
-		{
-			postf("choosing satieOSCMaker as osc interface\n");
-			e.oscInterface = ~satieOSCMaker.value();
-		}
-	);
 	e.defaultSatieGroup = e.makeSatieGroup();
 	e.satieGroups.put(\default, e.defaultSatieGroup);
 	e;  // return
