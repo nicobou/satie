@@ -59,12 +59,21 @@
 			prox;
 		};
 
+        ~killSatieGroup = { | self, name |
+			self.satieGroups[name].end;
+			self.satieGroups[name].free;
+			self.satieGroups.removeAt(name);
+			nil;
+		};
+
+
 		~makeInstance = { | self, name, synthDefName, prox = \default |
 			// ensuring not extra bus is allocated:
 			// (must be the first reference of "name" in the proxyspace
 			self.satieGroups[prox][name].ar(0);
 			self.satieGroups[prox][name].source = synthDefName;
-			nil;
+			self.satieGroups[prox][name];
+			//nil;
 		};
 
 		~cleanInstance = { | self, name, prox = \default |
