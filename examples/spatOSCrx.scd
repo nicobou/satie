@@ -114,6 +114,8 @@ s.waitForBoot{
 	~scbr.pluginLoader.loadEffectPlugins(~rootSrcPath ++ "/effects/*.scd");
 	~scbr.pluginLoader.effectPlugins;
 
+	~oscInterface = ~cOSCMaker.value();
+
 	if ( ~listeningFormat == nil,
 		{
 			// NEEDS IMPROVEMENT
