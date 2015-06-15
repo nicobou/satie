@@ -17,7 +17,7 @@
 		// TODO use try catch with this
 		~pluginLoader;
 		~synthDefFactory;
-		~cOSCMaker;
+		//~cOSCMaker;
 		~defaultSatieGroup;
 		~satieGroups = Dictionary.new;
 		~effectSynthDef = Set.new;
@@ -94,7 +94,7 @@
 	e.aux = Array.fill(numAudioAux, {arg i; e.auxbus.index + i });
 	e.pluginLoader = ~scbrPlugins.value();
 	e.synthDefFactory = ~scbrFactory.value();
-	e.oscInterface = ~cOSCMaker.value();
+	//e.oscInterface = ~cOSCMaker.value();
 	e.defaultSatieGroup = e.makeSatieGroup(\default);
 	e;  // return
 };  // scbrMaker
