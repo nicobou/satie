@@ -1,9 +1,9 @@
 #!/bin/bash
 
 
-#BASIC_TEST=1
+BASIC_TEST=1
 #PLUCK_TEST=1
-GROUP_TEST=1
+#GROUP_TEST=1
 
 
 
@@ -16,31 +16,28 @@ if [ $BASIC_TEST ] ; then
 echo TESTING BASIC SPATOSC COMMANDS
 sleep 2
 
-oscsend localhost 18032 /spatosc/core ss createSource mySound
+oscsend localhost 18032 /spatosc/core sss createSource mySound plugin://default
 clear;  echo CREATE SOURCE NODE mySound
-sleep 1
-oscsend localhost 18032 /spatosc/core/source/mySound/uri s plugin://default
-echo SET DEFAULT PLUGIN
 sleep 1
 oscsend localhost 18032 /spatosc/core sss connect mySound ear
 echo CONNECT TO LISTENER ear
 sleep 1
-oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff -90 0 -12 0 22050  # azi ele  gainDB del lpf
+oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff -1.57 0 -12 0 22050  # azi ele  gainDB del lpf
 echo PAN LEFT
 sleep 1
-oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff 90 0 3 0 22050  # azi ele  gainDB del lpf
+oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff 1.57 0 3 0 22050  # azi ele  gainDB del lpf
 echo PAN RIGHT, GAIN = 3db
 sleep 1
 oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff 0 0 0 0 22050  # azi ele  gainDB del lpf
 echo PAN CENTER, GAIN = 0db
 sleep 1
-oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff -45 0 -16 0 1000  # azi ele  gainDB del lpf
+oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff -.78 0 -16 0 1000  # azi ele  gainDB del lpf
 echo PAN LEFT. GAIN = -16db LPF = 1000
 sleep 1
 oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff 0 0 -6 0 22050  # azi ele  gainDB del lpf
 echo PAN CENTER, GAIN = -6, LPF = 22050
 sleep 1
-oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff -45 0 -24 0 22050  # azi ele  gainDB del lpf
+oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff .78 0 -24 0 22050  # azi ele  gainDB del lpf
 echo  PAN RIGHT, GAIN = -24db
 sleep 1
 oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/spread" f 0

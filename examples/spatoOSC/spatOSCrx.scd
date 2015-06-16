@@ -16,147 +16,27 @@ this implementation is based on a one-listener model. In the future, we may wish
 OSC RX message specification is based on the SPATOSC specification  (see:   http://code.sat.qc.ca/redmine/projects/spatosc/wiki/spec  )
 */
 
-s.makeGui;
+//~allSourceNodes.size;
 
-
-
-if (~plotTree == nil,  { ~plotTree=s.plotTree;});
-
-/*
-s.makeGui;
-s.meter
-
-s.dump
- s.reboot;
-~allSourceNodes.size;
-*/
 
 (
-// set these flags depending on your environment
-
-~outAudioDev = nil;
-~superNovaFlag = true;
-
-~listeningFormat = \stereoListener;
-
-//~listeningFormat = \octoVBAP;       // octo
-//~listeningFormat = \domeVBAP;       // for sato
-//~listeningFormat = \labodomeVBAP;      // for labodome
-
-//~outAudioDev = "Soundflower (64ch)";   //  for multi-channel testing without hardware on OSX
-//~outAudioDev = "MADIface USB (23635751)";     // for labodome or SATO
-
-
-if ( ~superNovaFlag != nil,
-	{
-		Server.supernova;
-});
-
-o = Server.local.options;   // default set up options
-o.memSize = 2**19;        // probably should just leave this the same for everyting
-o.device = nil;  // default
-
-
-~volume = s.volume;     // create hook to global audio engine volume / mute control
-~volume.setVolumeRange(-99, 18);
-
-// o.device = "MADIface USB (23635751)";     // set for dome or labodome
-
-if ( ~listeningFormat == \domeVBAP,
-	{
-		o.numOutputBusChannels = 32;
-		~outAudioDev = "MADIface USB (23635751)";
-		// o.dump;
-});
-
-if ( ~listeningFormat == \labodomeVBAP,
-	{
-		o.numOutputBusChannels = 24;
-		~outAudioDev = "MADIface USB (23635751)";
-		// o.dump;
-});
-
-if ( ~listeningFormat == \octoVBAP,
-	{
-		o.numOutputBusChannels = 8;
-		//~outAudioDev = "MADIface USB (23635751)";
-		// o.dump;
-});
-
-
-if ( ~outAudioDev != nil ,
-	{
-		o.device = ~outAudioDev;
-});
-
 
 s.waitForBoot{
 
-
-	// finding source directory
-	~rootSrcPath = thisProcess.nowExecutingPath.dirname ++ "/..";
-	(~rootSrcPath ++ "/src/*.scd").pathMatch.do({arg item; item.loadPaths});
-
-	~num_aux_bus = 5;
-	// creating a sc-basic-renderer
-	if (~scbr == nil,{
-		~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus);});
-	// printing internal aux array with bus indexes
-	~scbr.aux;
-	// loading source plugins
-	~scbr.pluginLoader.loadAudioPlugins(~rootSrcPath ++ "/audiosources/*.scd");
-	// see the loaded plugins in the console
-	~scbr.pluginLoader.audioPlugins;
-	// loading spatializer plugins
-	~scbr.pluginLoader.loadSpatPlugins(~rootSrcPath ++ "/spatializers/*.scd");
-	~scbr.pluginLoader.spatPlugins;
-
-	~scbr.pluginLoader.loadEffectPlugins(~rootSrcPath ++ "/effects/*.scd");
-	~scbr.pluginLoader.effectPlugins;
-
-	if ( ~listeningFormat == nil,
-		{
-			// NEEDS IMPROVEMENT
-			// all plugins (synthDefs) have to be evaluated in "pre-runtime" herea
-			//
-			'NO LISTENING FORMAT SELECTED : generating synthdefs'.postln;
-
-/*			~scbr.makeSynthDef(\pink, \PinkSin, [\stereoPanner, \monoSpat], [0, 2]);
-			~scbr.makeSynthDef(\dust, \DustDust, [\stereoPanner, \monoSpat], [0, 2]);
-			~scbr.makeSynthDef(\default, \default, [\stereoListener], [0]);
-			~scbr.makeSynthDef(\zkarpluck0, \zkarpluck0, [\stereoListener], [0]);
-			~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [\stereoListener], [0]);
-			~scbr.makeSynthDef(\zbell1, \zbell1, [\stereoListener], [0]);
-			~scbr.makeSynthDef(\test, \testtone, [\stereoListener], [0]);*/
-		},
-		// else evalualte for dome listeners
-		{
-			postf("generating synthdefs for %\n", ~listeningFormat);
-			~scbr.makeSynthDef(\pink, \PinkSin, [~listeningFormat], [0]);
-			~scbr.makeSynthDef(\dust, \DustDust, [~listeningFormat], [0]);
-			~scbr.makeSynthDef(\default, \default, [~listeningFormat], [0]);
-			~scbr.makeSynthDef(\zkarpluck0, \zkarpluck0, [~listeningFormat], [0]);
-			//~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [~listeningFormat], [0]);
-			~scbr.makeSynthDef(\test, \testtone,  [~listeningFormat], [0]);
-			~scbr.makeSynthDef(\zbell1, \zbell1, [~listeningFormat], [0]);
-			~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [~listeningFormat], [0], [~scbr.aux[0]]);
-			~scbr.makeSynthDef(\busreverb, \freeverb, [~listeningFormat], [0]);
-
-		}
-	);
+	~volume = s.volume;     // create hook to global audio engine volume / mute control
+	~volume.setVolumeRange(-99, 18);
 
 
 	~scbr.makeSynthDef(\dummyPlugin, \emptySource, [\emptySpat], [0]);    // dummy synthdef, used for new nodes
-
-
-
-	// be sure the synthDefs are compiled on the server
+	// be sure the synthDef is compiled on the server
 	s.sync;
 
 	// get default group
 	~defaultProx = ~scbr.satieGroups[\default];  // Satie Groups are actually ProxySpace
 
-		// create special effects group located at tail
+
+
+	// create special effects group located at tail
 
 	if ( ~scbr.satieGroups[\effect] == nil,
 		{~effectProx = ~scbr.makeSatieGroup(\effect, \addToTail);}
@@ -168,6 +48,7 @@ s.waitForBoot{
 	// dictionarys for source nodes
 	~allSourceNodes = Dictionary();        //  ~allSourceNodes.postln;
 	~allGroupNodes = Dictionary();        //  ~allGroups.postln;
+	~fxSynthdefRegister;
 
 	OSCdef(\createSoundSource).clear.free;  // just in case newOSC will be re-evaluated.
 	~scbr.oscInterface.newOSC(\createSoundSource, ~coreCallback, "/spatosc/core");
@@ -176,6 +57,13 @@ s.waitForBoot{
 	~scbr.oscInterface.basicRendererOSC(\brOSC,~basicRendererCallback);
 
 	//~createGroup.value(\default);
+
+	~command = "ls " ++ thisProcess.nowExecutingPath.dirname ++ "/../../effects";
+	~fxSynthdefRegister = ~command.unixCmdGetStdOut;  // concatanated string containing all filenames in the "effects" directory
+
+
+
+
 
 	~basicRendererCallback = {
 		arg msg;
@@ -234,7 +122,7 @@ s.waitForBoot{
 		//postf("~coreCallback: command: %, msg: %, \n", command, msg);
 
 		switch (command,
-			'createSource',
+			'createSource',  // note:  EFFECTS SOURCES MUST HAVE URI ARG PROVIDED
 			{
 				//postf("~coreCallback: command: %, messLen: %   msg: %, \n", command, msg.size, msg);
 
@@ -255,11 +143,11 @@ s.waitForBoot{
 						});
 
 						if (msg.size > 4,
-						{
+							{
 								groupName = msg[4];
 						});
 						~createSource.value(sourceName, uriName, groupName);
-					});
+				});
 			},
 			'createGroup',
 			{
@@ -398,7 +286,7 @@ s.waitForBoot{
 		);
 	};
 
-		// e.g  /spatosc/core/group/nodename/prop  key val
+	// e.g  /spatosc/core/group/nodename/prop  key val
 	~groupCallback = {
 		| args |
 		var name, type, values, eventName, state;
@@ -467,7 +355,7 @@ s.waitForBoot{
 
 	// define some functions to handle actions
 
-		~reverbName="resonance-SC:spatOSCsource_1";  //  HACK to set up rvb node
+	~reverbName="resonance-SC:spatOSCsource_1";  //  HACK to set up rvb node
 
 
 
@@ -479,8 +367,11 @@ s.waitForBoot{
 			},
 			// else create new node
 			{
-
 				if (groupName == "", { groupName = \default; });   // make sure group name is ok
+
+
+				if (~isFXuri.value(uriName), { groupName = \effect };);  // if URI is a fx plugin,  force group to effects group
+
 
 				// check to see if group's proxy exists (even if the corresponding groupNode has not yet been instntiated),  if  not, create it
 				if ( ~scbr.satieGroups[groupName.asSymbol] == nil,
@@ -496,16 +387,16 @@ s.waitForBoot{
 
 
 				// assign proxy name
-				if (~reverbName.asSymbol == sourceName.asSymbol,   // HACK:   set EFFECTS proxy
+				if ( groupName == \effect,
 					{
-						//var proxy = ~scbr.satieGroups[\effect];
-						//postf("~createSource: setting  EFFECTS GROUP proxy  node %\n", sourceName);
-						//~allSourceNodes[sourceName.asSymbol].put(\proxy, proxy );
 
-						// we know that the effects proxy exists
+						if (~fxInputBus == nil,
+							{
+								postf("~createSource:  ~fxInputBus not defined");
+								~fxInputBus = 0; };);   // this should be defined previously in the project's .scd
+
 						~allSourceNodes[sourceName.asSymbol].put(\proxySymb, \effect);
 						~effectProx[sourceName.asSymbol].set(\in, ~scbr.aux[0]);  //  HACK to set up rvb node
-
 					},
 					// else set normal proxy
 					{
@@ -513,8 +404,7 @@ s.waitForBoot{
 
 						//var proxy = ~scbr.satieGroups[groupName.asSymbol];	  //
 						//~allSourceNodes[sourceName.asSymbol].put(\proxy, proxy);
-					}
-				);
+				};);
 
 				// call ~setUri to complete instance creation
 				~setUri.value(sourceName.asSymbol,uriName.asSymbol);
@@ -670,7 +560,7 @@ s.waitForBoot{
 		thisProxy.set(property.asSymbol, value);
 	};
 
-		// always a keyWord Value pair
+	// always a keyWord Value pair
 	~setGroupProperty = { | groupName property value |
 		var groupProxy = ~allGroupNodes[groupName.asSymbol].at(\proxy);
 
@@ -682,20 +572,20 @@ s.waitForBoot{
 	// enable/disable node
 	~setState = { | nodeName,  state |
 		var thisProxySym = ~allSourceNodes[nodeName.asSymbol].at(\proxySymb);
-/*		if ( (state > 0),
-			{
-				~scbr.makeInstance(nodeName.asSymbol, ~allSourceNodes[nodeName.asSymbol].at(\plugin).asSymbol, thisProxySym);
-			},
-			//else turn state off
-			{
-				~scbr.pauseInstance.value(nodeName.asSymbol, thisProxySym );
-			}
+		/*		if ( (state > 0),
+		{
+		~scbr.makeInstance(nodeName.asSymbol, ~allSourceNodes[nodeName.asSymbol].at(\plugin).asSymbol, thisProxySym);
+		},
+		//else turn state off
+		{
+		~scbr.pauseInstance.value(nodeName.asSymbol, thisProxySym );
+		}
 		);*/
 		//postf("~setState: seting state of % to %\n", nodeName, state);
 	};
 
 
-		// events RX:   /spatosc/core/source/nodename/event eventName v1...vN
+	// events RX:   /spatosc/core/source/nodename/event eventName v1...vN
 	~setGroupEvent = { | groupName, eventName,  args |
 		var valueCount = args.size;
 		var groupProxy = ~allGroupNodes[groupName.asSymbol].at(\proxy);
@@ -780,7 +670,7 @@ s.waitForBoot{
 				memberList.removeAt(index);
 				memberList.postln;
 				postf("~~dropMember: group % dropping member %\n", groupName, memberName);
-		},
+			},
 			// else
 			{
 				postf("~dropMember: group % member % not found \n", groupName, memberName);
@@ -824,7 +714,7 @@ s.waitForBoot{
 		});
 	};
 
-		~deleteGroup = { | nodeName |
+	~deleteGroup = { | nodeName |
 		if ( ~allGroupNodes.includesKey(nodeName.asSymbol) ,
 			{
 				~clearGroupNode.value(nodeName.asSymbol);
@@ -860,7 +750,7 @@ s.waitForBoot{
 	};
 
 
-		~clearSourceNode= { | nameSym |
+	~clearSourceNode= { | nameSym |
 		var node = ~allSourceNodes[nameSym];
 		var connectionName = node.at(\connectionName);
 		var nodeKeys = node.keys;
@@ -941,29 +831,60 @@ s.waitForBoot{
 	};
 
 
+~isFXuri = { | uriPath |
+	var charIndex, uriName, type, temp;
+
+	// type://name (i.e. plugin://DustDust, file://<path>
+
+	// check URI name to make sure its valid
+
+	if (uriPath.asString.contains("plugin://") == false,
+		{
+			postf("~getUriSym:  non-plugin type URI: % ", uriPath);
+			// ~setPlugin.value(nodeName.asSymbol, \dummyPlugin);
+			false;
+		},
+
+		// else  // path ok, proceed
+		{
+			charIndex = uriPath.asString.find("://");
+
+			temp = uriPath.asString.subStr(charIndex);
+			type = uriPath.asString.subStr(0, charIndex-1);
+			uriName = temp.asString.replace("://", "");
+
+				if ( ~fxSynthdefRegister.contains(uriName),
+					{ true },
+					{false};);
+	});
+};
+
+
+	'spatOSCrx loaded'.postln;
+
 	s.sync;
 
 
 	// ~dumpGroup.value();
 
-		// HACK:   create reverb EFFECTS node and set input to  relative aux 0
-/*
+	// HACK:   create reverb EFFECTS node and set input to  relative aux 0
+	/*
 
 
 	~dumpNodes.value();
 
 	~dumpGroups.value();
 
-		~dumpConnections.value();
+	~dumpConnections.value();
 
 
 
-	 ~reverbName="resonance-SC:spatOSCsource_1";
-	 ~createSource.value(~reverbName.asSymbol);
-	 ~createConnection.value(~reverbName.asSymbol, "listener:spatOSClistener_0");
-	 ~prox[~reverbName.asSymbol].set(\in, ~scbr.aux[0]);
+	~reverbName="resonance-SC:spatOSCsource_1";
+	~createSource.value(~reverbName.asSymbol);
+	~createConnection.value(~reverbName.asSymbol, "listener:spatOSClistener_0");
+	~prox[~reverbName.asSymbol].set(\in, ~scbr.aux[0]);
 
-	 ~scbr.makeInstance(~reverbName.asSymbol,\busreverb, \effect);
+	~scbr.makeInstance(~reverbName.asSymbol,\busreverb, \effect);
 
 
 
