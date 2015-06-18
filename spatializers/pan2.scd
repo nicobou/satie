@@ -33,7 +33,7 @@
 				gain.lag(slewGain) * in,
 				maxdelaytime: 0.5,
 				delaytime: delay.lag(slewDelay)),
-			aziDeg),
+			aziDeg/180), // Pan2 takes position from -1 to 1 
 		lpHz.lag(slewLp));
 };
 
