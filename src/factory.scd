@@ -32,12 +32,13 @@
 			srcfunc,
 			destFunArray,
 			busShiftArray = #[0],
-			toBusArray = #[] |
+			toBusArray = #[],
+			synthArgs = #[] |
 			SynthDef(name,
 				// can the "gate" arg name be changed to avoid conflicts with plugin-synthDefs that use it
 				{| gate = 1,  aziDeg = 0, eleDeg = 0, gainDB = 0, delayMs = 1, lpHz = 15000, spread = 1 |
 					var in, env;
-					in = SynthDef.wrap(srcfunc);
+					in = SynthDef.wrap(srcfunc, prependArgs:  synthArgs);
 					// fade in set to as short as possible for percussive cases
 					env = Linen.kr(gate, 0.005, 1, 0.01, 2);
 					//in -> busses
@@ -50,7 +51,7 @@
 						//var out = SynthDef.wrap(item, prependArgs: [in, vol, delay, azi, ele]);
 						Out.ar(busShiftArray.wrapAt(i), env * out);
 					}
-			}, variants: (default: [])).add;
+			}).add;
 		};
 	});
 	e.know = true;

@@ -25,7 +25,7 @@
 		~aux;
 
 		// TODO try catch
-		~makeSynthDef = { | self, name, srcSymbol, spatSymbolArray, busShiftArray = #[0], toBusArray = #[] |
+		~makeSynthDef = { | self, name, srcSymbol, spatSymbolArray, busShiftArray = #[0], toBusArray = #[], synthArgs = #[] |
 			// selecting audio source or effect dictionay because
 			// make instance require effects to be added to tail
 			// and audio source to head
@@ -45,7 +45,8 @@
 				spatSymbolArray.collect({ arg item, i;
 					self.pluginLoader.spatPlugins.at(item)}),
 				busShiftArray,
-				toBusArray);
+				toBusArray,
+				synthArgs);
 			nil;  // return
 		};
 
