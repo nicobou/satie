@@ -17,7 +17,7 @@
 		// TODO use try catch with this
 		~pluginLoader;
 		~synthDefFactory;
-		~cOSCMaker;
+		//~cOSCMaker;
 		~defaultSatieGroup;
 		~satieGroups = Dictionary.new;
 		~effectSynthDef = Set.new;
@@ -25,7 +25,7 @@
 		~aux;
 
 		// TODO try catch
-		~makeSynthDef = { | self, name, srcSymbol, spatSymbolArray, busShiftArray = #[0], toBusArray = #[] |
+		~makeSynthDef = { | self, name, srcSymbol, spatSymbolArray, busShiftArray = #[0], toBusArray = #[], synthArgs = #[] |
 			// selecting audio source or effect dictionay because
 			// make instance require effects to be added to tail
 			// and audio source to head
@@ -45,11 +45,11 @@
 				spatSymbolArray.collect({ arg item, i;
 					self.pluginLoader.spatPlugins.at(item)}),
 				busShiftArray,
-				toBusArray);
+				toBusArray,
+				synthArgs);
 			nil;  // return
 		};
 
-		// returns proxySpace
 		~makeSatieGroup = { | self, name, addAction = \addToHead |
 			// creating a global ProxySpace
 			var prox = ProxySpace(s);
@@ -60,20 +60,21 @@
 			prox;
 		};
 
-		~killSatieGroup = { | self, name |
+        ~killSatieGroup = { | self, name |
 			self.satieGroups[name].end;
 			self.satieGroups[name].free;
 			self.satieGroups.removeAt(name);
 			nil;
 		};
 
-		// returns proxySpace
+
 		~makeInstance = { | self, name, synthDefName, prox = \default |
 			// ensuring not extra bus is allocated:
 			// (must be the first reference of "name" in the proxyspace
 			self.satieGroups[prox][name].ar(0);
 			self.satieGroups[prox][name].source = synthDefName;
 			self.satieGroups[prox][name];
+			//nil;
 		};
 
 		~cleanInstance = { | self, name, prox = \default |
@@ -87,6 +88,14 @@
 			self.satieGroups[prox][name].release();
 			nil;
 		};
+
+		~getProxySym = { | self, prox |
+			var proxSym = \default;
+			self.satieGroups.keysValuesDo { |key, value|
+				if ((value === prox ) && (key != \nil),
+					{ proxSym = key; });};
+			proxSym ;
+		};
 	});  // Environment.make
 
 	e.know = true;
@@ -94,8 +103,8 @@
 	e.aux = Array.fill(numAudioAux, {arg i; e.auxbus.index + i });
 	e.pluginLoader = ~scbrPlugins.value();
 	e.synthDefFactory = ~scbrFactory.value();
-	e.oscInterface = ~cOSCMaker.value();
-	e.defaultSatieGroup = e.makeSatieGroup(\default);
+	e.defaultSatieGroup = e.makeSatieGroup();
+	e.satieGroups.put(\default, e.defaultSatieGroup);
 	e;  // return
 };  // scbrMaker
 )
