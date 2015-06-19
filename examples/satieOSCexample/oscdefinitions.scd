@@ -27,6 +27,12 @@
 	~osc.createSourceOSC(name, ~sourceOSC, group);
 };
 
+~createFX = { |instanceName, effect, bus = 0, fxGroup = \fx |
+	postf("creating an FX % named % in group % on bus %\n", effect, instanceName, fxGroup, bus);
+	~scbr.makeInstance(instanceName, effect, fxGroup);
+	~scbr.satieGroups[instanceName].set(\in, ~scbr.aux[bus]);
+};
+
 ~createGroup = { | groupName, addAction = \addToHead |
 	if (~groupExists.value(groupName),
 		{
@@ -182,6 +188,15 @@
 			if(~groupExists.value(groupName) == false,
 				{ 	~createGroup.value(groupName, action) }
 			);
+		},
+		\createEffect,
+		{
+			var name, effect, bus, fxGroup;
+			name = msg[2];
+			effect = msg[3];
+			bus = msg[4];
+			fxGroup = msg[5];
+			~createFX.value(name, effect, bus, fxGroup);
 		}
 	);
 };
