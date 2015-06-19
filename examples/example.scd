@@ -64,8 +64,8 @@ s.waitForBoot{
 		\boo: Buffer.cueSoundFile(s, Platform.resourceDir +/+ "sounds/a11wlk01.wav", 0, 1)
 	);
 	// load sound files using arguments
-	~scbr.makeSynthDef(\snd1, \sndFile, [\stereoPanner], [0], [], [~playBuffers[\boo].bufnum, 1]);
-	~scbr.makeSynthDef(\snd2, \sndFile, [\stereoPanner], [0], [], [~playBuffers[\alsaTest].bufnum, 1]);
+	~scbr.makeSynthDef(\snd1, \sndFile, [\stereoPanner], [0], [], [~playBuffers[\boo].bufnum]);
+	~scbr.makeSynthDef(\snd2, \sndFile, [\stereoPanner], [0], [], [~playBuffers[\alsaTest].bufnum]);
 	// load synths with arguments
 	~scbr.makeSynthDef(\pink400, \PinkSin, [\stereoPanner], [0], [], [400]);
 	~scbr.makeSynthDef(\pink800, \PinkSin, [\stereoPanner], [0], [], [800]);
