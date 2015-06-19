@@ -47,6 +47,9 @@
 //~scbr.makeSynthDef(\string, \zkarpluck1, [\stereoPanner, \monoSpat], [0, 2]);
 ~scbr.makeSynthDef(\string, \zkarpluck1, [\octoVBAP], [0]);
 ~scbr.makeSynthDef(\pinksin, \PinkSin, [\stereoPanner], [0]);
+// generate a synth and change its defaults
+~scbr.makeSynthDef(\pink400, \PinkSin, [\stereoPanner], [0], [], [800]);
+
 ~scbr.makeSynthDef(\testtone, \testtone, [\stereoPanner], [0]);
 // writing to all aux busses (first is starting a 0):
 ~scbr.makeSynthDef(\string_all_aux, \zkarpluck1, [\stereoPanner], [0], ~scbr.aux);
@@ -55,11 +58,14 @@
 // spatilized reverb effect (input will be set at creation):
 ~scbr.makeSynthDef(\busreverb, \freeverb, [\stereoPanner], [0]);
 // streaming a soundfile from disk
-~scbr.makeSynthDef(\snd, \sndFile, [\stereoPanner], [0]);
-// be sure the synthDef is compiled on the server
-~osc = ~satieOSCMaker.value();
-s.sync;
+// - load soundfiles
 ~playBuffers = Dictionary();
 ~playBuffers.add(\bleh -> Buffer.cueSoundFile(s, Platform.resourceDir +/+ "sounds/a11wlk01.wav", 0, 1));
 ~playBuffers.add(\alsaTest -> Buffer.cueSoundFile(s, "/usr/share/sounds/alsa/Front_Center.wav", 0, 1));
+// create players
+~scbr.makeSynthDef(\snd1, \sndFile, [\stereoPanner], [0], [], [~playBuffers[\bleh].bufnum]);
+~scbr.makeSynthDef(\snd2, \sndFile, [\stereoPanner], [0], [], [~playBuffers[\alsaTest].bufnum]);
+// be sure the synthDef is compiled on the server
+~osc = ~satieOSCMaker.value();
+
 s.sync;
