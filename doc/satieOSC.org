@@ -27,7 +27,7 @@
 - /SATIE :: the root address space. At this level we can create and delete synth instances and groups.
   - /default :: group level, only methods affecting a group of synths should be used. The group and synths must already be created. A group =default= is already created on the server and synth instances are placed in the =default= group automatically, unless a different group is specified. 
 
-*  OSC messages
+* OSC messages
 
 ** Handling sound sources
 *** createSoundSource name synthName [groupName]
@@ -101,3 +101,12 @@ creates a new group named /name/ to which sound sources can be added. Groups in 
       | =\addBefore=  |               |
       | =\addReplace= |               |
 
+** Effects
+*** createEffect name fxProcessor bus group
+Intantiates an effect and assigns it to a particular bus and group
+
+- Arguments:
+  - name :: the instance name of the effect
+  - fxProcessor :: the type of the of the effect
+  - bus :: the bus number. Note that the bus must be defined with makeSynthDef
+  - group :: the effects group to add it to.
