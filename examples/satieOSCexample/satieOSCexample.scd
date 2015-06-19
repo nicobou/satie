@@ -20,7 +20,7 @@
 ~num_aux_bus = 5;
 ~oscSys = \satieOSC;
 // creating a sc-basic-renderer
-~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus, oscSystem: ~oscSys);
+~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus);
 // printing internal aux array with bus indexes
 ~scbr.aux;
 // ~scbr.auxbus.scope;
@@ -57,6 +57,8 @@
 ~scbr.makeSynthDef(\string_third_aux, \zkarpluck1, [\domeVBAP], [0], [~scbr.aux[2]]);
 // spatilized reverb effect (input will be set at creation):
 ~scbr.makeSynthDef(\busreverb, \freeverb, [\stereoPanner], [0]);
+// mono input
+~scbr.makeSynthDef(\monoIn, \MonoIn, [\stereoPanner], [0]);
 // streaming a soundfile from disk
 // - load soundfiles
 ~playBuffers = Dictionary();
