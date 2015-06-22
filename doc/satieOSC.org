@@ -30,17 +30,33 @@
 * OSC messages
 
 ** Handling sound sources
-*** createSoundSource name synthName [groupName]
-        
+*** create 
+Create synth group:
+
+=/SATIE create name=
+
+Create effect group:
+
+=/SATIE createFX name=
+
+Create a group member:
+
+=/SATIE/group create name synthName=
+
+(NOTE to self: addAction = hardcoded \addToTail for effects, \addToHead for synths)
+
+
 creates an instance of a SATIE synthDef. it also creates a group if the group does not exist.
 - Receiver :: =/SATIE=
 
 - Arguments:
-  - name :: unique identifier for this synth
-  - synthName :: the reference name of the synth being used. The synth must have been compiled on the server with =~scbr.makeSynthDef= method before instantiating
-  - groupName :: (optional), the name of the group the synth instance will be attached to. If this parameter is omitted, it will be attached to the =default= group.
+  - name :: unique identifier for the created object
+  - synthName :: the reference name of the synth or effect being used. The synth must have been compiled on the server with =~scbr.makeSynthDef= method before instantiating
 
-*** deleteSoundSource name 
+
+*** delete 
+=/SATIE/group delete=
+=/SATIE/group/instance delete=
 delete a named instance from the SATIE server. /name/ is the uniquely identified synth instance.
 
 - Receiver :: =/SATIE=
@@ -48,8 +64,9 @@ delete a named instance from the SATIE server. /name/ is the uniquely identified
 - Arguments:
   - name :: the named instance of the synth to remove
 
-*** setInstance param value [param, value, ...]
-
+*** set 
+=/SATIE/group set param value [param, value, ...]=
+=/SATIE/group/instance set param value [param, value, ...]=
 sets parameter values to a SATIE instance. Any number of =param / value= pairs may be provided
 
 - Receiver :: =/SATIE/group/synth=
@@ -66,47 +83,3 @@ sets parameter values to a SATIE instance. Any number of =param / value= pairs m
              | =spread=   | int      | panning spread, 0 - 100. 0 = narrow, 100 = omni |
 
   - value :: parameter's value
-
-*** setGroup param value [param, value, ...]
-
-sets parameter values to all synths in a group. Any number of =param / value= pairs may be provided
-
-- Receiver :: =/SATIE/group/=
-
-- Arguments
-  - param :: parameter to affect, dependent on the instrument. The common parameters are:
-             | Parameter  | Unit     | Description                                     |
-             |------------+----------+-------------------------------------------------|
-             | =gainDB=   | decibels | gain                                            |
-             | =aziDeg=   | degrees  | azimuth +/- 180                                 |
-             | =elevDeg=  | degrees  | elevation +/- 90                                |
-             | =delaySec= | seconds  | delay time for doppler effect                   |
-             | =lpHz=     | hertz    | low pass filter for for doppler                 |
-             | =spread=   | int      | panning spread, 0 - 100. 0 = narrow, 100 = omni |
-
-  - value :: parameter's value
-
-
-** Handling groups
-*** createGroup name [addAction]
-creates a new group named /name/ to which sound sources can be added. Groups in SATIE are actually SuperCollider's ProxySpace. 
-
-- Arguments:
-  - name :: the name of the group to make
-  - addAction :: one of the following (please refer to SuperCollider documentation of *ParGroup*):
-      | =\addToHead=  | (the default) |
-      | =\addToTail=  |               |
-      | =\addAfter=   |               |
-      | =\addBefore=  |               |
-      | =\addBefore=  |               |
-      | =\addReplace= |               |
-
-** Effects
-*** createEffect name fxProcessor bus group
-Intantiates an effect and assigns it to a particular bus and group
-
-- Arguments:
-  - name :: the instance name of the effect
-  - fxProcessor :: the type of the of the effect
-  - bus :: the bus number. Note that the bus must be defined with makeSynthDef
-  - group :: the effects group to add it to.
