@@ -43,16 +43,12 @@ Create a group member:
 
 =/SATIE/group create name synthName=
 
-(NOTE to self: addAction = hardcoded \addToTail for effects, \addToHead for synths)
-
-
 creates an instance of a SATIE synthDef. it also creates a group if the group does not exist.
 - Receiver :: =/SATIE=
 
 - Arguments:
   - name :: unique identifier for the created object
   - synthName :: the reference name of the synth or effect being used. The synth must have been compiled on the server with =~scbr.makeSynthDef= method before instantiating
-
 
 *** delete 
 =/SATIE/group delete=
