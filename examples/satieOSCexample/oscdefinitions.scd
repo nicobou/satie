@@ -22,9 +22,15 @@
 			~createGroup.value(sourceGroup);
 		}
 	);
-	postf("creating source % using % and adding to group %\n", name, synth, sourceGroup);
-	~scbr.makeInstance(name, synth, sourceGroup);
-	~osc.createSourceOSC(name, ~sourceOSC, group);
+	postf("creating source % using % and adding to group %\n", name, syn, sourceGroup);
+	~scbr.makeInstance(name, syn, sourceGroup);
+	~osc.createSourceOSC(name, ~coreCallback, group);
+};
+
+~createFX = { |instanceName, effect, bus = 0, fxGroup = \fx |
+	postf("creating an FX % named % in group % on bus %\n", effect, instanceName, fxGroup, bus);
+	~scbr.makeInstance(instanceName, effect, fxGroup);
+	~scbr.satieGroups[instanceName].set(\in, ~scbr.aux[bus]);
 };
 
 ~createGroup = { | groupName, addAction = \addToHead |
@@ -35,6 +41,7 @@
 		{
 			postf("Group  % does not exist, creating one\n", groupName);
 			~scbr.makeSatieGroup(groupName, addAction);
+			~osc.makeGroupOSC(groupName, ~coreCallback);
 		}
 	);
 };
@@ -48,10 +55,16 @@
 	ret;
 };
 
-~removeSoundSource = { |sourceName|
+~removeSoundSource = { |sourceName, group = \default |
 	var name = sourceName;
+	var sourceGroup = group;
 	postf("Removing and cleaning %\n", name);
-	~scbr.cleanInstance(name);
+	~scbr.cleanInstance(name, sourceGroup);
+};
+
+~removeGroup = { | group |
+	postf("Removing group %\n", group);
+	~scbr.killSatieGroup(group);
 };
 
 ~setInstance = { | sourceName, property, value, group = \default|
@@ -111,7 +124,7 @@
 	cmd = args[1];
 	postf("properties to affect: %\n", props);
 	switch(cmd,
-		\setInstance,
+		\set,
 		{
 			props.pairsDo({ | prop, val |
 				//~prox.existingProxies;
@@ -133,16 +146,39 @@
 };
 
 // handle any OSC message
-// eg. /SATIE/ createSoundSource pluck string
+// eg. /SATIE create name - to create a group
+//     /SATIE/default create name - to create an instance of a synth or effect
 ~coreCallback = { | msg |
-	var command, instanceName, synth, group;
-	command = msg[1];
+	var url, obj, command, name ;
+	url = msg[0].asString.split;
+	url.removeAt(0); // remove thefirst empty element
+	name = msg[2].asSymbol;
+	command = msg[1].asSymbol;
 	postf("coreCallback argument: %\n", msg);
+	postf("coreCallback url: %\n", url);
 
 	switch(command,
-		\createSoundSource,
+		\create,
 		{
-			instanceName = msg[2];
+
+			var dest = ~getAddressLevel.value(url);
+			switch(dest,
+				\system, {
+					switch(command,
+						\create, { ~createGroup.value(name);},
+						\createFX, { ~createGroup.value(name, \addToTail);}
+					);
+				},
+				\group,  {
+					var group, synth;
+					group = url[1].asSymbol;
+					synth = msg[3].asSymbol;
+					postf("create synth named % using % in group %\n", name, synth, group);
+					~createSoundSource.value(name, synth, group);
+				}
+			);
+
+			/*instanceName = msg[2];
 			synth = msg[3];
 			postf("creating: %, %, based on message %\n", instanceName, synth, msg);
 			postf("there are % arguments \n", msg.size);
@@ -162,14 +198,32 @@
 					postf("-------> % % % \n", instanceName, synth, group);
 					~createSoundSource.value(instanceName, synth, group);
 				}
-			)
+			)*/
 		},
-		\deleteSoundSource,
+		\delete,
 		{
-			var instanceName = msg[2];
+			var dest = ~getAddressLevel.value(url);
+			switch(dest,
+				\group, { |group|
+					group = url[1].asSymbol;
+					~removeGroup.value(group);
+
+				},
+				\instance, { | synthName, group |
+					synthName = url[2].asSymbol;
+					group = url[1].asSymbol;
+					~removeSoundSource.value(synthName, group);
+				}
+			);
+			/*var instanceName = msg[2].asSymbol;
 			postf("Removing sound source: ---> %\n", instanceName);
 			~osc.removeSourceOSC(instanceName);
 			~removeSoundSource.value(instanceName);
+			*/
+		},
+		\set,
+		{
+			"set message received".postln;
 		},
 		\createGroup,
 		{
@@ -182,7 +236,35 @@
 			if(~groupExists.value(groupName) == false,
 				{ 	~createGroup.value(groupName, action) }
 			);
+		},
+		\createEffect,
+		{
+			var name, effect, bus, fxGroup;
+			name = msg[2];
+			effect = msg[3];
+			bus = msg[4];
+			fxGroup = msg[5];
+			~createFX.value(name, effect, bus, fxGroup);
 		}
+	);
+};
+
+~getAddressLevel = { | url = #[] |
+	url.postln;
+	switch(url.size,
+		1, {
+			if(url[0] == "SATIE",
+				\system,
+				{
+					\nope;
+					postf("Wrong system address, expected /SATIE, got %\n", url[0]);
+					nil;
+				}
+			);
+		},
+		2, { \group },
+		3, { \instance },
+		{ postf("Wrong address: %\n", url.join); }
 	);
 };
 

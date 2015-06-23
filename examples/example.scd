@@ -27,9 +27,8 @@ s.waitForBoot{
 	(~rootSrcPath ++ "/src/*.scd").pathMatch.do({arg item; item.loadPaths});
 
 	~num_aux_bus = 5;
-	~oscSys = \satieOSC;
 	// creating a sc-basic-renderer
-	~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus, oscSystem: ~oscSys);
+	~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus);
 	// printing internal aux array with bus indexes
 	~scbr.aux;
     // ~scbr.auxbus.scope;
@@ -59,7 +58,17 @@ s.waitForBoot{
 	// spatilized reverb effect (input will be set at creation):
 	~scbr.makeSynthDef(\busreverb, \freeverb, [\stereoPanner], [0]);
 	// streaming a soundfile from disk
-	~scbr.makeSynthDef(\snd, \sndFile, [\stereoPanner], [0]);
+	~playBuffers = (
+		// the first one will work only on linux
+		\alsaTest: Buffer.cueSoundFile(s, "/usr/share/sounds/alsa/Front_Center.wav", 0, 1),
+		\boo: Buffer.cueSoundFile(s, Platform.resourceDir +/+ "sounds/a11wlk01.wav", 0, 1)
+	);
+	// load sound files using arguments
+	~scbr.makeSynthDef(\snd1, \sndFile, [\stereoPanner], [0], [], [~playBuffers[\boo].bufnum]);
+	~scbr.makeSynthDef(\snd2, \sndFile, [\stereoPanner], [0], [], [~playBuffers[\alsaTest].bufnum]);
+	// load synths with arguments
+	~scbr.makeSynthDef(\pink400, \PinkSin, [\stereoPanner], [0], [], [400]);
+	~scbr.makeSynthDef(\pink800, \PinkSin, [\stereoPanner], [0], [], [800]);
 	// be sure the synthDef is compiled on the server
 	s.sync;
 
@@ -74,8 +83,15 @@ s.waitForBoot{
 ~scbr.makeInstance(\test1, \string);
 ~scbr.makeInstance(\test2, \string);
 ~scbr.makeInstance(\test3, \pinksin);
-~scbr.cleanInstance(\test4);
+~scbr.cleanInstance(\test3);
 
+
+~scbr.makeInstance(\f, \snd1);
+~scbr.makeInstance(\f2, \snd2);
+~scbr.makeInstance(\f3, \snd);
+~scbr.makeInstance(\f4, \snd);
+
+~scbr.cleanInstance(\f2);
 // change test3 source
 ~scbr.makeInstance(\test3, \testtone);
 
@@ -87,20 +103,6 @@ s.waitForBoot{
 ~scbr.satieGroups[\default].[\test3].set(\gainDB, -10);
 
 ~defaultProx.[\test1];
-
-// play a file from disk
-~scbr.makeInstance(\f, \snd);
-// load a buffer to play a soundfile - only mono files
-~playBuffers = (\alsaTest: Buffer.cueSoundFile(s, "/usr/share/sounds/alsa/Front_Center.wav", 0, 1), \boo: Buffer.cueSoundFile(s, Platform.resourceDir +/+ "sounds/a11wlk01.wav", 0, 1));
-// ~buf = Buffer.cueSoundFile(s, "/usr/share/sounds/alsa/Front_Center.wav", 0, 1);
-// ~buf = Buffer.cueSoundFile(s, Platform.resourceDir +/+ "sounds/a11wlk01.wav", 0, 1);
-// play the buffer without looping
-~playBuffers[\boo]
-~defaultProx.[\f].set(\loop,0,\bufnum, ~playBuffers[\boo].bufnum);
-// loop the previously played buffer
-~defaultProx.[\f].set(\loop, 1);
-~scbr.cleanInstance(\f);
-~buf.free;
 
 // removing an instance
 ~scbr.cleanInstance(\test2);
@@ -284,5 +286,16 @@ r.stop;
 	)
 };
 ~scbr.oscInterface.newOSC(\satieOSC, ~coreCallback);
+
+)
+
+// ********** dealing with sound files ********************
+
+(
+d = Dictionary();
+d.add(\bleh -> Buffer.cueSoundFile(s, Platform.resourceDir +/+ "sounds/a11wlk01.wav", 0, 1));
+d.add(\alsaTest -> Buffer.cueSoundFile(s, "/usr/share/sounds/alsa/Front_Center.wav", 0, 1));
+
+~scbr.makeInstance('f.bufnum', \snd);
 
 )

@@ -28,7 +28,7 @@
 		};
 
 		// make a synth instance and create its group if needed
-		~createSourceOSC = {|self, sourceName, cb, groupName = \default|
+		~createSourceOSC = {|self, sourceName, cb, groupName|
 			//self.newOSC(sourceName, cb,  rootURI +/+ groupName);
  			self.newOSC(groupName ++ sourceName, cb,  rootURI +/+ groupName +/+ sourceName);
 			if(OSCdef.all.includesKey(groupName) == false,
@@ -41,7 +41,7 @@
 
 
 		// create a group
-		~makeGroup = {|self, groupName, cb|
+		~makeGroupOSC = {|self, groupName, cb|
 			self.newOSC(groupName, cb,  rootURI +/+ groupName);
 		};
 
