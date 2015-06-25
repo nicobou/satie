@@ -223,7 +223,34 @@
 		},
 		\set,
 		{
-			"set message received".postln;
+			var dest, group, props;
+			dest = ~getAddressLevel.value(url);
+			group = url[1].asSymbol;
+			props = msg.copyRange(2, msg.size - 1);
+			postf("entered set with destination: %\n", dest);
+			switch(dest,
+				\group,
+				{
+					props.pairsDo({ | prop, val |
+						//~prox.existingProxies;
+						postf("** group: set %'s % to %\n", group, prop, val);
+						~scbr.satieGroups[group].group.set(prop, val);
+					});
+
+					//~scbr.satieGroups[sourceGroup].group.set(param, val);
+				},
+				\instance,
+				{
+					var name;
+					name = url[2].asSymbol;
+					props.pairsDo({ | prop, val |
+						//~prox.existingProxies;
+						postf("** instance: set %'s % to %\n", name, prop, val);
+						~scbr.satieGroups[group].[name].set(prop.asSymbol, val);
+					});
+				}
+			);
+				//"set message received".postln;
 		},
 		\createGroup,
 		{
