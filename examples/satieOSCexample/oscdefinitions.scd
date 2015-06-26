@@ -27,11 +27,11 @@
 	~osc.createSourceOSC(name, ~coreCallback, group);
 };
 
-~createFX = { |instanceName, effect, bus = 0, fxGroup = \fx |
+/*~createFX = { |instanceName, effect, bus = 0, fxGroup = \fx |
 	postf("creating an FX % named % in group % on bus %\n", effect, instanceName, fxGroup, bus);
 	~scbr.makeInstance(instanceName, effect, fxGroup);
 	~scbr.satieGroups[instanceName].set(\in, ~scbr.aux[bus]);
-};
+};*/
 
 ~createGroup = { | groupName, addAction = \addToHead |
 	if (~groupExists.value(groupName),
@@ -67,7 +67,7 @@
 	~scbr.killSatieGroup(group);
 };
 
-~setInstance = { | sourceName, property, value, group = \default|
+/*~setInstance = { | sourceName, property, value, group = \default|
 	// set parameters
 	var name = sourceName.asSymbol;
 	var param = property.asSymbol;
@@ -81,10 +81,10 @@
 		},
 		{ postf("the group % does not exist so not doing anything", sourceGroup); }
 	);
-};
+};*/
 
 // kludge!
-~handleBufProperty = { |property, value|
+/*~handleBufProperty = { |property, value|
 	// we need to handle the special case of passing a bufnum to sndFile.
 	// sndFile expects a bufnum with its context, either a Buffer object or, in our case, a dictionary entry
 	// so we construct the proper object here to allow the user simply call the dictionary entry.
@@ -97,9 +97,9 @@
 		{ val = value; }
 	);
 	val;
-};
+};*/
 
-~setGroup = { | group, property, value|
+/*~setGroup = { | group, property, value|
 	// set parameters
 	var param = property.asSymbol;
 	var val = ~handleBufProperty.value(property, value);
@@ -112,9 +112,9 @@
 		},
 		{ postf("the group % does not exist so not doing anything", sourceGroup); }
 	);
-};
+};*/
 
-~sourceOSC = { | args |
+/*~sourceOSC = { | args |
 	var group, name, props, cmd, size;
 	args.postln;
 	size = args.size;
@@ -143,31 +143,28 @@
 			});
 		}
 	);
-};
+};*/
 
 // handle any OSC message
 // eg. /SATIE create name - to create a group
 //     /SATIE/default create name - to create an instance of a synth or effect
 ~coreCallback = { | msg |
-	var url, obj, command, name ;
+	var url, dest, obj, command, name ;
 	url = msg[0].asString.split;
 	url.removeAt(0); // remove thefirst empty element
+	dest = ~getAddressLevel.value(url);
 	name = msg[2].asSymbol;
-	command = msg[1].asSymbol;
+	command = msg[1];
 	postf("coreCallback argument: %\n", msg);
 	postf("coreCallback url: %\n", url);
-
+	postf("command is %\n", command);
 	switch(command,
 		\create,
 		{
-
-			var dest = ~getAddressLevel.value(url);
 			switch(dest,
 				\system, {
-					switch(command,
-						\create, { ~createGroup.value(name);},
-						\createFX, { ~createGroup.value(name, \addToTail);}
-					);
+					"***************** received create".postln;
+					~createGroup.value(name);
 				},
 				\group,  {
 					var group, synth;
@@ -177,28 +174,15 @@
 					~createSoundSource.value(name, synth, group);
 				}
 			);
-
-			/*instanceName = msg[2];
-			synth = msg[3];
-			postf("creating: %, %, based on message %\n", instanceName, synth, msg);
-			postf("there are % arguments \n", msg.size);
-			if ((msg.size < 4) ,
-				{
-					postf("wrong number of arguments %\n", msg);
-				},
-				{
-					postf("coreCallback creates %\n", msg);
-					case
-					{ msg.size > 4 } {
-						group = msg[4];
-					}
-					{ msg.size == 4 } {
-						group = \default;
-					};
-					postf("-------> % % % \n", instanceName, synth, group);
-					~createSoundSource.value(instanceName, synth, group);
+		},
+		\createFX,
+		{
+			switch(dest,
+				\system, {
+					"***************** received createFX".postln;
+					~createGroup.value(name, \addToTail);
 				}
-			)*/
+			);
 		},
 		\delete,
 		{
@@ -215,11 +199,6 @@
 					~removeSoundSource.value(synthName, group);
 				}
 			);
-			/*var instanceName = msg[2].asSymbol;
-			postf("Removing sound source: ---> %\n", instanceName);
-			~osc.removeSourceOSC(instanceName);
-			~removeSoundSource.value(instanceName);
-			*/
 		},
 		\set,
 		{
@@ -227,51 +206,42 @@
 			dest = ~getAddressLevel.value(url);
 			group = url[1].asSymbol;
 			props = msg.copyRange(2, msg.size - 1);
-			postf("entered set with destination: %\n", dest);
 			switch(dest,
 				\group,
 				{
 					props.pairsDo({ | prop, val |
-						//~prox.existingProxies;
 						postf("** group: set %'s % to %\n", group, prop, val);
 						~scbr.satieGroups[group].group.set(prop, val);
 					});
-
-					//~scbr.satieGroups[sourceGroup].group.set(param, val);
 				},
 				\instance,
 				{
 					var name;
 					name = url[2].asSymbol;
 					props.pairsDo({ | prop, val |
-						//~prox.existingProxies;
 						postf("** instance: set %'s % to %\n", name, prop, val);
-						~scbr.satieGroups[group].[name].set(prop.asSymbol, val);
+						if(prop == \in, // effect's property 'in' needs a special treatment
+							{
+								postf("----------FX--------- setting property % on effect to %\n", prop, val);
+								~scbr.satieGroups[name].set(prop, ~scbr.aux[val.asInt]);
+							},
+							{
+								postf("-=-=-=-=-=-=- got instance property %\n", prop);
+								~scbr.satieGroups[group].[name].set(prop, val);
+							}
+						);
 					});
 				}
 			);
-				//"set message received".postln;
 		},
-		\createGroup,
+		\clear,
 		{
-			var groupName, action;
-			groupName = msg[2];
-			if(msg[3] != nil,
-				{ action = msg[3] },
-				{ action = \addToHead }
-			);
-			if(~groupExists.value(groupName) == false,
-				{ 	~createGroup.value(groupName, action) }
-			);
-		},
-		\createEffect,
-		{
-			var name, effect, bus, fxGroup;
-			name = msg[2];
-			effect = msg[3];
-			bus = msg[4];
-			fxGroup = msg[5];
-			~createFX.value(name, effect, bus, fxGroup);
+			// rmove all satie groups
+			~scbr.satieGroups.keysDo {|key | ~scbr.killSatieGroup(key)};
+			// free all OSC
+			OSCdef.freeAll;
+			// re-create satie system level OSC
+			~osc.newOSC(\satieOSC, ~coreCallback, "/SATIE");
 		}
 	);
 };
