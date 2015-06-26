@@ -22,7 +22,6 @@
 #+LANGUAGE: en
 \thispagestyle{fancy}
 
-
 * Address space
 - /SATIE :: the root address space. At this level we can create and delete synth instances and groups.
   - /default :: group level, only methods affecting a group of synths should be used. The group and synths must already be created. A group =default= is already created on the server and synth instances are placed in the =default= group automatically, unless a different group is specified. 
@@ -41,14 +40,13 @@ Create effect group:
 
 Create a group member:
 
-=/SATIE/group create name synthName=
+=/SATIE/group create name synthType=
 
 creates an instance of a SATIE synthDef. it also creates a group if the group does not exist.
-- Receiver :: =/SATIE=
 
 - Arguments:
   - name :: unique identifier for the created object
-  - synthName :: the reference name of the synth or effect being used. The synth must have been compiled on the server with =~scbr.makeSynthDef= method before instantiating
+  - synthType :: the reference name of the synth or effect being used. The synth must have been compiled on the server with =~scbr.makeSynthDef= method before instantiating
 
 *** delete 
 =/SATIE/group delete=
@@ -62,10 +60,11 @@ delete a named instance from the SATIE server. /name/ is the uniquely identified
 
 *** set 
 =/SATIE/group set param value [param, value, ...]=
-=/SATIE/group/instance set param value [param, value, ...]=
-sets parameter values to a SATIE instance. Any number of =param / value= pairs may be provided
 
-- Receiver :: =/SATIE/group/synth=
+
+=/SATIE/group/instance set param value [param, value, ...]=
+
+sets parameter values to a SATIE instance. Any number of =param / value= pairs may be provided
 
 - Arguments
   - param :: parameter to affect, dependent on the instrument. The common parameters are:
@@ -79,3 +78,14 @@ sets parameter values to a SATIE instance. Any number of =param / value= pairs m
              | =spread=   | int      | panning spread, 0 - 100. 0 = narrow, 100 = omni |
 
   - value :: parameter's value
+
+*** clear
+=/SATIE clear=
+
+remove all SATIE groups, their synths/effects and associated OSC addresses and reset to default.
+
+* Workflow
+
+Basic workflow:
+- create groups for desired synths/effects
+- instantiate synths and effects in their groups
