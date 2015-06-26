@@ -45,7 +45,7 @@
 ~scbr.makeSynthDef(\fool, \PinkSin, [\stereoPanner, \monoSpat], [0, 2]);
 
 //~scbr.makeSynthDef(\string, \zkarpluck1, [\stereoPanner, \monoSpat], [0, 2]);
-~scbr.makeSynthDef(\string, \zkarpluck1, [\octoVBAP], [0]);
+~scbr.makeSynthDef(\string, \zkarpluck1, [\stereoPanner], [0]);
 ~scbr.makeSynthDef(\pinksin, \PinkSin, [\stereoPanner], [0]);
 // generate a synth and change its defaults
 ~scbr.makeSynthDef(\pink400, \PinkSin, [\stereoPanner], [0], [], [800]);
@@ -54,7 +54,7 @@
 // writing to all aux busses (first is starting a 0):
 ~scbr.makeSynthDef(\string_all_aux, \zkarpluck1, [\stereoPanner], [0], ~scbr.aux);
 // writing to only to the third audio bus
-~scbr.makeSynthDef(\string_third_aux, \zkarpluck1, [\domeVBAP], [0], [~scbr.aux[2]]);
+~scbr.makeSynthDef(\string_third_aux, \zkarpluck1, [\stereoPanner], [0], [~scbr.aux[2]]);
 // spatilized reverb effect (input will be set at creation):
 ~scbr.makeSynthDef(\busreverb, \freeverb, [\stereoPanner], [0]);
 // mono input
