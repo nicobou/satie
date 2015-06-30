@@ -1,0 +1,103 @@
+#+TITLE: SATIE OSC
+#+AUTHOR: Michał Seta
+#+EXPORT_TITLE: "SATIE OSC reference"
+#+LATEX_CLASS: article
+#+LATEX_CLASS_OPTIONS: [article]
+#+LATEX_HEADER: \oddsidemargin 0cm
+#+LATEX_HEADER: \evensidemargin 0cm
+#+LATEX_HEADER: \textwidth 15cm
+#+LATEX_HEADER: \topmargin -1cm
+#+LATEX_HEADER: \textheight 23.5cm
+#+LATEX_HEADER: \usepackage{fancyhdr}
+#+LATEX_HEADER: \pagestyle{fancy}
+#+LATEX_HEADER: \fancyhead{}
+#+LATEX_HEADER: \fancyhead[LE,RO]{SATIE OSC reference}
+#+LATEX_HEADER: \fancyhead[RE,LO]{[SAT]Metalab}
+#+LATEX_HEADER: \fancyfoot[CE,CO]{Michał Seta | e: mseta@sat.qc.ca }
+#+LATEX_HEADER: \usepackage{epic}
+#+OPTIONS: num:2
+#+OPTIONS: toc:t
+#+OPTIONS: author:nil
+#+OPTIONS: timestamp:t date:t d:nil <:nil p:nil tags:nil
+#+LANGUAGE: en
+\thispagestyle{fancy}
+
+
+* Address space
+- /SATIE :: the root address space. At this level we can create and delete synth instances and groups.
+  - /default :: group level, only methods affecting a group of synths should be used. The group and synths must already be created. A group =default= is already created on the server and synth instances are placed in the =default= group automatically, unless a different group is specified. 
+
+*  OSC messages
+
+** Handling sound sources
+*** createSoundSource name synthName [groupName]
+        
+creates an instance of a SATIE synthDef. it also creates a group if the group does not exist.
+- Receiver :: =/SATIE=
+
+- Arguments:
+  - name :: unique identifier for this synth
+  - synthName :: the reference name of the synth being used. The synth must have been compiled on the server with =~scbr.makeSynthDef= method before instantiating
+  - groupName :: (optional), the name of the group the synth instance will be attached to. If this parameter is omitted, it will be attached to the =default= group.
+
+*** deleteSoundSource name 
+delete a named instance from the SATIE server. /name/ is the uniquely identified synth instance.
+
+- Receiver :: =/SATIE=
+
+- Arguments:
+  - name :: the named instance of the synth to remove
+
+*** setInstance param value [param, value, ...]
+
+sets parameter values to a SATIE instance. Any number of =param / value= pairs may be provided
+
+- Receiver :: =/SATIE/group/synth=
+
+- Arguments
+  - param :: parameter to affect, dependent on the instrument. The common parameters are:
+             | Parameter  | Unit     | Description                                     |
+             |------------+----------+-------------------------------------------------|
+             | =gainDB=   | decibels | gain                                            |
+             | =aziDeg=   | degrees  | azimuth +/- 180                                 |
+             | =elevDeg=  | degrees  | elevation +/- 90                                |
+             | =delaySec= | seconds  | delay time for doppler effect                   |
+             | =lpHz=     | hertz    | low pass filter for for doppler                 |
+             | =spread=   | int      | panning spread, 0 - 100. 0 = narrow, 100 = omni |
+
+  - value :: parameter's value
+
+*** setGroup param value [param, value, ...]
+
+sets parameter values to all synths in a group. Any number of =param / value= pairs may be provided
+
+- Receiver :: =/SATIE/group/=
+
+- Arguments
+  - param :: parameter to affect, dependent on the instrument. The common parameters are:
+             | Parameter  | Unit     | Description                                     |
+             |------------+----------+-------------------------------------------------|
+             | =gainDB=   | decibels | gain                                            |
+             | =aziDeg=   | degrees  | azimuth +/- 180                                 |
+             | =elevDeg=  | degrees  | elevation +/- 90                                |
+             | =delaySec= | seconds  | delay time for doppler effect                   |
+             | =lpHz=     | hertz    | low pass filter for for doppler                 |
+             | =spread=   | int      | panning spread, 0 - 100. 0 = narrow, 100 = omni |
+
+  - value :: parameter's value
+
+
+** Handling groups
+*** createGroup name [addAction]
+creates a new group named /name/ to which sound sources can be added. Groups in SATIE are actually SuperCollider's ProxySpace. 
+
+- Arguments:
+  - name :: the name of the group to make
+  - addAction :: one of the following (please refer to SuperCollider documentation of *ParGroup*):
+      | =\addToHead=  | (the default) |
+      | =\addToTail=  |               |
+      | =\addAfter=   |               |
+      | =\addBefore=  |               |
+      | =\addBefore=  |               |
+      | =\addReplace= |               |
+
