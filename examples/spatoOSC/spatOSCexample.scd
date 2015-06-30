@@ -41,7 +41,62 @@ s.waitForBoot{
 
 	s.sync;
 
-}
 
 
-//~nodeSpwan = { | nodename, 
+
+
+
+
+	// set up a process class
+
+	~sheefa = Environment[
+		'randAzi' -> 20,
+		'randElev' ->
+		'randDist' -> 1,
+		'cloneCount' -> 20,
+	];
+
+
+	// generic stuff
+	~sheefa.know=true;
+
+	~sheefa.property =  {| self, property, value |
+		self.put(property.asSymbol, value);
+	};
+
+
+	~registerProcess.value(\sheefa, ~sheefa);
+
+
+	// project specific stuff
+	~sheefa.setup = { | self, args |
+
+		var cloneCount = args[0];
+		var randAzi = args[1];
+		var randElev = args[2];
+		var randDist = args[3];
+
+		if (args.size != 4,
+			{ '~sheefa.setup: bad arg count'.postln;});
+
+		'~sheefa.setup'.postln;
+		self.cloneCount = cloneCount;
+		self.randAzi = randAzi;
+		self.randElev = randElev;
+		self.randDist = randDist;
+	};
+
+
+
+	~sheefa.trigger = { |self, groupName |
+
+		postf("~sheefa.trigger: update group: % \n", groupName);
+	};
+
+
+
+
+
+};
+
+

@@ -1,9 +1,10 @@
 #!/bin/bash
 
 
-BASIC_TEST=1
+#BASIC_TEST=1
 #PLUCK_TEST=1
 #GROUP_TEST=1
+PROCESSING_TEST=1
 
 
 
@@ -13,11 +14,13 @@ clear
 
 if [ $BASIC_TEST ] ; then
 
+clear;
 echo TESTING BASIC SPATOSC COMMANDS
 sleep 2
 
-oscsend localhost 18032 /spatosc/core sss createSource mySound plugin://default
-clear;  echo CREATE SOURCE NODE mySound
+oscsend localhost 18032 /spatosc/core sss createSource mySound process://default
+sleep 2
+echo CREATE SOURCE NODE mySound
 sleep 1
 oscsend localhost 18032 /spatosc/core sss connect mySound ear
 echo CONNECT TO LISTENER ear
@@ -131,6 +134,7 @@ fi
 
 if [ $GROUP_TEST ] ; then
 
+clear
 echo TESTING GROUP
 sleep 2
 
@@ -168,6 +172,27 @@ echo done
 
 fi
 
+
+if [ $PROCESSING_TEST ] ; then
+
+clear
+echo TESTING PROCESSING_NODE
+oscsend localhost 18032 /spatosc/core s clear
+sleep 2
+
+oscsend localhost 18032 /spatosc/core sss createSource pNode1 "process://sheefa"
+oscsend localhost 18032 /spatosc/core sss connect pNode1 ear
+oscsend localhost 18032 /spatosc/core/source/pNode1/event sffff setup 10 20 10 1    #cloneCount randAzi randElev randDist
+sleep 1
+oscsend localhost 18032 "/spatosc/core/connection/pNode1->ear/update" fffff -1.57 0 -12 0 22050  # azi ele  gainDB del lpf
+echo PAN LEFT
+sleep .5
+oscsend localhost 18032 /spatosc/core/source/pNode1/event ssf setProperty cloneCount 33    #set a value in the process
+echo SET PROCESS PROPERTY
+
+echo done
+
+fi
 
 
 
