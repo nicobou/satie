@@ -1,53 +1,90 @@
 s.makeGui;
 s.meter;
 
-Server.default.options.dump;
+
+
+w=Window.new("voicing", Rect(30, 30, 400, 140)).front;
+w.view.decorator=FlowLayout(w.view.bounds);
+w.view.decorator.gap=8@2;
+
+
+g = EZSlider(w, 380@20, "pitch ", ControlSpec(40, 110, \lin, 1, 60));
+g.action_({ |ez| (  ~globalSet.value(\note, [ ez.value, 1, 0.5 ] );  ~globalSet.value(\t_trig, 1);)});
+
+
+// h = EZSlider(w, 380@20, "amp", ControlSpec(0, 1, \lin, 0.01, 0.5));
+// h.action_({ |ez| (  ~globalSet.value(\amp, (ez.value)))});
+//
+
+
+i = EZSlider(w, 380@20, "pos", ControlSpec(0.0, 1, \lin, 0.01, 0.14));
+i.action_({ |ez| (  ~globalSet.value(\pos, (ez.value)))});
+
+
+j = EZSlider(w, 380@20, "c1", ControlSpec(0.05, 5, \lin, 0.01, 1));
+j.action_({ |ez| (  ~globalSet.value(\c1, (ez.value)))});
+
+
+k = EZSlider(w, 380@20, "c3", ControlSpec(0.05, 20, \lin, 0.01, 1));
+k.action_({ |ez| (  ~globalSet.value(\c3, (ez.value)))});
+
+l = EZSlider(w, 380@20, "fb", ControlSpec(0.0, 100, \lin, 0.1, 20));
+l.action_({ |ez| (  ~globalSet.value(\fb, (ez.value)))});
 
 
 
-~superNovaFlag = true;
 
 
 
-OSCdef(\createBasicRendererListener).clear.free;  // just in case newOSC will be re-evaluated.
-	~scbr.oscInterface.newOSC(\createBasicRendererListener, ~basicRendererCallback, "/a.renderer");
+// harp 1
+~globalSet.value(\c1, 0.4);
+~globalSet.value(\c3, 5);
+~globalSet.value(\fb, 0);
+
+// harp 2
+~globalSet.value(\c1, 0.38);
+~globalSet.value(\c3, 6.11);
+~globalSet.value(\fb, 0);
+
+// harp 3 (longer dur)
+~globalSet.value(\c1, 0.15);
+~globalSet.value(\c3, 4.51);
+~globalSet.value(\fb, 0);
+
+// harp 3 (feather)
+~globalSet.value(\c1, 0.15);
+~globalSet.value(\c3, 9.51);
+~globalSet.value(\fb, 0);
+
+
+~globalSet.value(\c1, 0.2);
+~globalSet.value(\c3, 6);
+
+~globalSet.value(\c1, 0.2);
+~globalSet.value(\c3, 3);
+
+~globalSet.value(\c1, 0.2);
+~globalSet.value(\c3, 3);
+
+
+// lantern zoner
+~globalSet.value(\c1, 0.11);
+~globalSet.value(\c3, 3);
+~globalSet.value(\fb, 100);
+
+// lantern zoner (shorter)
+~globalSet.value(\c1, 0.7);
+~globalSet.value(\c3, 3);
+~globalSet.value(\fb, 100);
 
 
 
-~basicRendererCallback = {
-	arg msg;
-	var command;
-	command = msg[1];
-	postf("~basicRendererCallback: command: %, msg: %, \n", command, msg);
 
-	switch (command,
-		'createSource',
-		{
-			if ( (msg.size < 3 ) ,
-				{"~basicRendererCallback: OSCrx createSource message missing values".warn;
-					postf("CREATESOURCE MESS LEN: %", msg.size);
 
-				},
-				// else
-				{
-					var sourceName = msg[2];
-					var uriName;
 
-					if (msg.size == 3,
-						{
-							uriName = "";
-						},
-						// else
-						{
-							uriName = msg[3];
-					});
 
-					~createSource.value(sourceName, uriName);
-				}
-			)
-		}
-	);
-};
+
+
 
 
 
@@ -226,65 +263,6 @@ t.stop;
 
 
 
-// harp 1
-~globalSet.value(\c1, 0.4);
-~globalSet.value(\c3, 5);
-~globalSet.value(\fb, 0);
-
-// harp 2
-~globalSet.value(\c1, 0.38);
-~globalSet.value(\c3, 6.11);
-~globalSet.value(\fb, 0);
-
-// harp 3 (longer dur)
-~globalSet.value(\c1, 0.15);
-~globalSet.value(\c3, 4.51);
-~globalSet.value(\fb, 0);
-
-// harp 3 (feather)
-~globalSet.value(\c1, 0.15);
-~globalSet.value(\c3, 9.51);
-~globalSet.value(\fb, 0);
-
-
-~globalSet.value(\c1, 0.2);
-~globalSet.value(\c3, 6);
-
-~globalSet.value(\c1, 0.2);
-~globalSet.value(\c3, 3);
-
-~globalSet.value(\c1, 0.2);
-~globalSet.value(\c3, 3);
-
-
-// lantern zoner
-~globalSet.value(\c1, 0.11);
-~globalSet.value(\c3, 3);
-~globalSet.value(\fb, 100);
-
-// lantern zoner (shorter)
-~globalSet.value(\c1, 0.7);
-~globalSet.value(\c3, 3);
-~globalSet.value(\fb, 100);
-
-
-
-
-
-v=Window.new("location", Rect(30, 30, 400, 100)).front;
-v.view.decorator=FlowLayout(v.view.bounds);
-v.view.decorator.gap=8@2;
-
-
-
-h = EZSlider(v, 380@20, "azi", ControlSpec(-180, 180, \lin, 0.1, 0));
-h.action_({ |ez| ( ~globalSet.value(\aziDeg, (ez.value)))});
-
-i = EZSlider(v, 380@20, "elev", ControlSpec(-90, 90, \lin, 0.1, 0));
-i.action_({ |ez| ( ~globalSet.value(\eleDeg, (ez.value)))});
-
-j = EZSlider(v, 380@20, "spread", ControlSpec(0, 100, \lin, 0.1, 5));
-j.action_({ |ez| ( ~globalSet.value(\spread, (ez.value)))});
 
 
 
@@ -293,34 +271,6 @@ j.action_({ |ez| ( ~globalSet.value(\spread, (ez.value)))});
 
 
 
-
-w=Window.new("voicing", Rect(30, 30, 400, 140)).front;
-w.view.decorator=FlowLayout(w.view.bounds);
-w.view.decorator.gap=8@2;
-
-
-g = EZSlider(w, 380@20, "pitch ", ControlSpec(40, 110, \lin, 1, 60));
-g.action_({ |ez| (  ~globalSet.value(\note, [ ez.value, 1, 0.5 ] );  ~globalSet.value(\t_trig, 1);)});
-
-
-// h = EZSlider(w, 380@20, "amp", ControlSpec(0, 1, \lin, 0.01, 0.5));
-// h.action_({ |ez| (  ~globalSet.value(\amp, (ez.value)))});
-//
-
-
-i = EZSlider(w, 380@20, "pos", ControlSpec(0.0, 1, \lin, 0.01, 0.14));
-i.action_({ |ez| (  ~globalSet.value(\pos, (ez.value)))});
-
-
-j = EZSlider(w, 380@20, "c1", ControlSpec(0.05, 5, \lin, 0.01, 1));
-j.action_({ |ez| (  ~globalSet.value(\c1, (ez.value)))});
-
-
-k = EZSlider(w, 380@20, "c3", ControlSpec(0.05, 20, \lin, 0.01, 1));
-k.action_({ |ez| (  ~globalSet.value(\c3, (ez.value)))});
-
-l = EZSlider(w, 380@20, "fb", ControlSpec(0.0, 100, \lin, 0.1, 20));
-l.action_({ |ez| (  ~globalSet.value(\fb, (ez.value)))});
 
 
 

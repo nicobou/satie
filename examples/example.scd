@@ -57,7 +57,18 @@ s.waitForBoot{
 	~scbr.makeSynthDef(\string_third_aux, \zkarpluck1, [\domeVBAP], [0], [~scbr.aux[2]]);
 	// spatilized reverb effect (input will be set at creation):
 	~scbr.makeSynthDef(\busreverb, \freeverb, [\stereoPanner], [0]);
-
+	// streaming a soundfile from disk
+	~playBuffers = (
+		// the first one will work only on linux
+		\alsaTest: Buffer.cueSoundFile(s, "/usr/share/sounds/alsa/Front_Center.wav", 0, 1),
+		\boo: Buffer.cueSoundFile(s, Platform.resourceDir +/+ "sounds/a11wlk01.wav", 0, 1)
+	);
+	// load sound files using arguments
+	~scbr.makeSynthDef(\snd1, \sndFile, [\stereoPanner], [0], [], [~playBuffers[\boo].bufnum]);
+	~scbr.makeSynthDef(\snd2, \sndFile, [\stereoPanner], [0], [], [~playBuffers[\alsaTest].bufnum]);
+	// load synths with arguments
+	~scbr.makeSynthDef(\pink400, \PinkSin, [\stereoPanner], [0], [], [400]);
+	~scbr.makeSynthDef(\pink800, \PinkSin, [\stereoPanner], [0], [], [800]);
 	// be sure the synthDef is compiled on the server
 	s.sync;
 
@@ -72,7 +83,15 @@ s.waitForBoot{
 ~scbr.makeInstance(\test1, \string);
 ~scbr.makeInstance(\test2, \string);
 ~scbr.makeInstance(\test3, \pinksin);
+~scbr.cleanInstance(\test3);
 
+
+~scbr.makeInstance(\f, \snd1);
+~scbr.makeInstance(\f2, \snd2);
+~scbr.makeInstance(\f3, \snd);
+~scbr.makeInstance(\f4, \snd);
+
+~scbr.cleanInstance(\f2);
 // change test3 source
 ~scbr.makeInstance(\test3, \testtone);
 
@@ -80,6 +99,10 @@ s.waitForBoot{
 ~defaultProx = ~scbr.satieGroups[\default];  // Satie Groups are actually ProxySpace
 // list internal instances from default group (internal instances are NodeProxy instances):
 ~defaultProx.existingProxies;
+
+~scbr.satieGroups[\default].[\test3].set(\gainDB, -10);
+
+~defaultProx.[\test1];
 
 // removing an instance
 ~scbr.cleanInstance(\test2);
@@ -121,7 +144,7 @@ s.waitForBoot{
 // making a reverb effect
 // this need a specific group since
 // effects need to be added to tail
-~effectProx = ~scbr.makeSatieGroup(\effect, \addToTail); all proxies (free and stop the moni
+~effectProx = ~scbr.makeSatieGroup(\effect, \addToTail);
 ~effectProx[\rev].set(\in, ~scbr.aux[2]);  // reading bus created by Satie
 ~effectProx[\rev].set(\mix, 1);  //wet only
 ~effectProx[\rev].set(\room, 0.2);
@@ -168,7 +191,6 @@ r.stop;
 	\aziDeg, rrand(-180,180),
 	\eleDeg, rrand(0,90));
 
-Group
 // change with gui
 w=Window.new("sheefa", Rect(30, 30, 400, 100)).front;
 w.view.decorator=FlowLayout(w.view.bounds);
@@ -217,4 +239,63 @@ r.stop;
 	\note, rrand(42, 72), rrand(1, 2), rrand(0.1, 0.9),
 	\aziDeg, rrand(-180,180),
 	\eleDeg, rrand(0,90));
+)
+
+// ****************** usage with OSC ************************
+(
+
+/* try with:
+   oscsend localhost 18032  /SATIE sss createSoundSource pink pinksin default
+   oscsend localhost 18032  /SATIE ss deleteSoundSource pink
+
+   for creation and deletion
+*/
+
+~createSoundSource = {| args |
+	var name = args[2].asSymbol;
+	var synth = args[3].asSymbol;
+	var proxy = args[4].asSymbol;
+	args.postln;
+	postf("creating source % using % and adding to group %\n", name, synth, proxy);
+	~scbr.makeInstance(name, synth, proxy);
+};
+
+~removeSoundSource = { |sourceName|
+	var name = sourceName;
+	postf("Removing and cleaning %\n", name);
+	~scbr.cleanInstance(name);
+};
+
+~coreCallback = { | msg |
+	var command = msg[1];
+	command.postln;
+	switch(command,
+		\createSoundSource,
+		{
+			var instanceName = msg[2];
+			postf("Creating a source: %\n", instanceName);
+			~scbr.oscInterface.createSourceOSC(instanceName, ~createSoundSource);
+		},
+		\deleteSoundSource,
+		{
+			var instanceName = msg[2];
+			postf("Removing OSC source: %\n", instanceName);
+			~scbr.oscInterface.removeSourceOSC(instanceName);
+			~removeSoundSource.value(instanceName);
+		}
+	)
+};
+~scbr.oscInterface.newOSC(\satieOSC, ~coreCallback);
+
+)
+
+// ********** dealing with sound files ********************
+
+(
+d = Dictionary();
+d.add(\bleh -> Buffer.cueSoundFile(s, Platform.resourceDir +/+ "sounds/a11wlk01.wav", 0, 1));
+d.add(\alsaTest -> Buffer.cueSoundFile(s, "/usr/share/sounds/alsa/Front_Center.wav", 0, 1));
+
+~scbr.makeInstance('f.bufnum', \snd);
+
 )
