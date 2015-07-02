@@ -18,7 +18,6 @@
 (~rootSrcPath ++ "/src/*.scd").pathMatch.do({arg item; item.loadPaths});
 
 ~num_aux_bus = 5;
-~oscSys = \satieOSC;
 // creating a sc-basic-renderer
 ~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus);
 // printing internal aux array with bus indexes
@@ -42,11 +41,11 @@
 // here a PinkSin source spatialized by
 //   - a stereo panner (starting channel 0)
 //   - a monoSpat (starting channel 2)
-~scbr.makeSynthDef(\fool, \PinkSin, [\stereoPanner, \monoSpat], [0, 2]);
+~scbr.makeSynthDef(\fool, \PinkSin, [\octoVBAP, \monoSpat], [0, 2]);
 
 //~scbr.makeSynthDef(\string, \zkarpluck1, [\stereoPanner, \monoSpat], [0, 2]);
 ~scbr.makeSynthDef(\string, \zkarpluck1, [\stereoPanner], [0]);
-~scbr.makeSynthDef(\pinksin, \PinkSin, [\stereoPanner], [0]);
+~scbr.makeSynthDef(\pinksin, \PinkSin, [\quadVBAP], [0]);
 // generate a synth and change its defaults
 ~scbr.makeSynthDef(\pink400, \PinkSin, [\stereoPanner], [0], [], [800]);
 
