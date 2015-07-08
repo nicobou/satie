@@ -15,7 +15,7 @@ Server.supernova;
 o = Server.local.options;
 o.numOutputBusChannels = 4;
 o.memSize = 2**20;
-o.blockSize = 2048;
+o.blockSize = 512;
 //s.reboot;
 s.makeGui;
 s.meter;
