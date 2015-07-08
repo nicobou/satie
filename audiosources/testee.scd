@@ -29,8 +29,8 @@ var tri = Array.with(
 		1-LFTri.ar(100),
 		1-LFTri.ar(55.1),
 	);
-	var triScale = 0.05;
+	var triScale = 0.1;
 	var triMix = tri[0] * tri[1] * tri[2] * tri[3] * triScale;
-	var verb = FreeVerb.ar(triMix, 0.7, 1)/4;
+	var verb = FreeVerb.ar(triMix, 0.7, 1, 0.5, Line.kr(0, 0.75, 15));
 	verb;
 };
