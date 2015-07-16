@@ -187,8 +187,21 @@ sleep 1
 oscsend localhost 18032 "/spatosc/core/connection/pNode1->ear/update" fffff -1.57 0 -12 0 22050  # azi ele  gainDB del lpf
 echo PAN LEFT
 sleep .5
-oscsend localhost 18032 /spatosc/core/source/pNode1/event ssf setProperty cloneCount 33    #set a value in the process
+oscsend localhost 18032 "/spatosc/core/connection/pNode1->ear/spread" f 10  # spread value
+sleep .5
+oscsend localhost 18032 /spatosc/core/source/pNode1/event ssf setParam cloneCount 33    #set a value in the process
 echo SET PROCESS PROPERTY
+sleep .5
+oscsend localhost 18032 /spatosc/core/source/pNode1/prop sf hpfq 4000
+sleep .5
+echo SET SYNTH NAME
+oscsend localhost 18032 /spatosc/core/source/pNode1/event sss setParam synthName zkarpluck1
+sleep .5
+echo TRIGGER
+oscsend localhost 18032 /spatosc/core/source/pNode1/event s trigger
+
+
+
 
 echo done
 

@@ -52,6 +52,8 @@ s.waitForBoot{
 	// set up a process class
 
 	~sheefa = Environment[
+		'nodeName' -> \nil, // required field
+		'synthName' -> \default,
 		'randAzi' -> 20,
 		'randElev' ->
 		'randDist' -> 1,
@@ -61,16 +63,18 @@ s.waitForBoot{
 
 	// generic stuff
 	~sheefa.know=true;
-
 	~sheefa.property =  {| self, property, value |
 		self.put(property.asSymbol, value);
 	};
 
 
+	// required
 	~registerProcess.value(\sheefa, ~sheefa);
 
 
 	// project specific stuff
+
+	// called when node is created
 	~sheefa.setup = { | self, args |
 
 		var cloneCount = args[0];
@@ -89,11 +93,32 @@ s.waitForBoot{
 	};
 
 
+	// if defined, will be called when node's "update" message is received
+	// otherwise the "update" message will be applided to the node's group
+	~sheefa.updateConnection = { | self, aziDeg, eleDeg, gainDB, delayMs, lpHz |
 
-	~sheefa.trigger = { |self, groupName |
+		'~sheefa.updateConnection'.postln;
+		postf("sheefa.updateConnection: called for node: % \n", self.nodeName);
 
-		postf("~sheefa.trigger: update group: % \n", groupName);
 	};
+
+
+	// if defined, will be called when node's "spread" message is received
+	// otherwise the "spread" message will be applided to the node's group
+	~sheefa.spread = { | self, spreadVal |
+
+		'~sheefa.spread'.postln;
+
+	};
+
+	// custom method
+	~sheefa.trigger = { | self |
+		var thisProxy = ~allSourceNodes[self.nodeName.asSymbol].at(\proxy);
+		// create Synth then trigger
+		thisProxy.set(\t_trigger, 1);
+		postf("~sheefa.trigger: triggering synths in node: % group \n",self.nodeName);
+	};
+
 
 
 
