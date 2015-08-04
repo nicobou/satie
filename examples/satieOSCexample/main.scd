@@ -13,7 +13,7 @@
 
 Server.supernova;
 o = Server.local.options;
-o.numOutputBusChannels = 4;
+o.numOutputBusChannels = 8;
 o.memSize = 2**20;
 o.blockSize = 512;
 //s.reboot;

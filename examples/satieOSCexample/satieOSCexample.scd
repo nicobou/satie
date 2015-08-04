@@ -58,7 +58,7 @@
 ~scbr.makeSynthDef(\busreverb, \freeverb, [\stereoPanner], [0]);
 // mono input
 ~scbr.makeSynthDef(\monoIn, \MonoIn, [\stereoPanner], [0]);
-~scbr.makeSynthDef(\tastee, \testee, [\stereoPanner], [0]);
+~scbr.makeSynthDef(\tastee, \testee, [\octoVBAP], [0]);
 // streaming a soundfile from disk
 // - load soundfiles
 ~playBuffers = Dictionary();
