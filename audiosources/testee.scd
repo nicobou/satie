@@ -10,24 +10,27 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-(
-Server.supernova;
-o = Server.local.options;
-o.numOutputBusChannels = 8;
-o.memSize = 2**20;
-o.blockSize = 512;
-//s.reboot;
-s.makeGui;
-s.meter;
-s.plotTree;
 
+~randFreq = { |baseFreq = 50, octave = 1, t|
+	var ratio, ret;
+	ratio = t.ratios.choose;
+	postf("randFreq excuting ratio %\n", ratio );
+	ret = baseFreq * octave * ratio;
+	postf("returning frequency: %\n", ret);
+	ret;
 
-~files = #["satieOSCexample.scd", "oscdefinitions.scd"];
+};
 
-s.waitForBoot {
-	var dir = thisProcess.nowExecutingPath.dirname;
-	~files.do { |f| f.loadRelative ; s.sync;};
-	s.sync;
-	"All files loaded".postln;
-}; // waitForBoot
-)
+~name = \testee;
+~function = {
+var tri = Array.with(
+		1-LFTri.ar((SinOsc.kr(0.001)+1)*1000),
+		1-LFTri.ar((SinOsc.kr(0.002)+1)*750),
+		1-LFTri.ar(100),
+		1-LFTri.ar(55.1),
+	);
+	var triScale = 0.5;
+	var triMix = tri[0] * tri[1] * tri[2] * tri[3] * triScale;
+	var verb = LeakDC.ar(FreeVerb.ar(triMix, 0.7, 1, 0.5, Line.kr(0, 0.75, 15)));
+	verb;
+};

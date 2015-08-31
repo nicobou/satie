@@ -22,10 +22,16 @@
 			~createGroup.value(sourceGroup);
 		}
 	);
-	postf("creating source % using % and adding to group %\n", name, synth, sourceGroup);
-	~scbr.makeInstance(name, synth, sourceGroup);
-	~osc.createSourceOSC(name, ~sourceOSC, group);
+	postf("creating source % using % and adding to group %\n", name, syn, sourceGroup);
+	~scbr.makeInstance(name, syn, sourceGroup);
+	~osc.createSourceOSC(name, ~coreCallback, group);
 };
+
+/*~createFX = { |instanceName, effect, bus = 0, fxGroup = \fx |
+	postf("creating an FX % named % in group % on bus %\n", effect, instanceName, fxGroup, bus);
+	~scbr.makeInstance(instanceName, effect, fxGroup);
+	~scbr.satieGroups[instanceName].set(\in, ~scbr.aux[bus]);
+};*/
 
 ~createGroup = { | groupName, addAction = \addToHead |
 	if (~groupExists.value(groupName),
@@ -35,6 +41,7 @@
 		{
 			postf("Group  % does not exist, creating one\n", groupName);
 			~scbr.makeSatieGroup(groupName, addAction);
+			~osc.makeGroupOSC(groupName, ~coreCallback);
 		}
 	);
 };
@@ -48,13 +55,19 @@
 	ret;
 };
 
-~removeSoundSource = { |sourceName|
+~removeSoundSource = { |sourceName, group = \default |
 	var name = sourceName;
+	var sourceGroup = group;
 	postf("Removing and cleaning %\n", name);
-	~scbr.cleanInstance(name);
+	~scbr.cleanInstance(name, sourceGroup);
 };
 
-~setInstance = { | sourceName, property, value, group = \default|
+~removeGroup = { | group |
+	postf("Removing group %\n", group);
+	~scbr.killSatieGroup(group);
+};
+
+/*~setInstance = { | sourceName, property, value, group = \default|
 	// set parameters
 	var name = sourceName.asSymbol;
 	var param = property.asSymbol;
@@ -68,10 +81,10 @@
 		},
 		{ postf("the group % does not exist so not doing anything", sourceGroup); }
 	);
-};
+};*/
 
 // kludge!
-~handleBufProperty = { |property, value|
+/*~handleBufProperty = { |property, value|
 	// we need to handle the special case of passing a bufnum to sndFile.
 	// sndFile expects a bufnum with its context, either a Buffer object or, in our case, a dictionary entry
 	// so we construct the proper object here to allow the user simply call the dictionary entry.
@@ -84,9 +97,9 @@
 		{ val = value; }
 	);
 	val;
-};
+};*/
 
-~setGroup = { | group, property, value|
+/*~setGroup = { | group, property, value|
 	// set parameters
 	var param = property.asSymbol;
 	var val = ~handleBufProperty.value(property, value);
@@ -99,9 +112,9 @@
 		},
 		{ postf("the group % does not exist so not doing anything", sourceGroup); }
 	);
-};
+};*/
 
-~sourceOSC = { | args |
+/*~sourceOSC = { | args |
 	var group, name, props, cmd, size;
 	args.postln;
 	size = args.size;
@@ -111,7 +124,7 @@
 	cmd = args[1];
 	postf("properties to affect: %\n", props);
 	switch(cmd,
-		\setInstance,
+		\set,
 		{
 			props.pairsDo({ | prop, val |
 				//~prox.existingProxies;
@@ -130,59 +143,125 @@
 			});
 		}
 	);
-};
+};*/
 
 // handle any OSC message
-// eg. /SATIE/ createSoundSource pluck string
+// eg. /SATIE create name - to create a group
+//     /SATIE/default create name - to create an instance of a synth or effect
 ~coreCallback = { | msg |
-	var command, instanceName, synth, group;
+	var url, dest, obj, command, name ;
+	url = msg[0].asString.split;
+	url.removeAt(0); // remove thefirst empty element
+	dest = ~getAddressLevel.value(url);
+	name = msg[2].asSymbol;
 	command = msg[1];
 	postf("coreCallback argument: %\n", msg);
-
+	postf("coreCallback url: %\n", url);
+	postf("command is %\n", command);
 	switch(command,
-		\createSoundSource,
+		\create,
 		{
-			instanceName = msg[2];
-			synth = msg[3];
-			postf("creating: %, %, based on message %\n", instanceName, synth, msg);
-			postf("there are % arguments \n", msg.size);
-			if ((msg.size < 4) ,
-				{
-					postf("wrong number of arguments %\n", msg);
+			switch(dest,
+				\system, {
+					"***************** received create".postln;
+					~createGroup.value(name);
 				},
-				{
-					postf("coreCallback creates %\n", msg);
-					case
-					{ msg.size > 4 } {
-						group = msg[4];
-					}
-					{ msg.size == 4 } {
-						group = \default;
-					};
-					postf("-------> % % % \n", instanceName, synth, group);
-					~createSoundSource.value(instanceName, synth, group);
+				\group,  {
+					var group, synth;
+					group = url[1].asSymbol;
+					synth = msg[3].asSymbol;
+					postf("create synth named % using % in group %\n", name, synth, group);
+					~createSoundSource.value(name, synth, group);
 				}
-			)
-		},
-		\deleteSoundSource,
-		{
-			var instanceName = msg[2];
-			postf("Removing sound source: ---> %\n", instanceName);
-			~osc.removeSourceOSC(instanceName);
-			~removeSoundSource.value(instanceName);
-		},
-		\createGroup,
-		{
-			var groupName, action;
-			groupName = msg[2];
-			if(msg[3] != nil,
-				{ action = msg[3] },
-				{ action = \addToHead }
 			);
-			if(~groupExists.value(groupName) == false,
-				{ 	~createGroup.value(groupName, action) }
+		},
+		\createFX,
+		{
+			switch(dest,
+				\system, {
+					"***************** received createFX".postln;
+					~createGroup.value(name, \addToTail);
+				}
 			);
+		},
+		\delete,
+		{
+			var dest = ~getAddressLevel.value(url);
+			switch(dest,
+				\group, { |group|
+					group = url[1].asSymbol;
+					~removeGroup.value(group);
+
+				},
+				\instance, { | synthName, group |
+					synthName = url[2].asSymbol;
+					group = url[1].asSymbol;
+					~removeSoundSource.value(synthName, group);
+				}
+			);
+		},
+		\set,
+		{
+			var dest, group, props;
+			dest = ~getAddressLevel.value(url);
+			group = url[1].asSymbol;
+			props = msg.copyRange(2, msg.size - 1);
+			switch(dest,
+				\group,
+				{
+					props.pairsDo({ | prop, val |
+						postf("** group: set %'s % to %\n", group, prop, val);
+						~scbr.satieGroups[group].group.set(prop, val);
+					});
+				},
+				\instance,
+				{
+					var name;
+					name = url[2].asSymbol;
+					props.pairsDo({ | prop, val |
+						postf("** instance: set %'s % to %\n", name, prop, val);
+						if(prop == \in, // effect's property 'in' needs a special treatment
+							{
+								postf("----------FX--------- setting property % on effect to %\n", prop, val);
+								~scbr.satieGroups[name].set(prop, ~scbr.aux[val.asInt]);
+							},
+							{
+								postf("-=-=-=-=-=-=- got instance property %\n", prop);
+								~scbr.satieGroups[group].[name].set(prop, val);
+							}
+						);
+					});
+				}
+			);
+		},
+		\clear,
+		{
+			// rmove all satie groups
+			~scbr.satieGroups.keysDo {|key | ~scbr.killSatieGroup(key)};
+			// free all OSC
+			OSCdef.freeAll;
+			// re-create satie system level OSC
+			~osc.newOSC(\satieOSC, ~coreCallback, "/SATIE");
 		}
+	);
+};
+
+~getAddressLevel = { | url = #[] |
+	url.postln;
+	switch(url.size,
+		1, {
+			if(url[0] == "SATIE",
+				\system,
+				{
+					\nope;
+					postf("Wrong system address, expected /SATIE, got %\n", url[0]);
+					nil;
+				}
+			);
+		},
+		2, { \group },
+		3, { \instance },
+		{ postf("Wrong address: %\n", url.join); }
 	);
 };
 
