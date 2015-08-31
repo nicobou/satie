@@ -10,7 +10,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+(
 Server.supernova;
 o = Server.local.options;
 o.numOutputBusChannels = 8;
@@ -19,8 +19,9 @@ o.blockSize = 512;
 //s.reboot;
 s.makeGui;
 s.meter;
+s.plotTree;
 
-(
+
 ~files = #["satieOSCexample.scd", "oscdefinitions.scd"];
 
 s.waitForBoot {
