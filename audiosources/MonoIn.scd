@@ -9,6 +9,7 @@
 
 ~name = \MonoIn;
 ~function = {
-	|bus = 0|
-	SoundIn.ar(bus, 1);
+	|t_trig = 0, bus = 0|
+	var env = Env([0,1], [1, 1]);
+	SoundIn.ar(bus, EnvGen.kr(env, t_trig));
 }
