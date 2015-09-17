@@ -222,11 +222,11 @@
 						postf("** instance: set %'s % to %\n", name, prop, val);
 						if(prop == \in, // effect's property 'in' needs a special treatment
 							{
-								postf("----------FX--------- setting property % on effect to %\n", prop, val);
+								// postf("----------FX--------- setting property % on effect to %\n", prop, val);
 								~scbr.satieGroups[name].set(prop, ~scbr.aux[val.asInt]);
 							},
 							{
-								postf("-=-=-=-=-=-=- got instance property %\n", prop);
+								// postf("-=-=-=-=-=-=- got instance property %\n", prop);
 								~scbr.satieGroups[group].[name].set(prop, val);
 							}
 						);
