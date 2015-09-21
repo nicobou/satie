@@ -13,18 +13,13 @@
 
 
 
-s.makeGui;
-
-
-
-if (~plotTree == nil,  { ~plotTree=s.plotTree;});
 
 /*
 s.makeGui;
 s.meter
 
 s.dump
-s.reboot;
+s.reboot;
 
 */
 
@@ -34,10 +29,10 @@ s.dump
 ~outAudioDev = nil;
 ~superNovaFlag = true;
 
-~listeningFormat = \stereoListener;
+//~listeningFormat = \stereoListener;
 
 //~listeningFormat = \octoVBAP;       // octo
-//~listeningFormat = \domeVBAP;       // for sato
+~listeningFormat = \domeVBAP;       // for sato
 //~listeningFormat = \labodomeVBAP;      // for labodome
 
 //~outAudioDev = "Soundflower (64ch)";   //  for multi-channel testing without hardware on OSX
@@ -84,10 +79,17 @@ if ( ~outAudioDev != nil ,
 });
 
 
+// open up GUIs for monitoring
+if (~plotTree == nil,  { ~plotTree=s.plotTree;});
+if (~makeGui == nil,  { ~plotTree=s.makeGui;});
+if (~meter == nil,  { ~plotTree=s.meter;});
+
+
+
 // LOAD FILES FOR PROJECT
 
 (
-~files = #["spatOSCexample.scd", "spatOSCrx.scd"];
+~files = #["spatOSCexample.scd", "spatOSCrx.scd","spatOSCrx.scd"];
 
 s.waitForBoot {
 	var dir = thisProcess.nowExecutingPath.dirname;
