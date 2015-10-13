@@ -17,7 +17,7 @@ SynthDef(\speakerMapTest, { |out, gate=1|
 
 ~panDur=0.4;
 
-~channelCount=2;
+~channelCount=31;
 
 ~task= Task({
     loop {
@@ -30,6 +30,11 @@ SynthDef(\speakerMapTest, { |out, gate=1|
         });
     }
 });
+
+
+
+
+
 
 
 ~dacTestWindow=Window.new("dac testing", Rect(30, 30, 400, 90)).front;
@@ -57,7 +62,7 @@ SynthDef(\speakerMapTest, { |out, gate=1|
 
 };
 
-~chanCountSlider = EZSlider(~dacTestWindow, 380@20, "channels", ControlSpec(0, 31, \lin, 1, 2));
+~chanCountSlider = EZSlider(~dacTestWindow, 380@20, "channels", ControlSpec(0, 31, \lin, 1, ~channelCount));
 ~chanCountSlider.action_({ |ez| (  ~channelCount = ez.value;   )});
 
 ~panDurSlider = EZSlider(~dacTestWindow, 380@20, "panDuration", ControlSpec(0.05, 2, \lin, 0.02, 0.4));
