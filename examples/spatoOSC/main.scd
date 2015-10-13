@@ -89,7 +89,7 @@ if (~meter == nil,  { ~plotTree=s.meter;});
 // LOAD FILES FOR PROJECT
 
 (
-~files = #["spatOSCexample.scd", "spatOSCrx.scd","spatOSCrx.scd"];
+~files = #["../../utils/dacTest.scd", "spatOSCexample.scd", "spatOSCrx.scd","spatOSCrx.scd"];
 
 s.waitForBoot {
 	var dir = thisProcess.nowExecutingPath.dirname;
