@@ -12,7 +12,11 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
+// NOTE:  this file optionally uses the BASH environment variable SATIE_LISTENING_FORMAT
+// which is set to:
+//   export SATIE_LISTENING_FORMAT="sato"
+// or
+// export SATIE_LISTENING_FORMAT="labodome"
 
 /*
 s.makeGui;
@@ -29,10 +33,13 @@ s.reboot;
 ~outAudioDev = nil;
 ~superNovaFlag = true;
 
-//~listeningFormat = \stereoListener;
+~defaultListeningFormat = \stereoListener;
+
+~listeningFormat = ~defaultListeningFormat;    // will remain unless overwritten below
+
 
 //~listeningFormat = \octoVBAP;       // octo
-~listeningFormat = \domeVBAP;       // for sato
+//~listeningFormat = \domeVBAP;       // for sato
 //~listeningFormat = \labodomeVBAP;      // for labodome
 
 //~outAudioDev = "Soundflower (64ch)";   //  for multi-channel testing without hardware on OSX
@@ -48,6 +55,40 @@ o = Server.local.options;   // default set up options
 o.memSize = 2**20;        // probably should just leave this the same for everyting
 o.device = nil;  // default
 o.blockSize = 2048;
+
+
+
+// check to see if the BASH environment variable is set to either "sato" or "labodome"
+(
+//p = Pipe.new("ls -l", "r");            // list directory contents in long format
+p = Pipe.new("echo $SATIE_LISTENING_FORMAT", "r");            // list directory contents in long format
+
+l = p.getLine;                    // get the first line
+
+if ( l != nil,
+	{
+
+		// l.postln;
+		switch (l,
+			"sato",
+			{
+				"SETTING LISTENING FORMAT TO: domeVBAP".postln;
+				~listeningFormat = \domeVBAP;       // for sato
+
+			},
+			"labodome",
+			{
+				"SETTING LISTENING FORMAT TO: labodomeVBAP".postln;
+				~listeningFormat = \labodomeVBAP;      // for labodome
+
+			}
+		);
+});
+
+p.close;                    // close the pipe to avoid that nasty buildup
+);
+
+
 
 // o.device = "MADIface USB (23635751)";     // set for dome or labodome
 
@@ -73,10 +114,27 @@ if ( ~listeningFormat == \octoVBAP,
 });
 
 
+
+
+if ( ~listeningFormat == \stereoListener,
+	{
+		o.numOutputBusChannels = 2;
+		~outAudioDev = "Built-in Output";
+		// o.dump;
+});
+
+
 if ( ~outAudioDev != nil ,
 	{
 		o.device = ~outAudioDev;
 });
+
+
+postf("AUDIO CONFIGURATION: \n");
+postf("\t LISTENING FORMAT:  %  \n", ~listeningFormat);
+postf("\t OUTPUT DEVICE:  %\n", o.outDevice);
+postf("\t OUTPUT CHANNELS:  %\n", o.numOutputBusChannels);
+//o.dump
 
 
 // open up GUIs for monitoring

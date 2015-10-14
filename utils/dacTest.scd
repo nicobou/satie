@@ -6,6 +6,16 @@
 //		~dacTestSyn.release;
 
 
+~channelCount= Server.local.options.numOutputBusChannels;
+
+if  ( ~channelCount == 32,
+	{
+		~channelCount= ~channelCount-1;
+
+});
+
+
+
 
 SynthDef(\speakerMapTest, { |out, gate=1|
     // doneAction: 2 frees the synth when EnvGen is done
@@ -17,7 +27,8 @@ SynthDef(\speakerMapTest, { |out, gate=1|
 
 ~panDur=0.4;
 
-~channelCount=31;
+
+
 
 ~task= Task({
     loop {
