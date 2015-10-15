@@ -589,7 +589,16 @@ s.waitForBoot{
 		if (groupName == "", { groupName = \default; });   // make sure group name is ok
 
 
-		if (~isFXuri.value(uriName), { groupName = \effect };);  // if URI is a fx plugin,  force group to effects group
+		if (~isFXuri.value(uriName), { groupName = \effect };);  // BROKEN:  if URI is a fx plugin,  force group to effects group
+
+
+		// HACK UNTIL GROUPS IS IMPMENETED IN UNITY SCRIPT
+		if (uriName.asSymbol ==  "plugin://busreverb".asSymbol  ,
+			{
+				postf("~createSource:  HACK:  forcing  EFFECTS group for source: %", sourceName.asSymbol);
+				groupName = \effect
+
+		};);  // if URI is a fx plugin,  force group to effects group
 
 
 		// check to see if group's proxy exists (even if the corresponding groupNode has not yet been instntiated),  if  not, create it
@@ -608,11 +617,12 @@ s.waitForBoot{
 		// assign proxy name
 		if ( groupName == \effect,
 			{
-
-				if (~fxInputBus == nil,
+				//postf("~createSource:  CREATING EFFECTS SOURCE for:%", sourceName.asSymbol);
+				if (~fxInputBus == nil,    // this should be defined previously in the project's .scd
 					{
 						postf("~createSource:  ~fxInputBus not defined");
-						~fxInputBus = 0; };);   // this should be defined previously in the project's .scd
+						~fxInputBus = 0;
+				};);
 
 				~allSourceNodes[sourceName.asSymbol].put(\proxySymb, \effect);
 				~effectProx[sourceName.asSymbol].set(\in, ~scbr.aux[0]);  //  HACK to set up rvb node
