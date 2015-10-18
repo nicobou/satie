@@ -147,7 +147,8 @@ if (~meter == nil,  { ~plotTree=s.meter;});
 // LOAD FILES FOR PROJECT
 
 (
-~files = #["../../utils/dacTest.scd", "spatOSCexample.scd", "spatOSCrx.scd","spatOSCrx.scd"];
+// note: files that define OSCcallbacks seem to need to be evaluated twice
+~files = #["../../utils/dacTest.scd", "spatOSCexample.scd", "spatOSCrx.scd","spatOSCrx.scd", "spatOSCexamplePresets.scd", "spatOSCexamplePresets.scd"];
 
 s.waitForBoot {
 	var dir = thisProcess.nowExecutingPath.dirname;

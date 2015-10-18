@@ -2,7 +2,7 @@
 
 if (w != nil, {w.close});
 
-w=Window.new("spatOSCexamplePreset voicing", Rect(30, 30, 400, 140)).front;
+w=Window.new("spatOSCexamplePreset voicing", Rect(500, 30, 400, 140)).front;
 w.view.decorator=FlowLayout(w.view.bounds);
 w.view.decorator.gap=8@2;
 
@@ -47,12 +47,16 @@ OSCdef(\presetCallback, ~presetCallback, "/a.renderer/preset", recvPort: 18032);
 	if (presetNo < 0, {presetNo=0});
 	if (presetNo > 6, {presetNo=6});
 
-				postf("~setPreset no: %\n", presetNo);
 
-	switch (presetNo,
+
+	postf("~setPreset no: %\n", presetNo.asInt);
+	switch (presetNo.asInt,
 		0,
 		{
-			// harp 1
+
+						postf("~setPreset no: %\n", presetNo);
+
+			// harp 0
 			~globalSet.value(\c1, 0.4);
 			~globalSet.value(\c3, 5);
 			~globalSet.value(\fb, 0);
@@ -60,7 +64,7 @@ OSCdef(\presetCallback, ~presetCallback, "/a.renderer/preset", recvPort: 18032);
 		},
 		1,
 		{
-			// harp 2
+			// harp 1
 			~globalSet.value(\c1, 0.38);
 			~globalSet.value(\c3, 6.11);
 			~globalSet.value(\fb, 0);
@@ -68,7 +72,7 @@ OSCdef(\presetCallback, ~presetCallback, "/a.renderer/preset", recvPort: 18032);
 		},
 		2,
 		{
-			// harp 3 (longer dur)
+			// harp 2 (longer dur)
 			~globalSet.value(\c1, 0.15);
 			~globalSet.value(\c3, 4.51);
 			~globalSet.value(\fb, 0);
@@ -76,7 +80,7 @@ OSCdef(\presetCallback, ~presetCallback, "/a.renderer/preset", recvPort: 18032);
 		},
 		3,
 		{
-			// harp 4 (feather)
+			// harp 3 (feather)
 			~globalSet.value(\c1, 0.15);
 			~globalSet.value(\c3, 9.51);
 			~globalSet.value(\fb, 0);
@@ -113,7 +117,8 @@ OSCdef(\presetCallback, ~presetCallback, "/a.renderer/preset", recvPort: 18032);
 ~presetCallback = {
 	arg msg;
 	var presetNo = msg[1];
-	// postf("~basicRendererCallback: command: %, msg: %, \n", presetNo, msg);
+
+	postf("~basicRendererCallback: command: %, msg: %, \n", presetNo, msg);
 
 	if (msg.size < 2,
 		{
