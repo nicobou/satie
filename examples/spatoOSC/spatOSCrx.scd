@@ -18,6 +18,8 @@ OSC RX message specification is based on the SPATOSC specification  (see:   http
 
 //~allSourceNodes.size;
 
+// 				// DEBUG
+//~allSourceNodes.at( "ball_3:spatOSCsource_5".asSymbol).at(\outDB);
 
 (
 
@@ -75,6 +77,10 @@ s.waitForBoot{
 	};
 
 
+
+	~outputDB = 0;    // current state of the supercollider's output
+	~outputTrimDB = 0;
+
 	~basicRendererCallback = {
 		arg msg;
 		var command = msg[1];
@@ -89,38 +95,59 @@ s.waitForBoot{
 			{
 
 				switch (command,
-					'setOutputDB',
+					'setOutputTrimDB',
 					{
-						//postf("~basicRendererCallback setVolume: %\n", msg[2]);
-						if ( (msg.size < 3 ) ,
-							{"~basicRendererCallback: setVolume missing value".warn;
-								// postf("CREATESOURCE MESS LEN: %", msg.size);
-
-							},
+							if ( (msg.size < 3 ) ,
+							{"~basicRendererCallback: setOutputTrimDB missing value".warn;},
 							// else
 							{
-								~volume.volume = msg[2];
+								~outputTrimDB = msg[2];
+								~volume.volume = ~outputTrimDB + ~outputDB;
 							}
 						)
 					},
-					'setDIM',   // this is really setMute; a proper setMute message and setDIM responder should be implemented.
+					'setOutputDB',
 					{
-						//postf("~basicRendererCallback setMute: %\n", msg[2]);
-						if ( (msg.size < 3 ) ,
-							{"~basicRendererCallback: setMute missing value".warn;
+							if ( (msg.size < 3 ) ,
+							{"~basicRendererCallback: setOutputDB missing value".warn;},
+							// else
+							{
+								~outputDB = msg[2];
+								~volume.volume = ~outputTrimDB + ~outputDB;
+							}
+						)
+					},
+					'setOutputDIM',
+					{
+							if ( (msg.size < 3 ) ,
+							{"~basicRendererCallback: setOutputMute missing value".warn;
 								// postf("CREATESOURCE MESS LEN: %", msg.size);
 
 							},
 							// else
 							{
 								if (msg [2] > 0,
-									{~volume.mute;},
+									 {  ~volume.volume = -30;  },
 									// else
-									{~volume.unmute;});
+									{  ~volume.volume =  ~outputDB + ~outputTrimDB;   });
 							}
 						)
+					},
+					'setOutputMute',
+					{
+						//postf("~basicRendererCallback setMute: %\n", msg[2]);
+						if ( (msg.size < 3 ) ,
+							{"~basicRendererCallback: setOutputDIM missing value".warn;  },
+							// else
+							{
+								if (msg [2] > 0,
+									{~volume.mute;},
+									// else
+									{~volume.unmute;} );  // full muting implmentation
+							}
+						);
 					}
-				);
+				)
 		});
 	};
 
@@ -206,12 +233,16 @@ s.waitForBoot{
 	};
 
 
+
+
+
 	// /spatosc/core/connection/source->listener/update azi elev gainDB delayMS  lpHZ
 	// /spatosc/core/connection/source->listener/spread  exp   // exponent for incidence effect
 	~connectionCallback = { | args |
 		var nodeName, listenerName, connectionName, type, temp, charIndex;
 		var aziDeg, eleDeg, gainDB, delayMs, lpHz, spread;
 		var thisProxy;
+		var index;
 
 		//args.postln;
 		connectionName = args[0].asString.split[4].asSymbol;   // this is terrible.  The spatOSC message format should be improved here
@@ -236,6 +267,16 @@ s.waitForBoot{
 						gainDB = args[3];
 						delayMs = args[4];
 						lpHz = args[5];
+
+						//DEBUG
+						//~allSourceNodes[nodeName.asSymbol].put(\outDB, gainDB);
+
+
+
+				/*		z = (z+1).mod(20);
+						if ( (z == 0), {postf("\n")});
+						postf("  %  " ++ gainDB.trunc );*/
+
 
 						thisProxy.set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB, \delayMs, delayMs, \lpHz, lpHz);
 
@@ -299,6 +340,7 @@ s.waitForBoot{
 						gainDB = args[3];
 						delayMs = args[4];
 						lpHz = args[5];
+
 
 						if (myProcess[\updateConnection] == nil,
 							{
@@ -574,6 +616,7 @@ s.waitForBoot{
 
 				~allSourceNodes[sourceName.asSymbol].put(\proxySymb, groupName.asSymbol);
 
+
 				~setPlugin.value(sourceName.asSymbol, "");  // sets dummy plugin as placeholder
 
 				~oscInterface.sourceOSC(sourceName.asSymbol, ~sourceProcessCallback);   // create OSC callback
@@ -612,6 +655,10 @@ s.waitForBoot{
 		postf("~createSourceNode: %:  uri: %  group: %\n", sourceName, uriName, groupName);
 		~allSourceNodes[sourceName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
 		~allSourceNodes[sourceName.asSymbol].put(\plugin, \nil);
+
+		// DEBUG
+		//~allSourceNodes[sourceName.asSymbol].put(\outDB, 0);
+
 
 
 		// assign proxy name
@@ -854,16 +901,26 @@ s.waitForBoot{
 		var valueCount = args.size;
 		var thisProxy = ~allSourceNodes[nodeName.asSymbol].at(\proxy);
 
-		//postln("~setEvent: node:" ++nodeName ++" event name:"++eventName++"  arg(s): "++ args );
+		// DEBUG
+		//var db = ~allSourceNodes.at( nodeName.asSymbol).at(\outDB);
+
+
 
 		if ( (valueCount > 1) ,    // pass vector
 			{
+				// DEBUG
+				//postln("~setEvent: " ++ nodeName.asSymbol ++ "    args: " ++ args[0]  ++ "     " ++ (args[1]*1000).trunc++ "    " ++ (args[2]*100).trunc  );
+				//if( args[2] < 0.07, {postln("~setEvent: " ++ nodeName.asSymbol ++ "   INCIDENCE  " ++ args[2]  )});
+
 				thisProxy.set(eventName.asSymbol, args);
 			},
 			// else
 			{
 				if ( (valueCount == 1) ,    // pass value
 					{
+					// DEBUG
+					//postln("~setEvent: " ++ nodeName.asSymbol ++ "        BANG   db: "++db.trunc++ "\n");
+
 						thisProxy.set(eventName.asSymbol, args[0]);
 					},
 					// else  no args.. just pass 1

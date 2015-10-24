@@ -41,18 +41,27 @@ fB	 ??  Inharmonicity factor.
 	var env,inp,son;
 	var freq = note[0].midicps;
 	var amp = note[1];
+	var incidence = note[2].clip(0,1);
 	var pos = note[2] * 0.5; // unitVal * positionRange
 	var hfqLoss= c3 + (1-amp)*c3*2;  // add more dampening when amplitude gets low
 	var idecay = c1 +  (1-amp)*c1;  //  reduce decay when amplitude gets low
+	var lpassFq = 100 + (incidence**(0.7) * 21900) ;  // used to cut highs when incidence is low
+
+
 
 
 	//SendTrig.kr(Impulse.kr(1), 0, amp);
 	env = Env.perc(0.005,0.01,1,0);
-    inp = amp * LFClipNoise.ar(2000) * EnvGen.ar(env,t_trig);
+	// the filter blows up for lower Q values (like 1),  some experimenting with smoothing the lpassFq is still needed
+	inp =   BLowPass.ar(      (amp * LFClipNoise.ar(2000) * EnvGen.ar(env,t_trig))     , Lag.kr(lpassFq, 0.02) , 5) ;
+
+
 
 	// note:  "gate" arg fixed to constant of 1, to keep plugin alive, "relase" arg not used:
     son = DWGPluckedStiff.ar(freq, 10, 1 ,pos,idecay,hfqLoss,inp, 1 , fb);
 	// Out.ar(100, son);
+
+	// suggestion:  add amplitude-based filtering to the final output
 	son;   // make sure this is last, so the sound is returned
 	 };
 
