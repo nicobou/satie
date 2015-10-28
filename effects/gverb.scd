@@ -12,9 +12,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ~name = \gverb;
-~function = { arg in, roomsize=50, revtime=3, damping=0.5, inputbw=0.5, spread=15, drylevel=1, earlylevel=0.7, taillevel=0.5, maxroomsize=300;
-	outputDB.dbamp  *  Mix.new(GVerb.ar(
-		        in.ar(in),
+~function = { arg in, roomsize=50, revtime=3, damping=0.5, inputbw=0.5, spread=15, drylevel=1, earlylevel=0.7, taillevel=0.5, maxroomsize=300, outputDB=0;
+ outputDB.dbamp  * Mix.new(GVerb.ar(
+		        In.ar(in),
 		        roomsize,
 		        revtime,
 		        damping,
@@ -23,6 +23,9 @@
 		        drylevel.dbamp,
 		        earlylevel.dbamp,
 		        taillevel.dbamp,
-		        roomsize));
+		roomsize ));
+	//outputDB.dbamp  *  Mix.new([revsig]);
+
+
 	};
 

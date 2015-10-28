@@ -38,14 +38,6 @@ s.reboot;
 ~listeningFormat = ~defaultListeningFormat;    // will remain unless overwritten below
 
 
-//~listeningFormat = \octoVBAP;       // octo
-//~listeningFormat = \domeVBAP;       // for sato
-//~listeningFormat = \labodomeVBAP;      // for labodome
-
-//~outAudioDev = "Soundflower (64ch)";   //  for multi-channel testing without hardware on OSX
-//~outAudioDev = "MADIface USB (23635751)";     // for labodome or SATO
-
-
 if ( ~superNovaFlag != nil,
 	{
 		Server.supernova;
@@ -55,7 +47,6 @@ o = Server.local.options;   // default set up options
 o.memSize = 2**20;        // probably should just leave this the same for everyting
 o.device = nil;  // default
 o.blockSize = 2048;
-
 
 
 // check to see if the BASH environment variable is set to either "sato" or "labodome"
@@ -90,38 +81,55 @@ p.close;                    // close the pipe to avoid that nasty buildup
 
 
 
-// o.device = "MADIface USB (23635751)";     // set for dome or labodome
 
-if ( ~listeningFormat == \domeVBAP,
+
+if (  ( ( ~listeningFormat == \domeVBAP)  ||   ( ~listeningFormat == \labodomeVBAP)  || ( ~listeningFormat == \octoVBAP)  ),
+	{
+
+		if (  ServerOptions.outDevices.indexOfEqual("HDSPe MADI (23453676)") != nil,
+		{
+				postln("AudioOutDev: HDSPe MADI");
+				~outAudioDev = "HDSPe MADI (23453676)";
+		});
+
+		if (  ServerOptions.outDevices.indexOfEqual("MADIface USB (23635751)") != nil,
+		{
+				postln("AudioOutDev:  MADIface USB");
+				~outAudioDev = "MADIface USB (23635751)";
+		});
+
+	},  // else
+	{
+		if ( ~listeningFormat == \stereoListener,
+		{
+				postln("AudioOutDev: Built-in Output");
+				~outAudioDev = "Built-in Output";
+		// o.dump;
+		});
+});
+
+
+
+
+switch (~listeningFormat,
+	\domeVBAP,
 	{
 		o.numOutputBusChannels = 32;
-		~outAudioDev = "MADIface USB (23635751)";
-		// o.dump;
-});
-
-if ( ~listeningFormat == \labodomeVBAP,
+	},
+	\labodomeVBAP,
 	{
 		o.numOutputBusChannels = 24;
-		~outAudioDev = "MADIface USB (23635751)";
-		// o.dump;
-});
-
-if ( ~listeningFormat == \octoVBAP,
+	},
+	\octoVBAP,
 	{
 		o.numOutputBusChannels = 8;
-		//~outAudioDev = "MADIface USB (23635751)";
-		// o.dump;
-});
-
-
-
-
-if ( ~listeningFormat == \stereoListener,
+	},
+	\stereoListener,
 	{
 		o.numOutputBusChannels = 2;
-		~outAudioDev = "Built-in Output";
-		// o.dump;
-});
+	},
+);
+
 
 
 if ( ~outAudioDev != nil ,

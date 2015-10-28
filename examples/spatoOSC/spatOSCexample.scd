@@ -37,6 +37,7 @@ s.waitForBoot{
 	~scbr.makeSynthDef(\zbell1, \zbell1, [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [~listeningFormat], [0], [~scbr.aux[~fxInputBus]]);
 	~scbr.makeSynthDef(\busreverb, \freeverb, [~listeningFormat], [0]);
+	~scbr.makeSynthDef(\busgverb, \gverb, [~listeningFormat], [0]);
 
 	// initialize the OSC interpreter here
 	~oscInterface = ~cOSCMaker.value();
