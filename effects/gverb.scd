@@ -13,7 +13,7 @@
 
 ~name = \gverb;
 ~function = { arg in, roomsize=50, revtime=3, damping=0.5, inputbw=0.5, spread=15, drylevel=1, earlylevel=0.7, taillevel=0.5, maxroomsize=300, outputDB=0;
- outputDB.dbamp  * Mix.new(GVerb.ar(
+ outputDB.dbamp  * Mix.fill(1,GVerb.ar(
 		        In.ar(in),
 		        roomsize,
 		        revtime,

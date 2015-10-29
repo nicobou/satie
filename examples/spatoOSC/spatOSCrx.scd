@@ -639,9 +639,17 @@ s.waitForBoot{
 		if (uriName.asSymbol ==  "plugin://busreverb".asSymbol  ,
 			{
 				postf("~createSource:  HACK:  forcing  EFFECTS group for source: %", sourceName.asSymbol);
-				groupName = \effect
+				groupName = \effect;  // if URI is a fx plugin,  force group to effects group
+			},
+			// else if
+			{
+				if (uriName.asSymbol ==  "plugin://busgverb".asSymbol  ,
+					{
+						postf("~createSource:  HACK:  forcing  EFFECTS group for source: %", sourceName.asSymbol);
+						groupName = \effect;
+				};);  // if URI is a fx plugin,  force group to effects group
+		});
 
-		};);  // if URI is a fx plugin,  force group to effects group
 
 
 		// check to see if group's proxy exists (even if the corresponding groupNode has not yet been instntiated),  if  not, create it
@@ -1186,6 +1194,29 @@ s.waitForBoot{
 
 	s.sync;
 
+	// roomsize=50, revtime=3, damping=0.5, inputbw=0.5, spread=15, drylevel=1, earlylevel=0.7, taillevel=0.5, maxroomsize=300
+
+
+/*	  	// tune up reverb
+
+	~rvbname="resonance_SC:spatOSCsource_0".asSymbol;
+	~setEvent.value(~rvbname,  \outputDB, [-10]);
+	~setEvent.value(~rvbname,  \roomsize, [160]);
+	~setEvent.value(~rvbname,  \revtime, [3]);
+	~setEvent.value(~rvbname,  \damping, [0.1]);
+	~setEvent.value(~rvbname,  \inputbw, [0.6]);
+	~setEvent.value(~rvbname,  \spread, [15]);
+	~setEvent.value(~rvbname,  \drylevel, [-99]);
+	~setEvent.value(~rvbname,  \earlylevel, [3]);
+	~setEvent.value(~rvbname,  \taillevel, [3]);
+
+*/
+
+
+		// e.g  /spatosc/core/source/nodename/prop  key val
+	//~sourceNodeCallback.value("/spatosc/core/source/resonance_SC:spatOSCsource_1/prop", "outputDB", -20.0);
+
+
 
 	// ~dumpGroup.value();
 
@@ -1208,6 +1239,11 @@ s.waitForBoot{
 
 	~scbr.makeInstance(~reverbName.asSymbol,\busreverb, \effect);
 
+	~scbr.makeInstance(~reverbName.asSymbol,\busgverb, \effect);
+
+
+
+
 
 
 	postf("makeing % instance \n", ~reverbName);
@@ -1220,6 +1256,8 @@ s.waitForBoot{
 	//~prox[~reverbName].set(\gainDB, 0);
 	//~prox[~reverbName].set(\outputDB, 0);
 
+
+	//~setEvent.value("resonance_SC:spatOSCsource_1".asSymbol,  \revtime, 0.5);
 
 
 	/*  TEMP
