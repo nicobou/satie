@@ -126,8 +126,8 @@ switch (~listeningFormat,
 	},
 	\stereoListener,
 	{
-		o.numOutputBusChannels = 2;
-	},
+	o.numOutputBusChannels = 2;
+	}
 );
 
 

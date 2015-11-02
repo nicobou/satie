@@ -28,11 +28,14 @@
 	var slewDelay = 0.3; //  note: this needs to be improved ... smoother
 	var slewGain = 0.03;
 	var slewLp = 0.3;
-	LPF.ar(Pan2.ar(DelayC.ar(
-		gain.lag(slewGain) * in,
-		maxdelaytime: 0.5,
-		delaytime: delay.lag(slewDelay)),
-		aziDeg),
-		lpHz.lag(slewLp));   // need to install spread param
-};
 
+	var insig;
+	var aziScale = 0.01 * (100 - spread);
+	var theta = aziScale * aziDeg *  0.01745329251994;  // radians
+	var index = SinOsc.kr(0, theta);
+
+	Pan2.ar( LPF.ar(DelayC.ar(
+		gain.lag(slewGain) *  in,
+		maxdelaytime: 0.5,
+		delaytime: delay.lag(slewDelay)), lpHz.lag(slewLp)), index );
+};

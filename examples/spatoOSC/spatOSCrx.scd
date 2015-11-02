@@ -287,9 +287,11 @@ s.waitForBoot{
 			{
 				if ( (args.size > 0 ) ,
 					{
-						//postf("~connectionCallback:  connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
-						spread = args[1];  // get values from vector, and write to connectionState
+						spread = 100 * args[1];  // get values from vector, and write to connectionState
 						thisProxy.set(\spread, spread);
+
+						//postf("~connectionCallback:  SPREAD:  connectionName: %  spread: % \n", connectionName, spread);
+
 					},
 					// else
 					{"~connectionCallback: OSCrx spread message with no values".warn; })
@@ -389,7 +391,10 @@ s.waitForBoot{
 		//'~sourceNodeCallback'.postln;
 
 		switch(type,
-			'prop', {~setProperty.value(name, args[1], args[2])},
+			'prop', {~setProperty.value(name, args[1], args[2]);
+					//postf("~sourceNodeCallback:  nodeName: %  setProp: %  key: % value: %\n", name, args[1], args[2]);
+
+			},
 			'uri', {~setUri.value(name, args[1])},
 			'event',
 			{
@@ -1271,10 +1276,12 @@ s.waitForBoot{
 
 
 
-	~nodeName=\mySound;
-	~listenerName=\ear;
+	// --------------------------------------SPREAD TEST
+	// sourceB->listener
+	~nodeName=\sourceB;
+	~listenerName=\listener;
 	~connectionName= ~nodeName ++ "->" ++ ~listenerName;
-
+~connectionCallback.value( ["/spatosc/core/connection/"++ ~connectionName ++"/spread", 100]);
 
 	~createSource.value(~nodeName);
 
@@ -1303,6 +1310,10 @@ s.waitForBoot{
 	1.do({ arg item;
 	var nodename=("testNode"++item).asSymbol;
 	var connectionName = "testNode"++item++"->ear";
+
+
+
+
 
 	~createSource.value(nodename);
 	//~createConnection.value(nodename, "ear");
