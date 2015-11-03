@@ -11,12 +11,19 @@ public class SATIErendererCtl : MonoBehaviour {
 	
     public bool dspState = true;
     private bool _dspState;
-
-    public float volume = -10f;
-    private float _volume;
-
+    
+    public float outputGainDB = -10f;
+    private float _outputGainDB;
+    
+    public float outputTrimDB = -0f;
+    private float _outputTrimDB;
+    
+    public bool dim = false;
+    private bool _dim;
+    
     public bool mute = false;
     private bool _mute;
+
 
     public string outputFormat = "stereo"; // builtin choices:  stereo quad five.one seven.one octo dome mono labodome
     private string _outputFormat;
@@ -78,11 +85,15 @@ public class SATIErendererCtl : MonoBehaviour {
 		}
 
         _dspState = dspState;
-        _volume = volume;
-        mute = _mute;
+        _outputGainDB = outputGainDB;
+        _dim = dim;
+        _outputTrimDB = outputTrimDB;
+        _mute = mute;
         _outputFormat = outputFormat;
-
-        updateGain();
+        
+        updateGainDB();
+        updateTrimDB();
+        updateMute();
         updateOutputFormat();
     }
 	
@@ -90,35 +101,54 @@ public class SATIErendererCtl : MonoBehaviour {
     {
         OSCMessage message = new OSCMessage (_oscMessage);
         float state = (dspState) ? 1f:0f;
-
-		message.Append ("setDSP");
-		message.Append (state);
+        
+        message.Append ("setDSP");
+        message.Append (state);
         sendOSC (message);
     }
-
-    private void updateGain()
+    
+    private void updateGainDB()
     {
         OSCMessage message = new OSCMessage (_oscMessage);
-
-		message.Append ("setVolume");
-		message.Append (volume);
+        
+        message.Append ("setOutputDB");
+        message.Append (outputGainDB);
         sendOSC (message);
     }
-
+    
+    private void updateTrimDB()
+    {
+        OSCMessage message = new OSCMessage (_oscMessage);
+        
+        message.Append ("setOutputTrimDB");
+        message.Append (outputTrimDB);
+        sendOSC (message);
+    }
+    
     private void updateMute()
     {
         OSCMessage message = new OSCMessage (_oscMessage);
         float state = (mute) ? 1f:0f;
-
-		message.Append ("setMute");
+        
+        message.Append ("setOutputMute");
         message.Append (state);
         sendOSC (message);
     }
-
+    
+    private void updateDim()
+    {
+        OSCMessage message = new OSCMessage (_oscMessage);
+        float state = (dim) ? 1f:0f;
+        
+        message.Append ("setOutputDIM");
+        message.Append (state);
+        sendOSC (message);
+    }
+    
     private void updateOutputFormat()
     {
         OSCMessage message = new OSCMessage (_oscMessage);
-		message.Append ("setOutputFormat");
+        message.Append ("setOutputFormat");
         message.Append (outputFormat);
         sendOSC (message);
     }
@@ -132,25 +162,36 @@ public class SATIErendererCtl : MonoBehaviour {
 		//so we used a shared proccessQueue full of OSC Messages
 
 
-        if (_volume != volume)
+        if (_outputGainDB != outputGainDB)
         {
-			_volume = volume;
-            updateGain();
+            _outputGainDB = outputGainDB;
+            updateGainDB();
         }
-
-
+        
+        if (_outputTrimDB != outputTrimDB)
+        {
+            _outputTrimDB = outputTrimDB;
+            updateTrimDB();
+        }
+        
         if (_outputFormat != outputFormat)
         {
             _outputFormat = outputFormat;
             updateOutputFormat();
         }
-
+        
+        if (_dim != dim)
+        {
+            _dim = dim;
+            updateDim();
+        }
+        
         if (_mute != mute)
         {
             _mute = mute;
             updateMute();
         }
-
+        
         if (_dspState != dspState)
         {
             _dspState = dspState;

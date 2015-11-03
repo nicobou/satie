@@ -11,7 +11,7 @@ using OSC.NET;
 
 public class SATIEsetup : MonoBehaviour {
 
-    public bool enabled = true;
+    //public bool enabled = true;
    
     private bool connected = false;
        
@@ -30,30 +30,34 @@ public class SATIEsetup : MonoBehaviour {
         return RendererAddress;
     }
    
-    public int updateRateMs = 30;
+    public float updateRateMs = 30;
     private float _updateRateMs;
-    private float _updateRateSec;
+
+    [HideInInspector] 
+    public static float updateRateSecs = .02f;
+
+
        
     // list of all instantiated nodes
     [HideInInspector] 
     public  static List<SATIEnode> SATIEnodeList = new List<SATIEnode>();
   
-    public Vector3 SceneOrientation = new Vector3(90f,180f,180f);
-    private Vector3 _sceneOrientation = new Vector3(0f,0f,0f);
+//    public Vector3 SceneOrientation = new Vector3(90f,180f,180f);
+//    private Vector3 _sceneOrientation = new Vector3(0f,0f,0f);
+//
+//    public bool invertX = false;
+//    private static float _invertX;
+//
+//    public bool invertY = false;
+//    private static float _invertY;
+//
+//    public bool invertZ = false;
+//    private static float _invertZ;
+//
+//    public static bool swapYandZ = false;
 
-    public bool invertX = false;
-    private static float _invertX;
 
-    public bool invertY = false;
-    private static float _invertY;
-
-    public bool invertZ = false;
-    private static float _invertZ;
-
-    public static bool swapYandZ = false;
-
-
-    public Vector3 SceneTranslation = new Vector3(0f,0f,0f);
+   // public Vector3 SceneTranslation = new Vector3(0f,0f,0f);
 
 	private bool _enabled = false;
 
@@ -76,6 +80,8 @@ public class SATIEsetup : MonoBehaviour {
             return;
         }
 		
+
+
         try
         {
              sender = new OSCTransmitter(RendererAddress, RendererPort);
@@ -103,21 +109,46 @@ public class SATIEsetup : MonoBehaviour {
         Debug.Log("SATIEsetup.Awake: OSC TX to:  " + RendererAddress + ":" + RendererPort);
 
 
-        _invertX = (invertX) ? -1f : 1f;
-        _invertY = (invertY) ? -1f : 1f;
-        _invertZ = (invertZ) ? -1f : 1f;
+//        _invertX = (invertX) ? -1f : 1f;
+//        _invertY = (invertY) ? -1f : 1f;
+//        _invertZ = (invertZ) ? -1f : 1f;
 
-        _updateRateMs = updateRateMs;
-        _updateRateSec = updateRateMs / 1000f;
+        setUpdateRate(updateRateMs);
+
+
         //SATIEsetup.setSceneOrientation(SceneOrientation.x, SceneOrientation.y, SceneOrientation.z);   // in degrees
         //SATIEsetup.setSceneTranslation(SceneTranslation.x, SceneTranslation.y, SceneTranslation.z);
 
 	}
 
+    void OnValidate()
+    {
+
+        if (_updateRateMs != updateRateMs )        
+            setUpdateRate( updateRateMs );
+    }
+
+    void setUpdateRate(float updateMs)
+    {
+        _updateRateMs = updateMs;
+        updateRateSecs = updateMs / 1000f;
+    }
+
+    void Start()
+    {
+        StartCoroutine( initSatie() );
+    }
+
+    IEnumerator initSatie() // now that litener(s) have been conection related parameters.
+    {
+        yield return new WaitForSeconds(.1f);   // may need to be bigger for large scenes
+        refreshNodes();    // or do this using a coroutine to avoid OSC peaking
+    }
+
     public void refreshNodes()
     {
-//        foreach (spatOSCnode  node in spatOSCnodeList)
-//            node.refreshState();
+        foreach (SATIEnode  node in SATIEnodeList)
+            node.refreshState();
     }
 
 //    void  Update()
@@ -150,7 +181,7 @@ public class SATIEsetup : MonoBehaviour {
 //
 //         if (_updateRateMs != updateRateMs)
 //        {
-//            _updateRateSec = updateRateMs / 1000f;
+//            updateRateSecs = updateRateMs / 1000f;
 //            _updateRateMs = updateRateMs;
 //        }
 //    }
@@ -159,13 +190,13 @@ public class SATIEsetup : MonoBehaviour {
 
     void LateUpdate()
     {
-        if (Time.time - lastUpdate > _updateRateSec)
-        {
-            //Debug.Log("SATIEsetup.LateUpdate:  current delta" + (Time.time - lastUpdate) + " is greater than " + _updateRate);
-
-            updateAudioScene();
-            lastUpdate = Time.time;
-        }
+//        if (Time.time - lastUpdate > updateRateSecs)
+//        {
+//            //Debug.Log("SATIEsetup.LateUpdate:  current delta" + (Time.time - lastUpdate) + " is greater than " + _updateRate);
+//            // this is done now in each listener
+//            //updateAudioScene();
+//            lastUpdate = Time.time;
+//        }
     }
 
     void OnDestroy()
@@ -173,10 +204,10 @@ public class SATIEsetup : MonoBehaviour {
         OnApplicationQuit();
 	}
 
- private void updateAudioScene()
-    {
-    }
-  
+// private void updateAudioScene()
+//    {
+//    }
+//  
     /**
      * Call update every frame in order to dispatch all messages that have come
      * in on the listener thread
@@ -326,7 +357,20 @@ public class SATIEsetup : MonoBehaviour {
     }
 
 
-
+//	// Much Better version!!  NEEDS TESTING 
+//	public  void sendEvent (string keyWord, List<object> values)
+//	{
+//		string path = "/spatosc/core/"+nodeType+"/" + nodeName + "/event";
+//		List<object> items = new List<object>();
+//		
+//		items.Add(keyWord);
+//		
+//		foreach (object o in values)
+//			items.Add(o);
+//		
+//		SATIEsetup.OSCtx(path, items);
+//		items.Clear();
+//	}
 
 
     public static bool OSCtx(string path, List<object> items)

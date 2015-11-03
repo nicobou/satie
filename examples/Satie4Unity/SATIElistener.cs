@@ -27,6 +27,9 @@ public class SATIElistener : SATIEnode {
         base.FixedUpdate();
     }
 
+
+    private float _lastUpdate = -1f;
+
     void LateUpdate()
     {
 
@@ -34,11 +37,20 @@ public class SATIElistener : SATIEnode {
         {
             if (true)
             {
-                UpdateConnection(transform, updatePosFlag, updateRotFlag);  // send update connection to all connected delegates
-                if (updatePosFlag)
-                    updatePosFlag = false; // reset flag
-                if (updateRotFlag)
-                    updateRotFlag = false; // reset flag
+                if ( (Time.time - _lastUpdate )> SATIEsetup.updateRateSecs)
+                {
+                    //Debug.Log("SATIEsetup.LateUpdate:  current delta" + (Time.time - lastUpdate) + " is greater than " + _updateRate);
+                    UpdateConnection(transform, updatePosFlag, updateRotFlag);  // send update connection to all connected delegates
+
+                    if (updatePosFlag)
+                        updatePosFlag = false; // reset flag
+                    if (updateRotFlag)
+                        updateRotFlag = false; // reset flag
+
+                    _lastUpdate = Time.time;
+                }
+
+
             }
         }
     }

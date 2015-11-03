@@ -37,6 +37,7 @@ public class SATIEnode : MonoBehaviour {
 
     public bool useFixedUpdate = false;
 
+
     public List <string> PropertyMessages = new List<string>();
     private List <string> _PropertyMessages = new List<string>();  // used to detect changes in the Inspector
 
@@ -45,7 +46,7 @@ public class SATIEnode : MonoBehaviour {
     private Vector3 _lastSpatUpdatePos;
     private Vector3 _lastPos;
     private Quaternion _lastRot;
-    private float _lastUpdateTime = 0f;
+    //private float _lastUpdateTime = 0f;
     public bool updateRotFlag = false;
     public bool updatePosFlag = false;
 
@@ -86,6 +87,8 @@ public class SATIEnode : MonoBehaviour {
             _state = nodeEnabled;
             setNodeActive(nodeName, nodeEnabled);
         }
+
+
 
         if (_PropertyMessages.Count != PropertyMessages.Count)
         {
@@ -369,20 +372,7 @@ public class SATIEnode : MonoBehaviour {
         items.Clear();
    }
 
-    // Much Better version!!  NEEDS TESTING 
-    public  void sendEvent (string keyWord, List<object> values)
-    {
-        string path = "/spatosc/core/"+nodeType+"/" + nodeName + "/event";
-        List<object> items = new List<object>();
-
-        items.Add(keyWord);
-
-        foreach (object o in values)
-            items.Add(o);
-
-        SATIEsetup.OSCtx(path, items);
-        items.Clear();
-    }
+  
 
     public virtual void  setNodeActive(string nodeName, bool nodeEnabled)
     {
@@ -497,7 +487,7 @@ public class SATIEnode : MonoBehaviour {
             }
         }
         //Debug.Log("spatOECnode.updateNode: time delta:" + (Time.realtimeSinceStartup - _lastUpdateTime));
-        _lastUpdateTime = Time.realtimeSinceStartup;
+      //  _lastUpdateTime = Time.realtimeSinceStartup;
     }
 
     void OnDestroy()
@@ -565,6 +555,7 @@ public class SATIEnode : MonoBehaviour {
             setURI(nodeName, uriString);
         }
         sendProperties();
+        updatePosFlag = updateRotFlag = true;
 
     }
 

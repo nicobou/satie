@@ -95,8 +95,8 @@ public class SATIEsource : SATIEnode {
  
         //Debug.Log("SATIEsetup.setDirectivity " + nodeName + "  htab:" + HorizontalDirectivity + "  vtab:" + VerticalDirectivity);
         //result = SATIEsetup.setDirectivity(nodeName, hDirectivity, vDirectivity);
-        if (result == false)
-            Debug.LogWarning("SATIEsource.start: bad directiviry table name"); 
+//        if (result == false)
+//            Debug.LogWarning("SATIEsource.start: bad directiviry table name"); 
 
 
 
