@@ -12,7 +12,11 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
+// NOTE:  this file optionally uses the BASH environment variable SATIE_LISTENING_FORMAT
+// which is set to:
+//   export SATIE_LISTENING_FORMAT="sato"
+// or
+// export SATIE_LISTENING_FORMAT="labodome"
 
 /*
 s.makeGui;
@@ -29,14 +33,9 @@ s.reboot;
 ~outAudioDev = nil;
 ~superNovaFlag = true;
 
-//~listeningFormat = \stereoListener;
+~defaultListeningFormat = \stereoListener;
 
-//~listeningFormat = \octoVBAP;       // octo
-~listeningFormat = \domeVBAP;       // for sato
-//~listeningFormat = \labodomeVBAP;      // for labodome
-
-//~outAudioDev = "Soundflower (64ch)";   //  for multi-channel testing without hardware on OSX
-//~outAudioDev = "MADIface USB (23635751)";     // for labodome or SATO
+~listeningFormat = ~defaultListeningFormat;    // will remain unless overwritten below
 
 
 if ( ~superNovaFlag != nil,
@@ -49,34 +48,101 @@ o.memSize = 2**20;        // probably should just leave this the same for everyt
 o.device = nil;  // default
 o.blockSize = 2048;
 
-// o.device = "MADIface USB (23635751)";     // set for dome or labodome
 
-if ( ~listeningFormat == \domeVBAP,
+// check to see if the BASH environment variable is set to either "sato" or "labodome"
+(
+//p = Pipe.new("ls -l", "r");            // list directory contents in long format
+p = Pipe.new("echo $SATIE_LISTENING_FORMAT", "r");            // list directory contents in long format
+
+l = p.getLine;                    // get the first line
+
+if ( l != nil,
+	{
+
+		// l.postln;
+		switch (l,
+			"sato",
+			{
+				"SETTING LISTENING FORMAT TO: domeVBAP".postln;
+				~listeningFormat = \domeVBAP;       // for sato
+
+			},
+			"labodome",
+			{
+				"SETTING LISTENING FORMAT TO: labodomeVBAP".postln;
+				~listeningFormat = \labodomeVBAP;      // for labodome
+
+			}
+		);
+});
+
+p.close;                    // close the pipe to avoid that nasty buildup
+);
+
+
+
+
+
+if (  ( ( ~listeningFormat == \domeVBAP)  ||   ( ~listeningFormat == \labodomeVBAP)  || ( ~listeningFormat == \octoVBAP)  ),
+	{
+
+		if (  ServerOptions.outDevices.indexOfEqual("HDSPe MADI (23453676)") != nil,
+		{
+				postln("AudioOutDev: HDSPe MADI");
+				~outAudioDev = "HDSPe MADI (23453676)";
+		});
+
+		if (  ServerOptions.outDevices.indexOfEqual("MADIface USB (23635751)") != nil,
+		{
+				postln("AudioOutDev:  MADIface USB");
+				~outAudioDev = "MADIface USB (23635751)";
+		});
+
+	},  // else
+	{
+		if ( ~listeningFormat == \stereoListener,
+		{
+				postln("AudioOutDev: Built-in Output");
+				~outAudioDev = "Built-in Output";
+		// o.dump;
+		});
+});
+
+
+
+
+switch (~listeningFormat,
+	\domeVBAP,
 	{
 		o.numOutputBusChannels = 32;
-		~outAudioDev = "MADIface USB (23635751)";
-		// o.dump;
-});
-
-if ( ~listeningFormat == \labodomeVBAP,
+	},
+	\labodomeVBAP,
 	{
 		o.numOutputBusChannels = 24;
-		~outAudioDev = "MADIface USB (23635751)";
-		// o.dump;
-});
-
-if ( ~listeningFormat == \octoVBAP,
+	},
+	\octoVBAP,
 	{
 		o.numOutputBusChannels = 8;
-		//~outAudioDev = "MADIface USB (23635751)";
-		// o.dump;
-});
+	},
+	\stereoListener,
+	{
+	o.numOutputBusChannels = 2;
+	}
+);
+
 
 
 if ( ~outAudioDev != nil ,
 	{
 		o.device = ~outAudioDev;
 });
+
+
+postf("AUDIO CONFIGURATION: \n");
+postf("\t LISTENING FORMAT:  %  \n", ~listeningFormat);
+postf("\t OUTPUT DEVICE:  %\n", o.outDevice);
+postf("\t OUTPUT CHANNELS:  %\n", o.numOutputBusChannels);
+//o.dump
 
 
 // open up GUIs for monitoring
@@ -89,7 +155,8 @@ if (~meter == nil,  { ~plotTree=s.meter;});
 // LOAD FILES FOR PROJECT
 
 (
-~files = #["spatOSCexample.scd", "spatOSCrx.scd","spatOSCrx.scd"];
+// note: files that define OSCcallbacks seem to need to be evaluated twice
+~files = #["../../utils/dacTest.scd", "spatOSCexample.scd", "spatOSCrx.scd","spatOSCrx.scd", "spatOSCexamplePresets.scd", "spatOSCexamplePresets.scd"];
 
 s.waitForBoot {
 	var dir = thisProcess.nowExecutingPath.dirname;

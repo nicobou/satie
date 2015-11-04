@@ -18,6 +18,8 @@ OSC RX message specification is based on the SPATOSC specification  (see:   http
 
 //~allSourceNodes.size;
 
+// 				// DEBUG
+//~allSourceNodes.at( "ball_3:spatOSCsource_5".asSymbol).at(\outDB);
 
 (
 
@@ -75,6 +77,10 @@ s.waitForBoot{
 	};
 
 
+
+	~outputDB = 0;    // current state of the supercollider's output
+	~outputTrimDB = 0;
+
 	~basicRendererCallback = {
 		arg msg;
 		var command = msg[1];
@@ -89,38 +95,59 @@ s.waitForBoot{
 			{
 
 				switch (command,
-					'setOutputDB',
+					'setOutputTrimDB',
 					{
-						//postf("~basicRendererCallback setVolume: %\n", msg[2]);
-						if ( (msg.size < 3 ) ,
-							{"~basicRendererCallback: setVolume missing value".warn;
-								// postf("CREATESOURCE MESS LEN: %", msg.size);
-
-							},
+							if ( (msg.size < 3 ) ,
+							{"~basicRendererCallback: setOutputTrimDB missing value".warn;},
 							// else
 							{
-								~volume.volume = msg[2];
+								~outputTrimDB = msg[2];
+								~volume.volume = ~outputTrimDB + ~outputDB;
 							}
 						)
 					},
-					'setDIM',   // this is really setMute; a proper setMute message and setDIM responder should be implemented.
+					'setOutputDB',
 					{
-						//postf("~basicRendererCallback setMute: %\n", msg[2]);
-						if ( (msg.size < 3 ) ,
-							{"~basicRendererCallback: setMute missing value".warn;
+							if ( (msg.size < 3 ) ,
+							{"~basicRendererCallback: setOutputDB missing value".warn;},
+							// else
+							{
+								~outputDB = msg[2];
+								~volume.volume = ~outputTrimDB + ~outputDB;
+							}
+						)
+					},
+					'setOutputDIM',
+					{
+							if ( (msg.size < 3 ) ,
+							{"~basicRendererCallback: setOutputMute missing value".warn;
 								// postf("CREATESOURCE MESS LEN: %", msg.size);
 
 							},
 							// else
 							{
 								if (msg [2] > 0,
-									{~volume.mute;},
+									 {  ~volume.volume = -30;  },
 									// else
-									{~volume.unmute;});
+									{  ~volume.volume =  ~outputDB + ~outputTrimDB;   });
 							}
 						)
+					},
+					'setOutputMute',
+					{
+						//postf("~basicRendererCallback setMute: %\n", msg[2]);
+						if ( (msg.size < 3 ) ,
+							{"~basicRendererCallback: setOutputDIM missing value".warn;  },
+							// else
+							{
+								if (msg [2] > 0,
+									{~volume.mute;},
+									// else
+									{~volume.unmute;} );  // full muting implmentation
+							}
+						);
 					}
-				);
+				)
 		});
 	};
 
@@ -206,12 +233,16 @@ s.waitForBoot{
 	};
 
 
+
+
+
 	// /spatosc/core/connection/source->listener/update azi elev gainDB delayMS  lpHZ
 	// /spatosc/core/connection/source->listener/spread  exp   // exponent for incidence effect
 	~connectionCallback = { | args |
 		var nodeName, listenerName, connectionName, type, temp, charIndex;
 		var aziDeg, eleDeg, gainDB, delayMs, lpHz, spread;
 		var thisProxy;
+		var index;
 
 		//args.postln;
 		connectionName = args[0].asString.split[4].asSymbol;   // this is terrible.  The spatOSC message format should be improved here
@@ -237,6 +268,16 @@ s.waitForBoot{
 						delayMs = args[4];
 						lpHz = args[5];
 
+						//DEBUG
+						//~allSourceNodes[nodeName.asSymbol].put(\outDB, gainDB);
+
+
+
+				/*		z = (z+1).mod(20);
+						if ( (z == 0), {postf("\n")});
+						postf("  %  " ++ gainDB.trunc );*/
+
+
 						thisProxy.set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB, \delayMs, delayMs, \lpHz, lpHz);
 
 					}
@@ -246,9 +287,11 @@ s.waitForBoot{
 			{
 				if ( (args.size > 0 ) ,
 					{
-						//postf("~connectionCallback:  connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
-						spread = args[1];  // get values from vector, and write to connectionState
+						spread = 100 * args[1];  // get values from vector, and write to connectionState
 						thisProxy.set(\spread, spread);
+
+						//postf("~connectionCallback:  SPREAD:  connectionName: %  spread: % \n", connectionName, spread);
+
 					},
 					// else
 					{"~connectionCallback: OSCrx spread message with no values".warn; })
@@ -300,6 +343,7 @@ s.waitForBoot{
 						delayMs = args[4];
 						lpHz = args[5];
 
+
 						if (myProcess[\updateConnection] == nil,
 							{
 								postf("~connectionProcessCallback:  setting update for nodes group %\n", connectionName);
@@ -347,7 +391,10 @@ s.waitForBoot{
 		//'~sourceNodeCallback'.postln;
 
 		switch(type,
-			'prop', {~setProperty.value(name, args[1], args[2])},
+			'prop', {~setProperty.value(name, args[1], args[2]);
+					//postf("~sourceNodeCallback:  nodeName: %  setProp: %  key: % value: %\n", name, args[1], args[2]);
+
+			},
 			'uri', {~setUri.value(name, args[1])},
 			'event',
 			{
@@ -574,6 +621,7 @@ s.waitForBoot{
 
 				~allSourceNodes[sourceName.asSymbol].put(\proxySymb, groupName.asSymbol);
 
+
 				~setPlugin.value(sourceName.asSymbol, "");  // sets dummy plugin as placeholder
 
 				~oscInterface.sourceOSC(sourceName.asSymbol, ~sourceProcessCallback);   // create OSC callback
@@ -589,7 +637,24 @@ s.waitForBoot{
 		if (groupName == "", { groupName = \default; });   // make sure group name is ok
 
 
-		if (~isFXuri.value(uriName), { groupName = \effect };);  // if URI is a fx plugin,  force group to effects group
+		if (~isFXuri.value(uriName), { groupName = \effect };);  // BROKEN:  if URI is a fx plugin,  force group to effects group
+
+
+		// HACK UNTIL GROUPS IS IMPMENETED IN UNITY SCRIPT
+		if (uriName.asSymbol ==  "plugin://busreverb".asSymbol  ,
+			{
+				postf("~createSource:  HACK:  forcing  EFFECTS group for source: %", sourceName.asSymbol);
+				groupName = \effect;  // if URI is a fx plugin,  force group to effects group
+			},
+			// else if
+			{
+				if (uriName.asSymbol ==  "plugin://busgverb".asSymbol  ,
+					{
+						postf("~createSource:  HACK:  forcing  EFFECTS group for source: %", sourceName.asSymbol);
+						groupName = \effect;
+				};);  // if URI is a fx plugin,  force group to effects group
+		});
+
 
 
 		// check to see if group's proxy exists (even if the corresponding groupNode has not yet been instntiated),  if  not, create it
@@ -604,15 +669,20 @@ s.waitForBoot{
 		~allSourceNodes[sourceName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
 		~allSourceNodes[sourceName.asSymbol].put(\plugin, \nil);
 
+		// DEBUG
+		//~allSourceNodes[sourceName.asSymbol].put(\outDB, 0);
+
+
 
 		// assign proxy name
 		if ( groupName == \effect,
 			{
-
-				if (~fxInputBus == nil,
+				//postf("~createSource:  CREATING EFFECTS SOURCE for:%", sourceName.asSymbol);
+				if (~fxInputBus == nil,    // this should be defined previously in the project's .scd
 					{
 						postf("~createSource:  ~fxInputBus not defined");
-						~fxInputBus = 0; };);   // this should be defined previously in the project's .scd
+						~fxInputBus = 0;
+				};);
 
 				~allSourceNodes[sourceName.asSymbol].put(\proxySymb, \effect);
 				~effectProx[sourceName.asSymbol].set(\in, ~scbr.aux[0]);  //  HACK to set up rvb node
@@ -844,16 +914,26 @@ s.waitForBoot{
 		var valueCount = args.size;
 		var thisProxy = ~allSourceNodes[nodeName.asSymbol].at(\proxy);
 
-		//postln("~setEvent: node:" ++nodeName ++" event name:"++eventName++"  arg(s): "++ args );
+		// DEBUG
+		//var db = ~allSourceNodes.at( nodeName.asSymbol).at(\outDB);
+
+
 
 		if ( (valueCount > 1) ,    // pass vector
 			{
+				// DEBUG
+				//postln("~setEvent: " ++ nodeName.asSymbol ++ "    args: " ++ args[0]  ++ "     " ++ (args[1]*1000).trunc++ "    " ++ (args[2]*100).trunc  );
+				//if( args[2] < 0.07, {postln("~setEvent: " ++ nodeName.asSymbol ++ "   INCIDENCE  " ++ args[2]  )});
+
 				thisProxy.set(eventName.asSymbol, args);
 			},
 			// else
 			{
 				if ( (valueCount == 1) ,    // pass value
 					{
+					// DEBUG
+					//postln("~setEvent: " ++ nodeName.asSymbol ++ "        BANG   db: "++db.trunc++ "\n");
+
 						thisProxy.set(eventName.asSymbol, args[0]);
 					},
 					// else  no args.. just pass 1
@@ -1119,6 +1199,29 @@ s.waitForBoot{
 
 	s.sync;
 
+	// roomsize=50, revtime=3, damping=0.5, inputbw=0.5, spread=15, drylevel=1, earlylevel=0.7, taillevel=0.5, maxroomsize=300
+
+
+/*	  	// tune up reverb
+
+	~rvbname="resonance_SC:spatOSCsource_0".asSymbol;
+	~setEvent.value(~rvbname,  \outputDB, [-10]);
+	~setEvent.value(~rvbname,  \roomsize, [160]);
+	~setEvent.value(~rvbname,  \revtime, [3]);
+	~setEvent.value(~rvbname,  \damping, [0.1]);
+	~setEvent.value(~rvbname,  \inputbw, [0.6]);
+	~setEvent.value(~rvbname,  \spread, [15]);
+	~setEvent.value(~rvbname,  \drylevel, [-99]);
+	~setEvent.value(~rvbname,  \earlylevel, [3]);
+	~setEvent.value(~rvbname,  \taillevel, [3]);
+
+*/
+
+
+		// e.g  /spatosc/core/source/nodename/prop  key val
+	//~sourceNodeCallback.value("/spatosc/core/source/resonance_SC:spatOSCsource_1/prop", "outputDB", -20.0);
+
+
 
 	// ~dumpGroup.value();
 
@@ -1141,6 +1244,11 @@ s.waitForBoot{
 
 	~scbr.makeInstance(~reverbName.asSymbol,\busreverb, \effect);
 
+	~scbr.makeInstance(~reverbName.asSymbol,\busgverb, \effect);
+
+
+
+
 
 
 	postf("makeing % instance \n", ~reverbName);
@@ -1154,6 +1262,8 @@ s.waitForBoot{
 	//~prox[~reverbName].set(\outputDB, 0);
 
 
+	//~setEvent.value("resonance_SC:spatOSCsource_1".asSymbol,  \revtime, 0.5);
+
 
 	/*  TEMP
 
@@ -1166,10 +1276,12 @@ s.waitForBoot{
 
 
 
-	~nodeName=\mySound;
-	~listenerName=\ear;
+	// --------------------------------------SPREAD TEST
+	// sourceB->listener
+	~nodeName=\sourceB;
+	~listenerName=\listener;
 	~connectionName= ~nodeName ++ "->" ++ ~listenerName;
-
+~connectionCallback.value( ["/spatosc/core/connection/"++ ~connectionName ++"/spread", 100]);
 
 	~createSource.value(~nodeName);
 
@@ -1198,6 +1310,10 @@ s.waitForBoot{
 	1.do({ arg item;
 	var nodename=("testNode"++item).asSymbol;
 	var connectionName = "testNode"++item++"->ear";
+
+
+
+
 
 	~createSource.value(nodename);
 	//~createConnection.value(nodename, "ear");
