@@ -35,9 +35,6 @@ public class SATIEnode : MonoBehaviour {
     private float _movementThreshSqu;
     private bool _start = false;
 
-    public bool useFixedUpdate = false;
-
-
     public List <string> PropertyMessages = new List<string>();
     private List <string> _PropertyMessages = new List<string>();  // used to detect changes in the Inspector
 
@@ -47,19 +44,23 @@ public class SATIEnode : MonoBehaviour {
     private Vector3 _lastPos;
     private Quaternion _lastRot;
     //private float _lastUpdateTime = 0f;
-    public bool updateRotFlag = false;
-    public bool updatePosFlag = false;
+    
+	[HideInInspector] 
+	public bool updateRotFlag = false;
+    
+	[HideInInspector] 
+	public bool updatePosFlag = false;
 
 
 
     [HideInInspector] 
-	public static List<Transform> sourceInsatances = new List<Transform>();
+	public static List<SATIEnode> sourceInsatances = new List<SATIEnode>();
 
     [HideInInspector] 
-	public static List<Transform> listenerInsatances = new List<Transform>();
+	public static List<SATIEnode> listenerInsatances = new List<SATIEnode>();
 
 	[HideInInspector] 
-	public static List<Transform> groupInsatances = new List<Transform>();
+	public static List<SATIEnode> groupInsatances = new List<SATIEnode>();
 
 
     [HideInInspector] 
@@ -186,12 +187,14 @@ public class SATIEnode : MonoBehaviour {
         _movementThreshSqu = movementThresh * movementThresh;
 
 
-        Vector3 orientation = transform.rotation.eulerAngles;
+       // Vector3 orientation = transform.rotation.eulerAngles;
         //SATIEsetup.setPositionWrapper(nodeName,transform.position.x, transform.position.y, transform.position.z);
         //SATIEsetup.setOrientation(nodeName, orientation.x, orientation.y, orientation.z);
         //StartCoroutine(testTrigger());
 
        // Debug.Log("SATIEnode.Start:  AssetPath = " + _assetPath);
+		//updatePosFlag = true;  
+		//updateRotFlag = true;
 
 
     }
@@ -213,41 +216,40 @@ public class SATIEnode : MonoBehaviour {
     {
         bool result = false;
         string uriString;
-        List<Transform> nodeList=null;
-		
+
 
         if (!SATIEsetup.OSCenabled)
         {
             Debug.LogWarning(transform.name + ":  SATIEnode.Start:  SATIEsetup: translator(s) not enabled");
             //return false;
         }
- 
- 
-        switch (nodeType)
-        {
-            case  "listener": 
-                nodeList = listenerInsatances;
-                break;
-            case  "source":
-                nodeList = sourceInsatances;
-                break;
-            case "group":
-                nodeList = groupInsatances;
-                break;
-        }
 
-        // ensure no duplicate names
-        // note:  all sound nodes should have unique names
-        foreach (Transform tr in nodeList)
-        {
-            if (transform.name == tr.name)
-            {
-                transform.name = transform.name + "_" + transform.GetInstanceID();  
-                Debug.LogError("SATIEnode: initNode:  duplicate node name found. Renaming node: "+transform.name);
-            }
-        }
+		List <SATIEnode> nodeList = new List<SATIEnode>();
 
-        nodeList.Add(transform);
+
+		switch(nodeType)
+		{
+		case "listener" :
+			nodeList = listenerInsatances;
+			break;
+		case "source" :
+			nodeList = sourceInsatances;
+			break;
+		case "group" :
+			nodeList = groupInsatances;
+			break;
+		}
+
+		foreach (SATIEnode node in nodeList )
+		{
+			if (transform.name == node.name)
+			{
+				transform.name = transform.name + "_" + transform.GetInstanceID();  
+				Debug.LogError("SATIEnode: initNode:  duplicate node name found. Renaming node: "+ transform.name);
+			}
+		}
+		nodeList.Add( (SATIEnode) this);
+
 
         //nodeNo = nodeCount++;
 
@@ -279,20 +281,23 @@ public class SATIEnode : MonoBehaviour {
 		// this should be done in the superclass-- 
 		else if (nodeType == "source" )
         {
+			SATIEsource src = (SATIEsource) this;
 
 			// go agead an make this node with this group name, even if the group has not been created yet
-
-			string groupName = "";
-
-			if (gameObject.tag != "Untagged")  
-				groupName = gameObject.tag;
+			//string groupName = "";
+//
+//			if (gameObject.tag != "Untagged")  
+//				groupName = gameObject.tag;
 
             nodeName = transform.name;  // + "_" + nodeNo;
 			//result = SATIEsetup.createSource(nodeName, uriString, "sheefa");
-			result = SATIEsetup.createSource(nodeName, uriString, groupName);
+			result = SATIEsetup.createSource(nodeName, uriString, src.group);
             // Debug.Log("********************************************initNode:  createSource returned: " + result);
 			//setURI(nodeName, uriString);   //NO NEED TO DO THIS NOW THAT THE URI IS CREATED WITH THE SOURCE
-        }
+			// 
+
+			//Debug.Log("******************************************SATIEnode.initNode: source nodename; "+nodeName+"  groupName: "+ src.group);
+		}
 		else if (nodeType == "group" )
 			
 		{
@@ -416,28 +421,28 @@ public class SATIEnode : MonoBehaviour {
 
 
 
+	// Update is called once per frame
+	public virtual void Update () 
+	{
+		//if (Input.GetKeyDown("s")) sendProperties();
+		//if (Input.GetKeyDown("a")) sendEvent("sheefa", "1,2,-3,4.1");
+	} 
 
 
-    // fixedUpdate is called once per physics engine frame
+	public virtual void FixedUpdate () 
+	{
+		 
+	}
 
 
-    public virtual void FixedUpdate () 
-    {
-        if (useFixedUpdate && nodeEnabled)
-            updateNode(); 
-    }
+    // lateUpdate is called onece per frame, after physics engine is updated
+	public virtual void LateUpdate () 
+	{
+			updateNode(); 
+	}
+	
 
-    // Update is called once per frame
-    public virtual void Update () 
-    {
 
-        if (!useFixedUpdate && nodeEnabled)
-            updateNode();    
-        if (Input.GetKeyDown("s")) sendProperties();
-        //if (Input.GetKeyDown("a")) sendEvent("sheefa", "1,2,-3,4.1");
-
-     } 
-        
    
     // called to set node's update flags
     void updateNode()
@@ -494,20 +499,21 @@ public class SATIEnode : MonoBehaviour {
     {
         if (SATIEsetup.OSCenabled)
         {
+			// SATIEnode node = (SATIEnode) this;
 
-            SATIEsetup.SATIEnodeList.Remove(this);
+			SATIEsetup.SATIEnodeList.Remove(this);
 
 			switch (nodeType) 
 			{
 				
 			case  "listener": 
-				listenerInsatances.Remove (transform);
+				listenerInsatances.Remove ( this );
 				break;
 			case  "source":
-				sourceInsatances.Remove (transform);
+				sourceInsatances.Remove (this);
 				break;
 			case "group":
-				groupInsatances.Remove (transform);
+				groupInsatances.Remove (this);
 				break;
 			}
 

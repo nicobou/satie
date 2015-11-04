@@ -6,6 +6,7 @@ using System.Threading;
 using System.Runtime.InteropServices;
 using System.Net;
 using OSC.NET;
+using UnityEngine.UI;
 
 // this script must be attached to a game object called "spatOSCroot"
 
@@ -30,6 +31,8 @@ public class SATIEsetup : MonoBehaviour {
         return RendererAddress;
     }
    
+	public bool useFixedUpdate = false;
+
     public float updateRateMs = 30;
     private float _updateRateMs;
 
@@ -70,6 +73,17 @@ public class SATIEsetup : MonoBehaviour {
     public static SATIEsetup Instance { get { return _instance; } }
 	
     public SATIEsetup() {}
+
+
+
+	Text fpsText = null;  // used to display FPS
+
+
+	private int frameCount = 0;
+	private float dt = 0.0f;
+	private float fps = 0.0f;
+	private float updateRate = 4.0f;  // 4 updates per sec.
+
  
     // set up translator(s)  for now, using only the basic translator
 	void Awake () 
@@ -79,8 +93,7 @@ public class SATIEsetup : MonoBehaviour {
             Debug.LogError("SATIEsetup.Awake: multiple instances of SATIEsetup not allowed, duplicate instance found in:" + transform.name);
             return;
         }
-		
-
+	
 
         try
         {
@@ -108,19 +121,22 @@ public class SATIEsetup : MonoBehaviour {
         }
         Debug.Log("SATIEsetup.Awake: OSC TX to:  " + RendererAddress + ":" + RendererPort);
 
-
-//        _invertX = (invertX) ? -1f : 1f;
-//        _invertY = (invertY) ? -1f : 1f;
-//        _invertZ = (invertZ) ? -1f : 1f;
-
         setUpdateRate(updateRateMs);
-
-
-        //SATIEsetup.setSceneOrientation(SceneOrientation.x, SceneOrientation.y, SceneOrientation.z);   // in degrees
-        //SATIEsetup.setSceneTranslation(SceneTranslation.x, SceneTranslation.y, SceneTranslation.z);
-
 	}
 
+
+
+	
+	void Start()
+	{
+		GameObject obj = GameObject.Find("FPStext");
+
+		fpsText = obj.GetComponent<Text> ();
+
+		StartCoroutine( initSatie() );
+	}
+	
+	
     void OnValidate()
     {
 
@@ -134,10 +150,6 @@ public class SATIEsetup : MonoBehaviour {
         updateRateSecs = updateMs / 1000f;
     }
 
-    void Start()
-    {
-        StartCoroutine( initSatie() );
-    }
 
     IEnumerator initSatie() // now that litener(s) have been conection related parameters.
     {
@@ -151,96 +163,62 @@ public class SATIEsetup : MonoBehaviour {
             node.refreshState();
     }
 
-//    void  Update()
-//    {
-//
-//        if (Input.GetKeyDown("r"))
-//        {
-//            refreshNodes();
-// //               foreach (spatOSCnode  node in spatOSCnodeList)
-////                Debug.Log("SATIEsetup. nodeName: " + node.nodeName);
-//        }
-//
-//        if (_sceneOrientation != SceneOrientation)
-//        {
-//            SATIEsetup.setSceneOrientation(SceneOrientation.x, SceneOrientation.y, SceneOrientation.z);
-//            _sceneOrientation = SceneOrientation;
-//            Debug.Log("Setting Orientation to: " + SceneOrientation);
-//        }
-// 
-//        float val;
-//
-//        if (_invertX != (val = (invertX) ? -1f : 1f))
-//            _invertX = val;
-//
-//        if (_invertY != (val = (invertY) ? -1f : 1f))
-//            _invertY =  val;
-//
-//        if (_invertZ != (val = (invertZ) ? -1f : 1f))
-//            _invertZ =  val;
-//
-//         if (_updateRateMs != updateRateMs)
-//        {
-//            updateRateSecs = updateRateMs / 1000f;
-//            _updateRateMs = updateRateMs;
-//        }
-//    }
+	// connections are serviced after the previous frame's physics engine is updated during lateUpdate() 
+	public virtual void FixedUpdate () 
+	{
+		if (useFixedUpdate)
+			serviceConnections(); 
+	}
+	
+	// Update is called once per frame
+	public virtual void Update () 
+	{
+		frameCount++;
+		dt += Time.deltaTime;
+		if (dt > 1.0f/updateRate)
+		{
+			fps = frameCount / dt ;
+			frameCount = 0;
+			dt -= 1.0f/updateRate;
+		}
+		if (fpsText)
+			fpsText.text = ((int)fps).ToString() + " fps, frameDurMS: "+ ((int) (Time.deltaTime * 1000f)).ToString();
+		if (!useFixedUpdate)
+			serviceConnections();    
+	} 
+	
+    private float _lastUpdate;
 
-    private float lastUpdate;
-
-    void LateUpdate()
+    void serviceConnections()
     {
-//        if (Time.time - lastUpdate > updateRateSecs)
-//        {
-//            //Debug.Log("SATIEsetup.LateUpdate:  current delta" + (Time.time - lastUpdate) + " is greater than " + _updateRate);
-//            // this is done now in each listener
-//            //updateAudioScene();
-//            lastUpdate = Time.time;
-//        }
+		if (!connected) return;
+
+		if (Time.time - _lastUpdate > updateRateSecs)
+        {
+			// service all nodes
+			foreach (SATIEnode node in SATIEnode.sourceInsatances)
+			{
+				SATIEsource src = (SATIEsource) node;
+				src.evalConnections();
+			}
+			// reset listener flags
+			foreach (SATIEnode node in SATIEnode.listenerInsatances)
+			{
+				node.updatePosFlag = node.updateRotFlag = false;
+			}
+            _lastUpdate = Time.time;
+        }
     }
+
 
     void OnDestroy()
 	{
         OnApplicationQuit();
 	}
 
-// private void updateAudioScene()
-//    {
-//    }
-//  
-    /**
-     * Call update every frame in order to dispatch all messages that have come
-     * in on the listener thread
-     */
-    public void Update() {
-        //processMessages has to be called on the main thread
-        //so we used a shared proccessQueue full of OSC Messages
-        
-//        if (Input.GetMouseButton (0)) 
-//        {
-//            OSCMessage message = new OSCMessage ("/blendo/xy");
-//            message.Append (transform.position.x*.1);
-//            message.Append (transform.position.z*.1);
-//            sendOSC (message);
-//            
-//            //Debug.Log ("MOUSE= " + transform.position);
-//        }       
-//                
-//        if (Input.GetKeyDown ("d")) 
-//        {
-//            
-//            //dogstate = !dogstate;
-//            
-//            
-//            OSCMessage message = new OSCMessage ("/blendo/dog");
-//            
-//            message.Append (999);
-//            
-//            sendOSC (message);      
-//               
-//        }       
-    }
-    
+
+
+
     public void OnApplicationQuit(){
         OSCMessage message = new OSCMessage ("/spatosc/core");
         message.Append ("clear");

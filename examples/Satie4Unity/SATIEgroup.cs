@@ -65,8 +65,12 @@ public class SATIEgroup : SATIEnode {
         base.FixedUpdate();
     }
 
-
-	public void dropMember (SATIEsource source)
+	public override void LateUpdate()
+	{
+		base.LateUpdate();
+	}
+	
+    public void dropMember (SATIEsource source)
 	{
         string path = "/spatosc/core/group/" + nodeName + "/drop";
         List<object> items = new List<object>();

@@ -27,9 +27,10 @@ public class SATIEconnection {
     public float maxGainClip = 0f;
     public float radius = 0f;
     public float radiusTransitionFactor = 1.5f;
-    public Transform listener=null; 
+    public SATIElistener listener=null; 
     public float currentspread=-1;
     public float spread = 1;
+	public bool updateFlag = false;
 }
 
 
@@ -50,7 +51,7 @@ public class SATIEsource : SATIEnode {
     public float radius = 0f;
     public float radiusTransitionFactor = 1.5f;
 
-    private float defaultEffectValue = 100f;  // default connection effect parameters value
+    //private float defaultEffectValue = 100f;  // default connection effect parameters value
 
     public float dopplarEffect = 100f;
     public float distanceEffect = 100f;
@@ -58,7 +59,7 @@ public class SATIEsource : SATIEnode {
 
     public float maxGainClipDB = 0f;
 
-    public List<Transform> myListeners = new List<Transform>(); 
+	public List<SATIElistener> myListeners = new List<SATIElistener>(); 
 
     private float SPEED_OF_SOUND = 0.340f;
 
@@ -74,10 +75,11 @@ public class SATIEsource : SATIEnode {
     {
  
 
-        bool result = false;
+        //bool result = false;
 		nodeType = "source";
 
-		if (gameObject.tag != "Untagged")  
+		if (gameObject.tag == null) group = "default";
+		else if (gameObject.tag != "Untagged")  
 			group = gameObject.tag;
         else group = "default";
 
@@ -86,7 +88,7 @@ public class SATIEsource : SATIEnode {
         initNode();  // must be called before parent's "Start()"
         base.Start();
        
-		Debug.Log("************\tsource: " + nodeName + "  group_______: " + group);
+		//Debug.Log("************\tsource: " + nodeName + "  group_______: " + group);
 
 
         sourceFocusPercent = Mathf.Clamp(sourceFocusPercent, 0f, 100f);
@@ -132,7 +134,7 @@ public class SATIEsource : SATIEnode {
 		yield return new WaitForFixedUpdate ();
 		//yield return new WaitForSeconds(.05f);
 
-        List<Transform> tempListeners = new List<Transform>(); 
+		List<SATIElistener> tempListeners = new List<SATIElistener>(); 
 
         add2Group(group);  // this can be done now that objects are instantiated
 
@@ -146,16 +148,16 @@ public class SATIEsource : SATIEnode {
         {
 
             // check to make sure the listeners in myListeners are good, if not, remove them from myListeners list
-            foreach (Transform tr in myListeners)
+            foreach (SATIElistener listener in myListeners)
             {
-                if (tr != null)
+				if (listener != null)
                 {
-                    if (listenerInsatances.Contains(tr))
+					if (listenerInsatances.Contains(listener))
                     {
-                        tempListeners.Add(tr);
+						tempListeners.Add(listener);
                     } else
                     {
-                        Debug.LogError("SATIEsource.connectionInit:  myListeners's gameObj: " + tr.name + " INVALID LISTENER");
+						Debug.LogError("SATIEsource.connectionInit:  myListeners's gameObj: " + listener.name + " INVALID LISTENER");
                     }
                 }
             }
@@ -163,26 +165,26 @@ public class SATIEsource : SATIEnode {
             if (tempListeners.Count != myListeners.Count)
             {
                 myListeners.Clear();
-                foreach (Transform tr in tempListeners)
-                    myListeners.Add(tr);
+				foreach (SATIElistener listener in tempListeners)
+					myListeners.Add(listener);
                 tempListeners.Clear();
             }
 
             // despite all, no valid listener objects were found in myListeners, so automatically put all listeners in myListeners
             if (myListeners.Count == 0)
             {
-                foreach (Transform tr in listenerInsatances)
-                    myListeners.Add(tr);
+				foreach (SATIElistener listener in listenerInsatances)
+					myListeners.Add(listener);
             }
 
             // set up parameters for connection(s)
-            foreach (Transform tr in myListeners)
+			foreach (SATIElistener listener in myListeners)
             {
                // note: the current implimentation does not provide for multiple listeners with listener-specific connection params.
 
                 SATIEconnection c = new SATIEconnection();
                 
-                c.listener = tr;
+				c.listener = listener;
                 c.doppler = dopplarEffect;
                 c.distance = distanceEffect;
                 c.directivity = incidenceEffect;
@@ -201,7 +203,7 @@ public class SATIEsource : SATIEnode {
                 
                 items.Add("connect");
                 items.Add(nodeName);
-                items.Add(tr.name);
+				items.Add(listener.name);
                 
                 
                 SATIEsetup.OSCtx(path, items);
@@ -213,9 +215,9 @@ public class SATIEsource : SATIEnode {
 
 	public void add2Group(string groupName)
 	{
-		Debug.Log("add2Group:  add  " + groupName + "  to sourceNode: " + transform.name);
+		//Debug.Log("add2Group:  add  " + transform.name + "  to sourceNode: " + groupName);
 
-		foreach (Transform obj in groupInsatances)  // check to see if source has same tag as any groups
+		foreach (SATIEnode obj in groupInsatances)  // check to see if source has same tag as any groups
 		{
 			if (obj.gameObject.tag == groupName)
 			{
@@ -229,76 +231,38 @@ public class SATIEsource : SATIEnode {
 		//GameObject groupObj = GameObject.FindWithTag (gameObject.tag);
  	}
 
-    // this is where the connections are updated,  called by the connected listener with his flags set
-    // note, this call is done during "lateupdate", so any update flags will be set by now
-    public void UpdateConnection(Transform listener, bool posFlag, bool rotFlag)
+	// best called in the context of lateUpdate() since flags can be set to true during FixedUpdate() or Uptade()
+ 	public void evalConnections()
     {
-        bool updateConnection = false;
+		if (!nodeEnabled) return;
 
-        if (updatePosFlag || posFlag )
-        {   
-
-
-
-            //updatePosFlag = false;
-            //Debug.Log("SATIEsource.UpdateConnection update source node: "+nodeName+"'s  position");
-            //Debug.Log("\t\t\t using listener: "+listener.name+" pos: "+ posFlag+"  rot: "+rotFlag);
-
-            //Debug.Log("\t\t\t myConnections listener = "+conn.listener.name);
-
-
-            //connPosition(conn);
-
-            updateConnection = true;
-            // calculate new discance and update incidences
-        }
-        if (updateRotFlag || rotFlag )
-        {
-
-            // connRotation(conn);
-
-            updateConnection = true;
-            //updateRotFlag = false;
-            //Debug.Log("SATIEsource.UpdateConnection update source node: "+nodeName+"'s  rotation");
-            //Debug.Log("\t\t\t using listener: "+listener.name+" pos: "+ posFlag+"  rot: "+rotFlag);
-            //  update incidences if not already done due to position update
-        }
-
-        if (updateConnection)
-        {
-            SATIEconnection conn = null;
-            conn = myConnections.Find(item => item.listener == listener);
-
-            recomputeConnection(conn); 
-            updateRotFlag = updatePosFlag = false;   // THIS NEEDS TO BE FIXED FOR MULTIPLE LISTENER CASE (flag needs to be reset after all the listeners have called this function)
-
-            //StartCoroutine(resetUpdateFlags());  // reset the flags now that the connection has been updated
-         }
+		foreach ( SATIEconnection conn in myConnections)
+		{
+			if (conn.listener.updatePosFlag || conn.listener.updatePosFlag || updatePosFlag || updateRotFlag )
+			{
+				computeConnection(conn);
+				updatePosFlag = updateRotFlag = false;
+			}
+		}
     }
 
-    IEnumerator resetUpdateFlags() // at the very end of the frame reset update flags
-    {
-        yield return new WaitForEndOfFrame();
-        updateRotFlag = updatePosFlag = false; 
-        // Debug.Log("resetUpdateFlags ***************************************");
-    }
 
     
     // ***************************************  start of connection stuff ****************
 
-    void recomputeConnection(SATIEconnection conn)
+    void computeConnection(SATIEconnection conn)
     {
 
         string path;
         List<object> items = new List<object>();
         
-        Transform listener = conn.listener;
+		SATIElistener listener = conn.listener;
         Transform source = transform;
 
         // float dist = Vector3.Distance(source.position, listener.position);
 
   
-        float _spread = conn.spread;
+    //    float _spread = conn.spread;
         float vdelMs_, distFq_, gainDB_;
         float radius = conn.radius;
 
@@ -384,29 +348,29 @@ public class SATIEsource : SATIEnode {
       }
 
 
-    Vector3 getAedFromSink(Transform src, Transform snk)
-    {
-        Vector3 connVec = src.position - snk.position;
-
-        // Rotate connVec by the negative of the rotation described by the snk's
-        // orientation. To do this, just flip the sign of the quat.w:
-
-        //Quaternion negRot = snk.rotation * Quaternion.Euler(0, 0, 0);
-        Quaternion negRot = snk.rotation;
-        negRot.w *= -1f;
-        Vector3 rotConnVec = negRot * connVec;
-
-        Vector3 aed = cartesianToSpherical(rotConnVec);
-
-        //Debug.DrawRay (snk.position, rotConnVec); 
-        return new Vector3 (-aed.x, aed.y, aed.z);   // invert x to work with UNITY
-    }
+	Vector3 getAedFromSink(Transform src, SATIElistener snk)
+	{
+		Vector3 connVec = src.position - snk.transform.position;
+		
+		// Rotate connVec by the negative of the rotation described by the snk's
+		// orientation. To do this, just flip the sign of the quat.w:
+		
+		//Quaternion negRot = snk.rotation * Quaternion.Euler(0, 0, 0);
+		Quaternion negRot = snk.transform.rotation;
+		negRot.w *= -1f;
+		Vector3 rotConnVec = negRot * connVec;
+		
+		Vector3 aed = cartesianToSpherical(rotConnVec);
+		
+		//Debug.DrawRay (snk.position, rotConnVec); 
+		return new Vector3 (-aed.x, aed.y, aed.z);   // invert x to work with UNITY
+	}
 
 
     // does dot product to see how much source is pointing at sink
-    float getSrcIncidenceOnSnk(Transform src, Transform snk)
+	float getSrcIncidenceOnSnk(Transform src, SATIElistener snk)
     {
-        Vector3 connVec = Vector3.Normalize(snk.position - src.position);  
+        Vector3 connVec = Vector3.Normalize(snk.transform.position - src.position);  
 
         Vector3 srvVec = Vector3.Normalize(src.TransformDirection(Vector3.forward));
 
@@ -497,9 +461,9 @@ public class SATIEsource : SATIEnode {
     {
 
         Transform src = transform;
-        Transform snk = conn.listener;
+        SATIElistener snk = conn.listener;
 
-        float distance = Vector3.Distance( src.position, snk.position ); 
+        float distance = Vector3.Distance( src.position, snk.transform.position ); 
 
         float incidence = getSrcIncidenceOnSnk(src, snk);
         float radiusClip;
@@ -577,41 +541,51 @@ public class SATIEsource : SATIEnode {
     public override void  setNodeActive(string nodeName, bool nodeEnabled)
     {
         base.setNodeActive(nodeName, nodeEnabled);
-        SATIElistener.UpdateConnection += UpdateConnection;  // subscribe to SATIElistener class
+        //SATIElistener.UpdateConnection += UpdateConnection;  // subscribe to SATIElistener class
+		if (!nodeEnabled) updatePosFlag = updateRotFlag = false;
     }
 
     public override  void deleteNode(string nodeName)
     {
         base.deleteNode(nodeName);
-        SATIElistener.UpdateConnection -= UpdateConnection;  // unsubscribe to SATIElistener class
+        //SATIElistener.UpdateConnection -= UpdateConnection;  // unsubscribe to SATIElistener class
         myConnections.Clear();
         myListeners.Clear();
+
     }
 
     public override void Update()
     {
         base.Update();
 
-		if (Input.GetKeyDown("e"))
-		{
-
-			float pitch = UnityEngine.Random.Range(40f, 80f);
-			String pstr = pitch.ToString() + ", 1.0";
-
-			Debug.Log(pstr);
-
-
-			//SATIEsetup.sendNodeEvent(nodeName, "note", pstr);
-			//SATIEsetup.sendNodeEvent(nodeName, "t_gate", "1.0" );
-			//Debug.Log("source:Update  sending t_gate event");
-		}
+//		if (Input.GetKeyDown("e"))
+//		{
+//
+//			float pitch = UnityEngine.Random.Range(40f, 80f);
+//			String pstr = pitch.ToString() + ", 1.0";
+//
+//			Debug.Log(pstr);
+//
+//
+//			//SATIEsetup.sendNodeEvent(nodeName, "note", pstr);
+//			//SATIEsetup.sendNodeEvent(nodeName, "t_gate", "1.0" );
+//			//Debug.Log("source:Update  sending t_gate event");
+//		}
     }
 
 
     public override void FixedUpdate()
     {
-             base.FixedUpdate();
+		base.FixedUpdate();
+
     }
+
+	public override void LateUpdate()
+	{
+		base.LateUpdate();
+				
+	}
+
 
     void setHorizontalDirectivity(string tabName)
     {
