@@ -41,6 +41,20 @@ SynthDef(\speakerMapTest, { |out, gate=1|
 });
 
 
+// for GUI
+~usingServer = "Built-in Output";
+
+~rebootServerUsing = {
+	var deviceName = ~usingServer;
+	o.device = deviceName;
+	s.reboot;
+    ("booting with: "++deviceName).postln;
+    ("THE SERVER IS :  "++s).postln;
+    Server.allRunningServers.postln;
+
+};
+
+
 ~dacTestWindow=Window.new("dac testing", Rect(30, 30, 400, 130)).front;
 ~dacTestWindow.view.decorator=FlowLayout(~dacTestWindow.view.bounds);
 ~dacTestWindow.view.decorator.gap=8@2;
@@ -98,6 +112,10 @@ g = EZPopUpMenu.new(~dacTestWindow,250@30 ,"Device : ");
 
 Button.new(~dacTestWindow,Rect(10,10,120,30)).states_([["reboot server"]]).action_(~rebootServerUsing);
 
+
+
+
+
 z=0;
 ServerOptions.outDevices.do({ arg key ;
 var index = z;
@@ -106,14 +124,6 @@ var index = z;
 	z=z+1;
 });
 
-~usingServer = "Built-in Output";
-
-~rebootServerUsing = {
-	var deviceName = ~usingServer;
-	o.device = deviceName;
-	s.reboot;
-		("booting with: "++deviceName).postln;
-};
 
 
 // *****************************   speaker test window stuff
