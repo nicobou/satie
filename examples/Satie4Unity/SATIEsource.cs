@@ -46,9 +46,12 @@ public class SATIEsource : SATIEnode {
     public string sourceDirectivity = "omni";
     public float cardioidDirectivityExp = 1;  // used when "cardioid" type of source diffusity is selected
   
-    public float sourceFocusPercent = 100f;   // this % value is used in the connection to the listener(s), and determines the "spread" of the source on the listener, 0 = widest (omni), 100 = narrowest 
- 
+    public float sourceFocusPercent = 99f;   // this % value is used in the connection to the listener(s), and determines the "spread" of the source on the listener, 0 = widest (omni), 100 = narrowest 
+	private float _sourceFocusPercent;
+
     public float radius = 0f;
+	private float _radius;
+
     public float radiusTransitionFactor = 1.5f;
 
     //private float defaultEffectValue = 100f;  // default connection effect parameters value
@@ -91,7 +94,11 @@ public class SATIEsource : SATIEnode {
 		//Debug.Log("************\tsource: " + nodeName + "  group_______: " + group);
 
 
-        sourceFocusPercent = Mathf.Clamp(sourceFocusPercent, 0f, 100f);
+        _sourceFocusPercent = sourceFocusPercent = Mathf.Clamp(sourceFocusPercent, 0f, 100f);
+
+		_radius = radius;
+
+
  
         setHorizontalDirectivity(sourceDirectivity);
  
@@ -128,6 +135,25 @@ public class SATIEsource : SATIEnode {
          //}
      }
 
+	void updateConnectionParams()
+	{
+		foreach (SATIEconnection conn in myConnections) {
+			// note: the current implimentation does not provide for multiple listeners with listener-specific connection params.
+			
+			SATIEconnection c = new SATIEconnection ();
+			
+			conn.doppler = dopplarEffect;
+			conn.distance = distanceEffect;
+			conn.directivity = incidenceEffect;
+			conn.maxGainClip = maxGainClipDB;
+			conn.radius = radius;
+			conn.radiusTransitionFactor = radiusTransitionFactor;
+			conn.spread = sourceFocusPercent * 0.01f; 
+
+		}
+		updatePosFlag=true;
+		updateRotFlag=true;
+	}
 
     IEnumerator connectionInit() // now that litener(s) have been conection related parameters.
     {
@@ -182,19 +208,19 @@ public class SATIEsource : SATIEnode {
             {
                // note: the current implimentation does not provide for multiple listeners with listener-specific connection params.
 
-                SATIEconnection c = new SATIEconnection();
+                SATIEconnection conn = new SATIEconnection();
                 
-				c.listener = listener;
-                c.doppler = dopplarEffect;
-                c.distance = distanceEffect;
-                c.directivity = incidenceEffect;
-                c.maxGainClip = maxGainClipDB;
-                c.radius = radius;
-                c.radiusTransitionFactor = radiusTransitionFactor;
-                c.spread = sourceFocusPercent * 0.01f; 
+				conn.listener = listener;
+				conn.doppler = dopplarEffect;
+				conn.distance = distanceEffect;
+				conn.directivity = incidenceEffect;
+				conn.maxGainClip = maxGainClipDB;
+				conn.radius = radius;
+				conn.radiusTransitionFactor = radiusTransitionFactor;
+				conn.spread = sourceFocusPercent * 0.01f; 
 
                 
-                myConnections.Add(c);
+				myConnections.Add(conn);
 
                 //   /spatosc/core connect srcNode listenerNode
                 string path = "/spatosc/core";
@@ -246,7 +272,7 @@ public class SATIEsource : SATIEnode {
 		}
     }
 
-
+	
     
     // ***************************************  start of connection stuff ****************
 
@@ -264,7 +290,7 @@ public class SATIEsource : SATIEnode {
   
     //    float _spread = conn.spread;
         float vdelMs_, distFq_, gainDB_;
-        float radius = conn.radius;
+        float myRadius = conn.radius;
 
         float azimuth, elevation,distance;
         Vector3 listenerAED = new Vector3();            
@@ -276,18 +302,26 @@ public class SATIEsource : SATIEnode {
         distance = listenerAED.z;
 
         //For the gain and vdel calculation, we want the distance to the radius:
-        float dist2Radius = distance - radius;
+		float dist2Radius = distance - myRadius;
 
-        // check to see if we are within the radius transition distance; if so, reduce the localization effect for panning: via spread
-        if ( radius > 0f )    // using the radius effect ?
+     	
+		// handle spread
+		path = "/spatosc/core/connection/" + source.name + "->"+listener.name+"/spread";
+
+		// Using radius effect?  then check to see if we are within the radius transition distance; if so, reduce the localization effect for panning: via spread
+		if ( myRadius > 0f )    
         {
  
-            float radiusTransitionDistance = radius * conn.radiusTransitionFactor;
+			float radiusTransitionDistance = myRadius * conn.radiusTransitionFactor;
             float newSpread;
             
-            newSpread = conn.directivity * .01f * getSpreadIndex(distance, radius, radiusTransitionDistance, conn.spread);
+			newSpread = conn.directivity * .01f * getSpreadIndex(distance, myRadius, radiusTransitionDistance, conn.spread);
         
  
+
+
+
+         
             if ( newSpread != conn.currentspread )   // changed ?
             {
                 path = "/spatosc/core/connection/" + source.name + "->"+listener.name+"/spread";
@@ -297,10 +331,22 @@ public class SATIEsource : SATIEnode {
                 SATIEsetup.OSCtx(path, items);   // send spread message via OSC
                 items.Clear();
 
-                SATIEsetup.OSCdebug("/debug/getSpreadIndex", getSpreadIndex(distance, radius, radiusTransitionDistance, conn.spread));
+				// SATIEsetup.OSCdebug("/debug/getSpreadIndex", getSpreadIndex(distance, myRadius, radiusTransitionDistance, conn.spread));
 
             }
         }
+		else // no radus effect, so just make sure any new spread changes are handled
+		{
+			if (conn.currentspread != conn.spread)
+			{
+				conn.currentspread = conn.spread;
+				items.Add(conn.spread);             
+				SATIEsetup.OSCtx(path, items);   // send spread message via OSC
+				items.Clear();
+				//SATIEsetup.OSCdebug("/debug/getSpreadIndex", conn.spread);
+			}
+		}
+
         
         if (dist2Radius>0f)
         {
@@ -449,9 +495,13 @@ public class SATIEsource : SATIEnode {
         
         
         if (distance <= radius) return (0f);  // return spread of zero,  i.e. cos to the zeroth power = 1 - no panning effect
-        
-        if (distance >= radiusTransitionDistance ) return (sourceSpread);  // not within the transition radius, so set spread to "normal"
-        
+
+  
+        if (distance >= radiusTransitionDistance)
+        {
+            return (sourceSpread);  // not within the transition radius, so set spread to "normal"
+
+        }
         // else we are inbetween radius and radiusTransition limit, so calculate spread using scaled incidenceFactor_
         
         return ( sourceSpread * (distance- radius) / (radiusTransitionDistance - radius) );   
@@ -553,6 +603,24 @@ public class SATIEsource : SATIEnode {
         myListeners.Clear();
 
     }
+
+	public override void OnValidate()
+	{
+		base.OnValidate();
+
+
+		if (_sourceFocusPercent != sourceFocusPercent)
+		{
+			_sourceFocusPercent = sourceFocusPercent = Mathf.Clamp(sourceFocusPercent, 0f, 100f); 
+			updateConnectionParams();
+		}
+		if (_radius != radius)
+		{
+			_radius = radius; 
+			updateConnectionParams();
+		}
+	}
+
 
     public override void Update()
     {

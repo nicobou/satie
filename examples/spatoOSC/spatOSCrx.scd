@@ -287,8 +287,7 @@ s.waitForBoot{
 			{
 				if ( (args.size > 0 ) ,
 					{
-                        // invert the spread value (usually an exp) to work with SATIE's VBAP-based spatializer
-						spread = 100 *  ( 1 - args[1]);  // get values from vector, and write to connectionState
+						spread = 100 * args[1];  // get values from vector, and write to connectionState
 						thisProxy.set(\spread, spread);
 
 						//postf("~connectionCallback:  SPREAD:  connectionName: %  spread: % \n", connectionName, spread);

@@ -46,7 +46,7 @@ SynthDef(\speakerMapTest, { |out, gate=1|
 
 ~rebootServerUsing = {
 	var deviceName = ~usingServer;
-	o.device = ~outAudioDev = deviceName;
+	o.device = deviceName;
 	s.reboot;
     ("booting with: "++deviceName).postln;
     ("THE SERVER IS :  "++s).postln;

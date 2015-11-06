@@ -52,6 +52,14 @@ public class SATIEgroup : SATIEnode {
 	
         
     }
+
+	public override void OnValidate()
+	{
+		base.OnValidate();
+		
+	}
+
+
     public override void Update()
     {
         base.Update();

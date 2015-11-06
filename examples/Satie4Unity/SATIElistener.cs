@@ -14,6 +14,13 @@ public class SATIElistener : SATIEnode {
         base.Start();
     }
 
+	public override void OnValidate()
+	{
+		base.OnValidate();
+		
+	}
+
+
     public override void Update()
     {
         base.Update();

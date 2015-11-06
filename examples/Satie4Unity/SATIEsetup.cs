@@ -131,7 +131,7 @@ public class SATIEsetup : MonoBehaviour {
 	{
 		GameObject obj = GameObject.Find("FPStext");
 
-		fpsText = obj.GetComponent<Text> ();
+		if (obj != null) fpsText = obj.GetComponent<Text> ();
 
 		StartCoroutine( initSatie() );
 	}

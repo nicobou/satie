@@ -78,7 +78,7 @@ public class SATIEnode : MonoBehaviour {
 
 
     // called when inspector's values are modified
-    void OnValidate()
+	public virtual void OnValidate()
     {
 
         if (!_start)

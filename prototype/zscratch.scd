@@ -1,40 +1,35 @@
-// set these flags depending on your environment
+s.makeGui;
+s.meter;
 
 
 
-
-// -----------------------------------------------------------
-
-
-~sourceName= \ball_0;
-~listenerName= \listener;
-~connectionName = ~sourceName++"->"++~listenerName;
+w=Window.new("voicing", Rect(30, 30, 400, 140)).front;
+w.view.decorator=FlowLayout(w.view.bounds);
+w.view.decorator.gap=8@2;
 
 
+g = EZSlider(w, 380@20, "pitch ", ControlSpec(40, 110, \lin, 1, 60));
+g.action_({ |ez| (  ~globalSet.value(\note, [ ez.value, 1, 0.5 ] );  ~globalSet.value(\t_trig, 1);)});
 
 
-~createSource.value(~sourceName, "plugin://zkarpluck1", \default);
-~createConnection.value(~sourceName, ~listenerName);
-~connectionCallback.value( ["/spatosc/core/connection/"++ ~connectionName++"/update", 45,0,-10,1,14000]);
-
-~setEvent.value(~sourceName, \note, [60,1,1]);
-~setEvent.value(~sourceName, \t_trig, 1);
+// h = EZSlider(w, 380@20, "amp", ControlSpec(0, 1, \lin, 0.01, 0.5));
+// h.action_({ |ez| (  ~globalSet.value(\amp, (ez.value)))});
+//
 
 
-~deleteSource.value( ~sourceName );
-
-// proxyspace delay problem:
-
-// 250 ms delay with this
-    ~scbr.satieGroups[\default][\ball_0].set(\t_trig, 1);
+i = EZSlider(w, 380@20, "pos", ControlSpec(0.0, 1, \lin, 0.01, 0.14));
+i.action_({ |ez| (  ~globalSet.value(\pos, (ez.value)))});
 
 
-// 0 ms delay with this
-	~scbr.satieGroups[\default].group.set(\t_trig, 1);
+j = EZSlider(w, 380@20, "c1", ControlSpec(0.05, 5, \lin, 0.01, 1));
+j.action_({ |ez| (  ~globalSet.value(\c1, (ez.value)))});
 
 
+k = EZSlider(w, 380@20, "c3", ControlSpec(0.05, 20, \lin, 0.01, 1));
+k.action_({ |ez| (  ~globalSet.value(\c3, (ez.value)))});
 
-
+l = EZSlider(w, 380@20, "fb", ControlSpec(0.0, 100, \lin, 0.1, 20));
+l.action_({ |ez| (  ~globalSet.value(\fb, (ez.value)))});
 
 
 
@@ -43,114 +38,94 @@
 
 
 
+// harp 1
+~globalSet.value(\c1, 0.4);
+~globalSet.value(\c3, 5);
+~globalSet.value(\fb, 0);
+
+// harp 2
+~globalSet.value(\c1, 0.38);
+~globalSet.value(\c3, 6.11);
+~globalSet.value(\fb, 0);
+
+// harp 3 (longer dur)
+~globalSet.value(\c1, 0.15);
+~globalSet.value(\c3, 4.51);
+~globalSet.value(\fb, 0);
+
+// harp 3 (feather)
+~globalSet.value(\c1, 0.15);
+~globalSet.value(\c3, 9.51);
+~globalSet.value(\fb, 0);
+
+
+~globalSet.value(\c1, 0.2);
+~globalSet.value(\c3, 6);
+
+~globalSet.value(\c1, 0.2);
+~globalSet.value(\c3, 3);
+
+~globalSet.value(\c1, 0.2);
+~globalSet.value(\c3, 3);
+
+
+// lantern zoner
+~globalSet.value(\c1, 0.11);
+~globalSet.value(\c3, 3);
+~globalSet.value(\fb, 100);
+
+// lantern zoner (shorter)
+~globalSet.value(\c1, 0.7);
+~globalSet.value(\c3, 3);
+~globalSet.value(\fb, 100);
 
 
 
 
-~outAudioDev = nil;
-~superNovaFlag = true;
 
-~defaultListeningFormat = \stereoListener;
 
-~listeningFormat = ~defaultListeningFormat;    // will remain unless overwritten below
+
+
+
+
+
+
+
+
+
+//~domePlaybackFormat = \domeVBAP;       // for sato
+~domePlaybackFormat = \labodomeVBAP;      // for labodome
+
+
+//~outAudioDev = "Soundflower (64ch)";   //  for multi-channel testing without hardware on OSX
+
+~outAudioDev = "MADIface USB (23635751)";     // for labodome or SATO
 
 
 if ( ~superNovaFlag != nil,
 	{
-		Server.supernova;
+	Server.supernova;
 });
 
-o = Server.local.options;   // default set up options
-o.memSize = 2**20;        // probably should just leave this the same for everyting
-o.device = nil;  // default
-o.blockSize = 2048;
-
-
-// check to see if the BASH environment variable is set to either "sato" or "labodome"
-(
-//p = Pipe.new("ls -l", "r");            // list directory contents in long format
-p = Pipe.new("echo $SATIE_LISTENING_FORMAT", "r");            // list directory contents in long format
-
-l = p.getLine;                    // get the first line
-
-if ( l != nil,
-	{
-
-		// l.postln;
-		switch (l,
-			"sato",
-			{
-				"SETTING LISTENING FORMAT TO: domeVBAP".postln;
-				~listeningFormat = \domeVBAP;       // for sato
-
-			},
-			"labodome",
-			{
-				"SETTING LISTENING FORMAT TO: labodomeVBAP".postln;
-				~listeningFormat = \labodomeVBAP;      // for labodome
-
-			}
-		);
-});
-
-p.close;                    // close the pipe to avoid that nasty buildup
-);
-
-
-if (  ( ( ~listeningFormat == \domeVBAP)  ||   ( ~listeningFormat == \labodomeVBAP)  || ( ~listeningFormat == \octoVBAP)  ),
-	{
-
-		if (  ServerOptions.outDevices.indexOfEqual("HDSPe MADI (23453676)") != nil,
-		{
-				postln("AudioOutDev: HDSPe MADI");
-				~outAudioDev = "HDSPe MADI (23453676)";
-		});
-
-		if (  ServerOptions.outDevices.indexOfEqual("MADIface USB (23635751)") != nil,
-		{
-				postln("AudioOutDev:  MADIface USB");
-				~outAudioDev = "MADIface USB (23635751)";
-		});
-
-	},  // else
-	{
-		if ( ~listeningFormat == \stereoListener,
-		{
-				postln("AudioOutDev: Built-in Output");
-				~outAudioDev = "Built-in Output";
-		// o.dump;
-		});
-});
-
-
-
-
-switch (~listeningFormat,
-	\domeVBAP,
-	{
-		o.numOutputBusChannels = 32;
-	},
-	\labodomeVBAP,
-	{
-		o.numOutputBusChannels = 24;
-	},
-	\octoVBAP,
-	{
-		o.numOutputBusChannels = 8;
-	},
-	\stereoListener,
-	{
-	o.numOutputBusChannels = 2;
-	}
-);
-
+	o = Server.local.options;   // set up options
+    o.memSize = 2**19;        // probably should just leave this the same for everyting
+	//o.blockSize = 2048;
 
 
 if ( ~outAudioDev != nil ,
-	{
-		o.device = ~outAudioDev;
+{
+	o.device = ~outAudioDev;
 });
 
+   // o.device = "MADIface USB (23635751)";     // set for dome or labodome
+
+if ( ~domePlaybackFormat != nil,
+	{
+		o.memSize = 2**19;
+		o.blockSize = 2048;
+		o.numOutputBusChannels = 32;
+		// o.dump;
+});
 
 
 ~allNodes.size;
@@ -162,11 +137,6 @@ if ( ~outAudioDev != nil ,
 
 
 ~clearScene.value();
-
-
-// ********************************************************************************
-
-
 
 
 ~createSource.value(\testNode0);
@@ -362,39 +332,6 @@ t.stop;
 });
 
 
-
-
-
-
-
-
-~incidenceVal = 0;
-
-~incidenceIndex=0;
-t = Task({ {
-	~nodeCount.do( { arg item;
-		var pitch = 55 + rand(10);
-		var nodename=("ball_"++item++":spatOSCsource_"++(item+1)).asSymbol;
-		var connectionName = nodename++"->listener:spatOSClistener_0";
-		// var incidence =  ~incidenceIndex.mod(100) * 0.01;
-
-		// var pitch = 55 + rand(10);
-
-		~incidenceIndex = (~incidenceIndex + 1) ;
-
-
-		//incidence.postln;
-
-		~setEvent.value(nodename, \note, [pitch,1,~incidenceVal]);
-		~setEvent.value(nodename, \t_trig, 1);
-		item.postln;
-		0.2.wait;
-	});
-	//~globalSet.value(\t_trig, 1);
-	0.wait; }.loop });
-
-t.start;
-t.stop;
 
 
 
