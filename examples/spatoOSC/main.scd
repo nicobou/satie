@@ -102,8 +102,9 @@ if (  ( ( ~listeningFormat == \domeVBAP)  ||   ( ~listeningFormat == \labodomeVB
 	{
 		if ( ~listeningFormat == \stereoListener,
 		{
-				postln("AudioOutDev: Built-in Output");
-				~outAudioDev = "Built-in Output";
+				// better to let the system pick the device by default
+				//postln("AudioOutDev: Built-in Output");
+				//~outAudioDev = "Built-in Output";
 		// o.dump;
 		});
 });
