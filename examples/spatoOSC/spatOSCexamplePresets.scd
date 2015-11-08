@@ -37,10 +37,10 @@ m.action_({ |ez| (  ~setPreset.value( (ez.value)))});
 // proxyspace delay problem:
 
 // 250 ms delay with this
-    ~scbr.satieGroups[\default][\ball_0].set(\t_trig, 1);
+ //   ~scbr.satieGroups[\default][\ball_0].set(\t_trig, 1);
 
 // 0 ms delay with this
-	~scbr.satieGroups[\default].group.set(\t_trig, 1);
+//	~scbr.satieGroups[\default].group.set(\t_trig, 1);
 
 
 

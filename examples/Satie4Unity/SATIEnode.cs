@@ -1,4 +1,4 @@
-﻿//using System;
+﻿ //using System;
 using System.IO;
 using UnityEngine;
 using System.Collections;
@@ -245,7 +245,7 @@ public class SATIEnode : MonoBehaviour {
 			if (transform.name == node.name)
 			{
 				transform.name = transform.name + "_" + transform.GetInstanceID();  
-				Debug.LogError("SATIEnode: initNode:  duplicate node name found. Renaming node: "+ transform.name);
+				Debug.LogWarning("SATIEnode: initNode:  duplicate node name found. Renaming node: "+ transform.name);
 			}
 		}
 		nodeList.Add( (SATIEnode) this);
@@ -378,6 +378,18 @@ public class SATIEnode : MonoBehaviour {
    }
 
   
+	public void sendEvent (List<object> items )   // items contains keyword data1 data2..... dataN
+	{
+
+		string path;
+
+		path = "/spatosc/core/"+nodeType+"/" + nodeName + "/event";
+				
+		SATIEsetup.OSCtx(path, items);
+		items.Clear();
+	}
+
+
 
     public virtual void  setNodeActive(string nodeName, bool nodeEnabled)
     {

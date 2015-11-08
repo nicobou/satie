@@ -35,15 +35,17 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 
 ~name = \pbell1;
 
-~function = { |outbus, t_trig = 1, decayscale = 1, i_doneAction = 0, note = #[60, 1, 0.5]  |
+~function = { |outbus, t_trig = 0, decayscale = 0.2, i_doneAction = 0, note = #[60, 1, 0.5]  |
 
 	var sig, input, first, freqscale,  transient, bellFq, halfSR, lpFq, fqScaler,fqRange, fqLowClip, fqHighClip,fqOffset, incidenceScaler,ampScaler;
 
 	var freq = note[0].midicps;
 	var amp = note[1];
-	 var incidence = note[2].clip(0,1);
 
-	fqLowClip = 200;   // lowest good sounding note
+	var incidence = note[2].clip(0,1);
+
+	incidence = abs(incidence);
+	fqLowClip = 100;   // lowest good sounding note
 	fqHighClip = 5000;   // highest good sounding note
 
 	freqscale = Clip.kr( freq, fqLowClip, fqHighClip)  / 2434;
@@ -121,7 +123,9 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
   ], input, freqscale, 0, decayscale);
 
 DetectSilence.ar(sig, doneAction: i_doneAction);
-  Out.ar(outbus, sig);
+  // Out.ar(outbus, sig);  enable this for debugging
+
+	sig;
 
 };
 
