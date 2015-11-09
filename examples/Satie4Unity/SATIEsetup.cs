@@ -36,11 +36,16 @@ public class SATIEsetup : MonoBehaviour {
     public float updateRateMs = 30;
     private float _updateRateMs;
 
-    [HideInInspector] 
+	public bool invertAzimuth = false;
+
+	public static bool invertAzi = false;   // this is referenced by source connections
+
+
+	[HideInInspector] 
     public static float updateRateSecs = .02f;
 
 
-       
+      
     // list of all instantiated nodes
     [HideInInspector] 
     public  static List<SATIEnode> SATIEnodeList = new List<SATIEnode>();
@@ -133,6 +138,8 @@ public class SATIEsetup : MonoBehaviour {
 
 		if (obj != null) fpsText = obj.GetComponent<Text> ();
 
+		invertAzi = invertAzimuth;
+
 		StartCoroutine( initSatie() );
 	}
 	
@@ -142,6 +149,10 @@ public class SATIEsetup : MonoBehaviour {
 
         if (_updateRateMs != updateRateMs )        
             setUpdateRate( updateRateMs );
+
+		if (invertAzi != invertAzimuth)
+				invertAzi = invertAzimuth;
+
     }
 
     void setUpdateRate(float updateMs)

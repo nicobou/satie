@@ -407,9 +407,10 @@ public class SATIEsource : SATIEnode {
 		Vector3 rotConnVec = negRot * connVec;
 		
 		Vector3 aed = cartesianToSpherical(rotConnVec);
-		
+
+
 		//Debug.DrawRay (snk.position, rotConnVec); 
-		return new Vector3 (-aed.x, aed.y, aed.z);   // invert x to work with UNITY
+		return new Vector3 (aed.x * ((SATIEsetup.invertAzi) ? -1f:1f), aed.y, aed.z);   // invert x to work with UNITY
 	}
 
 
