@@ -22,6 +22,6 @@
 
 ~name = \emptySpat;
 
-~function = {|in = 0, aziDeg = 0, eleDeg = 0, gainDB = 0, delayMs = 1, lpHz = 15000, spread = 1 |
+~function = {|in = 0, aziDeg = 0, eleDeg = 0, gainDB = 0, delayMs = 1, lpHz = 15000, hpHz = 20, spread = 1 |
 	DC.ar(0);
 };
