@@ -35,7 +35,7 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 
 ~name = \pbell1;
 
-~function = { |outbus, t_trig = 0, decayscale = 0.2, i_doneAction = 0, note = #[60, 1, 0.5]  |
+~function = { |outbus, t_trig = 0, decayscale = 0.2, i_doneAction = 0, note = #[60, 0, 0.5]  |
 
 	var sig, input, first, freqscale,  transient, bellFq, halfSR, lpFq, fqScaler,fqRange, fqLowClip, fqHighClip,fqOffset, incidenceScaler,ampScaler;
 
@@ -70,7 +70,6 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 	fqRange =   (0.5*SampleRate.ir) - fqOffset;
 
 	lpFq =  fqOffset + (incidenceScaler * fqRange);
-
 
     transient = LPF.ar(Trig.ar(t_trig, SampleDur.ir)!2, 10000 * freqscale);
 
