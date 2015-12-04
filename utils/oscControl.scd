@@ -149,13 +149,14 @@
 // eg. /SATIE create name - to create a group
 //     /SATIE/default create name - to create an instance of a synth or effect
 ~coreCallback = { | msg |
-	var url, dest, obj, command, name ;
+	var url, dest, obj, command, name, synth;
 	url = msg[0].asString.split;
 	url.removeAt(0); // remove thefirst empty element
 	dest = ~getAddressLevel.value(url);
 	name = msg[2].asSymbol;
 	command = msg[1];
 	postf("coreCallback argument: %\n", msg);
+	postf("message size: %\n", msg.size);
 	postf("coreCallback url: %\n", url);
 	postf("command is %\n", command);
 	switch(command,
@@ -164,7 +165,17 @@
 			switch(dest,
 				\system, {
 					"***************** received create".postln;
-					~createGroup.value(name);
+					if (msg.size == 4,
+						{
+							synth = msg[3];
+							postf("creating synth % in default group\n", synth);
+							~createSoundSource.value(name, synth, \default);
+
+						},
+						{
+							~createGroup.value(name);
+						}
+					);
 				},
 				\group,  {
 					var group, synth;
