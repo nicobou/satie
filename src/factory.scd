@@ -36,7 +36,7 @@
 			synthArgs = #[] |
 			SynthDef(name,
 				// can the "gate" arg name be changed to avoid conflicts with plugin-synthDefs that use it
-				{| gate = 1,  aziDeg = 0, eleDeg = 0, gainDB = 0, delayMs = 1, lpHz = 15000, hpHz = 20, spread = 1 |
+				{| gate = 1,  aziDeg = 0, eleDeg = 0, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 0.5 , spread = 1 |
 					var in, env;
 					in = SynthDef.wrap(srcfunc, prependArgs:  synthArgs);
 					// fade in set to as short as possible for percussive cases

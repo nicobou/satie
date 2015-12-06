@@ -240,9 +240,10 @@ s.waitForBoot{
 	// /spatosc/core/connection/source->listener/spread  exp   // exponent for incidence effect
 	~connectionCallback = { | args |
 		var nodeName, listenerName, connectionName, type, temp, charIndex;
-		var aziDeg, eleDeg, gainDB, delayMs, lpHz, spread;
+		var aziDeg, eleDeg, gainDB, delayMs, lpHz, hpHz, spread;
 		var thisProxy;
 		var index;
+		var halfSrate = 0.5 * s.sampleRate;
 
 		//args.postln;
 		connectionName = args[0].asString.split[4].asSymbol;   // this is terrible.  The spatOSC message format should be improved here
@@ -279,6 +280,22 @@ s.waitForBoot{
 
 
 						thisProxy.set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB, \delayMs, delayMs, \lpHz, lpHz);
+						//postf("~connectionCallback:  update: lpHz  % \n", lpHz);
+
+					}
+				)
+			},
+			'hpHz',   //  degree  (0 == noEffect,  1 == full effect)
+			{
+				if ( (args.size != 2 ) ,
+					{"connectionCallback: OSCrx hpHz message wrong number of values".warn;},
+					// else
+					{
+						// get value from vector, and write to connectionState
+						hpHz = args[1];   // get highpass cutoff value
+						thisProxy.set(\hpHz ,  clip(hpHz, 1, halfSrate ));
+
+								postf("~connectionCallback:  hpHz connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
 
 					}
 				)

@@ -20,6 +20,11 @@ using UnityEngine;
 //SATIEsetup.setConnectionMute (nodeName, listener, mute);
 
 
+// note: this structure will allow for sources to have multiple connections to multiple listeners
+// HOWEVER, this implementation is incomplete, due to the work involved to complete it.
+// thus, it is assumed elsewhere in the code, that all sources are connected a unique listener;
+
+
 public class SATIEconnection {
     public float doppler = 100f;
     public float distance = 100f;
@@ -64,15 +69,82 @@ public class SATIEsource : SATIEnode {
 
 	public List<SATIElistener> myListeners = new List<SATIElistener>(); 
 
+	// implemented for a single listener only
+	public bool underWaterEnabled = false;
+	public bool aboveWaterEnabled = true;
+
+	public float underWaterHpHz = 800;  // low frequency cutoff when underwater
+	private float _underWaterHpHz;
+
+	[Range(0f, -80f)]
+	public float underWaterDBdrop = -40;  //  DB drop of an above water sound, when heard when under water
+	private float _underWaterDBdrop;
+
+	[Range(0.01f, 300f)]
+	public float underWaterLpassEffect = 500;  // low pass  effect % for underWater connection
+	private float _underWaterLpassEffect;
+
+	[Range(0.01f, 300f)]
+	public float underWaterDistanceEffect = 50;  // distance effect %  for underWater connection
+	private float _underWaterDistanceEffect;
+
+	[Range(0.01f, 300f)]
+	public float underWaterIncidenceEffect = 50;  // distance effect %  for underWater connection
+	private float _underWaterIncidenceEffect;
+
+
+
+
     private float SPEED_OF_SOUND = 0.340f;
+
+
+
 
     [HideInInspector]
     public List<SATIEconnection> myConnections = new List<SATIEconnection>();
 
     delegate float SrcDirFnPtr(float theta);   //holds function for node's H directivity
     SrcDirFnPtr srcDirFnPtr;
-
+	
    
+	public override void OnValidate()
+	{
+		base.OnValidate();
+		
+		
+		if (_sourceFocusPercent != sourceFocusPercent)
+		{
+			_sourceFocusPercent = sourceFocusPercent = Mathf.Clamp(sourceFocusPercent, 0f, 100f); 
+			updateConnectionParams();
+		}
+		if (_radius != radius)
+		{
+			_radius = radius; 
+			updateConnectionParams();
+		}
+		if (_underWaterDBdrop != underWaterDBdrop)
+		{
+			_underWaterDBdrop = underWaterDBdrop; 
+		}
+		if (_underWaterLpassEffect != underWaterLpassEffect)
+		{
+			_underWaterLpassEffect = underWaterLpassEffect; 
+		}
+		if (_underWaterDistanceEffect != underWaterDistanceEffect)
+		{
+			_underWaterDistanceEffect = underWaterDistanceEffect; 
+		}
+		if (_underWaterIncidenceEffect != underWaterIncidenceEffect)
+		{
+			_underWaterIncidenceEffect = underWaterIncidenceEffect; 
+		}
+		if (_underWaterHpHz != underWaterHpHz) 
+		{
+			_underWaterHpHz = underWaterHpHz;
+		}
+	}
+
+
 
    public override void Start()
     {
@@ -86,7 +158,7 @@ public class SATIEsource : SATIEnode {
 			group = gameObject.tag;
         else group = "default";
 
-		Debug.Log("************ source: " + nodeName + "  group_______: " + group);
+		//Debug.Log("************ source: " + nodeName + "  group_______: " + group);
 
         initNode();  // must be called before parent's "Start()"
         base.Start();
@@ -284,12 +356,10 @@ public class SATIEsource : SATIEnode {
         
 		SATIElistener listener = conn.listener;
         Transform source = transform;
+ 
+		float newSpread;
 
-        // float dist = Vector3.Distance(source.position, listener.position);
-
-  
-    //    float _spread = conn.spread;
-        float vdelMs_, distFq_, gainDB_;
+		float vdelMs_, distFq_, gainDB_;
         float myRadius = conn.radius;
 
         float azimuth, elevation,distance;
@@ -305,23 +375,48 @@ public class SATIEsource : SATIEnode {
 		float dist2Radius = distance - myRadius;
 
      	
+
+		//  set  cutoff filter to eliminate low frequencies when under water
+		if (listener.submergedFlag) {
+			if (_underWaterHpHz != underWaterHpHz) {
+				_underWaterHpHz = underWaterHpHz;
+				path = "/spatosc/core/connection/" + source.name + "->" + listener.name + "/hpHz";
+				items.Add (_underWaterHpHz);             
+				SATIEsetup.OSCtx (path, items);   // send spread message via OSC
+				items.Clear ();
+				//Debug.Log("_underWaterHpHz = " + _underWaterHpHz);
+			}
+		} else 
+		{
+			if (_underWaterHpHz == underWaterHpHz) {
+				_underWaterHpHz = 1f;		// reset the cutoff filter to normal
+				path = "/spatosc/core/connection/" + source.name + "->" + listener.name + "/hpHz";
+				items.Add (_underWaterHpHz);             
+				SATIEsetup.OSCtx (path, items);   // send spread message via OSC
+				items.Clear ();
+				//Debug.Log("_underWaterHpHz = " + _underWaterHpHz);
+			}
+		}
+
+
 		// handle spread
 		path = "/spatosc/core/connection/" + source.name + "->"+listener.name+"/spread";
 
 		// Using radius effect?  then check to see if we are within the radius transition distance; if so, reduce the localization effect for panning: via spread
 		if ( myRadius > 0f )    
         {
+			// have not yet debugged this case when underwaterEnabled is used
+
  
 			float radiusTransitionDistance = myRadius * conn.radiusTransitionFactor;
-            float newSpread;
             
-			newSpread = conn.directivity * .01f * getSpreadIndex(distance, myRadius, radiusTransitionDistance, conn.spread);
-        
- 
+
+			if (listener.submergedFlag && underWaterEnabled)
+				newSpread = underWaterIncidenceEffect * .01f ;   // diminish incidence underwater: multiply the spread by some percentage 
+			else 
+				newSpread = conn.directivity * .01f * getSpreadIndex(distance, myRadius, radiusTransitionDistance, conn.spread);
 
 
-
-         
             if ( newSpread != conn.currentspread )   // changed ?
             {
                 path = "/spatosc/core/connection/" + source.name + "->"+listener.name+"/spread";
@@ -337,10 +432,15 @@ public class SATIEsource : SATIEnode {
         }
 		else // no radus effect, so just make sure any new spread changes are handled
 		{
-			if (conn.currentspread != conn.spread)
+			if (listener.submergedFlag && underWaterEnabled)
+				newSpread = underWaterIncidenceEffect * .01f ;   // diminish incidence underwater: multiply the spread by some percentage 
+			else 
+				newSpread = conn.spread; 
+
+			if (conn.currentspread != newSpread)
 			{
-				conn.currentspread = conn.spread;
-				items.Add(conn.spread);             
+				conn.currentspread = newSpread;
+				items.Add(newSpread);             
 				SATIEsetup.OSCtx(path, items);   // send spread message via OSC
 				items.Clear();
 				//SATIEsetup.OSCdebug("/debug/getSpreadIndex", conn.spread);
@@ -351,37 +451,80 @@ public class SATIEsource : SATIEnode {
         if (dist2Radius>0f)
         {
             // now from distance, compute gain, lowPassCutoff-fq and variable delay:
-            float distanceScaler;
+           float distanceScaler;
             float scaledDistance; 
             float srcDirectivityScaler;
 
+			float distanceEffect = conn.distance;
+			float lowPassEffect;
+			float directivityEffect = conn.directivity;
             
-            vdelMs_ = getVariableDelay(dist2Radius, conn.doppler);
-            
-            scaledDistance = Mathf.Pow(dist2Radius, conn.distance * 0.01f); // apply distanceFactor (effect) param
-                       
-            distFq_ = getDistFq(scaledDistance);  // using distance after distanceFactor applied
-            
+			vdelMs_ = getVariableDelay(dist2Radius, conn.doppler);   // calculate this independently of underwater status
+
+			if (listener.submergedFlag && underWaterEnabled)
+			{
+				scaledDistance = Mathf.Pow(dist2Radius, underWaterDistanceEffect * 0.01f ); // calculate distanceFactor for underwater
+			}
+			else 
+				scaledDistance = Mathf.Pow(dist2Radius, distanceEffect * 0.01f); // calculate distanceFactor (effect) param
+  
+            distFq_ = getDistFq(scaledDistance);  // using distance after distanceFactor applied          
+
             distanceScaler = 1.0f / (1.0f + scaledDistance);
 
-            srcDirectivityScaler = calcSrcDirectivity(conn);  
+			srcDirectivityScaler = calcSrcDirectivity(conn);  
 
             if (debug) Debug.DrawRay (source.position, (source.forward * 50f * srcDirectivityScaler), Color.green, 2f); 
 
             // obtain connection energy using distance * sourceDirectivity (based on incidence to listener)
-            gainDB_ = getGainDB(distanceScaler, srcDirectivityScaler, conn.directivity, conn.maxGainClip);
 
-        }
-        else
+			if (listener.submergedFlag && underWaterEnabled)
+				gainDB_ = getGainDB(distanceScaler, srcDirectivityScaler, (underWaterIncidenceEffect * 0.01f), conn.maxGainClip);
+			else
+				gainDB_ = getGainDB(distanceScaler, srcDirectivityScaler, conn.directivity, conn.maxGainClip);
+
+
+			if (listener.submergedFlag)
+			{
+				//distFq_ = distFq_ * underWaterLpassEffect  * 0.01f;
+				//Debug.Log("distFq_ = " + distFq_);
+
+				// distFq_ =  distFq_ *  (100f / underWaterLpassEffect); // calculate distanceFactor (effect) param
+
+				distFq_ =  Mathf.Pow (distFq_, (100 / underWaterLpassEffect)); // calculate distanceFactor (effect) param
+				distFq_ = Mathf.Clamp(distFq_, 100, 22050f); 
+
+				// sounds not supposed to be heard underwater are greatly attenuated
+				if(!underWaterEnabled)
+				{
+					gainDB_ = gainDB_ + underWaterDBdrop; // calculate distanceFactor (effect) param
+					// if ( gainDB_ > conn.maxGainClip )  gainDB_ =   conn.maxGainClip;
+				}
+			}
+		}
+		else   // very close to sound node, no attenuation effect
         {
-            distFq_ = 22050.0f;  // this should be redone in terms of .5 * SampRate
-            vdelMs_ = 0.0f;
-            gainDB_ = conn.maxGainClip ;
-        }
+			vdelMs_ = 0.0f;	
+			gainDB_ = conn.maxGainClip ;
+
+			if (listener.submergedFlag) 
+			{
+				distFq_ =  Mathf.Pow (22050f, (100 / underWaterLpassEffect)); // calculate distanceFactor (effect) param
+				distFq_ = Mathf.Clamp(distFq_, 100, 22050f); 
+
+				if (!underWaterEnabled)
+					gainDB_ = gainDB_  + underWaterDBdrop;
+			}
+			else
+			{
+				distFq_ = 22050f;
+			}
+		}
         // /spatosc/core/connection/sourceNode->listenerNode/update azimuthRADIANS elevationRADIANS gainDB delayMS  lpHZ 
         // Debug.Log("  AZI: "+ azimuth*Mathf.Rad2Deg+"  Elev: "+elevation*Mathf.Rad2Deg); 
 
         path = "/spatosc/core/connection/" + source.name + "->"+listener.name+"/update";
+
 
         items.Add(azimuth);
         items.Add(elevation);
@@ -464,11 +607,12 @@ public class SATIEsource : SATIEnode {
         float hz;
         float ms;
         
-        distance = (distance < 1000f) ? distance : 1000f;  // clip distance to 1000m
+		distance = (distance > 1000f) ? 1000f : distance;  // clip distance to 1000m
+
         
         ms = distance * (1.0f / SPEED_OF_SOUND); // convert to milliseconds
         hz = (1f - (ms * 0.00034002f));
-        hz= 500f + (hz*hz*19500f);
+					hz= 100f + (hz*hz*19900f);
         return hz;
     }
     
@@ -605,22 +749,7 @@ public class SATIEsource : SATIEnode {
 
     }
 
-	public override void OnValidate()
-	{
-		base.OnValidate();
 
-
-		if (_sourceFocusPercent != sourceFocusPercent)
-		{
-			_sourceFocusPercent = sourceFocusPercent = Mathf.Clamp(sourceFocusPercent, 0f, 100f); 
-			updateConnectionParams();
-		}
-		if (_radius != radius)
-		{
-			_radius = radius; 
-			updateConnectionParams();
-		}
-	}
 
 
     public override void Update()
@@ -674,7 +803,7 @@ public class SATIEsource : SATIEnode {
         // else
         sourceDirectivity = "omni";
         srcDirFnPtr = getOmni;
-        Debug.Log("SETTING OMNI");
+        //Debug.Log("SETTING OMNI");
     }
 
 }

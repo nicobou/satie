@@ -55,6 +55,7 @@
 			//path.postln;
 			self.newOSC(connectionName ++ \update, cb,  path +/+ "update");
 			self.newOSC(connectionName ++ \spread, cb,  path +/+ "spread");
+			self.newOSC(connectionName ++ \hpHz, cb,  path +/+ "hpHz");
 		};
 
 		// try to remove the OSC definitions.
@@ -83,6 +84,7 @@
 			//OSCdef((connectionName ++ \spread).asSymbol ).clear.free;
 			self.deleteOSC(connectionName ++ \update);
 			self.deleteOSC(connectionName ++ \spread);
+			self.deleteOSC(connectionName ++ \hpHz);
 		};
 
 				//  /a.renderer    for control messages to the renderer

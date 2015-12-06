@@ -1,11 +1,6 @@
 s.makeGui;
 s.meter;
-
-
-
-
-
-
+s.sampleRate
 
 
 ~nodeName= "bell_0";
@@ -25,14 +20,48 @@ s.meter;
 
 
 
-~connectionCallback.value( ["/spatosc/core/connection/"++ ~connectionName++"/update", 0,0,-3,1,20000]);
+~connectionCallback.value( ["/spatosc/core/connection/"++ ~connectionName++"/update", 0,0,-1,1,22050]);
 
+~connectionCallback.value( ["/spatosc/core/connection/"++ ~connectionName++"/submerse", 1]);
+~setEvent.value(~nodeName, \t_trig, 1);
 
-~setEvent.value(~nodeName, \note, [70,1,1]);
+~connectionCallback.value( ["/spatosc/core/connection/"++ ~connectionName++"/submerse", 0]);
 ~setEvent.value(~nodeName, \t_trig, 1);
 
 
+~setEvent.value(~nodeName, \note, [80,1,1]);
+~setEvent.value(~nodeName, \t_trig, 1);
 
+
+~setEvent.value(~nodeName, \t_trig, 1);
+~setEvent.value(~nodeName, \hpHz, 0);
+~setEvent.value(~nodeName, \gainDB, 6);
+
+
+~allSourceNodes[\bell_0].at(\proxy).set(\hpHz ,  10000 );
+~setEvent.value(~nodeName, \t_trig, 1)
+
+
+~allSourceNodes[\bell_0].at(\proxy).set(\hpHz ,   );
+
+
+
+
+~scbr.satieGroups[\default].group.set(\hpHz ,  800 );
+
+~scbr.satieGroups[\default].group.set(\hpHz ,  1 );
+
+~scbr.satieGroups[\default].group.set(\t_trig, 1)
+
+
+
+~setEvent.value(~nodeName, \t_trig, 1)
+
+
+
+~allSourceNodes[\bell_0].at(\proxy).set(\gainDB ,  0 );
+
+gainDB
 
 
 
@@ -40,7 +69,7 @@ s.meter;
 // proxyspace delay problem:
 
 // 250 ms delay with this
-~scbr.satieGroups[\default][\Capsule].set(\t_trig, 1);
+~scbr.satieGroups[\default][~nodeName.asSymbol].set(\t_trig, 1);
 
 // 0 ms delay with this
 	~scbr.satieGroups[\default].group.set(\t_trig, 1);
