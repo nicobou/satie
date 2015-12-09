@@ -30,26 +30,22 @@
 
 ~name = \labodomeVBAP;
 
-~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 0.5, spread = 1 |
+~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP
 	var delay = delayMs * 0.001;    // convert to seconds
 	var slewDelay = 0.3; //  note: this needs to be improved ... smoother
 	var slewGain = 0.1;
-	var slewFilter = 0.25;
+	var slewFilter = 0.6;
 	var slewPanning = 0.030;
 	var panWeights;
 	var outsig;
 
+	outsig =  LPF.ar(DelayC.ar(
+		VarLag.kr(gain, slewGain) * in,
+		maxdelaytime: 0.5,
+		delaytime: delay.lag(slewDelay)),   lpHz.lag(slewFilter)    );
 
-// need to work out the interpolation better, using Lag or Ramp or whatever else...
-
-	outsig = HPF.ar(
-		LPF.ar(
-		DelayC.ar(
-			Ramp.kr(gain, slewGain) * in,
-			maxdelaytime: 0.5,
-			delaytime: Lag.kr(delay, slewDelay)),
-		VarLag.kr(lpHz, slewFilter)) , VarLag.kr(hpHz, slewFilter));
+	outsig = BHiPass.ar(outsig, VarLag.kr(hpHz, slewFilter )  );
 
 	panWeights = VBAP.kr(numChans: ~spk24.numSpeakers,
 		in: 1.0,
@@ -57,15 +53,16 @@
 		azimuth: aziDeg,
 		elevation: eleDeg,
 		spread: spread );
-	//SendTrig.kr(Impulse.kr(1), 0, Ramp.kr(lpHz, slewFilter));  //  in synthdef
+	//SendTrig.kr(Impulse.kr(4), 0,  VarLag.kr(hpHz, 1, 0, Env.shapeNumber(\sin)  )     );  //  Enable for debugging
 	outsig * Ramp.kr(panWeights, slewPanning);
 };
 
 
 // debug
-
-//o = OSCresponderNode(s.addr, '/tr', { |time, resp, msg| msg.postln }).add;
-//o.remove;  // when done, you need to clean up the OSCresponderNode
+/*
+o = OSCresponderNode(s.addr, '/tr', { |time, resp, msg| msg.postln }).add;
+o.remove;  // when done, you need to clean up the OSCresponderNode
+*/
 
 //  in synthdef
 //SendTrig.kr(Impulse.kr(1), 0, freq);  

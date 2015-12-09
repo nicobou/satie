@@ -53,6 +53,7 @@ s.sampleRate
 
 ~scbr.satieGroups[\default].group.set(\t_trig, 1)
 
+~scbr.satieGroups[\default].group.set(\decayscale, 0.6)
 
 
 ~setEvent.value(~nodeName, \t_trig, 1)

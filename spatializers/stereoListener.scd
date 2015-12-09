@@ -22,20 +22,26 @@
 // lpHz    hertz
 // spread  units  (0 == directional, ....,  100 == omni)
 
-~function = {|in = 0, aziDeg = 0, eleDeg = 0, gainDB = 0, delayMs = 1, lpHz = 15000, hpHz = 20, spread = 1 |
+~function = {|in = 0, aziDeg = 0, eleDeg = 0, gainDB = 0, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP
 	var delay = delayMs * 0.001;    // convert to seconds
 	var slewDelay = 0.3; //  note: this needs to be improved ... smoother
-	var slewGain = 0.03;
-	var slewLp = 0.3;
+	var slewGain = 0.1;
+	var slewFilter = 0.6;
+	var slewPanning = 0.030;
+	var panWeights;
 
-	var insig;
 	var aziScale = 0.01 * (100 - spread);
 	var theta = aziScale * aziDeg *  0.01745329251994;  // radians
 	var index = SinOsc.kr(0, theta);
+	var outsig;
 
-	Pan2.ar( LPF.ar(DelayC.ar(
-		gain.lag(slewGain) *  in,
+	outsig =  LPF.ar(DelayC.ar(
+		VarLag.kr(gain, slewGain) * in,
 		maxdelaytime: 0.5,
-		delaytime: delay.lag(slewDelay)), lpHz.lag(slewLp)), index );
+		delaytime: delay.lag(slewDelay)),   lpHz.lag(slewFilter)    );
+
+	outsig = BHiPass.ar(outsig, VarLag.kr(hpHz, slewFilter )  );
+
+	Pan2.ar(outsig, index );
 };

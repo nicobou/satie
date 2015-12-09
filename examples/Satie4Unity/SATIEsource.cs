@@ -73,6 +73,7 @@ public class SATIEsource : SATIEnode {
 	public bool underWaterEnabled = false;
 	public bool aboveWaterEnabled = true;
 
+	[Range(1f, 5000f)]
 	public float underWaterHpHz = 800;  // low frequency cutoff when underwater
 	private float _underWaterHpHz;
 

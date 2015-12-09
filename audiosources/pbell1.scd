@@ -35,16 +35,24 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 
 ~name = \pbell1;
 
-~function = { |outbus, t_trig = 0, decayscale = 0.2, i_doneAction = 0, note = #[60, 0, 0]  |
+~function = { |outbus, t_trig = 0, decayscale = 0.2, i_doneAction = 0,   note = #[60, 0, 0]  |
 
 	var sig, input, first, freqscale,  transient, bellFq, halfSR, lpFq, fqScaler,fqRange, fqLowClip, fqHighClip,fqOffset, incidenceScaler,ampScaler;
+	var correctionGain, pulseWidth;
 
 	var freq = note[0].midicps;
 	var amp = note[1];
 
 	var incidence = note[2].clip(0,1);
 
+
+	amp = amp * 0.2;      // static gain adjustement
 	incidence = abs(incidence);
+
+	correctionGain =   4- (  (1 -  incidence )**0.5);   // compensate for more wider pulse energy
+	pulseWidth = 1 + (35 * ( 1 - incidence )**0.8);  // pulse width as function of incidence
+
+
 	fqLowClip = 100;   // lowest good sounding note
 	fqHighClip = 5000;   // highest good sounding note
 
@@ -71,12 +79,22 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 
 	lpFq =  fqOffset + (incidenceScaler * fqRange);
 
-	transient = LPF.ar(Trig.ar(t_trig, SampleDur.ir)!2, 10000 * Ramp.kr(freqscale, 0.01));
+	// WAS transient = LPF.ar(   Trig.ar( t_trig, SampleDur.ir ) !2,  10000 * Ramp.kr( freqscale, 0.01 ) );   // replaced with pulseWidth
 
-	input = LPF.ar(transient,  Ramp.kr(lpFq, 0.01)   );    // "mallet"
+	transient = (Trig.ar( t_trig, SampleDur.ir  * pulseWidth) !2 )* correctionGain * ampScaler;
 
 
-  sig = ampScaler * DynKlank.ar(`[
+
+	input = LPF.ar(transient,  Ramp.ar( K2A.ar (lpFq), 0.005)   );    // "mallet"
+
+
+
+	// WAS  input = LPF.ar(transient,  Ramp.ar(lpFq, 0.01)   );    // "mallet"
+
+
+	//input = transient;    // "mallet"
+
+  sig = DynKlank.ar(`[
     [
       (first = LFNoise1.kr(0.5).range(2424, 2444)) + Line.kr(20, 0, 0.5),
       first + LFNoise1.kr(0.5).range(1,3),
@@ -121,28 +139,64 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
     ] * freqscale.reciprocal.pow(0.5)
   ], input, freqscale, 0, decayscale);
 
-DetectSilence.ar(sig, doneAction: i_doneAction);
-  // Out.ar(outbus, sig);  enable this for debugging
+	DetectSilence.ar(sig, doneAction: i_doneAction);
+
+	// Out.ar(0, sig);  //enable this for debugging
 
 	sig;
 
 };
 
 /*   DEBUGGING
+
+s.makeGui;
+s.meter
+
+// t_trig = 0, decayscale = 0.2, i_doneAction = 0, note = #[60, 0, 0]
+
 SynthDef(\prayer_bell,  ~function  ).add;
 
 ~ballSet =Synth.new("prayer_bell",  [ \i_doneAction, 0, \decayscale , 0.7, \note,  [80,1, 0.5]     ]);
 ~ballSet.set(\i_doneAction, 0);
 ~ballSet.set(\decayscale, 0.8);
-~ballSet.set(\incidence, 1);
+
+~ballSet.set(\pulseWidth, 100);
 ~ballSet.set(\t_trig, 1);
+
+
+~ballSet.set(\note,  [80,0.2, 0.5] );
+
+
+
 
  {20.do( { arg item;
 	var fq = (item / 19)**5;
-	var amp =  (item / 19) ;
+//var boost =   1 - (   ( 1 - (item / 19)**2);
 
-	~ballSet=Synth.new("prayer_bell",  [\i_doneAction, 2,  \decayscale , 0.7, \note,  [100,1, (item/19)  ]     ]);
-0.1.wait;})}.fork
+
+
+var boost =   4- (  (1 -  (item / 19))**0.5);
+var pulseWidth = 1 + (35 * ( 1 - (item / 19))**0.8);
+
+
+~ballSet=Synth.new("prayer_bell",  [\i_doneAction, 2,  \decayscale , 0.6, \note,  [80,  0.1 , 1   ]     ]);
+
+
+~ballSet.set(\note,  [  65,     1,      (item / 19)  ]);
+
+
+//~ballSet.set(\boost, boost);
+
+pulseWidth.postln;
+
+~ballSet.set(\decayscale , 0.01);
+//~ballSet.set(\pulseWidth,   pulseWidth);
+~ballSet.set(\t_trig, 1);
+
+0.2.wait;})}.fork
+
+
+
 
 
 
