@@ -35,7 +35,7 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 
 ~name = \pbell1;
 
-~function = { |outbus, t_trig = 0, decayscale = 0.2, i_doneAction = 0,   note = #[60, 0, 0]  |
+~function = { |outbus, t_trig = 1, decayscale = 0.2, i_doneAction = 0,   note = #[60, 0, 0]  |
 
 	var sig, input, first, freqscale,  transient, bellFq, halfSR, lpFq, fqScaler,fqRange, fqLowClip, fqHighClip,fqOffset, incidenceScaler,ampScaler;
 	var correctionGain, pulseWidth;

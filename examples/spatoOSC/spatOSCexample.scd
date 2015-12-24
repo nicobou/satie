@@ -28,6 +28,7 @@ s.waitForBoot{
 
 
 	postf("generating example project synthdefs for % format \n", ~listeningFormat);
+	~scbr.makeSynthDef(\zparticle1, \zparticle1, [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\pink, \PinkSin, [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\dust, \DustDust, [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\default, \default, [~listeningFormat], [0]);
@@ -50,17 +51,27 @@ s.waitForBoot{
 
 
 
-
 	// set up a process class
 
 	~sheefa = Environment[
 		'nodeName' -> \nil, // required field
-		'synthName' -> \default,
+		'nodeGroupName' -> \nil, // required field
+		'nodeGroupProxy' -> \nil, // required field
+		'synth' -> \zparticle1,
 		'randAzi' -> 20,
-		'randElev' ->
+		'randElev' -> 30,
 		'randDist' -> 1,
 		'cloneCount' -> 20,
-	];
+		'cloudRadius' -> 5, // 2D particle field radius: 5 meters
+		'triggerIntervalMs' -> 500,   // time interval, during which the clones will randomly trigger
+		// connection state
+		'aziDeg' -> -10,
+		'elevDeg' -> 10,
+		'gainDB' -> -99,
+		'delayMs' -> 0,
+		'lpHz' -> 0.5,
+		'hpHz' -> 22040,
+		];
 
 
 	// generic stuff
@@ -70,37 +81,75 @@ s.waitForBoot{
 	};
 
 
+
+
 	// required
-	~registerProcess.value(\sheefa, ~sheefa);
+	// register process to environment
+if (~allProcesses == nil, {
+		~allProcesses = ();         // environment namespace for project functions
+	});
+
+	// if already registered, re-register
+	if (  ~allProcesses.includesKey(\sheefa) == true,
+		{
+			'un-registering process: sheefa'.postln;
+			~allProcesses.removeAt(\sheefa);
+	});
+
+	'registering process: sheefa'.postln;
+	~allProcesses.put(\sheefa, ~sheefa);
 
 
-	// project specific stuff
 
-	// called when node is created
-	~sheefa.setup = { | self, args |
 
-		var cloneCount = args[0];
-		var randAzi = args[1];
-		var randElev = args[2];
-		var randDist = args[3];
+	// required but project specific
+	// generates N synths
+	~sheefa.setup = { | self, nodeName, nodeGroupName, nodeGroupProxy |
+		var thisProxy ;
 
-		if (args.size != 4,
-			{ '~sheefa.setup: bad arg count'.postln;});
+		self.nodeName = nodeName;
+		self.nodeGroupName = nodeGroupName;
+		self.nodeGroupProxy = nodeGroupProxy;
 
-		'~sheefa.setup'.postln;
-		self.cloneCount = cloneCount;
-		self.randAzi = randAzi;
-		self.randElev = randElev;
-		self.randDist = randDist;
+		thisProxy = self.nodeGroupProxy.group;
+
+
+		postf("~sheefa.setup:  generating % synthVoices for group %\n",  self.cloneCount, self.nodeGroupName);
+
+		// now generate   self.cloneCount  synths in advance
+		//  when the state problem is fixed, this can be done in the context of trigger, and synths can destroy  themselves after sounding
+		self.cloneCount.do( { arg item;
+			var nodename=(self.nodeName++"_"++item).asSymbol;
+			var synth;
+
+			synth = ~scbr.makeInstance(nodename.asSymbol, self.synth.asSymbol, self.nodeGroupName);
+			// synth.set(\gainDB, self.gainDB);
+			// no state setting is possible at this stage
+		});
 	};
+
+
+// the functions below are not requied
 
 
 	// if defined, will be called when node's "update" message is received
 	// otherwise the "update" message will be applided to the node's group
 	~sheefa.updateConnection = { | self, aziDeg, eleDeg, gainDB, delayMs, lpHz |
 
-		'~sheefa.updateConnection'.postln;
-		postf("sheefa.updateConnection: called for node: % \n", self.nodeName);
+		var 	thisProxy = ~allSourceNodes[self.nodeName.asSymbol].at(\proxy);
+
+		//'~sheefa.updateConnection'.postln;
+		self.aziDeg = aziDeg;
+		self.elevDeg = eleDeg;
+		self.gainDB = gainDB;
+		self.delayMs = delayMs;
+		self.lpHz = lpHz;
+		self.hpHz = 0.5;  // to be added
+
+		//postf("sheefa.updateConnection: called for node: % \n", self.nodeName);
+
+	   thisProxy.set(\aziDeg, self.aziDeg, \eleDeg, self.elevDeg, \gainDB, self.gainDB , \delayMs, self.delayMs, \lpHz, self.lpHz, \hpHz, self.hpHz);
+
 
 	};
 
@@ -114,11 +163,50 @@ s.waitForBoot{
 	};
 
 	// custom method
-	~sheefa.trigger = { | self |
-		var thisProxy = ~allSourceNodes[self.nodeName.asSymbol].at(\proxy);
-		// create Synth then trigger
-		thisProxy.set(\t_trigger, 1);
-		postf("~sheefa.trigger: triggering synths in node: % group \n",self.nodeName);
+	~sheefa.trigger = { arg self, items = #[1,2,3] ;
+		var thisProxy = self.nodeGroupProxy.group;
+		var gain = self.gainDB;
+
+		if ( items.size != 3,
+			{
+				postf("~sheefa.trigger:  bad item count, expecing 3, received: % items\n",items.size);
+			},
+			{ // else
+
+				// calculate gains for each particle
+				self.cloneCount.do( { arg item;
+					var nodename=(self.nodeName++"_"++item).asSymbol;
+					// this is where we could calculate the exact position of the clone, with respect to this node
+					// but its expensive
+					//~scbr.satieGroups[ self.nodeGroupName.asSymbol ].[ nodename.asSymbol ].set(\gainDB, gain);
+
+				});
+				// calculate azimuths for each particle
+
+
+				// finally  update and trigger all cloned synths (particles)
+				thisProxy.set(\gainDB, gain);
+				//thisProxy.set(\durMs, self.triggerIntervalMs);
+				thisProxy.set(\randTrigMaxMs, self.triggerIntervalMs);
+				thisProxy.set(\t_trig, 1);
+				//postf("~sheefa.trigger: triggering synths in node: % group \n",self.nodeName);
+		});
+	};
+
+
+
+
+
+	// custom method
+	~sheefa.clearSynths = { | self |
+		//var thisProxy = ~allSourceNodes[self.nodeName.asSymbol].at(\proxy);
+
+		postf("~sheefa.clearSynths: clearing synths in node: % group \n", self.nodeName);
+
+		self.cloneCount.do( { arg item;
+			var nodename=(self.nodeName++"_"++item).asSymbol;
+			~scbr.cleanInstance(nodename.asSymbol, self.nodeGroupName);
+		});
 	};
 
 
