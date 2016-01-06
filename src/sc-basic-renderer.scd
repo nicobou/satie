@@ -20,6 +20,7 @@
 		//~cOSCMaker;
 		~defaultSatieGroup;
 		~satieGroups = Dictionary.new;
+		~satieGroupInstances = Dictionary.new;
 		~effectSynthDef = Set.new;
 		~auxbus;
 		~aux;
@@ -52,28 +53,36 @@
 
 		~makeSatieGroup = { | self, name, addAction = \addToHead |
 			// creating a global ProxySpace
-			var prox = ProxySpace(s);
-			prox.fadeTime = 0.5;
+			// var prox = ProxySpace(s);
+			// prox.fadeTime = 0.5;
 			// the proxyspace is going to be embedded in the global pargroup
-			prox.group = ParGroup.new(addAction: addAction);
-			self.satieGroups.put(name.asSymbol, prox);
-			prox;
+			var group = ParGroup.new(addAction: addAction);
+			self.satieGroups.put(name.asSymbol, group);
+			self.satieGroupInstances.put(name.asSymbol, Dictionary.new);
+			group;
 		};
 
         ~killSatieGroup = { | self, name |
-			self.satieGroups[name].end;
+			// self.satieGroups[name].end;
 			self.satieGroups[name].free;
+			self.satieGroupInstances[name].free;
 			self.satieGroups.removeAt(name);
+			self.satieGroupInstances.removeAt(name);
 			nil;
 		};
 
 
-		~makeInstance = { | self, name, synthDefName, prox = \default |
+		~makeInstance = { | self, name, synthDefName, group = \default |
 			// ensuring not extra bus is allocated:
 			// (must be the first reference of "name" in the proxyspace
-			self.satieGroups[prox][name].ar(0);
-			self.satieGroups[prox][name].source = synthDefName;
-			self.satieGroups[prox][name];
+			// self.satieGroups[name].ar(0);
+			// self.satieGroups[name].source = synthDefName;
+			var synth = Synth(synthDefName, target: self.satieGroups[group], addAction: \addToHead );
+			self.satieGroupInstances[group].put(name, synth);
+			// self.satieGroups[group].postln;
+			synth;
+			// self.satieGroups.postln;
+			// self.satieGroups[name];
 			//nil;
 		};
 
@@ -84,18 +93,18 @@
 			nil;
 		};
 
-		~pauseInstance = { | self, name, prox = \default |
-			self.satieGroups[prox][name].release();
+		~pauseInstance = { | self, name, group = \default |
+			self.satieGroupInstances[group][name].release();
 			nil;
 		};
-
+/*
 		~getProxySym = { | self, prox |
 			var proxSym = \default;
 			self.satieGroups.keysValuesDo { |key, value|
 				if ((value === prox ) && (key != \nil),
 					{ proxSym = key; });};
 			proxSym ;
-		};
+		};*/
 	});  // Environment.make
 
 	e.know = true;
@@ -105,6 +114,7 @@
 	e.synthDefFactory = ~scbrFactory.value();
 	e.defaultSatieGroup = e.makeSatieGroup();
 	e.satieGroups.put(\default, e.defaultSatieGroup);
+	e.satieGroupInstances.put(\default, Dictionary.new);
 	e;  // return
 };  // scbrMaker
 )
