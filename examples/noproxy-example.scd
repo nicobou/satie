@@ -114,6 +114,9 @@ s.waitForBoot{
 ~scbr.satieGroups[\default].free;
 ~scbr.killSatieGroup(\default)
 
+~scbr.cleanInstance(\testNode_0)
+~scbr.satieGroupInstances[\default][\testNode_0].size
+
 // ***************** old examples ************************************
 
 // test per instance set and group set

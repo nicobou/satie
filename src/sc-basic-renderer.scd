@@ -86,10 +86,11 @@
 			//nil;
 		};
 
-		~cleanInstance = { | self, name, prox = \default |
-			self.satieGroups[prox][name].release();
+		~cleanInstance = { | self, name, group = \default |
+			self.satieGroupInstances[group][name].release();
 			// fadeTime must be higher than SATIE internal fadeTime:
-			self.satieGroups[prox][name].clear(0.03);
+			self.satieGroupInstances[group][name].clear(0.03);
+			self.satieGroupInstances[group].removeAt(name);
 			nil;
 		};
 
