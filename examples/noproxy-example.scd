@@ -82,7 +82,7 @@ s.waitForBoot{
 	var nodename=("testNode"++"_"++item).asSymbol;
 	var synth;
 	synth = ~scbr.makeInstance(nodename.asSymbol, \testtone, \default);
-	synth.set(\gainDB, rrand(-60, -30), \sfreq, rrand(100, 1000));
+	synth.set(\gainDB, rrand(-90, -38), \sfreq, rrand(100, 1000));
 });
 
 ~scbr.satieGroups[\default]
@@ -100,12 +100,12 @@ s.waitForBoot{
 // make some changes to the individual synths
 20.do( {|item|
 	var nodename=("testNode"++"_"++item);
-	~scbr.satieGroupInstances[\default][nodename.asSymbol].set(\sfreq, rrand(200, 1000));
+	~scbr.satieGroupInstances[\default][nodename.asSymbol].set(\sfreq, rrand(200, 2000));
 });
 
 20.do( {|item|
 	var nodename=("testNode"++"_"++item);
-	~scbr.satieGroupInstances[\default][nodename.asSymbol].set(\gainDB, rrand(-60, -30));
+	~scbr.satieGroupInstances[\default][nodename.asSymbol].set(\gainDB, rrand(-100, -40));
 });
 
 // free the ParGroup
@@ -114,8 +114,8 @@ s.waitForBoot{
 ~scbr.satieGroups[\default].free;
 ~scbr.killSatieGroup(\default)
 
-~scbr.cleanInstance(\testNode_0)
-~scbr.satieGroupInstances[\default][\testNode_0].size
+~scbr.cleanInstance(\testNode_1)
+~scbr.satieGroupInstances[\default].size
 
 // ***************** old examples ************************************
 
