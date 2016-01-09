@@ -12,7 +12,10 @@ public class SATIErendererCtl : MonoBehaviour {
     public bool dspState = true;
     private bool _dspState;
     
-    public float outputGainDB = -10f;
+	public string projectDir; // defaults to $PROJECT/StreamingAssets
+	private string _projectDir;
+
+	public float outputGainDB = -10f;
     private float _outputGainDB;
     
     public float outputTrimDB = -0f;
@@ -45,6 +48,7 @@ public class SATIErendererCtl : MonoBehaviour {
 	public int getPort() {
 		return port;
 	}
+
 
     void Start()
     {
@@ -84,13 +88,14 @@ public class SATIErendererCtl : MonoBehaviour {
             Debug.Log ("SATIErendererCtl.Awake: MY IP:" + ipAddr.ToString ());
 		}
 
-        _dspState = dspState;
+       _dspState = dspState;
         _outputGainDB = outputGainDB;
         _dim = dim;
         _outputTrimDB = outputTrimDB;
         _mute = mute;
         _outputFormat = outputFormat;
         
+		updateProjectDir();
         updateGainDB();
         updateTrimDB();
         updateMute();
@@ -107,7 +112,31 @@ public class SATIErendererCtl : MonoBehaviour {
         sendOSC (message);
     }
     
-    private void updateGainDB()
+	private void updateProjectDir()
+	{
+		string path;
+
+		if (projectDir == "")
+		{
+			_projectDir = projectDir = "../StreamingAssets";
+			path = Application.streamingAssetsPath;
+		}
+
+		else if (projectDir.StartsWith("/")) 
+			path = projectDir;
+		else
+			path = Application.streamingAssetsPath + "/" + projectDir;
+
+		//Debug.Log ("path= "+ path);
+
+		OSCMessage message = new OSCMessage (_oscMessage);
+		
+		message.Append ("setProjectDir");
+		message.Append (path);
+		sendOSC (message);
+	}
+
+	private void updateGainDB()
     {
         OSCMessage message = new OSCMessage (_oscMessage);
         
@@ -158,45 +187,6 @@ public class SATIErendererCtl : MonoBehaviour {
 	 * in on the listener thread
 	 */
 	public void Update() {
-		//processMessages has to be called on the main thread
-		//so we used a shared proccessQueue full of OSC Messages
-
-
-        if (_outputGainDB != outputGainDB)
-        {
-            _outputGainDB = outputGainDB;
-            updateGainDB();
-        }
-        
-        if (_outputTrimDB != outputTrimDB)
-        {
-            _outputTrimDB = outputTrimDB;
-            updateTrimDB();
-        }
-        
-        if (_outputFormat != outputFormat)
-        {
-            _outputFormat = outputFormat;
-            updateOutputFormat();
-        }
-        
-        if (_dim != dim)
-        {
-            _dim = dim;
-            updateDim();
-        }
-        
-        if (_mute != mute)
-        {
-            _mute = mute;
-            updateMute();
-        }
-        
-        if (_dspState != dspState)
-        {
-            _dspState = dspState;
-            updateDSPstate();
-        }
 
 //        if (Input.GetKeyDown ("d")) {
 //
@@ -209,7 +199,57 @@ public class SATIErendererCtl : MonoBehaviour {
 
 	}
 
+	// called when inspector's values are modified
+	public virtual void OnValidate()
+	{
+		if (!connected) return;
+		
+		if (_projectDir != projectDir)
+		{
+			_projectDir = projectDir;
+			updateProjectDir();
+		}
+
+		if (_outputGainDB != outputGainDB)
+		{
+			_outputGainDB = outputGainDB;
+			updateGainDB();
+		}
+		
+		if (_outputTrimDB != outputTrimDB)
+		{
+			_outputTrimDB = outputTrimDB;
+			updateTrimDB();
+		}
+		
+		if (_outputFormat != outputFormat)
+		{
+			_outputFormat = outputFormat;
+			updateOutputFormat();
+		}
+		
+		if (_dim != dim)
+		{
+			_dim = dim;
+			updateDim();
+		}
+		
+		if (_mute != mute)
+		{
+			_mute = mute;
+			updateMute();
+		}
+		
+		if (_dspState != dspState)
+		{
+			_dspState = dspState;
+			updateDSPstate();
+		}
+		
+		
+	}
 	
+
 	public void OnApplicationQuit()
     {
 
