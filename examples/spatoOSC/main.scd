@@ -47,7 +47,7 @@ o = Server.local.options;   // default set up options
 o.memSize = 2**20;        // probably should just leave this the same for everyting
 o.device = nil;  // default
 o.blockSize = 2048;
-
+o.threads = 8;
 
 // check to see if the BASH environment variable is set to either "sato" or "labodome"
 (

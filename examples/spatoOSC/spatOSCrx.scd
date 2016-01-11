@@ -25,6 +25,8 @@ OSC RX message specification is based on the SPATOSC specification  (see:   http
 
 s.waitForBoot{
 
+	~projectDirectory =  thisProcess.nowExecutingPath.dirname;    // can be overwritten by OSC messages to audioRenderer
+
 	~volume = s.volume;     // create hook to global audio engine volume / mute control
 	~volume.setVolumeRange(-99, 18);
 
@@ -97,6 +99,19 @@ s.waitForBoot{
 			{
 
 				switch (command,
+				'setProjectDir',
+					{
+							if ( (msg.size != 3 ) ,
+							{"~basicRendererCallback: setProjectDir bad arg count: expecting 'setProjectDir projectDirPath' ".warn;},
+							// else
+							{
+								~projectDirectory = msg[2];
+
+								~projectDirectory.postln;
+
+							}
+						)
+					},
 					'setOutputTrimDB',
 					{
 							if ( (msg.size < 3 ) ,
@@ -504,7 +519,7 @@ s.waitForBoot{
 							},
 							// else  it is a function call
 							{
-								postf("~sourceProcessCallback: event_function call:  nodeName: %  event: %  size: % args: %\n", name, eventName.asSymbol, values.size, values);
+								//postf("~sourceProcessCallback: event_function call:  nodeName: %  event: %  size: % args: %\n", name, eventName.asSymbol, values.size, values);
 								myProcess[eventName.asSymbol].value(myProcess, values);   // call the process corresponding method passing argVec
 						});
 				});
