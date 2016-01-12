@@ -1,36 +1,3 @@
-~scbr.satieGroups[\effect].set(\aux, 0);
-
-~scbr.satieGroups[\default].set(\t_trig, 1);
-
-
-~scbr.satieGroups[\default].group.set(\gainDB, 4);
-
-~scbr.satieGroups[\default].set(\gainDB, -200);
-
-~scbr.satieGroupInstances[\effect]
-
-
-~effectProx[\effect]
-
-
-
-~allSourceNodes[\resonance_SC].at(\auxBus);
-
-~allSourceNodes[\resonance_SC].at(\aux);
-
-
-~allSourceNodes[\resonance_SC].put(\aux, 0);
-
-~allSourceNodes[\resonance_SC].at(\auxbus);
-
-~allSourceNodes[\resonance_SC].at(\proxy).set(\in, ~allSourceNodes[\resonance_SC].at(\auxBus));
-~allSourceNodes[\resonance_SC].at(\proxy).set(\outputDB, -30);
-
-
-
-
-
-
 // s.makeGui;
 // s.meter;
 // s.sampleRate;
@@ -91,11 +58,28 @@
 
 // srcNode_0_group, srcNode_0_6
 
-~scbr.satieGroups[\srcNode_0_group][\srcNode_0_6].set(\note, [90,1,1]);
-~scbr.satieGroups[\srcNode_0_group][\srcNode_0_6].set(\t_trig, 1);
+~scbr.satieGroupInstances[\srcNode_0_group][\srcNode_0_6].set(\note, [75,1,1]);
+~myProcess.put(triggerIntervalMs, 0);
+
+~scbr.satieGroupInstances[\srcNode_0_group][\srcNode_0_6].set(\t_trig, 1);
 
 
-~scbr.satieGroups[~myGroupName.asSymbol][~cloneName.asSymbol].set(\note, [89,1,1]);   // broken
+
+~myGroupName;
+
+// clear
+//~myProcess[\clearSynths].value(~myProcess);
+
+//~myProcess.freeClones();
+
+
+//~scbr.cleanInstance(~cloneName,~myGroupName );
+
+
+
+
+
+~scbr.satieGroupInstances[~myGroupName.asSymbol][~cloneName.asSymbol].set(\note, [89,1,1]);   // broken
 
 // should be
 
@@ -103,13 +87,14 @@
 
 
 
-~scbr.satieGroups[~myGroupName.asSymbol][~cloneName.asSymbol].set(\t_trig, 1);
+~scbr.satieGroupInstances[~myGroupName.asSymbol][~cloneName.asSymbol].set(\t_trig, 1);
 
 
 
 
 ~myProcess.at(\nodeGroupProxy).group.set(\note, [85,0.5,0.5]);
 ~myProcess.at(\nodeGroupProxy).group.set(\t_trig, 1);
+~myProcess.at(\nodeGroupProxy).group.set(\randTrigMaxMs, 0);
 
 
 
@@ -142,13 +127,6 @@
 	synth.set(\gainDB, -10);
 	synth.set(\t_trig, 1);
 });
-
-
-
-// clear
-~myProcess[\clearSynths].value(~myProcess);
-
-~myProcess.at(\nodeGroupProxy).free;
 
 
 
@@ -257,6 +235,49 @@
 
 
 ~allSourceNodes[\bell_0].at(\proxy).set(\gainDB ,  0 );
+
+
+
+
+~scbr.satieGroups[\effect].set(\aux, 0);
+
+~scbr.satieGroups[\default].set(\t_trig, 1);
+
+
+~scbr.satieGroups[\default].group.set(\gainDB, 4);
+
+~scbr.satieGroups[\default].set(\gainDB, -200);
+
+~scbr.satieGroupInstances[\effect][\resonance_SC].set(\outputDB, -30);
+
+
+~effectProx[\effect]
+
+
+
+~allSourceNodes[\resonance_SC].at(\auxBus);
+
+~allSourceNodes[\resonance_SC].at(\aux);
+
+
+~allSourceNodes[\resonance_SC].put(\aux, 0);
+
+~allSourceNodes[\resonance_SC].at(\auxbus);
+
+~allSourceNodes[\resonance_SC].at(\proxy).set(\in, ~allSourceNodes[\resonance_SC].at(\auxBus));
+~allSourceNodes[\resonance_SC].at(\proxy).set(\outputDB, -30);
+
+
+ ~allSourceNodes[\srcNode_0]
+
+ScIDE.open
+
+
+
+
+
+
+
 
 gainDB
 

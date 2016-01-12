@@ -44,7 +44,7 @@ if ( ~superNovaFlag != nil,
 });
 
 o = Server.local.options;   // default set up options
-o.memSize = 2**20;        // probably should just leave this the same for everyting
+o.memSize = 2**21;        // probably should just leave this the same for everyting
 o.device = nil;  // default
 o.blockSize = 2048;
 o.threads = 8;
@@ -78,8 +78,6 @@ if ( l != nil,
 
 p.close;                    // close the pipe to avoid that nasty buildup
 );
-
-
 
 
 

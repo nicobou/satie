@@ -226,7 +226,7 @@ s.waitForBoot{
 						var nodeName = msg[2];
 
 						if (~allGroupNodes.includesKey(nodeName.asSymbol),
-							{   ~deleteGroup.value(nodeName);  },
+							{   ~removeGroup.value(nodeName);  },
 							// else
 							{
 									~deleteSource.value(nodeName);   });
@@ -636,9 +636,8 @@ s.waitForBoot{
 	// called for uri type process://
 	//error check uriName done before call this, uriPath will be a process name
 	// ignore groupName since a unique one will be generated for this node and its clones
+
 	~createSourceProcess = { | sourceName, uriPath , groupNameDummy = \default |
-
-
 		var temp, type, charIndex, processName, processClone, myProcess, cloneProxy, cloneProxyName;
 
 		charIndex = uriPath.asString.find("://");
@@ -653,51 +652,42 @@ s.waitForBoot{
 			},
 			// else ALL GOOD,  instantiate
 			{
-				//postf("~createSourceProcess nodeName: %,   PROCESS_NAME: %\n", sourceName, processName);
-				//postf("~createSourceProcess: %:  uri: %  group: %\n", sourceName, uriPath, groupName);
+				if (~allSourceNodes[sourceName.asSymbol]  != nil,
+					{
+						error("~createSourceProcess source Process node: %,   ALREAYD EXISTS \n", sourceName);
+					},
+					// else node good to go
+					{
+						//postf("~createSourceProcess nodeName: %,   PROCESS_NAME: %\n", sourceName, processName);
+						//postf("~createSourceProcess: %:  uri: %  group: %\n", sourceName, uriPath, groupName);
 
-				~allSourceNodes[sourceName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
-				~allSourceNodes[sourceName.asSymbol].put(\plugin, \nil);
+						~allSourceNodes[sourceName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
+						~allSourceNodes[sourceName.asSymbol].put(\plugin, \nil);
 
-				// generate groupName unique to source node
-				cloneProxyName = sourceName ++ "_group";
-				cloneProxy = ~createGroup.value(cloneProxyName.asSymbol);   // create group for this node and its clones
+						// generate groupName unique to source node
+						cloneProxyName = sourceName ++ "_group";
+						cloneProxy = ~createGroup.value(cloneProxyName.asSymbol);   // create group for this node and its clones
 
-				//cloneProxy.postln;
+						//cloneProxy.postln;
 
-				// clone a new copy of the process
-				temp = ~allProcesses.at(processName.asSymbol);
-				processClone = temp.copy;
-				//processClone[\nodeName]=sourceName.asSymbol;
+						// clone a new copy of the process
+						temp = ~allProcesses.at(processName.asSymbol);
+						processClone = temp.copy;
+						//processClone[\nodeName]=sourceName.asSymbol;
 
-				cloneProxy = ~allGroupNodes[cloneProxyName.asSymbol].at(\proxy); // must be called after createGroup() above
+						cloneProxy = ~allGroupNodes[cloneProxyName.asSymbol].at(\proxy); // must be called after createGroup() above
 
-				//cloneProxy.postln;
+						~allSourceNodes[sourceName.asSymbol].put(\process, processClone);
+						~allSourceNodes[sourceName.asSymbol].put(\proxySymb, cloneProxyName.asSymbol);
 
+						myProcess = ~allSourceNodes[sourceName.asSymbol].at(\process);
+						myProcess[\setup].value(myProcess, sourceName.asSymbol, cloneProxyName.asSymbol, cloneProxy);   // set the state of the process
+						~setPlugin.value(sourceName.asSymbol, "");  // sets dummy plugin as placeholder
 
-				//processClone[\nodeGroupProxy] = myProxy;
-				//processClone[\nodeGroupName] = groupName.asSymbol;
+						~oscInterface.sourceOSC(sourceName.asSymbol, ~sourceProcessCallback);   // create OSC callback
 
-				~allSourceNodes[sourceName.asSymbol].put(\process, processClone);
-				~allSourceNodes[sourceName.asSymbol].put(\proxySymb, cloneProxyName.asSymbol);
-
-				myProcess = ~allSourceNodes[sourceName.asSymbol].at(\process);
-
-
-				myProcess[\setup].value(myProcess, sourceName.asSymbol, cloneProxyName.asSymbol, cloneProxy);   // set the state of the process
-
-
-
-				~setPlugin.value(sourceName.asSymbol, "");  // sets dummy plugin as placeholder
-
-				~oscInterface.sourceOSC(sourceName.asSymbol, ~sourceProcessCallback);   // create OSC callback
-
-
-				// myProcess[\setup].value(myProcess,[0,1,2,3]);  use only for generic parameters
-
-
+				});
 		});
-
 	};
 
 
@@ -1113,12 +1103,12 @@ s.waitForBoot{
 		});
 	};
 
-	~deleteGroup = { | nodeName |
-		if ( ~allGroupNodes.includesKey(nodeName.asSymbol) ,
+		~removeGroup = { | groupName |
+		if ( ~allGroupNodes.includesKey(groupName.asSymbol) ,
 			{
-				~clearGroupNode.value(nodeName.asSymbol);
-				postf("~deleteGroup:  group node: % \n",  nodeName);
-				~allGroupNodes.removeAt(nodeName.asSymbol);     // remove node from global dictionary
+				//  No OP  ~clearGroupNode.value(groupName.asSymbol);
+				postf("~removeGroup:  group node: % \n",  groupName);
+				~allGroupNodes.removeAt(groupName.asSymbol);     // remove node from global dictionary
 		});
 	};
 
@@ -1155,9 +1145,8 @@ s.waitForBoot{
 		var nodeKeys = node.keys;
 		var thisProxyName = ~allSourceNodes[nameSym].at(\proxySymb);
 
-		~scbr.cleanInstance(nameSym,thisProxyName );
 
-
+		// is this a process node?
 		if ( ~allSourceNodes[nameSym].at(\process) != nil,
 			{
 				var groupSym =  ~allSourceNodes[nameSym].at(\proxySymb);
@@ -1167,10 +1156,20 @@ s.waitForBoot{
 				//postf("clearSourceNode.deleteGroup()  %\n", groupSym);
 
 				// now kill off the clones in that group
-				myProcess.at(\nodeGroupProxy).free;
+				//myProcess.at(\nodeGroupProxy).free;
+
+				myProcess.freeClones();   // frees clone synths
+
+				~scbr.cleanInstance(nameSym,thisProxyName );
 
 				// now delete group
-				~deleteGroup.value(groupSym);
+				~removeGroup.value(groupSym); //
+				~scbr.killSatieGroup(groupSym);   // kill the group, since it was unique to this source
+		},
+		// else  its just a regular source
+		{
+				~scbr.cleanInstance(nameSym,thisProxyName );
+
 		});
 
 		//postf("~clearing:  node: % and connection: %\n",  nameSym, connectionName);

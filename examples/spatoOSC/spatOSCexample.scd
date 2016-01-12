@@ -122,6 +122,21 @@ s.waitForBoot{
 	~allProcesses.put(\sheefa, ~sheefa);
 
 
+	// required
+	// frees all clone synths
+	~sheefa.freeClones = { | self |
+		//self.nodeGroupProxy = nodeGroupProxy;
+		//thisProxy = self.nodeGroupProxy.group;
+
+		//postf("~sheefa.free:  freeing % synthVoices for group %\n",  self.cloneCount, self.nodeGroupName);
+
+		self.cloneCount.do( { arg item;
+			var nodename=(self.nodeName++"_"++item).asSymbol;
+			~scbr.cleanInstance(nodename, self.nodeGroupName );
+		});
+	};
+
+
 	// required but project specific
 	// generates N synths
 	~sheefa.setup = { | self, nodeName, nodeGroupName, nodeGroupProxy |
@@ -143,8 +158,7 @@ s.waitForBoot{
 			var synth;
 
 			synth = ~scbr.makeInstance(nodename.asSymbol, self.synth.asSymbol, self.nodeGroupName);
-			// synth.set(\gainDB, self.gainDB);
-			// no state setting is possible at this stage
+			synth.set(\gainDB, -99);  // instantiate full attenuated
 		});
 	};
 
@@ -166,9 +180,9 @@ s.waitForBoot{
 		self.lpHz = lpHz;
 		self.hpHz = 0.5;  // to be added
 
-		//postf("sheefa.updateConnection: called for node: % \n", self.nodeName);
+		//postf("sheefa.updateConnection: called for node: %    azi: %  \n", self.nodeName, aziDeg);
 
-		thisProxy.set(\aziDeg, self.aziDeg, \eleDeg, self.elevDeg, \gainDB, self.gainDB , \delayMs, self.delayMs, \lpHz, self.lpHz, \hpHz, self.hpHz);
+		thisProxy.group.set(\aziDeg, self.aziDeg, \eleDeg, self.elevDeg, \gainDB, self.gainDB , \delayMs, self.delayMs, \lpHz, self.lpHz, \hpHz, self.hpHz);
 
 
 	};
@@ -202,7 +216,7 @@ s.waitForBoot{
 		var gain = self.gainDB;
 		var seqName, pitch, position, incr, size, vel, incidence;
 
-		if ( items.size != 3,
+			if ( items.size != 3,
 			{
 				postf("~sheefa.trigger:  bad item count, expecing '[ pitch vel incidence]' , received: % items\n",items.size);
 			},
@@ -242,8 +256,11 @@ s.waitForBoot{
 
 					//[ self.nodeGroupName.asSymbol, nodename.asSymbol ] .postln;
 
-					~scbr.satieGroups[ self.nodeGroupName.asSymbol ].[ nodename.asSymbol ].set(\note, [ pitch, vel, incidence ] );
-					~scbr.satieGroups[ self.nodeGroupName.asSymbol ].[ nodename.asSymbol ].set(\t_trig, 1);
+					//~scbr.satieGroups[ self.nodeGroupName.asSymbol ].[ nodename.asSymbol ].set(\note, [ pitch, vel, incidence ] );  // was
+					~scbr.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(\note, [ pitch, vel, incidence ] );
+
+					//~scbr.satieGroups[ self.nodeGroupName.asSymbol ].[ nodename.asSymbol ].set(\t_trig, 1);  // was
+					~scbr.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(\t_trig, 1);
 
 
 					//~scbr.satieGroups[ self.nodeGroupName.asSymbol ].[ nodename.asSymbol ].set(\gainDB, gain);
