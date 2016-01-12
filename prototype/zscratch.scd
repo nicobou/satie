@@ -1,26 +1,222 @@
-s.makeGui;
-s.meter;
-s.sampleRate
+~scbr.satieGroups[\effect].set(\aux, 0);
+
+~scbr.satieGroups[\default].set(\t_trig, 1);
 
 
-~nodeName= "bell_0";
-~listenerName = "listener";
-~pluginName = "pbell1";
+~scbr.satieGroups[\default].group.set(\gainDB, 4);
+
+~scbr.satieGroups[\default].set(\gainDB, -200);
+
+~scbr.satieGroupInstances[\effect]
+
+
+~effectProx[\effect]
+
+
+
+~allSourceNodes[\resonance_SC].at(\auxBus);
+
+~allSourceNodes[\resonance_SC].at(\aux);
+
+
+~allSourceNodes[\resonance_SC].put(\aux, 0);
+
+~allSourceNodes[\resonance_SC].at(\auxbus);
+
+~allSourceNodes[\resonance_SC].at(\proxy).set(\in, ~allSourceNodes[\resonance_SC].at(\auxBus));
+~allSourceNodes[\resonance_SC].at(\proxy).set(\outputDB, -30);
+
+
+
+
+
+
+// s.makeGui;
+// s.meter;
+// s.sampleRate;
+
+//~dumpNodes.value();
+
 ~groupSym = \default;
+
+~nodeName= \srcNode_0;
+~listenerName = "listener";
+
+~allGroupNodes.includesKey(~nodeName.asSymbol);
+
+~allSourceNodes[~nodeName.asSymbol].at(\proxySymb);
+
+
+// for normal source Node
+//~pluginName = "pbell1";
+//~pluginPath = "plugin://"++~pluginName;
+
+
+
+// for process node
+~pluginName = "sheefa";
+~pluginPath = "process://"++~pluginName;
+
 
 
 ~connectionName = ~nodeName++ "->"++~listenerName;
-~pluginPath = "plugin://"++~pluginName;
 
 
+/*
 ~createSource.value(~nodeName, ~pluginPath, ~groupSym);
 ~createConnection.value(~nodeName,~listenerName);
 
+*/
+
+// process node testing
+~myProcess = ~allSourceNodes[~nodeName.asSymbol].at(\process);
+~myGroupName = ~myProcess.at(\nodeGroupName);
+
+
+// inspect values
+~myProcess.at(\cloneCount);
+~myProcess.at(\triggerIntervalMs);
+~myProcess.at(\cloudRadius);
+~myProcess.at(\randTrigMaxMs);
+~myProcess.at(\synth);
+
+
+
+~cloneName = ~nodeName++"_0";
+~myProxy = ~myProcess.at(\nodeGroupProxy);
+
+
+
+~myProcess.nodeGroupName.asSymbol;
+
+// srcNode_0_group, srcNode_0_6
+
+~scbr.satieGroups[\srcNode_0_group][\srcNode_0_6].set(\note, [90,1,1]);
+~scbr.satieGroups[\srcNode_0_group][\srcNode_0_6].set(\t_trig, 1);
+
+
+~scbr.satieGroups[~myGroupName.asSymbol][~cloneName.asSymbol].set(\note, [89,1,1]);   // broken
+
+// should be
+
+~scbr.satieGroupInstances[~myGroupName.asSymbol][~cloneName.asSymbol].set(\note, [89,1,1]);     // new style
+
+
+
+~scbr.satieGroups[~myGroupName.asSymbol][~cloneName.asSymbol].set(\t_trig, 1);
 
 
 
 
-~connectionCallback.value( ["/spatosc/core/connection/"++ ~connectionName++"/update", 0,0,-1,1,22050]);
+~myProcess.at(\nodeGroupProxy).group.set(\note, [85,0.5,0.5]);
+~myProcess.at(\nodeGroupProxy).group.set(\t_trig, 1);
+
+
+
+
+~connectionProcessCallback.value( ["/spatosc/core/connection/"++ ~connectionName++"/update", 0,0,-3,1,12345]);
+
+~sourceProcessCallback.value( ["/spatosc/core/source/"++ ~nodeName ++"/event", \trigger, 1]);
+
+// this is the way to access the process's params
+~sourceProcessCallback.value( ["/spatosc/core/source/"++ ~nodeName ++"/event", \setParam, \gainDB, -40]);
+
+
+// adjust group
+~myProcess.at(\nodeGroupProxy).group.set(\gainDB, -30);
+~myProcess.at(\nodeGroupProxy).group.set(\gainDB, -20);
+~myProcess.dump;
+
+
+
+
+
+
+//~nodeName="shitfuck";
+
+~myProcess.at(\cloneCount).do( { arg item;
+	var nodeName=(~nodeName++"_"++item).asSymbol;
+	var groupName = ~myProcess.at(\nodeGroupName);
+	var synth;
+	synth = ~scbr.satieGroups[ groupName ][nodeName];
+	synth.set(\gainDB, -10);
+	synth.set(\t_trig, 1);
+});
+
+
+
+// clear
+~myProcess[\clearSynths].value(~myProcess);
+
+~myProcess.at(\nodeGroupProxy).free;
+
+
+
+
+
+
+
+	10.do( { arg item;
+			var nodename=(~nodeName++"_"++item).asSymbol;
+	var synth;
+	{
+			synth = ~scbr.makeInstance(nodename.asSymbol, \default, ~myGroupName);
+		     s.sync;
+			synth.set(\gainDB, -3);
+	}.fork
+			//synth.at(\gainDB).postln;
+			//self.gainDB.postln;
+
+		});
+
+
+
+	20.do( { arg item;
+			var nodename=(~nodeName++"_"++item).asSymbol;
+	var synth;
+	{
+		nodename.asSymbol.postln;
+			synth = ~scbr.cleanInstance(nodename.asSymbol, ~myGroupName);
+		     s.sync;
+			synth.set(\gainDB, -3);
+	}.fork
+			//synth.at(\gainDB).postln;
+			//self.gainDB.postln;
+
+		});
+
+
+
+{
+        SynthDef(.....).add;
+        s.sync;
+        Synth(\newSDef, ...);
+}.fork;
+
+
+
+
+
+~synthName=~nodeName++"_12";
+
+~scbr.satieGroups[~myGroupName][~synthName.asSymbol ].set(\gainDB, -30);
+
+~synth  = ~scbr.satieGroups[~myGroupName][~synthName.asSymbol ];
+
+~synth.set(\gainDB, -90);
+
+
+~synth = ~scbr.makeInstance(~nodeName.asSymbol ,  \default, ~myGroupName);
+~synth.dump
+
+~synth.set(\gainDB, ~myProcess.at(\gainDB))
+
+
+~myProcess.at(\gainDB);
+~myProcess.at(\triggerIntervalMs)
+
+
+~connectionCallback.value( ["/spatosc/core/connection/"++ ~connectionName++"/update", 0,0,-30,1,13456]);
 
 ~connectionCallback.value( ["/spatosc/core/connection/"++ ~connectionName++"/submerse", 1]);
 ~setEvent.value(~nodeName, \t_trig, 1);
@@ -149,26 +345,7 @@ gainDB
 // "ball_142:spatOSCsource_143"
 
 
-~nodeCount=3;
-
-
-// CREATE SOURCES
-
-~nodeCount.do({ arg item;
-	var nodename=("ball_"++item++":spatOSCsource_"++(item+1)).asSymbol;
-	var connectionName = nodename++item++ "->listener:spatOSClistener_0";
-	postln("creating: "++nodename++" and connection:  "++ connectionName);
-	~createSource.value(nodename, "plugin://zkarpluck1", \default);
-	~createConnection.value(nodename, "listener:spatOSClistener_0");
-	 // ~setUri.value(nodename, "plugin://zkarpluck1");
-	//~connectionCallback.value( ["/spatosc/core/connection/"++ connectionName ++"/spread", 5]);
-	//~connectionCallback.value( ["/spatosc/core/connection/"++ connectionName++"/update", 45,0,-80,1,14000]);
-
-});
-~allSourceNodes.size;
-
-
-	~connectionName = ~reverbName++"->listener:spatOSClistener_0";
+~connectionName = ~reverbName++"->listener:spatOSClistener_0";
 ~connectionCallback.value( ["/spatosc/core/connection/"++ "ball_0:spatOSCsource_1->listener:spatOSClistener_0" ++"/update", 45,0,-30,1,14000]);
 
 
@@ -177,11 +354,30 @@ gainDB
  ["/spatosc/core/connection/"++ "ball_1:spatOSCsource_21->listener:spatOSClistener_0" ++"/update", 45,0,-30,1,14000].postln
 
 
+~nodeCount=10;
+
+// CREATE SOURCES
+
+~nodeCount.do({ arg item;
+	var nodename=("ball_"++item).asSymbol;
+	var connectionName = nodename++ "->listener";
+	postln("creating: "++nodename++" and connection:  "++ connectionName);
+	~createSource.value(nodename, "plugin://zkarpluck1", \default);
+	~createConnection.value(nodename, "listener");
+	 // ~setUri.value(nodename, "plugin://zkarpluck1");
+	//~connectionCallback.value( ["/spatosc/core/connection/"++ connectionName ++"/spread", 5]);
+	//~connectionCallback.value( ["/spatosc/core/connection/"++ connectionName++"/update", 45,0,-80,1,14000]);
+
+});
+~allSourceNodes.size;
+
+
+
 // SET CONNECTION
 
 ~nodeCount.do({ arg item;
-	var nodename=("ball_"++item++":spatOSCsource_"++(item+1)).asSymbol;
-	var connectionName = nodename++"->listener:spatOSClistener_0";
+	var nodename=("ball_"++item).asSymbol;
+	var connectionName = nodename++"->listener";
 	//postf("creating: "++nodename++"\n");
 	 //~setUri.value(nodename, "plugin://zkarpluck1");
 	~connectionCallback.value( ["/spatosc/core/connection/"++ connectionName ++"/spread", 5]);
@@ -195,7 +391,7 @@ gainDB
 
 // DELETE INSTANCE
 ~nodeCount.do({ arg item;
-		var nodename=("ball_"++item++":spatOSCsource_"++(item+1)).asSymbol;
+		var nodename=("ball_"++item).asSymbol;
 
 	~deleteSource.value( nodename );
 });
@@ -207,8 +403,8 @@ gainDB
 t = Task({ {
 	~nodeCount.do( { arg item;
 		var pitch = 55 + rand(10);
-		var nodename=("ball_"++item++":spatOSCsource_"++(item+1)).asSymbol;
-		var connectionName = nodename++"->listener:spatOSClistener_0";
+		var nodename=("ball_"++item).asSymbol;
+		var connectionName = nodename++"->listener";
 		// var incidence =  ~incidenceIndex.mod(100) * 0.01;
 
 		// var pitch = 55 + rand(10);
