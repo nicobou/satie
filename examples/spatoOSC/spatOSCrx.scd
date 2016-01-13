@@ -36,7 +36,7 @@ s.waitForBoot{
 	s.sync;
 
 	// get default group
-	~defaultProx = ~scbr.satieGroups[\default];  // Satie Groups are actually ProxySpace
+	//~defaultProx = ~scbr.satieGroups[\default];  // Satie Groups are actually ProxySpace
 
 
 
@@ -46,8 +46,6 @@ s.waitForBoot{
 		{~effectProx = ~scbr.makeSatieGroup(\effect, \addToTail);}
 	);
 
-	// list internal instances from default group (internal instances are NodeProxy instances):
-	// ~defaultProx.existingProxies;
 
 	// dictionarys for source nodes
 	~allSourceNodes = Dictionary();        //  ~allSourceNodes.postln;
@@ -259,7 +257,7 @@ s.waitForBoot{
 	~connectionCallback = { | args |
 		var nodeName, listenerName, connectionName, type, temp, charIndex;
 		var aziDeg, eleDeg, gainDB, delayMs, lpHz, hpHz, spread;
-		var thisProxy;
+		var thisSynth;
 		var index;
 		var halfSrate = 0.5 * s.sampleRate;
 
@@ -271,7 +269,7 @@ s.waitForBoot{
 		nodeName = connectionName.asString.subStr(0, charIndex-1);
 		//postf("~connectionCallback:  connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
 
-		thisProxy = ~allSourceNodes[nodeName.asSymbol].at(\proxy);
+		thisSynth = ~allSourceNodes[nodeName.asSymbol].at(\synth);
 
 		switch(type,
 			'update',
@@ -297,7 +295,7 @@ s.waitForBoot{
 						postf("  %  " ++ gainDB.trunc );*/
 
 
-						thisProxy.set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB, \delayMs, delayMs, \lpHz, lpHz);
+						thisSynth.set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB, \delayMs, delayMs, \lpHz, lpHz);
 						//postf("~connectionCallback:  update: lpHz  % \n", lpHz);
 
 					}
@@ -311,7 +309,7 @@ s.waitForBoot{
 					{
 						// get value from vector, and write to connectionState
 						hpHz = args[1];   // get highpass cutoff value
-						thisProxy.set(\hpHz ,  clip(hpHz, 1, halfSrate ));
+						thisSynth.set(\hpHz ,  clip(hpHz, 1, halfSrate ));
 
 								postf("~connectionCallback:  hpHz connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
 
@@ -327,7 +325,7 @@ s.waitForBoot{
 						// invert the spread value (usually an exp) to work with SATIE's VBAP-based spatializer (or others)
 						spread = 100 *  ( 1 - (clip(args[1],0,1)));  // get values from vector, and write to connectionState
 
-						thisProxy.set(\spread, spread);
+						thisSynth.set(\spread, spread);
 
 						//postf("~connectionCallback:  SPREAD:  connectionName: %  spread: % \n", connectionName, spread);
 
@@ -344,7 +342,7 @@ s.waitForBoot{
 	~connectionProcessCallback = { | args |
 		var nodeName, listenerName, connectionName, type, temp, charIndex;
 		var aziDeg, eleDeg, gainDB, delayMs, lpHz, spread;
-		var thisProxy;
+		var thisGroup, thisGroupName;
 		var myProcess;
 
 
@@ -361,7 +359,8 @@ s.waitForBoot{
 		// We know this is a sourceProcessingNode since this callback was chosen for this node
 		// so by default, we will update the source's group
 
-		thisProxy = ~allSourceNodes[nodeName.asSymbol].at(\proxy);  // process nodes have unique groups
+		thisGroupName = ~allSourceNodes[nodeName.asSymbol].at(\groupNameSym);  // process nodes have unique groups
+		thisGroup = ~allGroupNodes[thisGroupName].at(\group).group;
 
 		myProcess = ~allSourceNodes[nodeName.asSymbol].at(\process);
 
@@ -386,7 +385,7 @@ s.waitForBoot{
 						if (myProcess[\updateConnection] == nil,
 							{
 								//postf("~connectionProcessCallback:  setting update for nodes group %\n", connectionName);
-								thisProxy.set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB, \delayMs, delayMs, \lpHz, lpHz);
+								thisGroup.set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB, \delayMs, delayMs, \lpHz, lpHz);
 							},
 							// else use custom handler
 							{
@@ -407,7 +406,7 @@ s.waitForBoot{
 						if (myProcess[\spread] == nil,
 							{
 								postf("~connectionProcessCallback:  setting spread for node's group  %\n", connectionName);
-								thisProxy.set(\spread, spread);
+								thisGroup.set(\spread, spread);
 							},
 							// else use a custom handler
 							{
@@ -482,7 +481,7 @@ s.waitForBoot{
 		switch(type,
 			'prop',
 			{
-				var groupName = ~allSourceNodes[name.asSymbol].at(\proxySymb);
+				var groupName = ~allSourceNodes[name.asSymbol].at(\groupNameSym);
 				~setGroupProperty.value(groupName, args[1], args[2]);
 
 			},
@@ -623,7 +622,7 @@ s.waitForBoot{
 						~createSourceProcess.value(sourceName.asSymbol, uriName,groupName )
 
 					},
-					// "file", {~setPlugin.value(name, uriPath)}  not implemented yet
+					// "file", {~setSynth.value(name, uriPath)}  not implemented yet
 				);
 
 
@@ -638,7 +637,7 @@ s.waitForBoot{
 	// ignore groupName since a unique one will be generated for this node and its clones
 
 	~createSourceProcess = { | sourceName, uriPath , groupNameDummy = \default |
-		var temp, type, charIndex, processName, processClone, myProcess, cloneProxy, cloneProxyName;
+		var temp, type, charIndex, processName, processClone, myProcess, cloneGroup, cloneGroupName;
 
 		charIndex = uriPath.asString.find("://");
 
@@ -665,24 +664,24 @@ s.waitForBoot{
 						~allSourceNodes[sourceName.asSymbol].put(\plugin, \nil);
 
 						// generate groupName unique to source node
-						cloneProxyName = sourceName ++ "_group";
-						cloneProxy = ~createGroup.value(cloneProxyName.asSymbol);   // create group for this node and its clones
+						cloneGroupName = sourceName ++ "_group";
+						cloneGroup = ~createGroup.value(cloneGroupName.asSymbol);   // create group for this node and its clones
 
-						//cloneProxy.postln;
+						//cloneGroup.postln;
 
 						// clone a new copy of the process
 						temp = ~allProcesses.at(processName.asSymbol);
 						processClone = temp.copy;
 						//processClone[\nodeName]=sourceName.asSymbol;
 
-						cloneProxy = ~allGroupNodes[cloneProxyName.asSymbol].at(\proxy); // must be called after createGroup() above
+						cloneGroup = ~allGroupNodes[cloneGroupName.asSymbol].at(\group); // must be called after createGroup() above
 
 						~allSourceNodes[sourceName.asSymbol].put(\process, processClone);
-						~allSourceNodes[sourceName.asSymbol].put(\proxySymb, cloneProxyName.asSymbol);
+						~allSourceNodes[sourceName.asSymbol].put(\groupNameSym, cloneGroupName.asSymbol);
 
 						myProcess = ~allSourceNodes[sourceName.asSymbol].at(\process);
-						myProcess[\setup].value(myProcess, sourceName.asSymbol, cloneProxyName.asSymbol, cloneProxy);   // set the state of the process
-						~setPlugin.value(sourceName.asSymbol, "");  // sets dummy plugin as placeholder
+						myProcess[\setup].value(myProcess, sourceName.asSymbol, cloneGroupName.asSymbol, cloneGroup);   // set the state of the process
+						~setSynth.value(sourceName.asSymbol, "");  // sets dummy plugin as placeholder
 
 						~oscInterface.sourceOSC(sourceName.asSymbol, ~sourceProcessCallback);   // create OSC callback
 
@@ -693,34 +692,11 @@ s.waitForBoot{
 
 
 	~createSourceNode = { | sourceName, uriName , groupName = \default |
-
+		var synthName;
 
 		if (groupName == "", { groupName = \default; });   // make sure group name is ok
 
-
-		/*
-
-		if (~isFXuri.value(uriName), { groupName = \effect };);  // BROKEN:  if URI is a fx plugin,  force group to effects group
-
-
-		// HACK UNTIL GROUPS IS IMPMENETED IN UNITY SCRIPT
-		if (uriName.asSymbol ==  "plugin://busreverb".asSymbol  ,
-			{
-				postf("~createSource:  HACK:  forcing  EFFECTS group for source: %", sourceName.asSymbol);
-				groupName = \effect;  // if URI is a fx plugin,  force group to effects group
-			},
-			// else if
-			{
-				if (uriName.asSymbol ==  "plugin://busgverb".asSymbol  ,
-					{
-						postf("~createSource:  HACK:  forcing  EFFECTS group for source: %", sourceName.asSymbol);
-						groupName = \effect;
-				};);  // if URI is a fx plugin,  force group to effects group
-		});
-
-*/
-
-		// check to see if group's proxy exists (even if the corresponding groupNode has not yet been instntiated),  if  not, create it
+		// check to see if group  exists (even if the corresponding groupNode has not yet been instntiated),  if  not, create it
 		if ( ~scbr.satieGroups[groupName.asSymbol] == nil,
 			{
 				postf("~createSource_groupcheck:   source:%    group:  % undefined,  CREATING GROUP NOW \n", sourceName, groupName);
@@ -732,65 +708,74 @@ s.waitForBoot{
 		~allSourceNodes[sourceName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
 		~allSourceNodes[sourceName.asSymbol].put(\plugin, \nil);
 
-		// DEBUG
-		//~allSourceNodes[sourceName.asSymbol].put(\outDB, 0);
-
-
-
 		// handle any aux send issues here
 		if ( groupName == \effect,
 			{
 				postf("~createSource:  CREATING EFFECTS SOURCE for:%\n", sourceName.asSymbol);
 
-
 				if (~fxInputBus == nil,    // this should be defined previously in the project's .scd
 					{
 						postf("~createSource:  ~fxInputBus not defined");
 						~fxInputBus = 0;
-				};);
-
-
-				// ~allSourceNodes[sourceName.asSymbol].put(\proxySymb, \effect);
+				});
 
 				// this is an effects node, so save its aux bus assign
-
 				~allSourceNodes[sourceName.asSymbol].put(\auxBus, ~scbr.aux[~fxInputBus]);  //  HACK to set up effects send node
-
 		});
 
 		// now set node's group
-		~allSourceNodes[sourceName.asSymbol].put(\proxySymb, groupName.asSymbol);
-
-
+		~allSourceNodes[sourceName.asSymbol].put(\groupNameSym, groupName.asSymbol);
 
 		// call ~setUri to complete instance creation
-		~setUri.value(sourceName.asSymbol,uriName.asSymbol);
+		//~setUri.value(sourceName.asSymbol,uriName.asSymbol);
 
+		// now set up synth
+		if (uriName.asString.contains("plugin://") == false,
+			{
+				warn("~createSource: WARNING: node: %  bad URI format : %,  setting to \dummyPlugin", sourceName, uriName);
+				~setSynth.value(sourceName.asSymbol, \dummyPlugin);
+			},
+			// else  // path ok, proceed
+			{
+				var charIndex = uriName.asString.find("://");
+				var temp = uriName.asString.subStr(charIndex);
+				var type = uriName.asString.subStr(0, charIndex-1);
+				synthName = temp.asString.replace("://", "");
+
+				//postf("~setUri nodeName: %, type: %  plugName: %\n", uriName, type, uriPath);
+				// still needs to be expanded for soundfiles, adc, web etc..
+				switch( type,
+					"plugin", {
+						~setSynth.value(sourceName.asSymbol, synthName)
+
+					},
+					// "file", {~setSynth.value(name, uriPath)}  not implemented yet
+				);
+		});
 		~oscInterface.sourceOSC(sourceName.asSymbol, ~sourceNodeCallback);   // create OSC callback
-
 	};
 
 
-	// returns group proxy
+	// returns group
 	~createGroup = { | groupName |
 
 		if (~allGroupNodes.includesKey(groupName),
 			{
 				postf("createGroup:  GroupNode % exists, no action \n", groupName);
-				~allGroupNodes[groupName.asSymbol].at(\proxy);  // return group proxy
+				~allGroupNodes[groupName.asSymbol].at(\group);  // return group
 			},
 			// else create new group node
 			{
-				var groupProxy;
+				var group;
 
 
 				if (~scbr.satieGroups[groupName.asSymbol] != nil, // group already exists in SATIE, no need to create it
 					{
-						groupProxy = ~scbr.satieGroups[groupName.asSymbol];
+						group = ~scbr.satieGroups[groupName.asSymbol];
 					},
 					// else  group does not exist in SATIE,  create it
 					{
-						groupProxy = ~scbr.makeSatieGroup(groupName.asSymbol);
+						group = ~scbr.makeSatieGroup(groupName.asSymbol);
 						if ( groupName.asSymbol == \default,
 							{
 								postf("~createGroup:  BUG FOUND-- SHOULD NOT HAVE TO INSTANITATE DEFAULT GROUP !!!!");
@@ -799,19 +784,19 @@ s.waitForBoot{
 
 				postf("~createGroupNode:   % \n", groupName);
 				~allGroupNodes[groupName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
-				~allGroupNodes[groupName.asSymbol].put(\proxy , groupProxy);  // save proxy space
-				~allGroupNodes[groupName.asSymbol].put(\proxySym , groupName.asSymbol);  // save proxy symbol
+				~allGroupNodes[groupName.asSymbol].put(\group , group);  // save group
+				~allGroupNodes[groupName.asSymbol].put(\groupSym , groupName.asSymbol);  // save group name symbol
 				~allGroupNodes[groupName.asSymbol].put(\members, List() );  // create dict for members
 				~allGroupNodes[groupName.asSymbol].put(\plugin, \nil);
 
 
-				//  set group proxy
+				//  set group
 
-				~allGroupNodes[groupName.asSymbol].put(\proxy, groupProxy );
+				~allGroupNodes[groupName.asSymbol].put(\group, group );
 
 
 				~oscInterface.groupOSC(groupName.asSymbol, ~groupCallback);   // create OSC callback for this source
-				groupProxy;  // returns groups proxy
+				group;  // returns groups
 			}
 		);
 	};
@@ -850,12 +835,12 @@ s.waitForBoot{
 	};
 
 
-	// create or a node's plugin (synthdef)
-	~setPlugin = { | nodeName pluginName |
+	// create a node's  (synthdef)
+	~setSynth = { | nodeName pluginName |
 		var validPluginName = pluginName;
-		var proxyName = ~allSourceNodes[nodeName.asSymbol].at(\proxySymb);
+		var groupName = ~allSourceNodes[nodeName.asSymbol].at(\groupNameSym);
 
-		//postf("~setPlugin: node: %    NEW: %  CURRENT: % \n", nodeName, pluginName.asSymbol, ~allSourceNodes[nodeName.asSymbol].at(\plugin).asSymbol);
+		//postf("~setSynth: node: %    NEW: %  CURRENT: % \n", nodeName, pluginName.asSymbol, ~allSourceNodes[nodeName.asSymbol].at(\plugin).asSymbol);
 
 
 		// NEED A REAL SYNTH DEF CHECK HERE- set the \dummyPlugin if it fails
@@ -864,28 +849,28 @@ s.waitForBoot{
 
 		if (validPluginName.asSymbol != ~allSourceNodes[nodeName.asSymbol].at(\plugin).asSymbol,
 			{
-				var proxy;
+				var synth;
 				~allSourceNodes[nodeName.asSymbol].put(\plugin, validPluginName.asSymbol);
 
-				if ( proxyName.asSymbol == \default,
+				if ( groupName.asSymbol == \default,
 					{
-						proxy = ~scbr.makeInstance(nodeName.asSymbol, validPluginName.asSymbol);  // just being careful, but the call below should work for this too
+						synth = ~scbr.makeInstance(nodeName.asSymbol, validPluginName.asSymbol);  // just being careful, but the call below should work for this too
 					},
 					{
-						proxy = ~scbr.makeInstance(nodeName.asSymbol, validPluginName.asSymbol, proxyName.asSymbol);
+						synth = ~scbr.makeInstance(nodeName.asSymbol, validPluginName.asSymbol, groupName.asSymbol);
 
 				});
 
 				// now if its a node that has an aux send assign, it must be an effects node, so set its synth param with the aux bus number
 				if ( ~allSourceNodes[nodeName.asSymbol].at(\aux) != nil,
 					{
-						proxy.set(\in, ~allSourceNodes[nodeName.asSymbol].at(\auxBus) );
+						synth.set(\in, ~allSourceNodes[nodeName.asSymbol].at(\auxBus) );
 				});
 
-				~allSourceNodes[nodeName.asSymbol].put(\proxy, proxy);
+				~allSourceNodes[nodeName.asSymbol].put(\synth, synth);
 			},
 			{
-				//postf("~setPlugin: ignoring set plugin % for node % : plugin already set \n", pluginName, nodeName);
+				//postf("~setSynth: ignoring set plugin % for node % : plugin already set \n", pluginName, nodeName);
 			}
 		);
 
@@ -903,7 +888,7 @@ s.waitForBoot{
 		if (uriPath.asString.contains("plugin://") == false,
 			{
 				postf("~setUri: WARNING: node: %  bad URI format : %,  setting to \dummyPlugin", nodeName, uriPath);
-				~setPlugin.value(nodeName.asSymbol, \dummyPlugin);
+				~setSynth.value(nodeName.asSymbol, \dummyPlugin);
 			},
 
 			// else  // path ok, proceed
@@ -918,10 +903,10 @@ s.waitForBoot{
 				// still needs to be expanded for soundfiles, adc, web etc..
 				switch( type,
 					"plugin", {
-						~setPlugin.value(nodeName.asSymbol, uriName)
+						~setSynth.value(nodeName.asSymbol, uriName)
 
 					},
-					// "file", {~setPlugin.value(name, uriPath)}  not implemented yet
+					// "file", {~setSynth.value(name, uriPath)}  not implemented yet
 				);
 		});
 	};
@@ -929,32 +914,32 @@ s.waitForBoot{
 
 	// always a keyWord Value pair
 	~setProperty = { | nodeName property value |
-		var thisProxy = ~allSourceNodes[nodeName.asSymbol].at(\proxy);
+		var thisSynth = ~allSourceNodes[nodeName.asSymbol].at(\synth);
 
 		//postf("~setProperty: seting % of % to %\n", property, nodeName, value);
 
-		thisProxy.set(property.asSymbol, value);
+		thisSynth.set(property.asSymbol, value);
 	};
 
 	// always a keyWord Value pair
 	~setGroupProperty = { | groupName property value |
-		var groupProxy = ~allGroupNodes[groupName.asSymbol].at(\proxy);
+		var group = ~allGroupNodes[groupName.asSymbol].at(\group).group;
 
 		postf("~setGroupProperty: seting % of % to %\n", property, groupName, value);
 
-		groupProxy.group.set(property.asSymbol, value);
+		group.set(property.asSymbol, value);
 	};
 
 	// enable/disable node
 	~setState = { | nodeName,  state |
-		var thisProxySym = ~allSourceNodes[nodeName.asSymbol].at(\proxySymb);
+		var thisSynth = ~allSourceNodes[nodeName.asSymbol].at(\synth);
 		/*		if ( (state > 0),
 		{
-		~scbr.makeInstance(nodeName.asSymbol, ~allSourceNodes[nodeName.asSymbol].at(\plugin).asSymbol, thisProxySym);
+		~scbr.makeInstance(nodeName.asSymbol, ~allSourceNodes[nodeName.asSymbol].at(\plugin).asSymbol, thisGroupSym);
 		},
 		//else turn state off
 		{
-		~scbr.pauseInstance.value(nodeName.asSymbol, thisProxySym );
+		~scbr.pauseInstance.value(nodeName.asSymbol, thisGroupSym );
 		}
 		);*/
 		//postf("~setState: seting state of % to %\n", nodeName, state);
@@ -964,23 +949,23 @@ s.waitForBoot{
 	// events RX:   /spatosc/core/source/nodename/event eventName v1...vN
 	~setGroupEvent = { | groupName, eventName,  args |
 		var valueCount = args.size;
-		var groupProxy = ~allGroupNodes[groupName.asSymbol].at(\proxy);
+		var group = ~allGroupNodes[groupName.asSymbol].at(\group).group;
 
 		postln("~setGroupEvent: node:" ++groupName ++" event name:"++eventName++"  arg(s): "++ args );
 
 		if ( (valueCount > 1) ,    // pass vector
 			{
-				groupProxy.group.set(eventName.asSymbol, args);
+				group.set(eventName.asSymbol, args);
 			},
 			// else
 			{
 				if ( (valueCount == 1) ,    // pass value
 					{
-						groupProxy.group.set(eventName.asSymbol, args[0]);
+						group.set(eventName.asSymbol, args[0]);
 					},
 					// else  no args.. just pass 1
 					{
-						groupProxy.group.set(eventName.asSymbol, 1);
+						group.set(eventName.asSymbol, 1);
 					}
 				);
 		});
@@ -990,7 +975,7 @@ s.waitForBoot{
 	// events RX:   /spatosc/core/source/nodename/event eventName v1...vN
 	~setEvent = { | nodeName, eventName,  args |
 		var valueCount = args.size;
-		var thisProxy = ~allSourceNodes[nodeName.asSymbol].at(\proxy);
+		var thisSynth = ~allSourceNodes[nodeName.asSymbol].at(\synth);
 
 		// DEBUG
 		//var db = ~allSourceNodes.at( nodeName.asSymbol).at(\outDB);
@@ -1003,7 +988,7 @@ s.waitForBoot{
 				//postln("~setEvent: " ++ nodeName.asSymbol ++ "    args: " ++ args[0]  ++ "     " ++ (args[1]*1000).trunc++ "    " ++ (args[2]*100).trunc  );
 				//if( args[2] < 0.07, {postln("~setEvent: " ++ nodeName.asSymbol ++ "   INCIDENCE  " ++ args[2]  )});
 
-				thisProxy.set(eventName.asSymbol, args);
+				thisSynth.set(eventName.asSymbol, args);
 			},
 			// else
 			{
@@ -1012,11 +997,11 @@ s.waitForBoot{
 					// DEBUG
 					//postln("~setEvent: " ++ nodeName.asSymbol ++ "        BANG   db: "++db.trunc++ "\n");
 
-						thisProxy.set(eventName.asSymbol, args[0]);
+						thisSynth.set(eventName.asSymbol, args[0]);
 					},
 					// else  no args.. just pass 1
 					{
-						thisProxy.set(eventName.asSymbol, 1);
+						thisSynth.set(eventName.asSymbol, 1);
 					}
 				);
 		});
@@ -1024,7 +1009,7 @@ s.waitForBoot{
 
 	~addMember = { |  groupName, nodeName |
 		var memberList = ~allGroupNodes[groupName].at(\members);
-		var groupProxy = ~allGroupNodes[groupName].at(\proxy);
+		var group = ~allGroupNodes[groupName].at(\group).group;
 		//
 
 
@@ -1032,7 +1017,7 @@ s.waitForBoot{
 
 		// if not add it
 		// ~scbr.changeGroup(groupName, nodeName);   // assign source node to group's proxySpace
-		//  ~allSourceNodes[nodeName.asSymbol].put(\proxy, groupProxy);
+		//  ~allSourceNodes[nodeName.asSymbol].put(\group, groupProxy);
 		memberList.add(nodeName.asSymbol);
 
 
@@ -1074,21 +1059,23 @@ s.waitForBoot{
 		// first flush all nodes
 		~allSourceNodes.keysDo { |key |
 			//key.postln;
-
-
-			~clearSourceNode.value(key);
+		~clearSourceNode.value(key);
 		};
-		// now remove all nodes in the global dictionary
-		/*		nodelist.do { | key |
-		postf("removing:  node: %  from dictionary\n",  key);
-		~allSourceNodes.removeAt(key);
-		};*/
-		//~allSourceNodes.removeEvery();
-
-		// NEED TO CLEAR ALL GROUPS TOO
 
 		~allSourceNodes.clear();
 		~allSourceNodes.size;
+
+	// do not clear all groups except default group
+
+/*		~scbr.satieGroups.keysDo{ |key |
+			var nodeSym = key;
+
+			if (key != \default,
+				{
+					~scbr.killSatieGroup(key);
+			});
+		};*/
+
 	};
 
 	~deleteSource = { | nodeName |
@@ -1116,11 +1103,11 @@ s.waitForBoot{
 		var node = ~allGroupNodes[nameSym];
 		//var connectionName = node.at(\connectionName);
 		var nodeKeys = node.keys;
-		var thisProxy = ~allGroupNodes[nameSym].at(\proxy);
+		var thisGroup = ~allGroupNodes[nameSym].at(\group);
 		var memberList = ~allGroupNodes[nameSym].at(\members);
 
 
-		//~cleaninstance(nameSym, thisProxy);
+		//~cleaninstance(nameSym, thisGroup);
 
 		postf("~clearGroupeNode:  group node: % \n",  nameSym);
 
@@ -1143,13 +1130,13 @@ s.waitForBoot{
 		var node = ~allSourceNodes[nameSym];
 		var connectionName = node.at(\connectionName);
 		var nodeKeys = node.keys;
-		var thisProxyName = ~allSourceNodes[nameSym].at(\proxySymb);
+		var thisGroupName = ~allSourceNodes[nameSym].at(\groupNameSym);
 
 
 		// is this a process node?
 		if ( ~allSourceNodes[nameSym].at(\process) != nil,
 			{
-				var groupSym =  ~allSourceNodes[nameSym].at(\proxySymb);
+				var groupSym =  ~allSourceNodes[nameSym].at(\groupNameSym);
 
 				var myProcess = ~allSourceNodes[nameSym].at(\process);
 
@@ -1160,7 +1147,7 @@ s.waitForBoot{
 
 				myProcess.freeClones();   // frees clone synths
 
-				~scbr.cleanInstance(nameSym,thisProxyName );
+				~scbr.cleanInstance(nameSym,thisGroupName );
 
 				// now delete group
 				~removeGroup.value(groupSym); //
@@ -1168,7 +1155,7 @@ s.waitForBoot{
 		},
 		// else  its just a regular source
 		{
-				~scbr.cleanInstance(nameSym,thisProxyName );
+				~scbr.cleanInstance(nameSym,thisGroupName );
 
 		});
 
@@ -1255,7 +1242,7 @@ s.waitForBoot{
 	if (uriPath.asString.contains("plugin://") == false,
 		{
 			postf("~getUriSym:  non-plugin type URI: % ", uriPath);
-			// ~setPlugin.value(nodeName.asSymbol, \dummyPlugin);
+			// ~setSynth.value(nodeName.asSymbol, \dummyPlugin);
 			false;
 		},
 

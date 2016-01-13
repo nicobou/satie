@@ -69,7 +69,7 @@ s.waitForBoot{
 	~sheefa = Environment[
 		'nodeName' -> \nil, // required field
 		'nodeGroupName' -> \nil, // required field
-		'nodeGroupProxy' -> \nil, // required field
+		'nodeGroup' -> \nil, // required field
 		// connection state
 		'aziDeg' -> -10,
 		'elevDeg' -> 10,
@@ -125,8 +125,8 @@ s.waitForBoot{
 	// required
 	// frees all clone synths
 	~sheefa.freeClones = { | self |
-		//self.nodeGroupProxy = nodeGroupProxy;
-		//thisProxy = self.nodeGroupProxy.group;
+		//self.nodeGroup = nodeGroup;
+		//thisGroup = self.nodeGroup.group;
 
 		//postf("~sheefa.free:  freeing % synthVoices for group %\n",  self.cloneCount, self.nodeGroupName);
 
@@ -139,14 +139,13 @@ s.waitForBoot{
 
 	// required but project specific
 	// generates N synths
-	~sheefa.setup = { | self, nodeName, nodeGroupName, nodeGroupProxy |
-		var thisProxy ;
+	~sheefa.setup = { | self, nodeName, nodeGroupName, nodeGroup |
+		var thisGroup ;
 
 		self.nodeName = nodeName;
 		self.nodeGroupName = nodeGroupName;
-		self.nodeGroupProxy = nodeGroupProxy;
+		self.nodeGroup = nodeGroup;
 
-		thisProxy = self.nodeGroupProxy.group;
 
 
 		postf("~sheefa.setup:  generating % synthVoices for group %\n",  self.cloneCount, self.nodeGroupName);
@@ -170,7 +169,7 @@ s.waitForBoot{
 	// otherwise the "update" message will be applided to the node's group
 	~sheefa.updateConnection = { | self, aziDeg, eleDeg, gainDB, delayMs, lpHz |
 
-		var 	thisProxy = ~allSourceNodes[self.nodeName.asSymbol].at(\proxy);
+		var 	thisGroup = self.nodeGroup; // ~allSourceNodes[self.nodeName.asSymbol].at(\proxy);
 
 		//'~sheefa.updateConnection'.postln;
 		self.aziDeg = aziDeg;
@@ -182,9 +181,9 @@ s.waitForBoot{
 
 		//postf("sheefa.updateConnection: called for node: %    azi: %  \n", self.nodeName, aziDeg);
 
-		thisProxy.group.set(\aziDeg, self.aziDeg, \eleDeg, self.elevDeg, \gainDB, self.gainDB , \delayMs, self.delayMs, \lpHz, self.lpHz, \hpHz, self.hpHz);
+		//thisGroup.postln;
 
-
+		thisGroup.set(\aziDeg, self.aziDeg, \eleDeg, self.elevDeg, \gainDB, self.gainDB , \delayMs, self.delayMs, \lpHz, self.lpHz, \hpHz, self.hpHz);
 	};
 
 
@@ -192,8 +191,9 @@ s.waitForBoot{
 	// otherwise the "spread" message will be applided to the node's group
 	~sheefa.spread = { | self, spreadVal |
 
-		'~sheefa.spread'.postln;
-
+		var 	thisGroup = self.nodeGroup;
+		thisGroup.set(\spread, spreadVal);
+			// '~sheefa.spread'.postln;
 	};
 
 	~sheefa.setIncrement = { arg self, items = #[1] ;
@@ -212,7 +212,7 @@ s.waitForBoot{
 
 	// custom method
 	~sheefa.trigger = { arg self, items = #[1,2,3] ;
-		var thisProxy = self.nodeGroupProxy.group;
+		var thisGroup = self.nodeGroup;
 		var gain = self.gainDB;
 		var seqName, pitch, position, incr, size, vel, incidence;
 
@@ -232,16 +232,16 @@ s.waitForBoot{
 
 				// update all nodes in group
 
-				thisProxy.set(\gainDB, gain);
-				thisProxy.set(\randTrigMaxMs, self.triggerIntervalMs);
+				// thisGroup.set(\gainDB, gain);  not necessary, since this is handled in the update connection
+
+				thisGroup.set(\randTrigMaxMs, self.triggerIntervalMs);
 
 					// assign pitches  for each particle
 				self.cloneCount.do( { arg item;
 					var nodename=(self.nodeName++"_"++item).asSymbol;
-					// this is where we could calculate the exact position of the clone, with respect to this node
-					// but its expensive
-					//~scbr.satieGroups[ self.nodeGroupName.asSymbol ].[ nodename.asSymbol ].set(\gainDB, gain);
 
+					// this is where we could calculate the exact position of each clone, with respect to this node
+					// but its expensive
 
 					/* instance specific look up not used
 					pitch = ~sheefa_pitchSequences[self.pitchSeqSym][self.pitchSeqPos];
@@ -254,31 +254,20 @@ s.waitForBoot{
 					pitch = ~sheefa_pitchSequences.at(seqName.asSymbol).at(\pitches)[position];
 					~sheefa_pitchSequences.at(seqName.asSymbol).put(\pos,  ((position + incr) % size) );
 
-					//[ self.nodeGroupName.asSymbol, nodename.asSymbol ] .postln;
-
-					//~scbr.satieGroups[ self.nodeGroupName.asSymbol ].[ nodename.asSymbol ].set(\note, [ pitch, vel, incidence ] );  // was
 					~scbr.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(\note, [ pitch, vel, incidence ] );
 
-					//~scbr.satieGroups[ self.nodeGroupName.asSymbol ].[ nodename.asSymbol ].set(\t_trig, 1);  // was
 					~scbr.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(\t_trig, 1);
-
-
-					//~scbr.satieGroups[ self.nodeGroupName.asSymbol ].[ nodename.asSymbol ].set(\gainDB, gain);
-					//~scbr.satieGroups[ self.nodeGroupName.asSymbol ].[ nodename.asSymbol ].set(\randTrigMaxMs, self.triggerIntervalMs);
-					//~scbr.satieGroups[ self.nodeGroupName.asSymbol ].[ nodename.asSymbol ].set(\t_trig, 1);
-
-
-
 				});
+
 				// calculate azimuths for each particle
 
 
 				// finally  update and trigger all cloned synths (particles)
-/*				thisProxy.set(\gainDB, gain);
+/*				thisGroup.set(\gainDB, gain);
 
-				thisProxy.set(\randTrigMaxMs, self.triggerIntervalMs);*/
+				thisGroup.set(\randTrigMaxMs, self.triggerIntervalMs);*/
 
-				//thisProxy.set(\t_trig, 1);
+				//thisGroup.set(\t_trig, 1);
 				//postf("~sheefa.trigger: triggering synths in node: % group \n",self.nodeName);
 
 				//~sheefa_pitchSequences.at(seqName.asSymbol).at(\pos).postln;
@@ -291,7 +280,7 @@ s.waitForBoot{
 
 	// custom method
 	~sheefa.clearSynths = { | self |
-		//var thisProxy = ~allSourceNodes[self.nodeName.asSymbol].at(\proxy);
+		//var thisGroup = ~allSourceNodes[self.nodeName.asSymbol].at(\proxy);
 
 		postf("~sheefa.clearSynths: clearing synths in node: % group \n", self.nodeName);
 

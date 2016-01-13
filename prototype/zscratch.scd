@@ -7,11 +7,13 @@
 ~groupSym = \default;
 
 ~nodeName= \srcNode_0;
+~nodeGroupName = ~allSourceNodes[~nodeName.asSymbol].at(\groupNameSym);
+
 ~listenerName = "listener";
 
-~allGroupNodes.includesKey(~nodeName.asSymbol);
+~allGroupNodes.includesKey(~nodeGroupName);
 
-~allSourceNodes[~nodeName.asSymbol].at(\proxySymb);
+
 
 
 // for normal source Node
@@ -37,7 +39,8 @@
 
 // process node testing
 ~myProcess = ~allSourceNodes[~nodeName.asSymbol].at(\process);
-~myGroupName = ~myProcess.at(\nodeGroupName);
+~myGroupName = ~myProcess.nodeGroupName.asSymbol;
+~myGroup = ~myProcess.nodeGroup.group;
 
 
 // inspect values
@@ -50,18 +53,37 @@
 
 
 ~cloneName = ~nodeName++"_0";
-~myProxy = ~myProcess.at(\nodeGroupProxy);
 
 
 
-~myProcess.nodeGroupName.asSymbol;
+
 
 // srcNode_0_group, srcNode_0_6
 
 ~scbr.satieGroupInstances[\srcNode_0_group][\srcNode_0_6].set(\note, [75,1,1]);
 ~myProcess.put(triggerIntervalMs, 0);
 
-~scbr.satieGroupInstances[\srcNode_0_group][\srcNode_0_6].set(\t_trig, 1);
+~scbr.satieGroupInstances[\srcNode_0_group][\srcNode_0].set(\t_trig, 1);
+
+~myGroup.set(\randTrigMaxMs, 0);
+//~myGroup.set(\t_trig, 1).free
+
+\srcNode_0
+~scbr.satieGroups[~myGroupName].group.set(\aziDeg,  90);
+~scbr.satieGroups[~myGroupName].group.set(\t_trig, 1);
+
+{~scbr.satieGroupInstances[~myGroupName].keysDo{ |key |
+	var nodeSym = key;
+	// var synthName = "srcNode_"++item++"_group";
+
+
+	~scbr.satieGroupInstances[~myGroupName][key].set(\randTrigMaxMs, 0);
+	~scbr.satieGroupInstances[~myGroupName][key].set(\note, [89,1,1]);
+
+	~scbr.satieGroupInstances[~myGroupName][key].set(\t_trig, 1);
+	key.postln;
+			0.2.wait;
+};}.fork
 
 
 
@@ -76,8 +98,38 @@
 //~scbr.cleanInstance(~cloneName,~myGroupName );
 
 
+~allSourceNodes[\ball_5].at(\groupNameSym);
 
 
+\srcNode_0
+
+~scbr.satieGroups[\srcNode_0_group].set(\randTrigMaxMs, 0);
+~scbr.satieGroups[\srcNode_1_group].set(\randTrigMaxMs, 0);
+
+
+
+~scbr.satieGroups[\srcNode_0_group].set(\aziDeg,  90);
+~scbr.satieGroups[\srcNode_0_group].set(\t_trig, 1);
+
+~scbr.satieGroups[\srcNode_1_group].set(\aziDeg,  -90);
+~scbr.satieGroups[\srcNode_1_group].set(\t_trig, 1);
+
+
+
+~srcNode_0process = ~allSourceNodes[\srcNode_0].at(\process);
+~srcNode_1process = ~allSourceNodes[\srcNode_1].at(\process);
+
+
+~srcNode_0process.at(\nodeGroup).set(\aziDeg,  -90);
+~srcNode_1process.at(\nodeGroup).set(\aziDeg,  -90);
+
+~srcNode_0process.at(\nodeGroup).set(\t_trig, 1);
+~srcNode_1process.at(\nodeGroup).set(\t_trig, 1);
+
+
+
+
+~allSourceNodes[\srcNode_0].at(\process) == ~allSourceNodes[\srcNode_1].at(\process);
 
 ~scbr.satieGroupInstances[~myGroupName.asSymbol][~cloneName.asSymbol].set(\note, [89,1,1]);   // broken
 
@@ -91,11 +143,39 @@
 
 
 
+~scbr.satieGroups.keysDo{ |key |
+	var nodeSym = key;
+
+	if (key != \default,
+		{
+			~scbr.killSatieGroup(key);
+	});
+};
+
+
+~scbr.satieGroups
+
+
+( { arg key;
+
+	key.postln;
+
+	~scbr.killSatieGroup(nil);
+
+});
+
+
+
+
 
 ~myProcess.at(\nodeGroupProxy).group.set(\note, [85,0.5,0.5]);
 ~myProcess.at(\nodeGroupProxy).group.set(\t_trig, 1);
 ~myProcess.at(\nodeGroupProxy).group.set(\randTrigMaxMs, 0);
 
+~myProcess.at(\nodeGroupProxy).group.set(\t_trig, 1);
+~myProcess.at(\nodeGroupProxy).group.set(\aziDeg, -90);
+
+~allSourceNodes[~nodeName].at(\proxy);
 
 
 
