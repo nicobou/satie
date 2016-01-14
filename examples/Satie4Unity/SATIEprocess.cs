@@ -1,4 +1,20 @@
-﻿using UnityEngine;
+﻿// Satie4Unity, audio rendering support for Unity
+// Copyright (C) 2016  Zack Settel
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// -----------------------------------------------------------
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -35,7 +51,7 @@ public class SATIEprocess : MonoBehaviour {
 			return;
 		}
 
-      	StartCoroutine( connectionInit() );
+      	StartCoroutine( afterStart() );
 	
 
 	}
@@ -50,7 +66,7 @@ public class SATIEprocess : MonoBehaviour {
 	}
 
 
-	IEnumerator connectionInit() // now that litener(s) have been conection related parameters.
+	IEnumerator afterStart() // now that litener(s) have been conection related parameters.
 	{
 		yield return new WaitForFixedUpdate ();
 		sendState ();  // by this time, all the start and initialization routines have been evaluated and we can assume that updates to this node will be received on the renderer.
@@ -68,7 +84,16 @@ public class SATIEprocess : MonoBehaviour {
 	// called when inspector's values are modified
 	public virtual void OnValidate()
 	{
+		validateEvents ();
+		validateParams ();
 
+	}
+
+
+
+
+	void validateEvents()
+	{
 		if (_events.Count != events.Count)
 		{
 			// Debug.Log("_events.Count != events.Count");
@@ -105,17 +130,17 @@ public class SATIEprocess : MonoBehaviour {
 					{
 						if (property [n] != "")
 							svalues += " " + property [n];
-						}
+					}
 				}
 
-				// Debug.Log("\t \t \t WE GOT:  MODIFIED PROPERTY: "+keyword+" : "+ svalue);
-				//  Debug.Log("\t PROPERTY len = " + property.Count);
+				//Debug.Log("\t \t \t WE GOT:  MODIFIED EVEMT: "+keyword+" : "+ svalues);
+				//Debug.Log("\t EVENT len = " + events.Count);
 				//            foreach (string item in property)   Debug.Log("\t PROPERTY ATOM: " + item);       
 
-				// if incomplete property abort
+				// if incomplete event abort
 				if (keyword == "") 
 				{
-					//Debug.Log("propseryMessage too short:  " + events [i]);
+					Debug.LogWarning("Event Message too short:  " + events [i]);
 					return;
 				}
 
@@ -128,12 +153,81 @@ public class SATIEprocess : MonoBehaviour {
 				sendEvents (events, false);
 
 
-				//Debug.Log("MODIFIED PROPERTY: "+keyword+" : "+svalue);
+				Debug.Log("MODIFIED EVENT: "+keyword+" : "+svalues);
 
 			}
 		}
 	}
 
+
+	void validateParams()
+	{
+		if (_parameters.Count != parameters.Count)
+		{
+			// Debug.Log("_parameters.Count != parameters.Count");
+
+
+			_parameters.Clear();
+			foreach (string s in parameters)
+			{
+				_parameters.Add(s);
+			}
+			return;
+		}
+
+		for (int i=0; i<parameters.Count; i++)
+		{
+			// Debug.Log("parameters [i]:  " + parameters [i]);
+			if (parameters [i] != _parameters [i])
+			{
+				List<string> property = new List<string>(parameters [i].Split(' '));
+				string keyword = "";
+				string svalue = "";
+
+				//Debug.Log("CHANGED parameters [i]:  " + parameters [i]);
+
+				// remove spaces
+				for (int n = 0; n < property.Count; n++)
+				{
+					if ( keyword == "" && property[n] != "")  
+					{
+						keyword = property[n];
+
+						// if (n == property.Count) break;
+
+						for (int t = n+1; t < property.Count; t++)
+						{
+							if ( svalue == "" && property[t] != "")
+							{
+								svalue = property[t];
+								break;
+							}
+						}
+
+					}
+				}
+
+				// Debug.Log("\t \t \t WE GOT:  MODIFIED parameter: "+keyword+" : "+ svalue);
+				//  Debug.Log("\t parameter len = " + parameter.Count);
+				//            foreach (string item in parameter)   Debug.Log("\t PROPERTY ATOM: " + item);       
+
+				// if incomplete parameter abort
+				if (keyword == "" || svalue == "") 
+				{
+					//Debug.Log("parameterMessage too short:  " + parameters [i]);
+					return;
+				}
+
+				// else the parameter is valid
+
+				// rewrite parameter without white spaces
+				_parameters[i] = parameters[i] = keyword + " " + svalue;
+
+				//Debug.Log("MODIFIED PROPERTY: "+keyword+" : "+svalue);
+				sendEvents (parameters, true);
+			}
+		}
+	}
 
 
 	void sendEvents(List <string> messages, bool setParamFlag)
@@ -185,5 +279,35 @@ public class SATIEprocess : MonoBehaviour {
 		}
 	}
 
+	public void setParameter(string keyword, object value)
+	{
+		string newParam = "";
+		string valueStr = value.ToString();
+
+		if (keyword == "" || valueStr == "") {
+			Debug.LogWarning ("SATIEprocess.setParameter(): bad keyword or value");
+			return;
+		}
+
+
+		//if (value.GetType () == typeof(float))
+			
+
+
+		for (int i = 0; i < parameters.Count; i++) 
+		{
+			if (parameters [i].Contains (keyword)) 
+			{
+				parameters [i] = newParam = keyword + " " + valueStr;
+			}
+		}
+
+		if (newParam == "")  // didn't find the parameter so add it
+		{
+			newParam = keyword + " " + valueStr;
+			parameters.Add ( newParam );
+		}
+		sendEvents (parameters, true); 
+	}
 
 }

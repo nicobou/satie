@@ -2,7 +2,7 @@
 // s.meter;
 // s.sampleRate;
 
-~dumpNodes.value();
+//~dumpNodes.value();
 
 ~groupSym = \default;
 
@@ -29,15 +29,48 @@
 ~connectionName = ~nodeName++ "->"++~listenerName;
 
 
+/*
 ~createSource.value(~nodeName, ~pluginPath, ~groupSym);
 ~createConnection.value(~nodeName,~listenerName);
 
-
+*/
 
 // process node testing
 ~myProcess = ~allSourceNodes[~nodeName.asSymbol].at(\process);
-~myProcess.at(\nodeGroupProxy).free;
 ~myGroupName = ~myProcess.at(\nodeGroupName);
+
+
+// inspect values
+~myProcess.at(\cloneCount);
+~myProcess.at(\triggerIntervalMs);
+~myProcess.at(\cloudRadius);
+~myProcess.at(\randTrigMaxMs);
+~myProcess.at(\synth);
+
+
+
+~cloneName = ~nodeName++"_0";
+~myProxy = ~myProcess.at(\nodeGroupProxy);
+
+
+
+~myProcess.nodeGroupName.asSymbol;
+
+// srcNode_0_group, srcNode_0_6
+
+~scbr.satieGroups[\srcNode_0_group][\srcNode_0_6].set(\note, [90,1,1]);
+~scbr.satieGroups[\srcNode_0_group][\srcNode_0_6].set(\t_trig, 1);
+
+
+~scbr.satieGroups[~myGroupName.asSymbol][~cloneName.asSymbol].set(\note, [89,1,1]);
+~scbr.satieGroups[~myGroupName.asSymbol][~cloneName.asSymbol].set(\t_trig, 1);
+
+
+
+
+~myProcess.at(\nodeGroupProxy).group.set(\note, [85,0.5,0.5]);
+~myProcess.at(\nodeGroupProxy).group.set(\t_trig, 1);
+
 
 
 
@@ -54,27 +87,31 @@
 ~myProcess.at(\nodeGroupProxy).group.set(\gainDB, -20);
 ~myProcess.dump;
 
-// clear
-~myProcess[\clearSynths].value(~myProcess);
 
-~myProcess.at(\cloneCount);
-~myProcess.at(\triggerIntervalMs);
-~myProcess.at(\cloudRadius);
-~myProcess.at(\cloudRadius);
+
+
 
 
 //~nodeName="shitfuck";
 
 ~myProcess.at(\cloneCount).do( { arg item;
 	var nodeName=(~nodeName++"_"++item).asSymbol;
+	var groupName = ~myProcess.at(\nodeGroupName);
 	var synth;
-	synth = ~scbr.satieGroups[~myGroupName][nodeName];
-	synth.set(\gainDB, -50);
+	synth = ~scbr.satieGroups[ groupName ][nodeName];
+	synth.set(\gainDB, -10);
+	synth.set(\t_trig, 1);
 });
 
 
-~myProcess.at(\nodeGroupProxy).group.set(\note, [85,0.5,0.5]);
-~myProcess.at(\nodeGroupProxy).group.set(\t_trig, 1);
+
+// clear
+~myProcess[\clearSynths].value(~myProcess);
+
+~myProcess.at(\nodeGroupProxy).free;
+
+
+
 
 
 
