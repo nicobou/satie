@@ -22,6 +22,7 @@
 //~rootSrcPath = thisProcess.nowExecutingPath.dirname ++ "/../../.."
 
 ~rootSrcPath = thisProcess.nowExecutingPath.dirname ++ "/../..";
+~thisDir = thisProcess.nowExecutingPath.dirname ;
 
 
 // set these flags depending on your environment
@@ -157,7 +158,7 @@ if (~meter == nil,  { ~plotTree=s.meter;});
 
 (
 // note: files that define OSCcallbacks seem to need to be evaluated twice
-~startupfiles = [~rootSrcPath++"/utils/dacTest.scd", ~rootSrcPath++"/"++~myProjectFIleName, ~rootSrcPath++"/src/satie4unity.scd", ~rootSrcPath++"/src/satie4unity.scd"];
+~startupfiles = [~rootSrcPath++"/utils/dacTest.scd", ~thisDir++"/"++~myProjectFIleName, ~rootSrcPath++"/src/satie4unity.scd", ~rootSrcPath++"/src/satie4unity.scd"];
 
 
 // next:  load any .scd files in the project's autoload subdir
