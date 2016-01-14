@@ -1,3 +1,6 @@
+// Satie4Unity, audio rendering support for Unity
+// Copyright (C) 2016  Zack Settel
+
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -10,6 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// -----------------------------------------------------------
 
 
 
@@ -17,12 +21,13 @@
 ~myProjectFIleName = "aq.scd";
 
 
-// edit this path to point to the sate root if you have moved location of this example directory to a different parent directory
-// by default it is:
-//~rootSrcPath = thisProcess.nowExecutingPath.dirname ++ "/../../.."
-
-~rootSrcPath = thisProcess.nowExecutingPath.dirname ++ "/../..";
 ~thisDir = thisProcess.nowExecutingPath.dirname ;
+
+// Only edit this path to point to the sate root if you have moved location of this example project directory to a different level of the satie distribution directory tree
+// by default it is: ~rootSrcPath = ~thisDir++ "/../..";
+
+~rootSrcPath = ~thisDir++ "/../..";
+
 
 
 // set these flags depending on your environment
@@ -34,8 +39,6 @@
 
 
 // NO NEED TO MODIFY ANYTHING ELSE BELOW
-
-
 
 ~listeningFormat = ~defaultListeningFormat;    // will remain unless overwritten below
 
@@ -140,10 +143,11 @@ if ( ~outAudioDev != nil ,
 });
 
 
-postf("AUDIO CONFIGURATION: \n");
-postf("\t LISTENING FORMAT:  %  \n", ~listeningFormat);
-postf("\t OUTPUT DEVICE:  %\n", o.outDevice);
+postf("AUDIO CONFIGURATION: ");
+postf("\t LISTENING FORMAT:  %   ,    ", ~listeningFormat);
+postf("\t OUTPUT DEVICE:  %    ,     ", o.outDevice);
 postf("\t OUTPUT CHANNELS:  %\n", o.numOutputBusChannels);
+
 //o.dump
 
 
