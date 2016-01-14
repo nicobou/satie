@@ -12,28 +12,29 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-// NOTE:  this file optionally uses the BASH environment variable SATIE_LISTENING_FORMAT
-// which is set to:
-//   export SATIE_LISTENING_FORMAT="sato"
-// or
-// export SATIE_LISTENING_FORMAT="labodome"
 
-/*
-s.makeGui;
-s.meter
+//  REQUIRED project file name declaration
+~myProjectFIleName = "aq.scd";
 
-s.dump
-s.reboot;
 
-*/
+// edit this path to point to the sate root if you have moved location of this example directory to a different parent directory
+// by default it is:
+//~rootSrcPath = thisProcess.nowExecutingPath.dirname ++ "/../../.."
+
+~rootSrcPath = thisProcess.nowExecutingPath.dirname ++ "/../..";
 
 
 // set these flags depending on your environment
-
 ~outAudioDev = nil;
 ~superNovaFlag = true;
 
-~defaultListeningFormat = \stereoListener;
+
+~defaultListeningFormat = \stereoListener;    // can also set this to \domeVBAP)  or \labodomeVBAP or \octoVBAP
+
+
+// NO NEED TO MODIFY ANYTHING ELSE BELOW
+
+
 
 ~listeningFormat = ~defaultListeningFormat;    // will remain unless overwritten below
 
@@ -48,6 +49,7 @@ o.memSize = 2**21;        // probably should just leave this the same for everyt
 o.device = nil;  // default
 o.blockSize = 2048;
 o.threads = 8;
+
 
 // check to see if the BASH environment variable is set to either "sato" or "labodome"
 (
@@ -151,16 +153,44 @@ if (~meter == nil,  { ~plotTree=s.meter;});
 
 
 
-// LOAD FILES FOR PROJECT
+// LOAD ENVIRONMENT AND PROJECT FILES
 
 (
 // note: files that define OSCcallbacks seem to need to be evaluated twice
-~files = #["../../utils/dacTest.scd", "spatOSCexample.scd", "spatOSCrx.scd","spatOSCrx.scd", "spatOSCexamplePresets.scd", "spatOSCexamplePresets.scd"];
+~startupfiles = [~rootSrcPath++"/utils/dacTest.scd", ~rootSrcPath++"/"++~myProjectFIleName, ~rootSrcPath++"/src/satie4unity.scd", ~rootSrcPath++"/src/satie4unity.scd"];
 
+
+// next:  load any .scd files in the project's autoload subdir
+~autoLoadDirCmd = "ls "++thisProcess.nowExecutingPath.dirname++"/autoload/*.scd";
+~pipe = Pipe.new(~autoLoadDirCmd, "r");            // list directory contents in long format
+
+~files =List.new();
+~done = nil;
+while (  { ~done != true} ,
+	{
+		var filePath;
+		filePath = ~pipe.getLine;
+
+		if ( filePath != nil,
+			{
+				~files.add( filePath);
+			},
+			// else
+			{
+				~done = true;
+		});
+});
+~pipe.close;
+
+// load everything
 s.waitForBoot {
 	var dir = thisProcess.nowExecutingPath.dirname;
-	~files.do { |f| f.loadRelative ; s.sync;};
+	postf("main.scd:  loading needed files for % project \n", ~myProjectFIleName.splitext[0]);
+	~startupfiles.do { |f|  f.postln;  f.load ; s.sync;};
 	s.sync;
-	"All spatOSCexample files loaded".postln;
+
+	postf("main.scd: loading % items from %/autoload subdirectory\n", ~files.size, ~myProjectFIleName.splitext[0]);
+	~files.do { |f|  f.split.last.postln;  f.load; s.sync;};
+	s.sync;
 }; // waitForBoot
-)
+);

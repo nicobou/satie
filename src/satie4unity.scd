@@ -174,7 +174,7 @@ s.waitForBoot{
 		//postf("~coreCallback: command: %, msg: %, \n", command, msg);
 
 		switch (command,
-			'createSource',  // note:  EFFECTS SOURCES MUST HAVE URI ARG PROVIDED
+			'createSource',  // required args:  name uri    <optional>  group
 			{
 				//postf("~coreCallback: command: %, messLen: %   msg: %, \n", command, msg.size, msg);
 
@@ -647,7 +647,7 @@ s.waitForBoot{
 
 		if (~allProcesses[processName.asSymbol] == nil,
 			{
-				"~createSourceProcess: undefined process name:"++processName++"\n".warn;
+				postf("~createSourceProcess: undefined process name:"++processName++"   ,  node not created \n");
 			},
 			// else ALL GOOD,  instantiate
 			{
@@ -1145,7 +1145,7 @@ s.waitForBoot{
 				// now kill off the clones in that group
 				//myProcess.at(\nodeGroupProxy).free;
 
-				myProcess.freeClones();   // frees clone synths
+				myProcess.cleanup();   // frees any state the process may have created, i.e. synths
 
 				~scbr.cleanInstance(nameSym,thisGroupName );
 
