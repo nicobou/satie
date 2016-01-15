@@ -32,6 +32,7 @@
 		'cloudRadius' -> 5, // 2D particle field radius: 5 meters
 		'triggerIntervalMs' -> 500,   // time interval, during which the clones will randomly trigger
 		// other state
+		'pitchSeqGlobalMode' -> 0,
 		'pitchSeqSym' -> \default,
 		'pitchSeqLen' -> 1,   // not used
 		'pitchSeqIncr' -> 1,   // used, but only to set global sequencer state
@@ -103,8 +104,6 @@ if (~sheefa_pitchSequences == nil,
 		self.nodeGroupName = nodeGroupName;
 		self.nodeGroup = nodeGroup;
 
-
-
 		postf("~sheefa.setup:  generating % synthVoices for group %\n",  self.cloneCount, self.nodeGroupName);
 
 		// now generate   self.cloneCount  synths in advance
@@ -136,10 +135,10 @@ if (~sheefa_pitchSequences == nil,
 		self.lpHz = lpHz;
 		self.hpHz = 0.5;  // to be added
 
-		//postf("sheefa.updateConnection: called for node: %    azi: %  \n", self.nodeName, aziDeg);
+		//postf("sheefa.updateConnection: called for node: %    delayMS: %  \n", self.nodeName, delayMs);
 
 		// updating the connection of all this node's clones (via group message)
-		thisGroup.set(\aziDeg, self.aziDeg, \eleDeg, self.elevDeg, \gainDB, self.gainDB , \delayMs, self.delayMs, \lpHz, self.lpHz, \hpHz, self.hpHz);
+	thisGroup.set(\aziDeg, self.aziDeg, \eleDeg, self.elevDeg, \gainDB, self.gainDB , \delayMs, self.delayMs, \lpHz, self.lpHz); //  \hpHz, self.hpHz);
 	};
 
 
@@ -156,70 +155,101 @@ if (~sheefa_pitchSequences == nil,
 
 	// totally custom functions.  Calls to these functions result from OSC events received by satie4unity from Unity, and then applied to these functions,  if they exist
 
-	// custom method
-	~sheefa.trigger = { arg self, items = #[1,2,3] ;
-		var thisGroup = self.nodeGroup;
-		var gain = self.gainDB;
-		var seqName, pitch, position, incr, size, vel, incidence;
+	~sheefa.setIncrement = { arg self, items = #[1] ;
 
-			if ( items.size != 3,
+		if ( items.size != 1,
 			{
-				postf("~sheefa.trigger:  bad item count, expecing '[ pitch vel incidence]' , received: % items\n",items.size);
+				warn("~sheefa.setIncrement:  bad item count,  takes one float arg, received: % items\n",items.size);
 			},
-			{ // else
+			//else
+			{
+					postf("sheefa.setIncrement:  increment = % \n", items[0].asFloat);
 
-				seqName = self.pitchSeqSym;
-				vel =  items[1].asFloat;
-
-				// find out why incidence fucks the dog
-				incidence = 1; items[2].asFloat;
-
-				// incidence.postln;
-
-				// update all nodes in group
-
-				// thisGroup.set(\gainDB, gain);  not necessary, since this is handled in the update connection
-
-				thisGroup.set(\randTrigMaxMs, self.triggerIntervalMs);
-
-					// assign pitches  for each particle
-				self.cloneCount.do( { arg item;
-					var nodename=(self.nodeName++"_"++item).asSymbol;
-
-					// this is where we could calculate the exact position of each clone, with respect to this node
-					// but its expensive
-
-					/* instance specific look up not used
-					pitch = ~sheefa_pitchSequences[self.pitchSeqSym][self.pitchSeqPos];
-					self.pitchSeqPos = (self.pitchSeqPos + self.pitchSeqIncr) % self.pitchSeqLen;
-					*/
-					position = ~sheefa_pitchSequences.at(seqName.asSymbol).at(\pos);
-					incr = ~sheefa_pitchSequences.at(seqName.asSymbol).at(\incr);
-					size = ~sheefa_pitchSequences.at(seqName.asSymbol).at(\size);
-
-					pitch = ~sheefa_pitchSequences.at(seqName.asSymbol).at(\pitches)[position];
-					~sheefa_pitchSequences.at(seqName.asSymbol).put(\pos,  ((position + incr) % size) );
-
-					~scbr.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(\note, [ pitch, vel, incidence ] );
-
-					~scbr.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(\t_trig, 1);
-				});
-
-				// calculate azimuths for each particle
-
-
-				// finally  update and trigger all cloned synths (particles)
-/*				thisGroup.set(\gainDB, gain);
-
-				thisGroup.set(\randTrigMaxMs, self.triggerIntervalMs);*/
-
-				//thisGroup.set(\t_trig, 1);
-				//postf("~sheefa.trigger: triggering synths in node: % group \n",self.nodeName);
-
-				//~sheefa_pitchSequences.at(seqName.asSymbol).at(\pos).postln;
-
+			   if (self.pitchSeqGlobalMode != 0,
+				{
+				~sheefa_pitchSequences.at(self.pitchSeqSym).put(\incr, items[0].asFloat);
+				},
+				// else
+				{
+					self.pitchSeqIncr = items[0].asFloat;
+			});
 		});
 	};
+
+
+// custom method
+~sheefa.trigger = { arg self, items = #[1,2,3] ;
+	var thisGroup = self.nodeGroup;
+	var gain = self.gainDB;
+	var seqName, pitch, position, incr, size, vel, incidence;
+
+	if ( items.size != 3,
+		{
+			postf("~sheefa.trigger:  bad item count, expecing '[ pitch vel incidence]' , received: % items\n",items.size);
+		},
+		{ // else
+
+			seqName = self.pitchSeqSym;
+			vel =  items[1].asFloat;
+
+			// find out why incidence fucks the dog
+			// incidence = 1; items[2].asFloat;
+
+			incidence = items[2].asFloat.abs;   // not using negative values
+
+			//("incidence"++incidence).postln;
+
+			// update all nodes in group
+
+			// thisGroup.set(\gainDB, gain);  not necessary, since this is handled in the update connection
+
+			thisGroup.set(\randTrigMaxMs, self.triggerIntervalMs);
+
+			// assign pitches  for each particle
+			self.cloneCount.do( { arg item;
+				var nodename=(self.nodeName++"_"++item).asSymbol;
+
+				// this is where we could calculate the exact position of each clone, with respect to this node
+				// but its expensive
+
+				/* instance specific look up not used
+				pitch = ~sheefa_pitchSequences[self.pitchSeqSym][self.pitchSeqPos];
+				self.pitchSeqPos = (self.pitchSeqPos + self.pitchSeqIncr) % self.pitchSeqLen;
+				*/
+
+				size = ~sheefa_pitchSequences.at(seqName.asSymbol).at(\size);
+
+				if (self.pitchSeqGlobalMode != 0,
+					{
+
+						position = ~sheefa_pitchSequences.at(seqName.asSymbol).at(\pos);
+						incr = ~sheefa_pitchSequences.at(seqName.asSymbol).at(\incr);
+						pitch = ~sheefa_pitchSequences.at(seqName.asSymbol).at(\pitches)[position];
+						~sheefa_pitchSequences.at(seqName.asSymbol).put(\pos,  ((position + incr) % size) );
+					},
+					// else   instance specific read
+					{
+						position = self.pitchSeqPos;
+						incr = self.pitchSeqIncr;
+						pitch = ~sheefa_pitchSequences.at(seqName.asSymbol).at(\pitches)[position];
+						self.pitchSeqPos = ((position + incr) % size);
+					});
+
+
+				~scbr.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(\note, [ pitch, vel, incidence ] );
+
+				~scbr.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(\t_trig, 1);
+			});
+
+			// calculate azimuths for each particle
+			// finally  update and trigger all cloned synths (particles)
+			/*				thisGroup.set(\gainDB, gain);
+			thisGroup.set(\randTrigMaxMs, self.triggerIntervalMs);*/
+			//thisGroup.set(\t_trig, 1);
+			//postf("~sheefa.trigger: triggering synths in node: % group \n",self.nodeName);
+			//~sheefa_pitchSequences.at(seqName.asSymbol).at(\pos).postln;
+	});
+};
 
 	// custom method
 	~sheefa.readPitches = { arg self, items = #["/tmp"] ;

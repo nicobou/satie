@@ -25,7 +25,7 @@
 
 ~vbuf2 = Buffer.loadCollection(s, ~spk2.getSetsAndMatrices);
 
-~name = \stereoVBAP;
+~name = \stereoVBAP_P;
 
 ~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP
@@ -36,6 +36,7 @@
 	var slewPanning = 0.030;
 	var panWeights;
 	var outsig;
+// extra state for random particle offsets
 	var randOffsetAzi = Rand(-180, 180);  // random offset for azimuth
 	var dist = 0.343 * delayMs;   // speedOdSound: meters per milisecond == distance in meters
 	var maxDist = 200;  // after 200 meters, the spreader clips to ZERO
@@ -62,7 +63,7 @@
 		azimuth: aziDeg,
 		elevation: eleDeg,
 		spread: spread );
-	SendTrig.kr(Impulse.kr(4), 0,  offsetAzi   );  //  Enable for debugging
+	//SendTrig.kr(Impulse.kr(0.5), 0,  offsetAzi   );  //  Enable for debugging
 	outsig * Lag.kr(panWeights, 0.030);
 	Out.ar(0,outsig);
 };

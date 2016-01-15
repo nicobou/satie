@@ -42,7 +42,7 @@ fB	 ??  Inharmonicity factor.
 	var env,inp,son;
 	var freq = note[0].midicps;
 	var amp = note[1];
-	var incidence = abs (note[2]);
+	var incidence = abs (note[2]);   // apprently this does not work
 
 
 	var pos = note[2] * 0.5; // unitVal * positionRange

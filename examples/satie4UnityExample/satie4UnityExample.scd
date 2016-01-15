@@ -1,12 +1,9 @@
-
+// called from project's  main.scd file,  in which,  ~rootSrcPath is defined
 
 
 s.waitForBoot{
 
-	~listeningFormatP = (~listeningFormat++"_P").asSymbol;
-
 	// finding source directory
-	~rootSrcPath = thisProcess.nowExecutingPath.dirname ++ "/../..";
 	(~rootSrcPath ++ "/src/*.scd").pathMatch.do({arg item; item.loadPaths});
 
 	~num_aux_bus = 5;
@@ -35,12 +32,9 @@ s.waitForBoot{
 	~scbr.makeSynthDef(\dust, \DustDust, [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\default, \default, [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\zkarpluck0, \zkarpluck0, [~listeningFormat], [0]);
-	//~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\test, \testtone,  [~listeningFormat], [0]);
-	//~scbr.makeSynthDef(\zbell1, \zbell1, [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\pbell1, \pbell1, [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [~listeningFormat], [0], [~scbr.aux[~fxInputBus]]);
-	//~scbr.makeSynthDef(\zkarpluck1P, \zkarpluck1P, [~listeningFormatP], [0], [~scbr.aux[~fxInputBus]]);
 	~scbr.makeSynthDef(\zkarpluck1P, \zkarpluck1P, [~listeningFormat], [0], [~scbr.aux[~fxInputBus]]);
 	~scbr.makeSynthDef(\busreverb, \freeverb, [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\busgverb, \gverb, [~listeningFormat], [0]);
@@ -49,14 +43,26 @@ s.waitForBoot{
 	~oscInterface = ~cOSCMaker.value();
 
 	s.sync;
+
+
+
+
+
 };  // end of  waitforboot
+
+
+
+
+
+
+
 
 /*
 testing
 
 ~myFile =  "/Users/zack/Dropbox/Unity3D/projects_unity5/balljamDemoSATIE_2015_unity5/Assets/StreamingAssets/midi/pitchSequences/bjGroove.mid.mid.txt";
-~sheefa.readPitches(~myFile);
-~sheefa.pitchSeqLen;
-~sheefa.pitchSeqName;
+~helloWorld.readPitches(~myFile);
+~helloWorld.pitchSeqLen;
+~helloWorld.pitchSeqName;
 
 */
