@@ -28,7 +28,7 @@
 		'randAzi' -> 20,
 		'randElev' -> 30,
 		'randDist' -> 1,
-		'cloneCount' -> 20,
+		'cloneCount' -> 1,
 		'cloudRadius' -> 5, // 2D particle field radius: 5 meters
 		'triggerIntervalMs' -> 500,   // time interval, during which the clones will randomly trigger
 		// other state
@@ -52,10 +52,6 @@ if (~sheefa_pitchSequences == nil,
 			~sheefa_pitchSequences.at(\default).put(\size,1);
 
 	});
-
-
-
-
 
 	// required functions and state
 
@@ -95,27 +91,41 @@ if (~sheefa_pitchSequences == nil,
 	};
 
 
-	// required but project specific
-	// generates N synths
-	~sheefa.setup = { | self, nodeName, nodeGroupName, nodeGroup |
-		var thisGroup ;
+// required function but adaptable to project specifics
+// generates N synths
+~sheefa.setup = { | self, nodeName, nodeGroupName, argsString  |
+	var argvec = argsString.split($ );
+	var thisGroup = ~scbr.satieGroups[nodeGroupName.asSymbol] ;
 
-		self.nodeName = nodeName;
-		self.nodeGroupName = nodeGroupName;
-		self.nodeGroup = nodeGroup;
+	self.nodeName = nodeName;
+	self.nodeGroupName = nodeGroupName;
+	self.nodeGroup = thisGroup;
 
-		postf("~sheefa.setup:  generating % synthVoices for group %\n",  self.cloneCount, self.nodeGroupName);
+	// project-specific parsing of args string (coming from setUri OSC message string)
+		if ( argvec.size >= 2,
+		{
+			if ( argvec[0].asString == "cloneCount",
+				{
+					'yes'.postln;
+					self.cloneCount = 	argvec[1].asInt.clip(1, 10000);
+				},
+				// else bad arg
+				{
+					error("sheefa.setup: unrecognized key, expecting 'cloneCount' ");
+			});
+	});
 
-		// now generate   self.cloneCount  synths in advance
-		//  when the state problem is fixed, this can be done in the context of trigger, and synths can destroy  themselves after sounding
-		self.cloneCount.do( { arg item;
-			var nodename=(self.nodeName++"_"++item).asSymbol;
-			var synth;
+	// now generate   self.cloneCount  synths in advance
+	//  when the state problem is fixed, this can be done in the context of trigger, and synths can destroy  themselves after sounding
+	self.cloneCount.do( { arg item;
+		var nodename=(self.nodeName++"_"++item).asSymbol;
+		var synth;
 
-			synth = ~scbr.makeInstance(nodename.asSymbol, self.synth.asSymbol, self.nodeGroupName);
-			synth.set(\gainDB, -99);  // instantiate full attenuated
-		});
-	};
+		synth = ~scbr.makeInstance(nodename.asSymbol, self.synth.asSymbol, self.nodeGroupName);
+		synth.set(\gainDB, -99);  // instantiate full attenuated
+	});
+	postf("~sheefa.setup:  generating % synthVoices for group %\n",  self.cloneCount, self.nodeGroupName);
+};
 
 
 	// end of required class functions
@@ -138,7 +148,7 @@ if (~sheefa_pitchSequences == nil,
 		//postf("sheefa.updateConnection: called for node: %    delayMS: %  \n", self.nodeName, delayMs);
 
 		// updating the connection of all this node's clones (via group message)
-	thisGroup.set(\aziDeg, self.aziDeg, \eleDeg, self.elevDeg, \gainDB, self.gainDB , \delayMs, self.delayMs, \lpHz, self.lpHz); //  \hpHz, self.hpHz);
+	thisGroup.set(\aziDeg, self.aziDeg, \eleDeg, self.elevDeg, \gainDB, self.gainDB , \delayMs, self.delayMs, \lpHz, self.lpHz,  \cloudSpread, 1 ); //  \hpHz, self.hpHz);
 	};
 
 

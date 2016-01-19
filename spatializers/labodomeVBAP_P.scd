@@ -30,7 +30,7 @@
 
 ~name = \labodomeVBAP_P;
 
-~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1 |
+~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1, cloudSpread = 1 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP
 	var delay = delayMs * 0.001;    // convert to seconds
 	var slewDelay = 0.3; //  note: this needs to be improved ... smoother
@@ -42,15 +42,9 @@
 
 	// extra state for random particle variation
 	var randOffsetAzi = Rand(-180, 180);  // random offset for azimuth
-	var dist = 0.343 * delayMs;   // speedOdSound: meters per milisecond == distance in meters
-	var maxDist = 200;  // after 200 meters, the spreader clips to ZERO
-
-	var distScaler = (1 - ( dist.clip(0, maxDist) / maxDist) );
-
-	var cloudSpread = 10;  	// use this exp value:  smaller values == greater cloud spread
 
 
-	var offsetAzi = randOffsetAzi * (distScaler**cloudSpread);
+
 
 	outsig =  LPF.ar(DelayC.ar(
 		VarLag.kr(gain, slewGain) * in,
@@ -62,12 +56,12 @@
 	panWeights = VBAP.kr(numChans: ~spk24.numSpeakers,
 		in: 1.0,
 		bufnum: ~vbuf24.bufnum,
-		azimuth: aziDeg + offsetAzi,
+	    azimuth: aziDeg + (randOffsetAzi * cloudSpread),
 		elevation: eleDeg,
 		spread: spread );
 
 	//SendTrig.kr(Impulse.kr(0.5), 0,  (aziDeg + offsetAzi)   );  //  Enable for debugging
-	SendTrig.kr(Impulse.kr(0.5), 0,  (dist.clip(0, maxDist) )  );  //  Enable for debugging
+	// SendTrig.kr(Impulse.kr(0.5), 0,  offsetAzi );  //  Enable for debugging
 
 	outsig * Ramp.kr(panWeights, slewPanning);
 };
@@ -75,8 +69,8 @@
 
 // debug
 /*
-o = OSCresponderNode(s.addr, '/tr', { |time, resp, msg| msg.postln }).add;
-o.remove;  // when done, you need to clean up the OSCresponderNode
+~OSCrn = OSCresponderNode(s.addr, '/tr', { |time, resp, msg| msg.postln }).add;
+~OSCrn.remove;  // when done, you need to clean up the OSCresponderNode
 */
 
 //  in synthdef

@@ -49,7 +49,7 @@ o = Server.local.options;   // default set up options
 o.memSize = 2**21;        // probably should just leave this the same for everyting
 o.device = nil;  // default
 o.blockSize = 2048;
-o.threads = 8;
+//o.threads = 8;
 
 if (  ( ( ~listeningFormat == \domeVBAP)  ||   ( ~listeningFormat == \labodomeVBAP)  || ( ~listeningFormat == \octoVBAP)  ),
 	{

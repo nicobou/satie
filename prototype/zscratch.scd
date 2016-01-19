@@ -6,12 +6,68 @@
 
 ~groupSym = \default;
 
-~nodeName= \srcNode_0;
+~nodeName= \srcNode;
 ~nodeGroupName = ~allSourceNodes[~nodeName.asSymbol].at(\groupNameSym);
 
 ~listenerName = "listener";
 
 ~allGroupNodes.includesKey(~nodeGroupName);
+
+
+
+~uriPath= "process://sheefa 444 shit arg2 2.2 arg3";
+
+
+~stringArray = ~uriPath.split($ );
+~charIndex = ~stringArray[0].asString.find("://");
+~processName = ~stringArray[0].asString.subStr(~charIndex+3);
+
+~valueString = ~uriPath.asString.subStr(~stringArray[0].size+1);
+//~valueString = "";
+
+
+~argvec = ~valueString.split($ );
+
+~argvec.size;
+
+if ( ~argvec.size >= 2,
+	{
+		if ( ~argvec[0].asString == "cloneCount",
+			{
+				'yes'.postln;
+				~argvec[1].asFloat.postln;
+
+		},
+			// else bad arg
+			{
+				error("sheefa.setup: unrecognized key, expecting 'cloneCount' ");
+		});
+
+
+		~argvec[1].asFloat.postln;
+});
+
+
+~argvec[1].asInt.clip(1, 10000);
+
+
+//type = ~uriPath.asString.subStr(0, ~charIndex-1);
+
+
+
+
+~stringArray[0].asString.find("://");
+
+~temp.asString.find(" ");
+
+
+~charIndex = ~uriPath.asString.find(~processName);
+
+
+		~temp = ~uriPath.asString.subStr(~charIndex);
+
+
+
 
 
 
@@ -45,10 +101,19 @@
 
 // inspect values
 ~myProcess.at(\cloneCount);
+
+
+
+
 ~myProcess.at(\triggerIntervalMs);
-~myProcess.at(\cloudRadius);
+~myProcess.at(\nodeGroup);
 ~myProcess.at(\randTrigMaxMs);
-~myProcess.at(\synth);
+
+~someString = "pussy";
+~someString = "cloneCount";
+
+~myProcess.put(~someString.asSymbol, 33);
+
 
 
 
@@ -60,10 +125,13 @@
 
 // srcNode_0_group, srcNode_0_6
 
-~scbr.satieGroupInstances[\srcNode_0_group][\srcNode_0_6].set(\note, [75,1,1]);
+~scbr.satieGroupInstances[~myGroupName][\srcNode_0].set(\note, [75,1,1]);
 ~myProcess.put(triggerIntervalMs, 0);
 
-~scbr.satieGroupInstances[\srcNode_0_group][\srcNode_0].set(\t_trig, 1);
+~scbr.satieGroupInstances[~myGroupName][\srcNode_0].set(\t_trig, 1);
+
+~scbr.satieGroupInstances[~myGroupName][\srcNode_0].set(\cloudSpread, 2);
+
 
 ~myGroup.set(\randTrigMaxMs, 0);
 //~myGroup.set(\t_trig, 1).free
@@ -87,6 +155,9 @@
 
 
 
+
+
+
 ~myGroupName;
 
 // clear
@@ -103,7 +174,7 @@
 
 \srcNode_0
 
-~scbr.satieGroups[\srcNode_0_group].set(\randTrigMaxMs, 0);
+~scbr.satieGroups[\srcNode_group];
 ~scbr.satieGroups[\srcNode_1_group].set(\randTrigMaxMs, 0);
 
 
@@ -112,7 +183,7 @@
 ~scbr.satieGroups[\srcNode_0_group].set(\t_trig, 1);
 
 ~scbr.satieGroups[\srcNode_1_group].set(\aziDeg,  -90);
-~scbr.satieGroups[\srcNode_1_group].set(\t_trig, 1);
+~scbr.satieGroups[~myGroupName].set(\t_trig, 1);
 
 
 

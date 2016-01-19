@@ -79,13 +79,13 @@
 
 	// required function,  but modified to suit project needs
 	// generates N synths
-	~sheefa.setup = { | self, nodeName, nodeGroupName, nodeGroup |
-		var thisGroup ;
+	~sheefa.setup = { | self, nodeName, nodeGroupName |
+		var thisGroup = ~scbr.satieGroups[nodeGroupName.asSymbol] ;
 
 		// generic
 		self.nodeName = nodeName;
 		self.nodeGroupName = nodeGroupName;
-		self.nodeGroup = nodeGroup;
+		self.nodeGroup = thisGroup;
 
 
 		// project-specific code after here

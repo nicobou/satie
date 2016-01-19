@@ -41,7 +41,7 @@ s.waitForBoot{
 	~scbr.makeSynthDef(\pbell1, \pbell1, [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [~listeningFormat], [0], [~scbr.aux[~fxInputBus]]);
 	//~scbr.makeSynthDef(\zkarpluck1P, \zkarpluck1P, [~listeningFormatP], [0], [~scbr.aux[~fxInputBus]]);
-	~scbr.makeSynthDef(\zkarpluck1P, \zkarpluck1P, [~listeningFormat], [0], [~scbr.aux[~fxInputBus]]);
+	~scbr.makeSynthDef(\zkarpluck1P, \zkarpluck1P, [~listeningFormatP], [0], [~scbr.aux[~fxInputBus]]);
 	~scbr.makeSynthDef(\busreverb, \freeverb, [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\busgverb, \gverb, [~listeningFormat], [0]);
 

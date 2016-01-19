@@ -635,15 +635,23 @@ s.waitForBoot{
 	// called for uri type process://
 	//error check uriName done before call this, uriPath will be a process name
 	// ignore groupName since a unique one will be generated for this node and its clones
+	//  uri path may include arguments
+	// eg. uriPath:  "process://sheefa arg1 1.1 arg2 2.2 arg3"
 
 	~createSourceProcess = { | sourceName, uriPath , groupNameDummy = \default |
 		var temp, type, charIndex, processName, processClone, myProcess, cloneGroup, cloneGroupName;
+		var argsString = "";
+		var stringArray;
 
-		charIndex = uriPath.asString.find("://");
 
-		temp = uriPath.asString.subStr(charIndex);
-		//type = uriPath.asString.subStr(0, charIndex-1);
-		processName = temp.asString.replace("://", "");
+		'enter createSourceProcess'.postln;
+		("URI"++uriPath).postln;
+
+		stringArray = uriPath.asString.split($ );
+		charIndex = stringArray[0].asString.find("://");
+		processName = stringArray[0].asString.subStr(charIndex+3);
+		argsString = uriPath.asString.subStr(stringArray[0].size+1);
+
 
 		if (~allProcesses[processName.asSymbol] == nil,
 			{
@@ -680,7 +688,10 @@ s.waitForBoot{
 						~allSourceNodes[sourceName.asSymbol].put(\groupNameSym, cloneGroupName.asSymbol);
 
 						myProcess = ~allSourceNodes[sourceName.asSymbol].at(\process);
-						myProcess[\setup].value(myProcess, sourceName.asSymbol, cloneGroupName.asSymbol, cloneGroup);   // set the state of the process
+
+						// send URI's argsString to setup without any error checking
+
+						myProcess[\setup].value(myProcess, sourceName.asSymbol, cloneGroupName.asSymbol, argsString );   // set the state of the process
 						~setSynth.value(sourceName.asSymbol, "");  // sets dummy plugin as placeholder
 
 						~oscInterface.sourceOSC(sourceName.asSymbol, ~sourceProcessCallback);   // create OSC callback
@@ -1288,7 +1299,7 @@ s.waitForBoot{
 	};
 
 
-	'spatOSCrx loaded'.postln;
+	'satie4unity loaded'.postln;
 
 	s.sync;
 
