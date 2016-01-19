@@ -548,6 +548,7 @@ public class SATIEsource : SATIEnode {
         items.Add(gainDB_);
         items.Add(vdelMs_);
         items.Add(distFq_);
+		items.Add (distance);
 
         SATIEsetup.OSCtx(path, items);
         items.Clear();

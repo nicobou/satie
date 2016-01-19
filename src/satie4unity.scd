@@ -252,11 +252,13 @@ s.waitForBoot{
 
 
 
-	// /spatosc/core/connection/source->listener/update azi elev gainDB delayMS  lpHZ
+	// /spatosc/core/connection/source->listener/update azi elev gainDB delayMS  lpHZ distance
 	// /spatosc/core/connection/source->listener/spread  exp   // exponent for incidence effect
+	// /spatosc/core/connection/source->listener/hpHz fq   // high pass cutoff for underwater etc.
+
 	~connectionCallback = { | args |
 		var nodeName, listenerName, connectionName, type, temp, charIndex;
-		var aziDeg, eleDeg, gainDB, delayMs, lpHz, hpHz, spread;
+		var aziDeg, eleDeg, gainDB, delayMs, lpHz, hpHz, spread, distance;
 		var thisSynth;
 		var index;
 		var halfSrate = 0.5 * s.sampleRate;
@@ -274,7 +276,7 @@ s.waitForBoot{
 		switch(type,
 			'update',
 			{
-				if ( (args.size != 6 ) ,
+				if ( (args.size != 7 ) ,
 					{"connectionCallback: OSCrx update message missing values".warn;},
 					// else
 					{
@@ -284,6 +286,7 @@ s.waitForBoot{
 						gainDB = args[3];
 						delayMs = args[4];
 						lpHz = args[5];
+						distance = args[6];  // not used by basic spatializers
 
 						//DEBUG
 						//~allSourceNodes[nodeName.asSymbol].put(\outDB, gainDB);
@@ -337,11 +340,12 @@ s.waitForBoot{
 	};
 
 
-	// /spatosc/core/connection/source->listener/update azi elev gainDB delayMS  lpHZ
+	// /spatosc/core/connection/source->listener/update azi elev gainDB delayMS  lpHZ distance
 	// /spatosc/core/connection/source->listener/spread  exp   // exponent for incidence effect
+	// /spatosc/core/connection/source->listener/hpHz fq   // high pass cutoff for underwater etc.
 	~connectionProcessCallback = { | args |
 		var nodeName, listenerName, connectionName, type, temp, charIndex;
-		var aziDeg, eleDeg, gainDB, delayMs, lpHz, spread;
+		var aziDeg, eleDeg, gainDB, delayMs, lpHz, spread, distance;
 		var thisGroup, thisGroupName;
 		var myProcess;
 
@@ -370,7 +374,7 @@ s.waitForBoot{
 		switch(type,
 			'update',
 			{
-				if ( (args.size != 6 ) ,
+				if ( (args.size != 7 ) ,
 					{"connectionProcessCallback: OSCrx update message missing values".warn;},
 					// else
 					{
@@ -380,22 +384,26 @@ s.waitForBoot{
 						gainDB = args[3];
 						delayMs = args[4];
 						lpHz = args[5];
-
+						distance = args[6];
 
 						if (myProcess[\updateConnection] == nil,
 							{
+
 								//postf("~connectionProcessCallback:  setting update for nodes group %\n", connectionName);
+								// distance not used by standard spatializers
 								thisGroup.set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB, \delayMs, delayMs, \lpHz, lpHz);
 							},
 							// else use custom handler
 							{
 								// postf("~connectionProcessCallback:  calling custom update handler for %\n", connectionName);
-								myProcess[\updateConnection].value(myProcess, aziDeg, eleDeg, gainDB, delayMs, lpHz);
+								// distance used by custom process functions
+								myProcess[\updateConnection].value(myProcess, aziDeg, eleDeg, gainDB, delayMs, lpHz, distance);
 						});
 
 					}
 				)
 			},
+			// 'hpHz',   //  degree  (0 == noEffect,  1 == full effect)  Not implemented yet
 			'spread',
 			{
 				if ( (args.size > 0 ) ,

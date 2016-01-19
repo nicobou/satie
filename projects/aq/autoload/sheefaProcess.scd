@@ -133,9 +133,11 @@ if (~sheefa_pitchSequences == nil,
 	// the functions below are not requied
 	// however if defined, they will be called by satie4unity when node's "update" message is received
 	// otherwise satie4unity will send the  "update" message to the node's group
-	~sheefa.updateConnection = { | self, aziDeg, eleDeg, gainDB, delayMs, lpHz |
+	~sheefa.updateConnection = { | self, aziDeg, eleDeg, gainDB, delayMs, lpHz, distance |
 
 		var 	thisGroup = self.nodeGroup; // ~allSourceNodes[self.nodeName.asSymbol].at(\proxy);
+
+	//distance.postln;
 
 		// saving the connection state in case its needed
 		self.aziDeg = aziDeg;
