@@ -881,7 +881,7 @@ s.waitForBoot{
 				});
 
 				// now if its a node that has an aux send assign, it must be an effects node, so set its synth param with the aux bus number
-				if ( ~allSourceNodes[nodeName.asSymbol].at(\aux) != nil,
+				if ( ~allSourceNodes[nodeName.asSymbol].at(\auxBus) != nil,
 					{
 						synth.set(\in, ~allSourceNodes[nodeName.asSymbol].at(\auxBus) );
 				});

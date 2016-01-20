@@ -2,13 +2,13 @@
 
 if (w != nil, {w.close});
 
-w=Window.new("spatOSCexamplePreset voicing", Rect(500, 30, 400, 140)).front;
+w=Window.new("AQ_bell_Preset voicing", Rect(500, 30, 400, 140)).front;
 w.view.decorator=FlowLayout(w.view.bounds);
 w.view.decorator.gap=8@2;
 
 
-g = EZSlider(w, 380@20, "pitch ", ControlSpec(40, 110, \lin, 1, 60));
-g.action_({ |ez| (  ~ballSet.value(\note, [ ez.value, 1, 0.5 ] );  ~ballSet.value(\t_trig, 1);)});
+// g = EZSlider(w, 380@20, "pitch ", ControlSpec(40, 110, \lin, 1, 60));
+// g.action_({ |ez| (  ~bellSet.value(\note, [ ez.value, 1, 0.5 ] );  ~bellSet.value(\t_trig, 1);)});
 
 
 // h = EZSlider(w, 380@20, "amp", ControlSpec(0, 1, \lin, 0.01, 0.5));
@@ -16,10 +16,10 @@ g.action_({ |ez| (  ~ballSet.value(\note, [ ez.value, 1, 0.5 ] );  ~ballSet.valu
 //
 
 
-i = EZSlider(w, 380@20, "pos", ControlSpec(0.0, 1, \lin, 0.01, 0.14));
-i.action_({ |ez| (  ~ballSet.value(\pos, (ez.value)))});
+g = EZSlider(w, 380@20, "decay", ControlSpec(0.0, 1, \lin, 0.01, 0.14));
+g.action_({ |ez| (  ~ballSet.value(\decay, (ez.value)))});
 
-
+/*
 j = EZSlider(w, 380@20, "c1", ControlSpec(0.05, 5, \lin, 0.01, 1));
 j.action_({ |ez| (  ~ballSet.value(\c1, (ez.value)))});
 
@@ -31,7 +31,7 @@ l = EZSlider(w, 380@20, "fb", ControlSpec(0.0, 100, \lin, 0.1, 20));
 l.action_({ |ez| (  ~ballSet.value(\fb, (ez.value)))});
 
 m = EZSlider(w, 380@20, "PRESET", ControlSpec(0.0, 6, \lin, 1, 0));
-m.action_({ |ez| (  ~setPreset.value( (ez.value)))});
+m.action_({ |ez| (  ~setPreset.value( (ez.value)))});*/
 
 
 // proxyspace delay problem:
@@ -50,8 +50,8 @@ OSCdef(\presetCallback ).clear.free;
 OSCdef(\presetCallback, ~presetCallback, "/a.renderer/preset", recvPort: 18032);
 
 
-	~ballSet = { | param, value |
-		~scbr.satieGroups[\default].group.set(param.asSymbol, value);
+	~bellSet = { | param, value |
+		~scbr.satieGroups[\default].set(param.asSymbol, value);
 	};
 
 
@@ -70,58 +70,37 @@ OSCdef(\presetCallback, ~presetCallback, "/a.renderer/preset", recvPort: 18032);
 						postf("~setPreset no: %\n", presetNo);
 
 			// harp 0
-			~ballSet.value(\c1, 0.4);
-			~ballSet.value(\c3, 5);
-			~ballSet.value(\fb, 0);
-
+			~bellSet.value(\decay, 0.1);
 		},
 		1,
 		{
 			// harp 1
-			~ballSet.value(\c1, 0.38);
-			~ballSet.value(\c3, 6.11);
-			~ballSet.value(\fb, 0);
-
+			~bellSet.value(\decay, 0.3);
 		},
 		2,
 		{
-			// harp 2 (longer dur)
-			~ballSet.value(\c1, 0.15);
-			~ballSet.value(\c3, 4.51);
-			~ballSet.value(\fb, 0);
-
+			// bell 2 (longer dur)
+			~bellSet.value(\decay, 0.5);
 		},
 		3,
 		{
-			// harp 3 (feather)
-			~ballSet.value(\c1, 0.15);
-			~ballSet.value(\c3, 9.51);
-			~ballSet.value(\fb, 0);
-
-
+			// bell 2 (longer dur)
+			~bellSet.value(\decay, 0.7);
 		},
 		4,
 		{
-			// lantern zoner
-			~ballSet.value(\c1, 0.11);
-			~ballSet.value(\c3, 3);
-			~ballSet.value(\fb, 100);
-
+			// bell 2 (longer dur)
+			~bellSet.value(\decay, 0.8);
 		},
 		5,
 		{
-			// lantern zoner (shorter)
-			~ballSet.value(\c1, 0.7);
-			~ballSet.value(\c3, 3);
-			~ballSet.value(\fb, 100);
-
+				// bell 2 (longer dur)
+			~bellSet.value(\decay, 0.9);
 		},
 		6,
 		{
-			// Unused
-			~ballSet.value(\c1, 0.2);
-			~ballSet.value(\c3, 6);
-			~ballSet.value(\fb, 60);
+				// bell 6 (longer dur)
+			~bellSet.value(\decay, 0.95);
 		}
 	);
 };
@@ -146,5 +125,5 @@ OSCdef(\presetCallback, ~presetCallback, "/a.renderer/preset", recvPort: 18032);
 };
 
 
-
+//~scbr.satieGroups[\default].set(\decay, 0.0, \t_trig, 1)
 

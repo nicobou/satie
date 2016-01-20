@@ -45,10 +45,6 @@ m.action_({ |ez| (  ~setPreset.value( (ez.value)))});
 
 
 
-OSCdef(\presetCallback ).clear.free;
-
-OSCdef(\presetCallback, ~presetCallback, "/a.renderer/preset", recvPort: 18032);
-
 
 	~ballSet = { | param, value |
 		~scbr.satieGroups[\default].group.set(param.asSymbol, value);
@@ -145,6 +141,10 @@ OSCdef(\presetCallback, ~presetCallback, "/a.renderer/preset", recvPort: 18032);
 	});
 };
 
+
+OSCdef(\presetCallback ).clear.free;
+
+OSCdef(\presetCallback, ~presetCallback, "/a.renderer/preset", recvPort: 18032);
 
 
 
