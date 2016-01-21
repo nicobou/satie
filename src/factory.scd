@@ -53,6 +53,58 @@
 					}
 			}).add;
 		};
+		~identityMapper = {
+			| aziDeg = 0, eleDeg = 0, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 0.5, spread = 1 |
+			[aziDeg, eleDeg, gainDB, delayMs, lpHz, hpHz, spread];
+		};
+		~makeSynthDef2 = {| self,
+			name,
+			src,
+			srcToBusses = #[],
+			spatializers,
+			firstOutputIndexes = #[0],
+            paramsMapper,
+			synthArgs = #[] |
+			SynthDef(name,
+				// can the "gate" arg name be changed to avoid conflicts with plugin-synthDefs that use it
+				{ | gate = 1 |
+					var in, env, out, mapped;
+					// install first the mapper with spatialization parameters, allowing it to take control
+					// over all defined parameter
+					mapped = SynthDef.wrap(paramsMapper, prependArgs:  synthArgs);
+					// in
+					in = SynthDef.wrap(src);
+					// fade in set to as short as possible for percussive cases
+					env = Linen.kr(gate, 0.005, 1, 0.01, 2);
+					// in -> busses (busses are taking raw input)
+					srcToBusses.do {arg item;
+						Out.ar(item, env * in);
+					};
+					// in -> dest
+					spatializers.do{ arg item, i;
+						var out = SynthDef.wrap(item, prependArgs: [in] ++ mapped);
+						Out.ar(firstOutputIndexes.wrapAt(i), env * out);
+					}
+					// out = SynthDef.wrap(~spatfunc, prependArgs: [in] ++ mapped);
+					// //var out = SynthDef.wrap(item, prependArgs: [in, vol, delay, azi, ele]);
+					// Out.ar(0, out);
+					//
+					// var in, env;
+					// in = SynthDef.wrap(srcfunc, prependArgs:  synthArgs);
+					// // fade in set to as short as possible for percussive cases
+					// env = Linen.kr(gate, 0.005, 1, 0.01, 2);
+					// //in -> busses
+					// toBusArray.do {arg item;
+					// 	Out.ar(item, env * in);
+					// };
+					// // in -> dest
+					// destFunArray.do{ arg item, i;
+					// 	var out = SynthDef.wrap(item, prependArgs: [in, aziDeg, eleDeg, gainDB, delayMs, lpHz, hpHz, spread]);
+					// 	//var out = SynthDef.wrap(item, prependArgs: [in, vol, delay, azi, ele]);
+					// 	Out.ar(busShiftArray.wrapAt(i), env * out);
+					// }
+			}).add;
+		};
 	});
 	e.know = true;
 	e;

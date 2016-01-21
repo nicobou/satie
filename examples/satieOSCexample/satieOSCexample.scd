@@ -27,28 +27,14 @@ s.meter;
 s.plotTree;
 s.waitForBoot {
 	~rootSrcPath = thisProcess.nowExecutingPath.dirname ++ "/../..";
-
 	(~rootSrcPath ++ "/src/*.scd").pathMatch.do({arg item; item.loadPaths});
 
 	~num_aux_bus = 5;
 	// creating a sc-basic-renderer
-	~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus);
+	~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus, satieSrcPath: ~rootSrcPath);
 	// printing internal aux array with bus indexes
-	~scbr.aux;
+	// ~scbr.aux;
 	// ~scbr.auxbus.scope;
-	// loading source plugins
-	~scbr.pluginLoader.loadAudioPlugins(~rootSrcPath ++ "/audiosources/*.scd");
-	~scbr.pluginLoader.audioPlugins;  // list audio plugins
-	// loading spatializer plugins
-	~scbr.pluginLoader.loadSpatPlugins(~rootSrcPath ++ "/spatializers/*.scd");
-	~scbr.pluginLoader.spatPlugins;
-	// loading effect plugins
-	~scbr.pluginLoader.loadEffectPlugins(~rootSrcPath ++ "/effects/*.scd");
-	~scbr.pluginLoader.effectPlugins;
-
-	// initialize the instance manager
-
-	//~im = ~instanceManager.value(context: ~scbr);
 
 	// generating SynthDef that are going to be used,
 	// here a PinkSin source spatialized by

@@ -12,7 +12,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (
-~scbrMaker = { | numAudioAux = 0 |
+~scbrMaker = { | numAudioAux = 0, satieSrcPath |
 	var e = Environment.make({
 		// TODO use try catch with this
 		~pluginLoader;
@@ -24,6 +24,7 @@
 		~effectSynthDef = Set.new;
 		~auxbus;
 		~aux;
+		~satieSrcPath;
 
 		// TODO try catch
 		~makeSynthDef = { | self, name, srcSymbol, spatSymbolArray, busShiftArray = #[0], toBusArray = #[], synthArgs = #[] |
@@ -50,6 +51,38 @@
 				synthArgs);
 			nil;  // return
 		};
+		~makeSynthDef2 = {
+			| self,
+			name,
+			srcSymbol, srcToBusses = #[],
+			spatSymbolArray, firstOutputIndexes = #[0],
+			paramsMapper,
+			synthArgs = #[] |
+			// selecting audio source or effect dictionay because
+			// make instance require effects to be added to tail
+			// and audio source to head
+			var dictionary;
+			if (nil != self.pluginLoader.audioPlugins.at(srcSymbol),
+				{
+					dictionary = self.pluginLoader.audioPlugins;
+				},
+				{
+					dictionary = self.pluginLoader.effectPlugins;
+					self.effectSynthDef.add(name.asSymbol);
+				}
+			); //  endif
+			// Factory
+			self.synthDefFactory.makeSynthDef(
+				name: name,
+				src: dictionary.at(srcSymbol),
+				srcToBusses: srcToBusses,
+				spatializers: spatSymbolArray.collect({ arg item, i;
+					self.pluginLoader.spatPlugins.at(item)}),
+				firstOutputIndexes: firstOutputIndexes,
+				paramsMapper: paramsMapper,
+				synthArgs: synthArgs);
+			nil;  // return
+		};
 
 		~makeSatieGroup = { | self, name, addAction = \addToHead |
 			// creating a global ProxySpace
@@ -62,7 +95,7 @@
 			group;
 		};
 
-        ~killSatieGroup = { | self, name |
+		~killSatieGroup = { | self, name |
 			// self.satieGroups[name].end;
 			self.satieGroups[name].free;
 			self.satieGroupInstances[name].free;
@@ -98,40 +131,6 @@
 			self.satieGroupInstances[group][name].release();
 			nil;
 		};
-
-
-
-		~init = { | self  |
-			s.waitForBoot{
-
-	// printing internal aux array with bus indexes
-	// ~scbr.aux;
-	// loading source plugins
-	self.pluginLoader.loadAudioPlugins(~rootSrcPath ++ "/audiosources/*.scd");
-	// see the loaded plugins in the console
-	self.pluginLoader.audioPlugins;
-	// loading spatializer plugins
-	self.pluginLoader.loadSpatPlugins(~rootSrcPath ++ "/spatializers/*.scd");
-	self.pluginLoader.spatPlugins;
-
-	self.pluginLoader.loadEffectPlugins(~rootSrcPath ++ "/effects/*.scd");
-	self.pluginLoader.effectPlugins;
-
-	s.sync;
-
-	};
-};
-
-
-
-/*
-		~getProxySym = { | self, prox |
-			var proxSym = \default;
-			self.satieGroups.keysValuesDo { |key, value|
-				if ((value === prox ) && (key != \nil),
-					{ proxSym = key; });};
-			proxSym ;
-		};*/
 	});  // Environment.make
 
 	e.know = true;
@@ -142,6 +141,11 @@
 	e.defaultSatieGroup = e.makeSatieGroup();
 	e.satieGroups.put(\default, e.defaultSatieGroup);
 	e.satieGroupInstances.put(\default, Dictionary.new);
+	e.satieSrcPath = satieSrcPath;
+	// loading plugins
+	e.pluginLoader.loadAudioPlugins(e.satieSrcPath ++ "/audiosources/*.scd");
+	e.pluginLoader.loadSpatPlugins(e.satieSrcPath ++ "/spatializers/*.scd");
+	e.pluginLoader.loadEffectPlugins(e.satieSrcPath ++ "/effects/*.scd");
 	e;  // return
 };  // scbrMaker
 )

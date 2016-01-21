@@ -7,8 +7,7 @@ s.waitForBoot{
 
 	// create and initialize a sc-basic-renderer, and set environment variable
 	if (~scbr == nil,{
-		~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus);
-		~scbr.init();
+		~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus, satieSrcPath: ~rootSrcPath);
 	});
 
 	s.sync;
