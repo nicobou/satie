@@ -33,9 +33,10 @@ s.waitForBoot{
 	~scbr.aux;
     // ~scbr.auxbus.scope;
 	// list plugins
-	~scbr.pluginLoader.audioPlugins;  // list audio plugins
+	~scbr.pluginLoader.audioPlugins;
 	~scbr.pluginLoader.spatPlugins;
 	~scbr.pluginLoader.effectPlugins;
+	~scbr.pluginLoader.mapperPlugins;
 	// generating SynthDef that are going to be used,
 	// here a PinkSin source spatialized by
 	//   - a stereo panner (starting channel 0)
@@ -112,33 +113,22 @@ s.waitForBoot{
 ~scbr.cleanInstance(\testNode_1)
 ~scbr.satieGroupInstances[\default].size
 
-// makeSynthDef2 example with mappers
-// following is a mapper with additional parameter (shiftDeg)
-~myMapper = {
-	| aziDeg = 0, eleDeg = 0, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 0.5, spread = 1, shiftDeg = 0 |
-	// shiftDeg is added to aziDeg when returning value
-	[shiftDeg + aziDeg, eleDeg, gainDB, delayMs, lpHz, hpHz, spread];
-		};
-
+// makeSynthDef2 example with the defaut mapper plugin
 ~scbr.makeSynthDef2(
 	\myTestTone2,
 	\default, [],
 	[\stereoPanner], [0],
-	~myMapper,
+	\defaultMapper,
 	[]);
+~scbr.pluginLoader.mapperPlugins;
+~scbr.pluginLoader.mapperPlugins.at(\defaultMapper);
 
 2.do( { arg item;
 	var nodename=("testNode"++"_"++item).asSymbol;
 	var synth;
-	//synth = ~scbr.makeInstance(nodename.asSymbol, \testtone, \default);
 	synth = ~scbr.makeInstance(nodename.asSymbol, \myTestTone2, \default);
 	synth.set(\gainDB, rrand(-90, -38), \sfreq, rrand(100, 1000), \shiftDeg, rrand(-90, 90));
 });
-
-~scbr.satieGroups[\default].set(\gainDB, -30);
-
-// this move the group location but keep individual shiftDeg
-~scbr.satieGroups[\default].set(\aziDeg, -100);
 
 
 // ***************** old examples ************************************

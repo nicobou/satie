@@ -56,7 +56,7 @@
 			name,
 			srcSymbol, srcToBusses = #[],
 			spatSymbolArray, firstOutputIndexes = #[0],
-			paramsMapper,
+			paramsMapper = \defaultMapper,
 			synthArgs = #[] |
 			// selecting audio source or effect dictionay because
 			// make instance require effects to be added to tail
@@ -79,7 +79,7 @@
 				/*spatializers:*/ spatSymbolArray.collect({ arg item, i;
 					self.pluginLoader.spatPlugins.at(item)}),
 				/*firstOutputIndexes:*/ firstOutputIndexes,
-				/*paramsMapper:*/ paramsMapper,
+				/*paramsMapper:*/ self.pluginLoader.mapperPlugins.at(paramsMapper),
 				/*synthArgs:*/ synthArgs);
 			nil;  // return
 		};
@@ -134,6 +134,7 @@
 	e.pluginLoader.loadAudioPlugins(e.satieSrcPath ++ "/audiosources/*.scd");
 	e.pluginLoader.loadSpatPlugins(e.satieSrcPath ++ "/spatializers/*.scd");
 	e.pluginLoader.loadEffectPlugins(e.satieSrcPath ++ "/effects/*.scd");
+	e.pluginLoader.loadMapperPlugins(e.satieSrcPath ++ "/mappers/*.scd");
 	e;  // return
 };  // scbrMaker
 )
