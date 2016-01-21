@@ -1,4 +1,6 @@
-//// This program is free software: you can redistribute it and/or modify
+// Satie4Unity, audio rendering support for Unity
+// Copyright (C) 2016  Zack Settel
+// This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
@@ -13,17 +15,17 @@
 /*
 NOTES:
 this implementation is based on a one-listener model. In the future, we may wish to exapnd this to integrate more than one.  In such a case, proivision will have to be made so that multiple listener synth-defs can be defined.
-OSC RX message specification is based on the SPATOSC specification  (see:   http://code.sat.qc.ca/redmine/projects/spatosc/wiki/spec  )
+Satie4Unity's message specification is inspired from the SPATOSC specification  (see:   http://code.sat.qc.ca/redmine/projects/spatosc/wiki/spec  )
 */
 
-//~allSourceNodes.size;
 
-// 				// DEBUG
-//~allSourceNodes.at( "ball_3:spatOSCsource_5".asSymbol).at(\outDB);
+// Note:  the SATIE kernel in SATIE/src be evaluated before loading this file
 
 (
-
 s.waitForBoot{
+
+		// initialize the OSC interpreter here
+	~oscInterface = ~cOSCMaker.value();
 
 	~projectDirectory =  thisProcess.nowExecutingPath.dirname;    // can be overwritten by OSC messages to audioRenderer
 
@@ -57,11 +59,6 @@ s.waitForBoot{
 
 	~fxSynthdefRegister;
 
-	OSCdef(\createSoundSource).clear.free;  // just in case newOSC will be re-evaluated.
-	~oscInterface.newOSC(\createSoundSource, ~coreCallback, "/spatosc/core");
-
-	~oscInterface.removeBasicRendererOSC(\brOSC);
-	~oscInterface.basicRendererOSC(\brOSC,~basicRendererCallback);
 
 	//~createGroup.value(\default);
 
@@ -1305,6 +1302,17 @@ s.waitForBoot{
 		});
 		type;
 	};
+
+
+	// LAST:
+
+	//OSCdef(\createSoundSource).clear.free;  // just in case newOSC will be re-evaluated.
+	~oscInterface.removeBasicRendererOSC(\createSoundSource);
+
+	~oscInterface.newOSC(\createSoundSource, ~coreCallback, "/spatosc/core");
+
+	~oscInterface.removeBasicRendererOSC(\brOSC);
+	~oscInterface.basicRendererOSC(\brOSC,~basicRendererCallback);
 
 
 	'satie4unity loaded'.postln;

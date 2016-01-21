@@ -1,31 +1,19 @@
-// called from project's  main.scd file,  in which,  ~rootSrcPath is defined
-
+// called from project's  main.scd file
 
 s.waitForBoot{
-
-	// finding source directory
-	(~rootSrcPath ++ "/src/*.scd").pathMatch.do({arg item; item.loadPaths});
 
 	~num_aux_bus = 5;
 	~fxInputBus = 0;  // relative aux bus number that satie will use for this project's synthdef sends to fx synthdefs
 
-	// creating a sc-basic-renderer
+	// create and initialize a sc-basic-renderer, and set environment variable
 	if (~scbr == nil,{
-		~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus);});
-	// printing internal aux array with bus indexes
-	~scbr.aux;
-	// loading source plugins
-	~scbr.pluginLoader.loadAudioPlugins(~rootSrcPath ++ "/audiosources/*.scd");
-	// see the loaded plugins in the console
-	~scbr.pluginLoader.audioPlugins;
-	// loading spatializer plugins
-	~scbr.pluginLoader.loadSpatPlugins(~rootSrcPath ++ "/spatializers/*.scd");
-	~scbr.pluginLoader.spatPlugins;
+		~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus);
+		~scbr.init();
+	});
 
-	~scbr.pluginLoader.loadEffectPlugins(~rootSrcPath ++ "/effects/*.scd");
-	~scbr.pluginLoader.effectPlugins;
+	s.sync;
 
-
+	//  declare all the project's needed synthDefs here
 	postf("generating example project synthdefs for % format \n", ~listeningFormat);
 	~scbr.makeSynthDef(\zparticle1, \zparticle1, [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\pink, \PinkSin, [~listeningFormat], [0]);
@@ -39,22 +27,9 @@ s.waitForBoot{
 	~scbr.makeSynthDef(\busreverb, \freeverb, [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\busgverb, \gverb, [~listeningFormat], [0]);
 
-	// initialize the OSC interpreter here
-	~oscInterface = ~cOSCMaker.value();
-
 	s.sync;
 
-
-
-
-
 };  // end of  waitforboot
-
-
-
-
-
-
 
 
 /*

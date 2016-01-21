@@ -33,12 +33,13 @@
 ~superNovaFlag = true;
 
 
+// audio environment setup
+
 ~defaultListeningFormat = \stereoListener;    // can also be set to \domeVBAP  or  \labodomeVBAP  or   \octoVBAP
 
 
-// PROBABLY NO NEED TO MODIFY ANYTHING ELSE BELOW
+// PROBABLY NO NEED TO MODIFY ANYTHING ELSE BELOW  HERE
 ~listeningFormat = ~defaultListeningFormat;    // will remain unless overwritten below
-
 
 if ( ~superNovaFlag != nil,
 	{
@@ -119,14 +120,17 @@ if (~meter == nil,  { ~plotTree=s.meter;});
 
 
 
-// LOAD ENVIRONMENT AND PROJECT FILES
-
+// Initialize and load  section   ----------------------------------
 (
-// note: files that define OSCcallbacks seem to need to be evaluated twice
-~startupfiles = [~rootSrcPath++"/utils/dacTest.scd", ~thisDir++"/"++~myProjectFIleName, ~rootSrcPath++"/src/satie4unity.scd", ~rootSrcPath++"/src/satie4unity.scd"];
+// Load SATIE kernel
+(~rootSrcPath ++ "/src/*.scd").pathMatch.do({arg item; item.loadPaths});
 
 
-// next:  load any .scd files in the project's autoload subdir
+// specify files to be loaded:
+// note;  project file must be first
+~startupfiles = [~thisDir++"/"++~myProjectFIleName, ~rootSrcPath++"/translators/satie4unity.scd", ~rootSrcPath++"/utils/dacTest.scd"];
+
+// next:  locate any .scd files in the project's autoload subdir
 ~autoLoadDirCmd = "ls "++thisProcess.nowExecutingPath.dirname++"/autoload/*.scd";
 ~pipe = Pipe.new(~autoLoadDirCmd, "r");            // list directory contents in long format
 
@@ -148,13 +152,16 @@ while (  { ~done != true} ,
 });
 ~pipe.close;
 
+
 // load everything
 s.waitForBoot {
-	var dir = thisProcess.nowExecutingPath.dirname;
+
+	// load project file, Satie4Unity, and any other utility files
 	postf("main.scd:  loading needed files for % project \n", ~myProjectFIleName.splitext[0]);
 	~startupfiles.do { |f|  f.postln;  f.load ; s.sync;};
 	s.sync;
 
+	// load additional project-specific files from the "autoload" subdir.
 	postf("main.scd: loading % items from %/autoload subdirectory\n", ~files.size, ~myProjectFIleName.splitext[0]);
 	~files.do { |f|  f.split.last.postln;  f.load; s.sync;};
 	s.sync;

@@ -98,6 +98,32 @@
 			self.satieGroupInstances[group][name].release();
 			nil;
 		};
+
+
+
+		~init = { | self  |
+			s.waitForBoot{
+
+	// printing internal aux array with bus indexes
+	// ~scbr.aux;
+	// loading source plugins
+	self.pluginLoader.loadAudioPlugins(~rootSrcPath ++ "/audiosources/*.scd");
+	// see the loaded plugins in the console
+	self.pluginLoader.audioPlugins;
+	// loading spatializer plugins
+	self.pluginLoader.loadSpatPlugins(~rootSrcPath ++ "/spatializers/*.scd");
+	self.pluginLoader.spatPlugins;
+
+	self.pluginLoader.loadEffectPlugins(~rootSrcPath ++ "/effects/*.scd");
+	self.pluginLoader.effectPlugins;
+
+	s.sync;
+
+	};
+};
+
+
+
 /*
 		~getProxySym = { | self, prox |
 			var proxSym = \default;
