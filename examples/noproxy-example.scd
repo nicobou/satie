@@ -28,18 +28,13 @@ s.waitForBoot{
 
 	~num_aux_bus = 5;
 	// creating a sc-basic-renderer
-	~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus);
+	~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus, satieSrcPath: ~rootSrcPath);
 	// printing internal aux array with bus indexes
 	~scbr.aux;
     // ~scbr.auxbus.scope;
-	// loading source plugins
-	~scbr.pluginLoader.loadAudioPlugins(~rootSrcPath ++ "/audiosources/*.scd");
+	// list plugins
 	~scbr.pluginLoader.audioPlugins;  // list audio plugins
-	// loading spatializer plugins
-	~scbr.pluginLoader.loadSpatPlugins(~rootSrcPath ++ "/spatializers/*.scd");
 	~scbr.pluginLoader.spatPlugins;
-	// loading effect plugins
-	~scbr.pluginLoader.loadEffectPlugins(~rootSrcPath ++ "/effects/*.scd");
 	~scbr.pluginLoader.effectPlugins;
 	// generating SynthDef that are going to be used,
 	// here a PinkSin source spatialized by
@@ -116,6 +111,35 @@ s.waitForBoot{
 
 ~scbr.cleanInstance(\testNode_1)
 ~scbr.satieGroupInstances[\default].size
+
+// makeSynthDef2 example with mappers
+// following is a mapper with additional parameter (shiftDeg)
+~myMapper = {
+	| aziDeg = 0, eleDeg = 0, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 0.5, spread = 1, shiftDeg = 0 |
+	// shiftDeg is added to aziDeg when returning value
+	[shiftDeg + aziDeg, eleDeg, gainDB, delayMs, lpHz, hpHz, spread];
+		};
+
+~scbr.makeSynthDef2(
+	\myTestTone2,
+	\default, [],
+	[\stereoPanner], [0],
+	~myMapper,
+	[]);
+
+2.do( { arg item;
+	var nodename=("testNode"++"_"++item).asSymbol;
+	var synth;
+	//synth = ~scbr.makeInstance(nodename.asSymbol, \testtone, \default);
+	synth = ~scbr.makeInstance(nodename.asSymbol, \myTestTone2, \default);
+	synth.set(\gainDB, rrand(-90, -38), \sfreq, rrand(100, 1000), \shiftDeg, rrand(-90, 90));
+});
+
+~scbr.satieGroups[\default].set(\gainDB, -30);
+
+// this move the group location but keep individual shiftDeg
+~scbr.satieGroups[\default].set(\aziDeg, -100);
+
 
 // ***************** old examples ************************************
 
