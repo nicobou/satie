@@ -56,7 +56,7 @@
 			name,
 			srcSymbol, srcToBusses = #[],
 			spatSymbolArray, firstOutputIndexes = #[0],
-			paramsMapper,
+			paramsMapper = \defaultMapper,
 			synthArgs = #[] |
 			// selecting audio source or effect dictionay because
 			// make instance require effects to be added to tail
@@ -72,23 +72,19 @@
 				}
 			); //  endif
 			// Factory
-			self.synthDefFactory.makeSynthDef(
-				name: name,
-				src: dictionary.at(srcSymbol),
-				srcToBusses: srcToBusses,
-				spatializers: spatSymbolArray.collect({ arg item, i;
+			self.synthDefFactory.makeSynthDef2(
+				/*name:*/ name,
+				/*src:*/ dictionary.at(srcSymbol),
+				/*srcToBusses:*/ srcToBusses,
+				/*spatializers:*/ spatSymbolArray.collect({ arg item, i;
 					self.pluginLoader.spatPlugins.at(item)}),
-				firstOutputIndexes: firstOutputIndexes,
-				paramsMapper: paramsMapper,
-				synthArgs: synthArgs);
+				/*firstOutputIndexes:*/ firstOutputIndexes,
+				/*paramsMapper:*/ self.pluginLoader.mapperPlugins.at(paramsMapper),
+				/*synthArgs:*/ synthArgs);
 			nil;  // return
 		};
 
 		~makeSatieGroup = { | self, name, addAction = \addToHead |
-			// creating a global ProxySpace
-			// var prox = ProxySpace(s);
-			// prox.fadeTime = 0.5;
-			// the proxyspace is going to be embedded in the global pargroup
 			var group = ParGroup.new(addAction: addAction);
 			self.satieGroups.put(name.asSymbol, group);
 			self.satieGroupInstances.put(name.asSymbol, Dictionary.new);
@@ -106,17 +102,9 @@
 
 
 		~makeInstance = { | self, name, synthDefName, group = \default |
-			// ensuring not extra bus is allocated:
-			// (must be the first reference of "name" in the proxyspace
-			// self.satieGroups[name].ar(0);
-			// self.satieGroups[name].source = synthDefName;
 			var synth = Synth(synthDefName, target: self.satieGroups[group], addAction: \addToHead );
 			self.satieGroupInstances[group].put(name, synth);
-			// self.satieGroups[group].postln;
 			synth;
-			// self.satieGroups.postln;
-			// self.satieGroups[name];
-			//nil;
 		};
 
 		~cleanInstance = { | self, name, group = \default |
@@ -146,6 +134,7 @@
 	e.pluginLoader.loadAudioPlugins(e.satieSrcPath ++ "/audiosources/*.scd");
 	e.pluginLoader.loadSpatPlugins(e.satieSrcPath ++ "/spatializers/*.scd");
 	e.pluginLoader.loadEffectPlugins(e.satieSrcPath ++ "/effects/*.scd");
+	e.pluginLoader.loadMapperPlugins(e.satieSrcPath ++ "/mappers/*.scd");
 	e;  // return
 };  // scbrMaker
 )

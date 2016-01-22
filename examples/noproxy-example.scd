@@ -28,19 +28,15 @@ s.waitForBoot{
 
 	~num_aux_bus = 5;
 	// creating a sc-basic-renderer
-	~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus);
+	~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus, satieSrcPath: ~rootSrcPath);
 	// printing internal aux array with bus indexes
 	~scbr.aux;
     // ~scbr.auxbus.scope;
-	// loading source plugins
-	~scbr.pluginLoader.loadAudioPlugins(~rootSrcPath ++ "/audiosources/*.scd");
-	~scbr.pluginLoader.audioPlugins;  // list audio plugins
-	// loading spatializer plugins
-	~scbr.pluginLoader.loadSpatPlugins(~rootSrcPath ++ "/spatializers/*.scd");
+	// list plugins
+	~scbr.pluginLoader.audioPlugins;
 	~scbr.pluginLoader.spatPlugins;
-	// loading effect plugins
-	~scbr.pluginLoader.loadEffectPlugins(~rootSrcPath ++ "/effects/*.scd");
 	~scbr.pluginLoader.effectPlugins;
+	~scbr.pluginLoader.mapperPlugins;
 	// generating SynthDef that are going to be used,
 	// here a PinkSin source spatialized by
 	//   - a stereo panner (starting channel 0)
@@ -116,6 +112,24 @@ s.waitForBoot{
 
 ~scbr.cleanInstance(\testNode_1)
 ~scbr.satieGroupInstances[\default].size
+
+// makeSynthDef2 example with the defaut mapper plugin
+~scbr.makeSynthDef2(
+	\myTestTone2,
+	\default, [],
+	[\stereoPanner], [0],
+	\defaultMapper,
+	[]);
+~scbr.pluginLoader.mapperPlugins;
+~scbr.pluginLoader.mapperPlugins.at(\defaultMapper);
+
+2.do( { arg item;
+	var nodename=("testNode"++"_"++item).asSymbol;
+	var synth;
+	synth = ~scbr.makeInstance(nodename.asSymbol, \myTestTone2, \default);
+	synth.set(\gainDB, rrand(-90, -38), \sfreq, rrand(100, 1000), \shiftDeg, rrand(-90, 90));
+});
+
 
 // ***************** old examples ************************************
 
