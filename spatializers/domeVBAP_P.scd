@@ -48,7 +48,7 @@
 ~name = \domeVBAP_P;
 
 
-~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1, cloudSpread = 1 |
+~function = { | in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1, cloudAziScale = 1 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP
 	var delay = delayMs * 0.001;    // convert to seconds
 	var slewDelay = 0.3; //  note: this needs to be improved ... smoother
@@ -72,7 +72,7 @@
 	panWeights = VBAP.kr(numChans: ~spk31.numSpeakers,
 		in: 1.0,
 		bufnum: ~vbuf31.bufnum,
-		azimuth: aziDeg + (randOffsetAzi * cloudSpread),
+		azimuth: aziDeg + (randOffsetAzi * cloudAziScale),
 		elevation: eleDeg,
 		spread: spread );
 
