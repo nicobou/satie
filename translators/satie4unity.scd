@@ -517,7 +517,7 @@ s.waitForBoot{
 						// allOtherNames (to call a function with an arg vec)
 						if (( eventName == \setParam)&& (values.size == 2),
 							{
-								postf("sourceProcessCallback event_setParam: %  % \n", values[0].asSymbol, values[1]);
+								// postf("sourceProcessCallback event_setParam: %  % \n", values[0].asSymbol, values[1]);
 								myProcess[values[0].asSymbol] = values[1] ;
 
 							},
@@ -649,8 +649,7 @@ s.waitForBoot{
 		var stringArray;
 
 
-		'enter createSourceProcess'.postln;
-		("URI"++uriPath).postln;
+		("sheefa.createSourceProcess:  URI"++uriPath).postln;
 
 		stringArray = uriPath.asString.split($ );
 		charIndex = stringArray[0].asString.find("://");
@@ -696,7 +695,7 @@ s.waitForBoot{
 
 						// send URI's argsString to setup without any error checking
 
-						myProcess[\setup].value(myProcess, sourceName.asSymbol, cloneGroupName.asSymbol, argsString );   // set the state of the process
+							myProcess[\setup].value(myProcess, sourceName.asSymbol, cloneGroupName.asSymbol, argsString );   // set the state of the process
 						~setSynth.value(sourceName.asSymbol, "");  // sets dummy plugin as placeholder
 
 						~oscInterface.sourceOSC(sourceName.asSymbol, ~sourceProcessCallback);   // create OSC callback
@@ -941,7 +940,7 @@ s.waitForBoot{
 	~setGroupProperty = { | groupName property value |
 		var group = ~allGroupNodes[groupName.asSymbol].at(\group).group;
 
-		postf("~setGroupProperty: seting % of % to %\n", property, groupName, value);
+		// postf("~setGroupProperty: seting % of % to %\n", property, groupName, value);
 
 		group.set(property.asSymbol, value);
 	};

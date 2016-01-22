@@ -4,16 +4,20 @@
 
 s.waitForBoot{
 
-	~listeningFormatP = ~listeningFormat++"_P";
+	~listeningFormatP = (~listeningFormat++"_P").asSymbol;
 
 
 	~num_aux_bus = 5;
 	~fxInputBus = 0;  // relative aux bus number that satie will use for this project's synthdef sends to fx synthdefs
 
 	// create and initialize a sc-basic-renderer, and set environment variable
-	if (~scbr == nil,{
-		~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus, satieSrcPath: ~rootSrcPath);
-	});
+//	~scbr = nil;
+	// if (~scbr == nil,{
+		~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus, satieSrcPath: ~rootSrcPath);   // force so plugin loading is updated
+	// });
+
+
+	//~scbr.keysDo{ | key |  key.dump.postln;};
 
 	s.sync;
 
@@ -30,9 +34,10 @@ s.waitForBoot{
 	~scbr.makeSynthDef(\pbell1, \pbell1, [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [~listeningFormat], [0], [~scbr.aux[~fxInputBus]]);
 	//~scbr.makeSynthDef(\zkarpluck1P, \zkarpluck1P, [~listeningFormatP], [0], [~scbr.aux[~fxInputBus]]);
-	~scbr.makeSynthDef(\zkarpluck1P, \zkarpluck1P, [~listeningFormat], [0], [~scbr.aux[~fxInputBus]]);
+	~scbr.makeSynthDef(\zkarpluck1P, \zkarpluck1P, [~listeningFormatP], [0], [~scbr.aux[~fxInputBus]]);
 	~scbr.makeSynthDef(\busreverb, \freeverb, [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\busgverb, \gverb, [~listeningFormat], [0]);
+
 
 	s.sync;
 

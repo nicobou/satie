@@ -20,17 +20,17 @@
 // spread  units  (0 == directional, ....,  100 == omni)
 
 // labodome speaker layout
-~spk24 = VBAPSpeakerArray.new(3, [
+~spk24P = VBAPSpeakerArray.new(3, [
 [0, 90],
 [0, 60], [45, 60], [90, 60], [135, 60], [180, 60], [-135, 60], [-90, 60], [-45, 60],
 [0, 20], [45, 20], [90, 20], [135, 20], [180, 20], [-135, 20], [-90, 20], [-45, 20],
 [0, -15], [45, -15], [90, -15], [135, -15], [-135, -10], [-90, -10], [-45, -10],]);
 
-~vbuf24 = Buffer.loadCollection(s, ~spk24.getSetsAndMatrices);
+~vbuf24P = Buffer.loadCollection(s, ~spk24P.getSetsAndMatrices);
 
 ~name = \labodomeVBAP_P;
 
-~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1, cloudSpread = 1 |
+~function = { | in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1, cloudAziScale = 1 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP
 	var delay = delayMs * 0.001;    // convert to seconds
 	var slewDelay = 0.3; //  note: this needs to be improved ... smoother
@@ -43,9 +43,6 @@
 	// extra state for random particle variation
 	var randOffsetAzi = Rand(-180, 180);  // random offset for azimuth
 
-
-
-
 	outsig =  LPF.ar(DelayC.ar(
 		VarLag.kr(gain, slewGain) * in,
 		maxdelaytime: 0.5,
@@ -53,24 +50,27 @@
 
 	outsig = BHiPass.ar(outsig, VarLag.kr(hpHz, slewFilter )  );
 
-	panWeights = VBAP.kr(numChans: ~spk24.numSpeakers,
+	panWeights = VBAP.kr(numChans: ~spk24P.numSpeakers,
 		in: 1.0,
-		bufnum: ~vbuf24.bufnum,
-	    azimuth: aziDeg + (randOffsetAzi * cloudSpread),
+		bufnum: ~vbuf24P.bufnum,
+	    azimuth: aziDeg + (randOffsetAzi * cloudAziScale),
 		elevation: eleDeg,
 		spread: spread );
 
 	//SendTrig.kr(Impulse.kr(0.5), 0,  (aziDeg + offsetAzi)   );  //  Enable for debugging
 	// SendTrig.kr(Impulse.kr(0.5), 0,  offsetAzi );  //  Enable for debugging
-
 	outsig * Ramp.kr(panWeights, slewPanning);
 };
 
 
 // debug
+
+
 /*
 ~OSCrn = OSCresponderNode(s.addr, '/tr', { |time, resp, msg| msg.postln }).add;
 ~OSCrn.remove;  // when done, you need to clean up the OSCresponderNode
+a = ~function.play;
+a.free;
 */
 
 //  in synthdef

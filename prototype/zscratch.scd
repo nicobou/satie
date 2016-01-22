@@ -6,69 +6,21 @@
 
 ~groupSym = \default;
 
-~nodeName= \srcNode;
+~nodeName= \srcNode_0;
+
 ~nodeGroupName = ~allSourceNodes[~nodeName.asSymbol].at(\groupNameSym);
 
 ~listenerName = "listener";
 
 ~allGroupNodes.includesKey(~nodeGroupName);
 
+~cloneName = ~nodeName++"_0";
 
 
-~uriPath= "process://sheefa 444 shit arg2 2.2 arg3";
-
-
-~stringArray = ~uriPath.split($ );
-~charIndex = ~stringArray[0].asString.find("://");
-~processName = ~stringArray[0].asString.subStr(~charIndex+3);
-
-~valueString = ~uriPath.asString.subStr(~stringArray[0].size+1);
-//~valueString = "";
-
-
-~argvec = ~valueString.split($ );
-
-~argvec.size;
-
-if ( ~argvec.size >= 2,
-	{
-		if ( ~argvec[0].asString == "cloneCount",
-			{
-				'yes'.postln;
-				~argvec[1].asFloat.postln;
-
-		},
-			// else bad arg
-			{
-				error("sheefa.setup: unrecognized key, expecting 'cloneCount' ");
-		});
-
-
-		~argvec[1].asFloat.postln;
-});
-
-
-~argvec[1].asInt.clip(1, 10000);
-
-
-//type = ~uriPath.asString.subStr(0, ~charIndex-1);
-
-
-
-
-~stringArray[0].asString.find("://");
-
-~temp.asString.find(" ");
-
-
-~charIndex = ~uriPath.asString.find(~processName);
-
-
-		~temp = ~uriPath.asString.subStr(~charIndex);
-
-
-
-
+// process node testing
+~myProcess = ~allSourceNodes[~nodeName.asSymbol].at(\process);
+~myGroupName = ~myProcess.nodeGroupName.asSymbol;
+~myGroup = ~myProcess.nodeGroup.group;
 
 
 
@@ -76,15 +28,9 @@ if ( ~argvec.size >= 2,
 //~pluginName = "pbell1";
 //~pluginPath = "plugin://"++~pluginName;
 
-
-
 // for process node
 ~pluginName = "sheefa";
-~pluginPath = "process://"++~pluginName;
-
-
-
-~connectionName = ~nodeName++ "->"++~listenerName;
+//~pluginPath = "process://"++~pluginName;
 
 
 /*
@@ -93,31 +39,13 @@ if ( ~argvec.size >= 2,
 
 */
 
-// process node testing
-~myProcess = ~allSourceNodes[~nodeName.asSymbol].at(\process);
-~myGroupName = ~myProcess.nodeGroupName.asSymbol;
-~myGroup = ~myProcess.nodeGroup.group;
-
-
 // inspect values
 ~myProcess.at(\cloneCount);
-
-
-
-
 ~myProcess.at(\triggerIntervalMs);
 ~myProcess.at(\nodeGroup);
-~myProcess.at(\randTrigMaxMs);
 
-~someString = "pussy";
-~someString = "cloneCount";
-
-~myProcess.put(~someString.asSymbol, 33);
-
-
-
-
-~cloneName = ~nodeName++"_0";
+//~someKey = "cloneCount";
+//~myProcess.put(~someKey.asSymbol, 33);
 
 
 
@@ -125,19 +53,19 @@ if ( ~argvec.size >= 2,
 
 // srcNode_0_group, srcNode_0_6
 
-~scbr.satieGroupInstances[~myGroupName][\srcNode_0].set(\note, [75,1,1]);
+~scbr.satieGroupInstances[~myGroupName][~cloneName].set(\note, [75,1,1], \t_trig, 1);
 ~myProcess.put(triggerIntervalMs, 0);
 
-~scbr.satieGroupInstances[~myGroupName][\srcNode_0].set(\t_trig, 1);
+~scbr.satieGroupInstances[~myGroupName][~cloneName].set(\t_trig, 1);
 
-~scbr.satieGroupInstances[~myGroupName][\srcNode_0].set(\cloudSpread, 2);
+~scbr.satieGroupInstances[~myGroupName][~cloneName].set(\cloudSpread, 2);
 
 
 ~myGroup.set(\randTrigMaxMs, 0);
 //~myGroup.set(\t_trig, 1).free
 
 \srcNode_0
-~scbr.satieGroups[~myGroupName].group.set(\aziDeg,  90);
+~scbr.satieGroups[~myGroupName].set(\aziDeg,  0, \gainDB, 0, \note, [75,1,1], \t_trig, 1);
 ~scbr.satieGroups[~myGroupName].group.set(\t_trig, 1);
 
 {~scbr.satieGroupInstances[~myGroupName].keysDo{ |key |
@@ -154,6 +82,8 @@ if ( ~argvec.size >= 2,
 };}.fork
 
 
+
+~connectionName = ~nodeName++ "->"++~listenerName;
 
 
 
@@ -835,5 +765,64 @@ x.set(\azi,-90); // all speakers
 
 
 x.free; b.free;
+
+~uriPath= "process://sheefa  cloneCount 20";
+~stringArray = ~uriPath.asString.split($ );
+~charIndex = ~stringArray[0].asString.find("://");
+~processName = ~stringArray[0].asString.subStr(~charIndex+3);
+~thisargsString = ~uriPath.asString.subStr(~stringArray[0].size+1);
+
+~thisargsString.postln;
+~argsString.postln;
+
+
+~uriPath= "process://sheefa 444 shit arg2 2.2 arg3";
+
+
+
+
+// ~argvec = ~valueString.split($ );
+//
+// ~argvec.size;
+//
+// if ( ~argvec.size >= 2,
+// 	{
+// 		if ( ~argvec[0].asString == "cloneCount",
+// 			{
+// 				'yes'.postln;
+// 				~argvec[1].asFloat.postln;
+//
+// 			},
+// 			// else bad arg
+// 			{
+// 				error("sheefa.setup: unrecognized key, expecting 'cloneCount' ");
+// 		});
+//
+//
+// 		~argvec[1].asFloat.postln;
+// });
+//
+//
+// ~argvec[1].asInt.clip(1, 10000);
+
+
+//type = ~uriPath.asString.subStr(0, ~charIndex-1);
+
+
+
+
+// ~stringArray[0].asString.find("://");
+//
+// ~temp.asString.find(" ");
+//
+//
+// ~charIndex = ~uriPath.asString.find(~processName);
+//
+//
+// ~temp = ~uriPath.asString.subStr(~charIndex);
+//
+
+
+
 
 

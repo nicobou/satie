@@ -28,7 +28,7 @@
 		'randAzi' -> 20,
 		'randElev' -> 30,
 		'randDist' -> 1,
-		'cloneCount' -> 1,
+		'cloneCount' -> 20,
 		'cloudRadius' -> 5, // 2D particle field radius: 5 meters
 		'triggerIntervalMs' -> 500,   // time interval, during which the clones will randomly trigger
 		// other state
@@ -100,15 +100,17 @@ if (~sheefa_pitchSequences == nil,
 	self.nodeName = nodeName;
 	self.nodeGroupName = nodeGroupName;
 	self.nodeGroup = thisGroup;
+	//'sheefa,setup'.postln;
 
-	// project-specific parsing of args string (coming from setUri OSC message string)
+		// project-specific parsing of args string (coming from setUri OSC message string)
 		if ( argvec.size >= 2,
 		{
+
 			if ( argvec[0].asString == "cloneCount",
 				{
-					'yes'.postln;
 					self.cloneCount = 	argvec[1].asInt.clip(1, 10000);
-				},
+					// postf(" sheefa.setup: node: %   creating % clones \n", nodeName, self.cloneCount);
+			},
 				// else bad arg
 				{
 					error("sheefa.setup: unrecognized key, expecting 'cloneCount' ");
@@ -128,30 +130,41 @@ if (~sheefa_pitchSequences == nil,
 };
 
 
-	// end of required class functions
+// end of required class functions
 
-	// the functions below are not requied
-	// however if defined, they will be called by satie4unity when node's "update" message is received
-	// otherwise satie4unity will send the  "update" message to the node's group
-	~sheefa.updateConnection = { | self, aziDeg, eleDeg, gainDB, delayMs, lpHz, distance |
+// the functions below are not requied
+// however if defined, they will be called by satie4unity when node's "update" message is received
+// otherwise satie4unity will send the  "update" message to the node's group
+~sheefa.updateConnection = { | self, aziDeg, eleDeg, gainDB, delayMs, lpHz, distance |
 
-		var 	thisGroup = self.nodeGroup; // ~allSourceNodes[self.nodeName.asSymbol].at(\proxy);
+	var 	thisGroup = self.nodeGroup; // ~allSourceNodes[self.nodeName.asSymbol].at(\proxy);
+	var xzDist = distance * eleDeg.degrad.cos;  // get distance of node to listener on XZ plane
+	var aziScaler;
 
-	//distance.postln;
+	xzDist = xzDist.clip(0, 100)*0.01;   // anything over 100 meters away will generate no azimuth offset its clones. Normalize
 
-		// saving the connection state in case its needed
-		self.aziDeg = aziDeg;
-		self.elevDeg = eleDeg;
-		self.gainDB = gainDB;
-		self.delayMs = delayMs;
-		self.lpHz = lpHz;
-		self.hpHz = 0.5;  // to be added
+	aziScaler = (1 - xzDist)**3;   // increase this exponent to fall off more quickly
 
-		//postf("sheefa.updateConnection: called for node: %    delayMS: %  \n", self.nodeName, delayMs);
 
-		// updating the connection of all this node's clones (via group message)
-	thisGroup.set(\aziDeg, self.aziDeg, \eleDeg, self.elevDeg, \gainDB, self.gainDB , \delayMs, self.delayMs, \lpHz, self.lpHz,  \cloudSpread, 1 ); //  \hpHz, self.hpHz);
-	};
+	//aziScaler.postln;
+
+	// postf(" distance: %    xzDist:  %\n", distance, xzDist);
+
+
+
+	// saving the connection state in case its needed
+	self.aziDeg = aziDeg;
+	self.elevDeg = eleDeg;
+	self.gainDB = gainDB;
+	self.delayMs = delayMs;
+	self.lpHz = lpHz;
+	self.hpHz = 0.5;  // to be added
+
+	//postf("sheefa.updateConnection: called for node: %    delayMS: %  \n", self.nodeName, delayMs);
+
+	// updating the connection of all this node's clones (via group message)
+	thisGroup.set(\aziDeg, self.aziDeg, \eleDeg, self.elevDeg, \gainDB, self.gainDB , \delayMs, self.delayMs, \lpHz, self.lpHz,  \cloudAziScale, aziScaler ); //  \hpHz, self.hpHz);
+};
 
 
 	// if defined, will be called when node's "spread" message is received

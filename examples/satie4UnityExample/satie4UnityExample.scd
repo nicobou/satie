@@ -5,10 +5,12 @@ s.waitForBoot{
 	~num_aux_bus = 5;
 	~fxInputBus = 0;  // relative aux bus number that satie will use for this project's synthdef sends to fx synthdefs
 
+	~num_aux_bus = 5;
+	~fxInputBus = 0;  // relative aux bus number that satie will use for this project's synthdef sends to fx synthdefs
+
 	// create and initialize a sc-basic-renderer, and set environment variable
 	if (~scbr == nil,{
-		~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus);
-		~scbr.init();
+		~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus, satieSrcPath: ~rootSrcPath);
 	});
 
 	s.sync;
