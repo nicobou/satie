@@ -59,7 +59,7 @@ public class SATIEprocess : MonoBehaviour {
 		{
 			//Debug.Log ("SATIEprocess.Awake:  launchArg: " + s);
 
-			uriString = uriString + " " + s;
+			uriString = uriString + s + " ";
 
 			// uriString.Insert (uriString.Length, " " + s);
 		}

@@ -33,26 +33,42 @@
 ~superNovaFlag = true;
 
 
-~defaultListeningFormat = \stereoListener;    // can also set this to \domeVBAP)  or \labodomeVBAP or \octoVBAP
+// defaults to stereo
+~listeningFormat = \stereoListener;    // you can also set this to  \domeVBAP  or  \labodomeVBAP  or   \octoVBAP
+
+// or specify the listening format via command line args
+// possible arg values:   "sato", "labo", "octo", or "stereo"
 
 
-// NO NEED TO MODIFY ANYTHING ELSE BELOW
+if  (thisProcess.argv.size >= 1,
+ 	{
 
-~listeningFormat = ~defaultListeningFormat;    // will remain unless overwritten below
+ 		switch (thisProcess.argv[0].asString ,
+ 			"sato",
+ 			{
+ 				~listeningFormat = \domeVBAP;
+ 			},
+ 			"labo",
+ 			{
+				~listeningFormat = \labodomeVBAP;
+ 			},
+ 			"octo",
+ 			{
+ 				~listeningFormat = \octoVBAP;
+ 			},
+ 			"quad",
+ 			{
+ 				~listeningFormat = \quadVBAP;
+ 			},
+			"stereo",
+ 			{
+ 			~listeningFormat = \stereoListener;  	}
+ 		);
+ 		postf("% main.scd : parsing comand line arg:  setting listening format to %\n", ~myProjectFIleName, ~listeningFormat);
 
-
-if ( ~superNovaFlag != nil,
-	{
-		Server.supernova;
-});
-
-o = Server.local.options;   // default set up options
-o.memSize = 2**21;        // probably should just leave this the same for everyting
-o.device = nil;  // default
-o.blockSize = 2048;
-o.threads = 8;
-
-
+},
+// else check environment variable for listening format
+{
 // check to see if the BASH environment variable is set to either "sato" or "labodome"
 (
 //p = Pipe.new("ls -l", "r");            // list directory contents in long format
@@ -82,7 +98,32 @@ if ( l != nil,
 
 p.close;                    // close the pipe to avoid that nasty buildup
 );
+});
 
+
+
+
+
+
+
+
+
+
+
+// NO NEED TO MODIFY ANYTHING ELSE BELOW
+
+
+
+if ( ~superNovaFlag != nil,
+	{
+		Server.supernova;
+});
+
+o = Server.local.options;   // default set up options
+o.memSize = 2**21;        // probably should just leave this the same for everyting
+o.device = nil;  // default
+o.blockSize = 2048;
+o.threads = 8;
 
 
 if (  ( ( ~listeningFormat == \domeVBAP)  ||   ( ~listeningFormat == \labodomeVBAP)  || ( ~listeningFormat == \octoVBAP)  ),
@@ -126,6 +167,10 @@ switch (~listeningFormat,
 	\octoVBAP,
 	{
 		o.numOutputBusChannels = 8;
+	},
+	\quadVBAP,
+	{
+		o.numOutputBusChannels = 4;
 	},
 	\stereoListener,
 	{

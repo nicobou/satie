@@ -20,6 +20,43 @@
 ~myProjectFIleName = "satie4UnityExample.scd";
 
 
+// defaults to stereo
+~listeningFormat = \stereoListener;    // you can also set this to  \domeVBAP  or  \labodomeVBAP  or   \octoVBAP
+
+// or specify the listening format via command line args
+// possible arg values:   "sato", "labo", "octo", or "stereo"
+
+
+if  (thisProcess.argv.size >= 1,
+ 	{
+
+ 		switch (thisProcess.argv[0].asString ,
+ 			"sato",
+ 			{
+ 				~listeningFormat = \domeVBAP;
+ 			},
+ 			"labo",
+ 			{
+				~listeningFormat = \labodomeVBAP;
+ 			},
+ 			"octo",
+ 			{
+ 				~listeningFormat = \octoVBAP;
+ 			},
+ 			"quad",
+ 			{
+ 				~listeningFormat = \quadVBAP;
+ 			},
+			"stereo",
+ 			{
+ 			~listeningFormat = \stereoListener;  	}
+ 		);
+ 		postf("% main.scd : parsing comand line arg:  setting listening format to %\n", ~myProjectFIleName, ~listeningFormat);
+
+});
+
+
+
 ~thisDir = thisProcess.nowExecutingPath.dirname ;
 
 // Only edit this path to point to the sate root if you have moved location of this example project directory to a different level of the satie distribution directory tree
@@ -33,13 +70,8 @@
 ~superNovaFlag = true;
 
 
-// audio environment setup
-
-~defaultListeningFormat = \stereoListener;    // can also be set to \domeVBAP  or  \labodomeVBAP  or   \octoVBAP
-
 
 // PROBABLY NO NEED TO MODIFY ANYTHING ELSE BELOW  HERE
-~listeningFormat = ~defaultListeningFormat;    // will remain unless overwritten below
 
 if ( ~superNovaFlag != nil,
 	{
@@ -91,6 +123,10 @@ switch (~listeningFormat,
 	\octoVBAP,
 	{
 		o.numOutputBusChannels = 8;
+	},
+	\quadVBAP,
+	{
+		o.numOutputBusChannels = 4;
 	},
 	\stereoListener,
 	{

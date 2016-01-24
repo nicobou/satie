@@ -27,6 +27,7 @@ s.waitForBoot{
 		// initialize the OSC interpreter here
 	~oscInterface = ~cOSCMaker.value();
 
+	// global variable, potentially used by project processes
 	~projectDirectory =  thisProcess.nowExecutingPath.dirname;    // can be overwritten by OSC messages to audioRenderer
 
 	~volume = s.volume;     // create hook to global audio engine volume / mute control

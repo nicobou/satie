@@ -16,6 +16,7 @@
 // -----------------------------------------------------------
 using UnityEngine;
 using System;
+using System.IO;
 using System.Threading;
 using System.Collections;
 using System.Collections.Generic;
@@ -130,20 +131,73 @@ public class SATIErendererCtl : MonoBehaviour {
     
 	private void updateProjectDir()
 	{
-		string path;
+		string path="";
 
-		if (projectDir == "")
-		{
-			_projectDir = projectDir = "../StreamingAssets";
-			path = Application.streamingAssetsPath;
-		}
+        //Debug.Log ("PROJECT DIR: "+ projectDir);
 
+        if (projectDir == "")
+        {
+            _projectDir = projectDir = "../StreamingAssets";
+            path = Application.streamingAssetsPath;
+            // Debug.Log ("projectDir EMPTY,  path= "+ path);
+        } 
+        else if (projectDir.StartsWith("$DROPBOX"))    // users can specify $DROPBOX, and assuming a standard filepath like  "C:\Users or /Users,  we replace /Users/name with "~"
+        {
+            string[] pathItems;
+            int dirIndex = 0;
+            string relPath = "~";
+            int counter = 0;
+            int usersIndex = 0;
+            int dropBoxIndex = 0;
+            char delimiter =  '/';  // Path.DirectorySeparatorChar;   NOT NEEDED FOR WINDOWS ANYMORE
+
+
+            // will default to this if there are errors
+            _projectDir = projectDir = "../StreamingAssets";
+            path = Application.streamingAssetsPath;
+
+
+            //Debug.Log("***************************** PATH= "+path);
+
+            if ( !path.Contains("Dropbox") ||  ( !path.Contains("Users") && !path.Contains("Utilisateurs")) )
+            {
+                Debug.LogError("SATIErendererCtl.updateProjectDir: no DROPBOX and/or /Users directory found, setting project path to default");
+                return;
+            }
+
+            pathItems = path.Split(delimiter);   // get array of directory items
+ 
+            counter = 0;
+            foreach (string s in pathItems)
+            {
+                if (s == "Users" || s == "Utilisateurs")
+                {
+                    usersIndex = counter;
+                    break;
+                }
+                counter++;
+            }
+
+            if (  pathItems.Length < usersIndex+3  )   // /users/name/relativestuff.....
+            {
+                Debug.LogError("SATIErendererCtl.updateProjectDir: poorly formated directory path (BUG??), setting project path to default");
+                return;
+            }
+
+            for (int i = usersIndex+2; i<pathItems.Length; i++ )
+            {
+                relPath += "/"+pathItems[i];
+            }
+            //Debug.Log("***************************** pathItems[0] = " + pathItems[0]);
+             // Debug.Log("RELPATH= "+relPath);
+            _projectDir = projectDir = relPath;
+            path = relPath;
+        }
 		else if (projectDir.StartsWith("/")) 
 			path = projectDir;
 		else
 			path = Application.streamingAssetsPath + "/" + projectDir;
 
-		//Debug.Log ("path= "+ path);
 
 		OSCMessage message = new OSCMessage (_oscMessage);
 		

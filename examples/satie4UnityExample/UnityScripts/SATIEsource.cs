@@ -380,6 +380,8 @@ public class SATIEsource : SATIEnode {
         float myRadius = conn.radius;
 
         float azimuth, elevation,distance;
+        float dist2Dxz; 
+
         Vector3 listenerAED = new Vector3();            
 
         // get distance and angles of source relative to listener
@@ -387,6 +389,8 @@ public class SATIEsource : SATIEnode {
         azimuth = listenerAED.x;
         elevation = listenerAED.y;
         distance = listenerAED.z;
+        dist2Dxz = getDist2Dxz(source,listener);
+
 
         //For the gain and vdel calculation, we want the distance to the radius:
 		float dist2Radius = distance - myRadius;
@@ -548,14 +552,27 @@ public class SATIEsource : SATIEnode {
         items.Add(gainDB_);
         items.Add(vdelMs_);
         items.Add(distFq_);
-		items.Add (distance);
+        items.Add (distance);
+        //items.Add (dist2Dxz);
+
+        //Debug.Log("CONNECTION DISTANCE FROM LISTENER: " + distance);
 
         SATIEsetup.OSCtx(path, items);
         items.Clear();
       }
 
 
-	Vector3 getAedFromSink(Transform src, SATIElistener snk)
+    // returns the projected distance on XZ 
+    float getDist2Dxz(Transform src, SATIElistener snk)
+    {
+        Vector2 srcVec = new Vector2(src.position.x, src.position.z);
+        Vector2 snkVec = new Vector2(snk.transform.position.x, snk.transform.position.z);
+
+        return( Vector2.Distance(srcVec,snkVec) );
+    }
+
+
+            Vector3 getAedFromSink(Transform src, SATIElistener snk)
 	{
 		Vector3 connVec = src.position - snk.transform.position;
 		

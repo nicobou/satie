@@ -6,18 +6,11 @@ s.waitForBoot{
 
 	~listeningFormatP = (~listeningFormat++"_P").asSymbol;
 
-
 	~num_aux_bus = 5;
 	~fxInputBus = 0;  // relative aux bus number that satie will use for this project's synthdef sends to fx synthdefs
 
 	// create and initialize a sc-basic-renderer, and set environment variable
-//	~scbr = nil;
-	// if (~scbr == nil,{
-		~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus, satieSrcPath: ~rootSrcPath);   // force so plugin loading is updated
-	// });
-
-
-	//~scbr.keysDo{ | key |  key.dump.postln;};
+	~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus, satieSrcPath: ~rootSrcPath);   // satie plugins (re)loaded
 
 	s.sync;
 

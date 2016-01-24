@@ -19,15 +19,15 @@
 // lpHz    hertz
 // spread  units  (0 == directional, ....,  100 == omni)
 
-~spk2 = VBAPSpeakerArray.new(2, [-60, 60]);
+~spk2P = VBAPSpeakerArray.new(2, [-60, 60]);
 
 
 
-~vbuf2 = Buffer.loadCollection(s, ~spk2.getSetsAndMatrices);
+~vbuf2P = Buffer.loadCollection(s, ~spk2P.getSetsAndMatrices);
 
 ~name = \stereoListener_P;
 
-~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1, cloudSpread = 1 |
+~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1, cloudAziScale = 1 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP
 	var delay = delayMs * 0.001;    // convert to seconds
 	var slewDelay = 0.3; //  note: this needs to be improved ... smoother
@@ -49,11 +49,11 @@
 
 	outsig = BHiPass.ar(outsig, VarLag.kr(hpHz, slewFilter )  );
 
-	panWeights = VBAP.kr(numChans: ~spk2.numSpeakers,
+	panWeights = VBAP.kr(numChans: ~spk2P.numSpeakers,
 		in: 1.0,
-		bufnum: ~vbuf2.bufnum,
-		azimuth: aziDeg + (randOffsetAzi * cloudSpread),
-		elevation: eleDeg,
+		bufnum: ~vbuf2P.bufnum,
+	    azimuth: aziDeg + (randOffsetAzi * cloudAziScale),
+		elevation: 0,   // 2D panner, no elev used
 		spread: spread );
 	//SendTrig.kr(Impulse.kr(0.5), 0,  offsetAzi   );  //  Enable for debugging
 	outsig * Lag.kr(panWeights, 0.030);
