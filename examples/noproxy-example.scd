@@ -92,6 +92,7 @@ s.waitForBoot{
 ~scbr.makeSatieGroup(\synths)
 ~scbr.satieGroups
 ~scbr.satieGroups[\default].set(\gainDB, -200)
+~scbr.satieGroups[\default].set(\gainDB, -20)
 
 // make some changes to the individual synths
 20.do( {|item|
@@ -113,15 +114,48 @@ s.waitForBoot{
 ~scbr.cleanInstance(\testNode_1)
 ~scbr.satieGroupInstances[\default].size
 
-// makeSynthDef2 example with the defaut mapper plugin
+// ************************ MAPPERS ***********************************
+
+// example with the "exampleMapper" plugin
 ~scbr.makeSynthDef2(
 	\myTestTone2,         // name
-	\default, [],         // audio source + array of busses to write to
+	\testtone, [],         // audio source + array of busses to write to
+	[\stereoPanner], [0], // spatializer + index of the first physical output
+	\exampleMapper,       // name of the mapper to use
+	[]);                  // default parameters
+// ~scbr.pluginLoader.mapperPlugins;
+// ~scbr.pluginLoader.mapperPlugins.at(\exampleMapper);
+
+2.do( { arg item;
+	var nodename=("testNode"++"_"++item).asSymbol;
+	var synth;
+	synth = ~scbr.makeInstance(nodename.asSymbol, \myTestTone2, \default);
+	synth.set(\gainDB, -30, \sfreq, rrand(100, 1000), \shiftDeg, rrand(-90, 90));
+});
+
+~scbr.satieGroups[\default].set(\gainDB, -30)
+~scbr.satieGroups[\default].set(\gainDB, -20)
+
+// changing azimuth shift for both nodes individually:
+~scbr.satieGroupInstances[\default][\testNode_0].set(\aziDegShift, 120);
+~scbr.satieGroupInstances[\default][\testNode_1].set(\aziDegShift, -120);
+// changing azimuth for the group is keeping per instance attributed azimuth shift
+~scbr.satieGroups[\default].set(\aziDeg, -145);
+~scbr.satieGroups[\default].set(\aziDeg, -45);
+~scbr.satieGroups[\default].set(\aziDeg, 0);
+~scbr.satieGroups[\default].set(\aziDeg, 45);
+~scbr.satieGroups[\default].set(\aziDeg, 145);
+
+// example with the "defautMapper" plugin
+// (default is an identity mapper, it just forwards spatialization parameters without modification)
+~scbr.makeSynthDef2(
+	\myTestTone2,         // name
+	\testtone, [],         // audio source + array of busses to write to
 	[\stereoPanner], [0], // spatializer + index of the first physical output
 	\defaultMapper,       // name of the mapper to use
 	[]);                  // default parameters
-~scbr.pluginLoader.mapperPlugins;
-~scbr.pluginLoader.mapperPlugins.at(\defaultMapper);
+// ~scbr.pluginLoader.mapperPlugins;
+// ~scbr.pluginLoader.mapperPlugins.at(\defaultMapper);
 
 2.do( { arg item;
 	var nodename=("testNode"++"_"++item).asSymbol;
