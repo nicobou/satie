@@ -115,11 +115,11 @@ s.waitForBoot{
 
 // makeSynthDef2 example with the defaut mapper plugin
 ~scbr.makeSynthDef2(
-	\myTestTone2,
-	\default, [],
-	[\stereoPanner], [0],
-	\defaultMapper,
-	[]);
+	\myTestTone2,         // name
+	\default, [],         // audio source + array of busses to write to
+	[\stereoPanner], [0], // spatializer + index of the first physical output
+	\defaultMapper,       // name of the mapper to use
+	[]);                  // default parameters
 ~scbr.pluginLoader.mapperPlugins;
 ~scbr.pluginLoader.mapperPlugins.at(\defaultMapper);
 
