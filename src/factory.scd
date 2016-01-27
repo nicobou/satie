@@ -67,9 +67,9 @@
 					var in, env, out, mapped;
 					// install first the mapper with spatialization parameters, allowing it to take control
 					// over all defined parameter
-					mapped = SynthDef.wrap(paramsMapper, prependArgs:  synthArgs);
+					mapped = SynthDef.wrap(paramsMapper);
 					// in
-					in = SynthDef.wrap(src);
+					in = SynthDef.wrap(src, prependArgs:  synthArgs);
 					// fade in set to as short as possible for percussive cases
 					env = Linen.kr(gate, 0.005, 1, 0.01, 2);
 					// in -> busses (busses are taking raw input)
