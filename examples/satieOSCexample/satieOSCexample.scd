@@ -20,7 +20,7 @@ Server.supernova;
 o = Server.local.options;
 o.numOutputBusChannels = 8;
 o.memSize = 2**20;
-o.blockSize = 512;
+o.blockSize = 2048;
 //s.reboot;
 s.makeGui;
 s.meter;
@@ -69,7 +69,7 @@ s.waitForBoot {
 	// be sure the synthDef is compiled on the server
 	~osc = ~satieOSCMaker.value();
 	s.sync;
-	(~rootSrcPath ++ "/utils/oscControl.scd").load;
+	(~rootSrcPath ++ "/protocols/satieOSC.scd").load;
 	s.sync;
 };
 )
