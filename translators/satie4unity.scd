@@ -20,6 +20,7 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 
 
 // Note:  the SATIE kernel in SATIE/src be evaluated before loading this file
+//  meaning that the global:   '~scbr' must be defined already
 
 (
 s.waitForBoot{
@@ -839,7 +840,7 @@ s.waitForBoot{
 				if ( myProcess != nil,
 					{
 						postf("~createConnection: creating Custom update callback for  %  ", sourceName.asSymbol);
-						~oscInterface.connectionOSC(~allSourceNodes[sourceName.asSymbol].at(\connectionName),~connectionProcessCallback);
+						~oscInterface.connectionOSC(~allSourceNodes[sourceName.asSymbol].at(\connectionName), ~connectionProcessCallback);
 					},
 					//else  regular source node, set up standard connection callback
 					{

@@ -33,7 +33,7 @@
 
 	var aziScale = 0.01 * (100 - spread);
 	var theta = aziScale * aziDeg *  0.01745329251994;  // radians
-	var index = SinOsc.kr(0, theta);
+	var index = SinOsc.kr(0, theta + (pi/2) );
 	var outsig;
 
 	outsig =  LPF.ar(DelayC.ar(

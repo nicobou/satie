@@ -26,8 +26,12 @@ s.waitForBoot{
 	//~scbr.makeSynthDef(\zbell1, \zbell1, [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\pbell1, \pbell1, [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [~listeningFormat], [0], [~scbr.aux[~fxInputBus]]);
-	//~scbr.makeSynthDef(\zkarpluck1P, \zkarpluck1P, [~listeningFormatP], [0], [~scbr.aux[~fxInputBus]]);
-	~scbr.makeSynthDef(\zkarpluck1P, \zkarpluck1P, [~listeningFormatP], [0], [~scbr.aux[~fxInputBus]]);
+//	~scbr.makeSynthDef(\zkarpluck1P, \zkarpluck1P, [~listeningFormatP], [0], [~scbr.aux[~fxInputBus]]);
+
+	// note order:   name, synthName, fxBus, listenerName, outBusNo, mapName, optArgs
+	~scbr.makeSynthDef2(\zkarpluck1P, \zkarpluck1P,   [~scbr.aux[~fxInputBus]], [~listeningFormat],  [0], \randOffsets1, []);
+
+
 	~scbr.makeSynthDef(\busreverb, \freeverb, [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\busgverb, \gverb, [~listeningFormat], [0]);
 

@@ -48,6 +48,19 @@
 //~myProcess.put(~someKey.asSymbol, 33);
 
 
+	~scbr.satieGroups[~nodeGroupName].set(\c1, 0.7,  \c3, 3, \fb,  100);
+
+
+~particule1_instances.do{ |item |
+	var groupName = item.nodeGroupName;
+
+	~scbr.satieGroups[groupName].set(\c1, 2,  \c3, 4, \fb,  100);
+
+};
+
+	~scbr.satieGroups[groupName].set(\c1, 0.7,  \c3, 3, \fb,  100);
+
+// 0.7, 3, 100
 
 
 
@@ -65,7 +78,12 @@
 //~myGroup.set(\t_trig, 1).free
 
 \srcNode_0
-~scbr.satieGroups[~myGroupName].set(\aziDeg,  0, \gainDB, 0, \note, [75,1,1], \t_trig, 1);
+~scbr.satieGroups[~myGroupName].set(\aziDeg,  -89, \eleiDeg,  0, \gainDB, -30, \note, [75,1,1], \t_trig, 1);
+
+~scbr.satieGroups[~myGroupName].set(\cloudAziScale,  1, \cloudElevScale,  0, \t_trig, 1);
+~scbr.satieGroups[~myGroupName].set(\cloudAziScale,  0, \cloudElevScale,  0, \t_trig, 1);
+
+
 ~scbr.satieGroups[~myGroupName].group.set(\t_trig, 1);
 
 {~scbr.satieGroupInstances[~myGroupName].keysDo{ |key |

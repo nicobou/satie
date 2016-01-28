@@ -59,6 +59,8 @@
 
 	//SendTrig.kr(Impulse.kr(4), 0,  VarLag.kr(hpHz, 1, 0, Env.shapeNumber(\sin)  )     );  //  Enable for debugging
 
+	//SendTrig.kr(Impulse.kr(4), 0, aziDeg   );  //  Enable for debugging
+
 	outsig * Ramp.kr(panWeights, slewPanning);
 };
 
