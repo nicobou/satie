@@ -1,20 +1,3 @@
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-// This file is loaded by main.scd in the same directory
-
-// finding source directory
-
 (
 Server.supernova;
 o = Server.local.options;
@@ -26,7 +9,7 @@ s.makeGui;
 s.meter;
 s.plotTree;
 s.waitForBoot {
-	~rootSrcPath = thisProcess.nowExecutingPath.dirname ++ "/../..";
+	~rootSrcPath = thisProcess.nowExecutingPath.dirname ++ "/..";
 	(~rootSrcPath ++ "/src/*.scd").pathMatch.do({arg item; item.loadPaths});
 
 	~num_aux_bus = 5;
@@ -73,3 +56,13 @@ s.waitForBoot {
 	s.sync;
 };
 )
+
+
+~scbr.makeInstance(\soundOne, \snd1, \default);
+~scbr.makeInstance(\soundTwo, \snd2, \default);
+
+
+~scbr.satieGroupInstances[\default][\soundOne].set(\gainDB, -30, \loop, 1);
+~scbr.satieGroupInstances[\default][\soundTwo].set(\gainDB, -30, \loop, 1);
+
+~scbr.satieGroups[\default].set(\loop, 0);

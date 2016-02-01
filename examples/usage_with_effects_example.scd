@@ -1,20 +1,3 @@
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-// This file is loaded by main.scd in the same directory
-
-// finding source directory
-
 (
 Server.supernova;
 o = Server.local.options;
@@ -26,7 +9,7 @@ s.makeGui;
 s.meter;
 s.plotTree;
 s.waitForBoot {
-	~rootSrcPath = thisProcess.nowExecutingPath.dirname ++ "/../..";
+	~rootSrcPath = thisProcess.nowExecutingPath.dirname ++ "/..";
 	(~rootSrcPath ++ "/src/*.scd").pathMatch.do({arg item; item.loadPaths});
 
 	~num_aux_bus = 5;
@@ -73,3 +56,33 @@ s.waitForBoot {
 	s.sync;
 };
 )
+
+// ******* spatialized effects  (read audio from a bus) ***
+
+// making two trigered sound source
+// ~defaultProx = ~scbr.satieGroups[\default];
+~scbr.makeInstance(\test1, \string_third_aux);
+~scbr.makeInstance(\test2, \string_third_aux);
+// ~defaultProx.group.set(\gainDB, -20);
+~scbr.satieGroups[\default].set(\gainDB, -20);
+~scbr.satieGroupInstances[\default][\test1].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
+~scbr.satieGroupInstances[\default][\test2].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
+// ~defaultProx[\test1].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
+// ~defaultProx[\test2].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
+
+// making a reverb effect
+// this need a specific group since
+// effects need to be added to tail
+~scbr.makeSatieGroup(\effect, \addToTail);
+
+~scbr.makeInstance(\rev, \busreverb, \effect);
+~scbr.satieGroupInstances[\effect][\rev].set(\in, ~scbr.aux[2]);  // reading bus created by Satie
+~scbr.satieGroupInstances[\effect][\rev].set(\mix, 1);  //wet only
+~scbr.satieGroupInstances[\effect][\rev].set(\room, 0.9);
+~scbr.satieGroupInstances[\effect][\rev].set(\damp, 1);
+~scbr.satieGroupInstances[\effect][\rev].set(\aziDeg, -180);
+~scbr.satieGroupInstances[\effect][\rev].set(\gainDB, -20);
+
+// play with reverb
+~scbr.satieGroupInstances[\default][\test1].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
+~scbr.satieGroupInstances[\default][\test2].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);

@@ -30,7 +30,7 @@
 
 ~name = \labodomeVBAP;
 
-~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1 |
+~function = { | in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP
 	var delay = delayMs * 0.001;    // convert to seconds
 	var slewDelay = 0.3; //  note: this needs to be improved ... smoother
@@ -39,6 +39,9 @@
 	var slewPanning = 0.030;
 	var panWeights;
 	var outsig;
+
+
+
 
 	outsig =  LPF.ar(DelayC.ar(
 		VarLag.kr(gain, slewGain) * in,
@@ -53,7 +56,11 @@
 		azimuth: aziDeg,
 		elevation: eleDeg,
 		spread: spread );
+
 	//SendTrig.kr(Impulse.kr(4), 0,  VarLag.kr(hpHz, 1, 0, Env.shapeNumber(\sin)  )     );  //  Enable for debugging
+
+	//SendTrig.kr(Impulse.kr(4), 0, aziDeg   );  //  Enable for debugging
+
 	outsig * Ramp.kr(panWeights, slewPanning);
 };
 

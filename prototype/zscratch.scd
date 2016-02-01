@@ -7,26 +7,30 @@
 ~groupSym = \default;
 
 ~nodeName= \srcNode_0;
+
+~nodeGroupName = ~allSourceNodes[~nodeName.asSymbol].at(\groupNameSym);
+
 ~listenerName = "listener";
 
-~allGroupNodes.includesKey(~nodeName.asSymbol);
+~allGroupNodes.includesKey(~nodeGroupName);
 
-~allSourceNodes[~nodeName.asSymbol].at(\proxySymb);
+~cloneName = ~nodeName++"_0";
+
+
+// process node testing
+~myProcess = ~allSourceNodes[~nodeName.asSymbol].at(\process);
+~myGroupName = ~myProcess.nodeGroupName.asSymbol;
+~myGroup = ~myProcess.nodeGroup.group;
+
 
 
 // for normal source Node
 //~pluginName = "pbell1";
 //~pluginPath = "plugin://"++~pluginName;
 
-
-
 // for process node
 ~pluginName = "sheefa";
-~pluginPath = "process://"++~pluginName;
-
-
-
-~connectionName = ~nodeName++ "->"++~listenerName;
+//~pluginPath = "process://"++~pluginName;
 
 
 /*
@@ -35,42 +39,162 @@
 
 */
 
-// process node testing
-~myProcess = ~allSourceNodes[~nodeName.asSymbol].at(\process);
-~myGroupName = ~myProcess.at(\nodeGroupName);
-
-
 // inspect values
 ~myProcess.at(\cloneCount);
 ~myProcess.at(\triggerIntervalMs);
-~myProcess.at(\cloudRadius);
-~myProcess.at(\randTrigMaxMs);
-~myProcess.at(\synth);
+~myProcess.at(\nodeGroup);
+
+//~someKey = "cloneCount";
+//~myProcess.put(~someKey.asSymbol, 33);
 
 
-
-~cloneName = ~nodeName++"_0";
-~myProxy = ~myProcess.at(\nodeGroupProxy);
+	~scbr.satieGroups[~nodeGroupName].set(\c1, 0.7,  \c3, 3, \fb,  100);
 
 
+~particule1_instances.do{ |item |
+	var groupName = item.nodeGroupName;
 
-~myProcess.nodeGroupName.asSymbol;
+	~scbr.satieGroups[groupName].set(\c1, 2,  \c3, 4, \fb,  100);
+
+};
+
+	~scbr.satieGroups[groupName].set(\c1, 0.7,  \c3, 3, \fb,  100);
+
+// 0.7, 3, 100
+
+
 
 // srcNode_0_group, srcNode_0_6
 
-~scbr.satieGroups[\srcNode_0_group][\srcNode_0_6].set(\note, [90,1,1]);
-~scbr.satieGroups[\srcNode_0_group][\srcNode_0_6].set(\t_trig, 1);
+~scbr.satieGroupInstances[~myGroupName][~cloneName].set(\note, [75,1,1], \t_trig, 1);
+~myProcess.put(triggerIntervalMs, 0);
+
+~scbr.satieGroupInstances[~myGroupName][~cloneName].set(\t_trig, 1);
+
+~scbr.satieGroupInstances[~myGroupName][~cloneName].set(\cloudSpread, 2);
 
 
-~scbr.satieGroups[~myGroupName.asSymbol][~cloneName.asSymbol].set(\note, [89,1,1]);
-~scbr.satieGroups[~myGroupName.asSymbol][~cloneName.asSymbol].set(\t_trig, 1);
+~myGroup.set(\randTrigMaxMs, 0);
+//~myGroup.set(\t_trig, 1).free
+
+\srcNode_0
+~scbr.satieGroups[~myGroupName].set(\aziDeg,  -89, \eleiDeg,  0, \gainDB, -30, \note, [75,1,1], \t_trig, 1);
+
+~scbr.satieGroups[~myGroupName].set(\cloudAziScale,  1, \cloudElevScale,  0, \t_trig, 1);
+~scbr.satieGroups[~myGroupName].set(\cloudAziScale,  0, \cloudElevScale,  0, \t_trig, 1);
+
+
+~scbr.satieGroups[~myGroupName].group.set(\t_trig, 1);
+
+{~scbr.satieGroupInstances[~myGroupName].keysDo{ |key |
+	var nodeSym = key;
+	// var synthName = "srcNode_"++item++"_group";
+
+
+	~scbr.satieGroupInstances[~myGroupName][key].set(\randTrigMaxMs, 0);
+	~scbr.satieGroupInstances[~myGroupName][key].set(\note, [89,1,1]);
+
+	~scbr.satieGroupInstances[~myGroupName][key].set(\t_trig, 1);
+	key.postln;
+			0.2.wait;
+};}.fork
+
+
+
+~connectionName = ~nodeName++ "->"++~listenerName;
+
+
+
+
+~myGroupName;
+
+// clear
+//~myProcess[\clearSynths].value(~myProcess);
+
+//~myProcess.freeClones();
+
+
+//~scbr.cleanInstance(~cloneName,~myGroupName );
+
+
+~allSourceNodes[\ball_5].at(\groupNameSym);
+
+
+\srcNode_0
+
+~scbr.satieGroups[\srcNode_group];
+~scbr.satieGroups[\srcNode_1_group].set(\randTrigMaxMs, 0);
+
+
+
+~scbr.satieGroups[\srcNode_0_group].set(\aziDeg,  90);
+~scbr.satieGroups[\srcNode_0_group].set(\t_trig, 1);
+
+~scbr.satieGroups[\srcNode_1_group].set(\aziDeg,  -90);
+~scbr.satieGroups[~myGroupName].set(\t_trig, 1);
+
+
+
+~srcNode_0process = ~allSourceNodes[\srcNode_0].at(\process);
+~srcNode_1process = ~allSourceNodes[\srcNode_1].at(\process);
+
+
+~srcNode_0process.at(\nodeGroup).set(\aziDeg,  -90);
+~srcNode_1process.at(\nodeGroup).set(\aziDeg,  -90);
+
+~srcNode_0process.at(\nodeGroup).set(\t_trig, 1);
+~srcNode_1process.at(\nodeGroup).set(\t_trig, 1);
+
+
+
+
+~allSourceNodes[\srcNode_0].at(\process) == ~allSourceNodes[\srcNode_1].at(\process);
+
+~scbr.satieGroupInstances[~myGroupName.asSymbol][~cloneName.asSymbol].set(\note, [89,1,1]);   // broken
+
+// should be
+
+~scbr.satieGroupInstances[~myGroupName.asSymbol][~cloneName.asSymbol].set(\note, [89,1,1]);     // new style
+
+
+
+~scbr.satieGroupInstances[~myGroupName.asSymbol][~cloneName.asSymbol].set(\t_trig, 1);
+
+
+
+~scbr.satieGroups.keysDo{ |key |
+	var nodeSym = key;
+
+	if (key != \default,
+		{
+			~scbr.killSatieGroup(key);
+	});
+};
+
+
+~scbr.satieGroups
+
+
+( { arg key;
+
+	key.postln;
+
+	~scbr.killSatieGroup(nil);
+
+});
+
 
 
 
 
 ~myProcess.at(\nodeGroupProxy).group.set(\note, [85,0.5,0.5]);
 ~myProcess.at(\nodeGroupProxy).group.set(\t_trig, 1);
+~myProcess.at(\nodeGroupProxy).group.set(\randTrigMaxMs, 0);
 
+~myProcess.at(\nodeGroupProxy).group.set(\t_trig, 1);
+~myProcess.at(\nodeGroupProxy).group.set(\aziDeg, -90);
+
+~allSourceNodes[~nodeName].at(\proxy);
 
 
 
@@ -102,13 +226,6 @@
 	synth.set(\gainDB, -10);
 	synth.set(\t_trig, 1);
 });
-
-
-
-// clear
-~myProcess[\clearSynths].value(~myProcess);
-
-~myProcess.at(\nodeGroupProxy).free;
 
 
 
@@ -217,6 +334,49 @@
 
 
 ~allSourceNodes[\bell_0].at(\proxy).set(\gainDB ,  0 );
+
+
+
+
+~scbr.satieGroups[\effect].set(\aux, 0);
+
+~scbr.satieGroups[\default].set(\t_trig, 1);
+
+
+~scbr.satieGroups[\default].group.set(\gainDB, 4);
+
+~scbr.satieGroups[\default].set(\gainDB, -200);
+
+~scbr.satieGroupInstances[\effect][\resonance_SC].set(\outputDB, -30);
+
+
+~effectProx[\effect]
+
+
+
+~allSourceNodes[\resonance_SC].at(\auxBus);
+
+~allSourceNodes[\resonance_SC].at(\aux);
+
+
+~allSourceNodes[\resonance_SC].put(\aux, 0);
+
+~allSourceNodes[\resonance_SC].at(\auxbus);
+
+~allSourceNodes[\resonance_SC].at(\proxy).set(\in, ~allSourceNodes[\resonance_SC].at(\auxBus));
+~allSourceNodes[\resonance_SC].at(\proxy).set(\outputDB, -30);
+
+
+ ~allSourceNodes[\srcNode_0]
+
+ScIDE.open
+
+
+
+
+
+
+
 
 gainDB
 
@@ -623,5 +783,64 @@ x.set(\azi,-90); // all speakers
 
 
 x.free; b.free;
+
+~uriPath= "process://sheefa  cloneCount 20";
+~stringArray = ~uriPath.asString.split($ );
+~charIndex = ~stringArray[0].asString.find("://");
+~processName = ~stringArray[0].asString.subStr(~charIndex+3);
+~thisargsString = ~uriPath.asString.subStr(~stringArray[0].size+1);
+
+~thisargsString.postln;
+~argsString.postln;
+
+
+~uriPath= "process://sheefa 444 shit arg2 2.2 arg3";
+
+
+
+
+// ~argvec = ~valueString.split($ );
+//
+// ~argvec.size;
+//
+// if ( ~argvec.size >= 2,
+// 	{
+// 		if ( ~argvec[0].asString == "cloneCount",
+// 			{
+// 				'yes'.postln;
+// 				~argvec[1].asFloat.postln;
+//
+// 			},
+// 			// else bad arg
+// 			{
+// 				error("sheefa.setup: unrecognized key, expecting 'cloneCount' ");
+// 		});
+//
+//
+// 		~argvec[1].asFloat.postln;
+// });
+//
+//
+// ~argvec[1].asInt.clip(1, 10000);
+
+
+//type = ~uriPath.asString.subStr(0, ~charIndex-1);
+
+
+
+
+// ~stringArray[0].asString.find("://");
+//
+// ~temp.asString.find(" ");
+//
+//
+// ~charIndex = ~uriPath.asString.find(~processName);
+//
+//
+// ~temp = ~uriPath.asString.subStr(~charIndex);
+//
+
+
+
 
 

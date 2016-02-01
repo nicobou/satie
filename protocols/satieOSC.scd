@@ -234,11 +234,11 @@
 						if(prop == \in, // effect's property 'in' needs a special treatment
 							{
 								// postf("----------FX--------- setting property % on effect to %\n", prop, val);
-								~scbr.satieGroups[name].set(prop, ~scbr.aux[val.asInt]);
+								~scbr.satieGroupInstances[name].set(prop, ~scbr.aux[val.asInt]);
 							},
 							{
 								// postf("-=-=-=-=-=-=- got instance property %\n", prop);
-								~scbr.satieGroups[group].[name].set(prop, val);
+								~scbr.satieGroupInstances[group].[name].set(prop, val);
 							}
 						);
 					});

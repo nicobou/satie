@@ -1,20 +1,3 @@
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-// This file is loaded by main.scd in the same directory
-
-// finding source directory
-
 (
 Server.supernova;
 o = Server.local.options;
@@ -26,7 +9,7 @@ s.makeGui;
 s.meter;
 s.plotTree;
 s.waitForBoot {
-	~rootSrcPath = thisProcess.nowExecutingPath.dirname ++ "/../..";
+	~rootSrcPath = thisProcess.nowExecutingPath.dirname ++ "/..";
 	(~rootSrcPath ++ "/src/*.scd").pathMatch.do({arg item; item.loadPaths});
 
 	~num_aux_bus = 5;
@@ -73,3 +56,68 @@ s.waitForBoot {
 	s.sync;
 };
 )
+
+// Basic usage example
+
+// SATIE creates a \default group by default
+
+~scbr.satieGroups[\default];
+
+// create another group
+~scbr.makeSatieGroup(\synths);
+
+// populate default group with some test tones. We can set some properties
+// on each instance immediately upon creation
+(
+20.do( { arg item;
+	var nodename=("testNode"++"_"++item).asSymbol;
+	var synth;
+	synth = ~scbr.makeInstance(nodename.asSymbol, \testtone, \default);
+	synth.set(\gainDB, rrand(-90, -38), \sfreq, rrand(100, 1000));
+});
+)
+// act on individual instances
+(
+20.do( {|item|
+	var nodename=("testNode"++"_"++item);
+	~scbr.satieGroupInstances[\default][nodename.asSymbol].set(\sfreq, rrand(200, 2000));
+});
+)
+(
+20.do( {|item|
+	var nodename=("testNode"++"_"++item);
+	~scbr.satieGroupInstances[\default][nodename.asSymbol].set(\gainDB, rrand(-100, -40));
+});
+)
+(
+// the above can be done in one pass and
+20.do( {|item|
+	var nodename=("testNode"++"_"++item);
+	~scbr.satieGroupInstances[\default][nodename.asSymbol].set(
+		\sfreq, rrand(200, 2000),
+		\gainDB, rrand(-110, -50),
+		\aziDeg, rrand(-90, 90));
+});
+)
+// set properties to an entire group
+~scbr.satieGroups[\default].set(\gainDB, -60)
+~scbr.satieGroups[\default].set(\gainDB, -65, \sfreq, 220)
+
+// add 2 different instances of another synth to \synths group
+~scbr.makeInstance(\drone, \tastee, \synths);
+~scbr.makeInstance(\drone2, \tastee, \synths);
+
+// set parameters on one instance
+~scbr.satiGroupInstances[\synths][\drone].set(\aziDeg, 30);
+// or a group
+~scbr.satieGroups[\synths].set(\gainDB, -50);
+
+// satieGroups return a ParGroup
+~scbr.satieGroups[\synths];
+// inspect instances in a group
+~scbr.satieGroupInstances[\synths]
+
+// clean an instance
+~scbr.cleanInstance(\drone2, \synths)
+// kill a group
+~scbr.killSatieGroup(\default)

@@ -33,3 +33,25 @@ Versions of supercollider < 3.7 don’t seem to compile
 Refer to instructions in the README_OSX.md file  (use -DSUPERNOVA=ON, install Homebrew and deps. etc)
 Making the SC3-Plugins was straightforward. But you must copy the all the SC3 supernova plugins into your built superCollider.app/Content/Resources/Plugins folder, so they will be seen. 
 NOTE: make sure you have an Audio MIDI setup in which there are inputs and outputs defined
+
+
+Using Satie
+---------------------------
+Release structure:
+
+audiosources:  synthdef-style files defining sound sources
+doc
+effects:    synthdef-style files defining effects sources
+examples
+projects:   directory for user projects
+prototype
+README.md
+spatializers:   synthdef-style files defining sound sinks (listeners)
+src:        Satie system files
+tests
+utils:      diagnostics and other tools
+
+
+NB:  do not reorganize the satie distribution structure, as relative links can fail (including examples and projects)
+
+

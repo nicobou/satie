@@ -283,6 +283,8 @@ public class SATIEnode : MonoBehaviour {
 		}
 		else 
 			uriString = "";
+        //Debug.Log("********************************************initNode: node: "+transform.name+"   URI : " + uriString);
+            
 
 
 		//Debug.Log("URI STRING: "+uriString);
@@ -306,12 +308,8 @@ public class SATIEnode : MonoBehaviour {
 //				groupName = gameObject.tag;
 
             nodeName = transform.name;  // + "_" + nodeNo;
-			//result = SATIEsetup.createSource(nodeName, uriString, "sheefa");
-			result = SATIEsetup.createSource(nodeName, uriString, src.group);
-            // Debug.Log("********************************************initNode:  createSource returned: " + result);
-			//setURI(nodeName, uriString);   //NO NEED TO DO THIS NOW THAT THE URI IS CREATED WITH THE SOURCE
-			// 
-
+            result = SATIEsetup.createSource(nodeName, uriString, src.group);
+             //setURI(nodeName, uriString);   //NO NEED TO DO THIS NOW THAT THE URI IS CREATED WITH THE SOURCE
 			//Debug.Log("******************************************SATIEnode.initNode: source nodename; "+nodeName+"  groupName: "+ src.group);
 		}
 		else if (nodeType == "group" )

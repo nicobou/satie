@@ -1,10 +1,10 @@
 #!/bin/bash
 
 
-#BASIC_TEST=1
+BASIC_TEST=1
 #PLUCK_TEST=1
 #GROUP_TEST=1
-PROCESSING_TEST=1
+#PROCESSING_TEST=1
 
 
 
@@ -15,32 +15,39 @@ clear
 if [ $BASIC_TEST ] ; then
 
 clear;
-echo TESTING BASIC SPATOSC COMMANDS
+echo TESTING BASIC SATIE4UNITY COMMANDS
 sleep 2
 
-oscsend localhost 18032 /spatosc/core sss createSource mySound process://default
-sleep 2
 echo CREATE SOURCE NODE mySound
-sleep 1
-oscsend localhost 18032 /spatosc/core sss connect mySound ear
+oscsend localhost 18032 /spatosc/core sss creatqeSource mySound plugin://default
+sleep 2
+
+#echo CREATE LISTENER NODE mySound
+#LISTENER ALWAYS EXISTS, NO NEED TO CREATE
+#oscsend localhost 18032 /spatosc/core ss createListener ear
+#sleep 2
+
 echo CONNECT TO LISTENER ear
+oscsend localhost 18032 /spatosc/core sss connect mySound ear
 sleep 1
-oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff -1.57 0 -12 0 22050  # azi ele  gainDB del lpf
+
 echo PAN LEFT
+oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff -1.57 0 -12 0 22050 # azi ele  gainDB del lpf
 sleep 1
-oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff 1.57 0 3 0 22050  # azi ele  gainDB del lpf
+
+oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff 1.57 0 3 0 22050 # azi ele  gainDB del lpf
 echo PAN RIGHT, GAIN = 3db
 sleep 1
-oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff 0 0 0 0 22050  # azi ele  gainDB del lpf
+oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff 0 0 0 0 22050 # azi ele  gainDB del lpf
 echo PAN CENTER, GAIN = 0db
 sleep 1
-oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff -.78 0 -16 0 1000  # azi ele  gainDB del lpf
+oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff -.78 0 -16 0 1000 # azi ele  gainDB del lpf
 echo PAN LEFT. GAIN = -16db LPF = 1000
 sleep 1
-oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff 0 0 -6 0 22050  # azi ele  gainDB del lpf
+oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff 0 0 -6 0 22050 # azi ele  gainDB del lpf
 echo PAN CENTER, GAIN = -6, LPF = 22050
 sleep 1
-oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff .78 0 -24 0 22050  # azi ele  gainDB del lpf
+oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/update" fffff .78 0 -24 0 22050 # azi ele  gainDB del lpf
 echo  PAN RIGHT, GAIN = -24db
 sleep 1
 oscsend localhost 18032 "/spatosc/core/connection/mySound->ear/spread" f 0
@@ -103,7 +110,7 @@ echo TESTING PLUCK
 sleep 2
 
 
-oscsend localhost 18032 /spatosc/core ss createSource mySound
+oscsend localhost 18032 /spatosc/core sss createSource mySound plugin://zkarpluck1
 sleep 1
 oscsend localhost 18032 /spatosc/core sss connect mySound ear
 sleep 1
