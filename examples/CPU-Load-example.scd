@@ -91,6 +91,7 @@ r.stop;
 	rrand(0.05, 0.1).wait;
 	});});
 ~seqtrig.play;
+~seqtrig.reset; // hit it before playing again
 ~seqtrig.stop;
 
 // trig all once
