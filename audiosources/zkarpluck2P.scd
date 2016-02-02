@@ -20,11 +20,10 @@ o = OSCresponderNode(s.addr, '/tr', { |time, resp, msg| msg.postln }).add;
 o.remove;  // when done, you need to clean up the OSCresponderNode
 
 SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
-
 */
 
 
-// DESIGNED FOR RESONANT, CONTINUOUSLY UPATED PARTICLES (NON KAMIKAZI)
+// DESIGNED FOR  KAMIKAZI KLONES
 
 /*
 freq
@@ -39,38 +38,24 @@ fB	 ??  Inharmonicity factor.
 */
 //freq: 440, amp: 0.5, gate: 1, pos: 0.14, c1: 1, c3: 30, inp: 0, release: 0.1)
 
-~name = \zkarpluck1P;
+~name = \zkarpluck2P;
 
 ~function = {  | t_trig=0, c1 = 1, c3=20, fb = 2, randTrigMaxMs = 10000 , note = #[60, 1, 0.5]  |   // note: pitch force incidence
 	var env,inp,son;
-	var freq;
-	var amp;
-	var incidence;   // apprently this does not work
+	var freq = note[0].midicps;
+	var amp = note[1];
+	var incidence = abs (note[2]);   // apprently this does not work
 
 
-	var pos;
-	var hfqLoss;
-	var idecay;
-	var lpassFq;
+	var pos = note[2] * 0.5; // unitVal * positionRange
+	var hfqLoss= c3 + (1-amp)*c3*2;  // add more dampening when amplitude gets low
+	var idecay = c1 +  (1-amp)*c1;  //  reduce decay when amplitude gets low
+	var lpassFq = 100 + (incidence**(0.7) * 21900) ;  // used to cut highs when incidence is low
 	// particle use
 
-	var randTrigMaxSecs = (randTrigMaxMs*0.001).clip(0,10);
+	var randTrigMaxSecs = randTrigMaxMs*0.001;
 	var delTrigSecs = TRand.kr( 0,  randTrigMaxSecs,  t_trig);
 	var t_trigDel = TDelay.kr(t_trig, delTrigSecs);
-    var dnote = [0,0,0];
-
-	dnote = DelayN.kr(note, 10, delTrigSecs);    // delay note-related params by the same amount as trigger
-
-	freq = dnote[0].midicps;
-	amp = dnote[1];
-	incidence = abs (dnote[2]);   // apprently this does not work
-
-
-	pos = note[2] * 0.5; // unitVal * positionRange
-	hfqLoss= c3 + (1-amp)*c3*2;  // add more dampening when amplitude gets low
-	idecay = c1 +  (1-amp)*c1;  //  reduce decay when amplitude gets low
-	lpassFq = 100 + (incidence**(0.7) * 21900) ;  // used to cut highs when incidence is low
-
 
 	//incidence = incidence.clip(0,1);
 
@@ -100,13 +85,7 @@ fB	 ??  Inharmonicity factor.
 	a=~function.play;
     s.sync;
     a.set(\amp, 1);
-a.set(\randTrigMaxMs, 4000);
-
-a.set(\t_trig, 1 );
-a.set(\note, [61,1,1]);
-
-
-
+	a.set(\t_trig, 1 );
 //	t = Task({ { a.set(\t_trig, 1); 1.wait; 	a=~function.play;  s.sync; }.loop });
 	t = Task({ { a.set(\t_trig, 1); 0.2.wait; }.loop });
 	t.start;

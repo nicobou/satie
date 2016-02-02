@@ -6,7 +6,7 @@
 // this file defines  a process class, which is ONLY used by source nodes that have that have a URI of type:   "process" , e.g:      uri://process  "particule1"
 	// you can define any number of these process clases, each one, corresponding to a particular type of processing  behavoir you define
 
-
+// this class is for updated resonant klones
 
 // required:  set up class struct
 
