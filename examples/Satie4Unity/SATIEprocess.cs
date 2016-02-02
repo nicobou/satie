@@ -23,19 +23,25 @@ using System.Collections.Generic;
 // note:  this script must be in the transform that the SATIEsourceNode is in, and that node must have a "process" as a uri type
 public class SATIEprocess : MonoBehaviour {
 
+	public string processName = "default";
+
+	public List <string> launchArgs = new List<string>();
+
 	public List <string> events = new List<string>();
 	private List <string> _events = new List<string>();
 
 	public List <string> parameters = new List<string>();
 	private List <string> _parameters = new List<string>();
+    private bool _start = false;
 
 
 	SATIEsource SATIEsourceCS;
 
-
-	// Use this for initialization
-	void Start () 
+	void Awake()
 	{
+		// string argvec[];
+		string uriString = "";
+
 		SATIEsourceCS = transform.GetComponent<SATIEsource>();
 
 		if (SATIEsourceCS == null)
@@ -43,14 +49,38 @@ public class SATIEprocess : MonoBehaviour {
 			Debug.LogError("SATIEprocess.start(): component of type <SATIEsource> found in transform, aborting");
 			return;
 		}
-		// else
 
-		if ( !SATIEsourceCS.uri.Contains("process"))
+//		if ( !SATIEsourceCS.uri.Contains("process"))
+//		{
+//			Debug.LogError("SATIEprocess.start(): source node in transform URI type is not a process, aborting");
+//			return;
+//		}
+
+		foreach (string s in launchArgs) 
 		{
-			Debug.LogError("SATIEprocess.start(): source node in transform URI type is not a process, aborting");
-			return;
+			//Debug.Log ("SATIEprocess.Awake:  launchArg: " + s);
+
+			uriString = uriString + s + " ";
+
+			// uriString.Insert (uriString.Length, " " + s);
 		}
 
+		//Debug.Log ("SATIEprocess.Awake:  uriString: " + "process://"+processName+ " " + uriString); 
+		SATIEsourceCS.uri = "process://"+processName+ " " + uriString;
+
+	}
+
+
+	// Use this for initialization
+	void Start () 
+	{
+		if (SATIEsourceCS == null)
+		{
+			Debug.LogError("SATIEprocess.start(): component of type <SATIEsource> found in transform, aborting");
+			return;
+		}
+		// else
+        _start = true;
       	StartCoroutine( afterStart() );
 	
 
@@ -94,6 +124,8 @@ public class SATIEprocess : MonoBehaviour {
 
 	void validateEvents()
 	{
+        if (!_start) return;
+        
 		if (_events.Count != events.Count)
 		{
 			// Debug.Log("_events.Count != events.Count");
