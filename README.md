@@ -1,4 +1,4 @@
-see examples/example.scd, the following is about installing supercollider with supernova on ubuntu and OSX.
+see examples/ directory, the following is about installing supercollider with supernova on ubuntu and OSX.
 
 How to Install supercollider with supernova on linux
 ----------------------------------------------------
