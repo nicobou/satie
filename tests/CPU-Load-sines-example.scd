@@ -42,6 +42,7 @@ r.play;
 r.next;
 r.stop;
 
+
 // see what we have
 ~scbr.satieGroupInstances[\cpuTest];
 
@@ -51,8 +52,8 @@ r.stop;
 	item.set(
 		\aziDeg, rrand(-180,180),
 		\eleDeg, rrand(0,90),
-		\sfreq, rrand(200, 1000),
-		\gainDB, rrand(-95, -40)
+		\sfreq, rrand(50, 18000),
+		\gainDB, rrand(-140, -95)
 );})});
 ~seqtrig.play;
 ~seqtrig.reset; // hit it before playing again

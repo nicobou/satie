@@ -43,6 +43,7 @@ r = Routine {
 	}
 };
 r.play;
+r.next;
 r.stop;
 
 // see what we have

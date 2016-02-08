@@ -33,7 +33,7 @@ s.waitForBoot{
 	~scbr.makeSynthDef2(\snd1, \sndBuffer, [], [\octoVBAP], [0], \defaultMapper, [~playBuffers[\boo].bufnum]);
 	//~scbr.makeSynthDef(\snd2, \sndBuffer, [\domeVBAP], [0], [], [~playBuffers[\alsaTest].bufnum]);
 
-~scbr.makeSynthDef2(
+	~scbr.makeSynthDef2(
 		\string,
 		\zkarpluck1,
 		[],
