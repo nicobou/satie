@@ -29,15 +29,21 @@
 
 
 
-~function = {|in = 0, aziDeg = 0, eleDeg = 0, gainDB = 0, delayMs = 1, lpHz = 15000, spread = 1 |
+~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP
 	var delay = delayMs * 0.001;    // convert to seconds
 	var slewDelay = 0.3; //  note: this needs to be improved ... smoother
-	var slewGain = 0.03;
-	var slewLp = 0.3;
-	LPF.ar(
-		DelayC.ar(gain.lag(slewGain) * in,
-			maxdelaytime: 0.5,
-			delaytime: delay.lag(slewDelay)),
-		lpHz.lag(slewLp));
+	var slewGain = 0.1;
+	var slewFilter = 0.6;
+	var slewPanning = 0.030;
+	var panWeights;
+	var outsig;
+
+	outsig =  LPF.ar(DelayC.ar(
+		VarLag.kr(gain, slewGain) * in,
+		maxdelaytime: 0.5,
+		delaytime: delay.lag(slewDelay)),   lpHz.lag(slewFilter)    );
+
+	outsig = BHiPass.ar(outsig, VarLag.kr(hpHz, slewFilter )  );
+
 };

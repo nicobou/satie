@@ -38,6 +38,14 @@
 			};
 			nil;
 		};
+		~mapperPlugins = Dictionary.new;
+		~loadMapperPlugins = { | self,  path = "./*.scd" |
+			path.pathMatch.do{ arg item;
+				item.loadPaths;
+				self.mapperPlugins.put(~name.asSymbol, ~function);
+			};
+			nil;
+		};
 	});  // Environment.make
 	e.know = true;
 	e;

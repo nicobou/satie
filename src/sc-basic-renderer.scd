@@ -12,7 +12,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (
-~scbrMaker = { | numAudioAux = 0 |
+~scbrMaker = { | numAudioAux = 0, satieSrcPath |
 	var e = Environment.make({
 		// TODO use try catch with this
 		~pluginLoader;
@@ -20,9 +20,11 @@
 		//~cOSCMaker;
 		~defaultSatieGroup;
 		~satieGroups = Dictionary.new;
+		~satieGroupInstances = Dictionary.new;
 		~effectSynthDef = Set.new;
 		~auxbus;
 		~aux;
+		~satieSrcPath;
 
 		// TODO try catch
 		~makeSynthDef = { | self, name, srcSymbol, spatSymbolArray, busShiftArray = #[0], toBusArray = #[], synthArgs = #[] |
@@ -49,52 +51,78 @@
 				synthArgs);
 			nil;  // return
 		};
+		~makeSynthDef2 = {
+			| self,
+			name,
+			srcSymbol, srcToBusses = #[],
+			spatSymbolArray, firstOutputIndexes = #[0],
+			paramsMapper = \defaultMapper,
+			synthArgs = #[] |
+			// selecting audio source or effect dictionay because
+			// make instance require effects to be added to tail
+			// and audio source to head
+			var dictionary;
+			if (nil != self.pluginLoader.audioPlugins.at(srcSymbol),
+				{
+					dictionary = self.pluginLoader.audioPlugins;
+				},
+				{
+					dictionary = self.pluginLoader.effectPlugins;
+					self.effectSynthDef.add(name.asSymbol);
+				}
+			); //  endif
+			// Factory
+			self.synthDefFactory.makeSynthDef2(
+				/*name:*/ name,
+				/*src:*/ dictionary.at(srcSymbol),
+				/*srcToBusses:*/ srcToBusses,
+				/*spatializers:*/ spatSymbolArray.collect({ arg item, i;
+					self.pluginLoader.spatPlugins.at(item)}),
+				/*firstOutputIndexes:*/ firstOutputIndexes,
+				/*paramsMapper:*/ self.pluginLoader.mapperPlugins.at(paramsMapper),
+				/*synthArgs:*/ synthArgs);
+			nil;  // return
+		};
 
 		~makeSatieGroup = { | self, name, addAction = \addToHead |
-			// creating a global ProxySpace
-			var prox = ProxySpace(s);
-			prox.fadeTime = 0.5;
-			// the proxyspace is going to be embedded in the global pargroup
-			prox.group = ParGroup.new(addAction: addAction);
-			self.satieGroups.put(name.asSymbol, prox);
-			prox;
+			var group = ParGroup.new(addAction: addAction);
+			self.satieGroups.put(name.asSymbol, group);
+			self.satieGroupInstances.put(name.asSymbol, Dictionary.new);
+			group;
 		};
 
-        ~killSatieGroup = { | self, name |
-			self.satieGroups[name].end;
+		~killSatieGroup = { | self, name |
+			// self.satieGroups[name].end;
 			self.satieGroups[name].free;
+			self.satieGroupInstances[name].free;
 			self.satieGroups.removeAt(name);
+			self.satieGroupInstances.removeAt(name);
 			nil;
 		};
 
-
-		~makeInstance = { | self, name, synthDefName, prox = \default |
-			// ensuring not extra bus is allocated:
-			// (must be the first reference of "name" in the proxyspace
-			self.satieGroups[prox][name].ar(0);
-			self.satieGroups[prox][name].source = synthDefName;
-			self.satieGroups[prox][name];
-			//nil;
+		~makeInstance = { | self, name, synthDefName, group = \default |
+			var synth = Synth(synthDefName, target: self.satieGroups[group], addAction: \addToHead );
+			self.satieGroupInstances[group].put(name, synth);
+			synth;
 		};
 
-		~cleanInstance = { | self, name, prox = \default |
-			self.satieGroups[prox][name].release();
+		~makeKamikaze = { | self, name, synthDefName, group = \default |
+			var synth = Synth(synthDefName ++ "_kamikaze", target: self.satieGroups[group], addAction: \addToHead );
+			// self.satieGroupInstances[group].put(name, synth);
+			synth;
+		};
+
+		~cleanInstance = { | self, name, group = \default |
+			self.satieGroupInstances[group][name].release();
 			// fadeTime must be higher than SATIE internal fadeTime:
-			self.satieGroups[prox][name].clear(0.03);
+			self.satieGroupInstances[group][name].clear(0.03);
+			self.satieGroupInstances[group].removeAt(name);
 			nil;
 		};
 
-		~pauseInstance = { | self, name, prox = \default |
-			self.satieGroups[prox][name].release();
+		~pauseInstance = { | self, name, group = \default |
+			self.satieGroupInstances[group][name].release();
 			nil;
-		};
-
-		~getProxySym = { | self, prox |
-			var proxSym = \default;
-			self.satieGroups.keysValuesDo { |key, value|
-				if ((value === prox ) && (key != \nil),
-					{ proxSym = key; });};
-			proxSym ;
 		};
 	});  // Environment.make
 
@@ -105,6 +133,13 @@
 	e.synthDefFactory = ~scbrFactory.value();
 	e.defaultSatieGroup = e.makeSatieGroup();
 	e.satieGroups.put(\default, e.defaultSatieGroup);
+	e.satieGroupInstances.put(\default, Dictionary.new);
+	e.satieSrcPath = satieSrcPath;
+	// loading plugins
+	e.pluginLoader.loadAudioPlugins(e.satieSrcPath ++ "/audiosources/*.scd");
+	e.pluginLoader.loadSpatPlugins(e.satieSrcPath ++ "/spatializers/*.scd");
+	e.pluginLoader.loadEffectPlugins(e.satieSrcPath ++ "/effects/*.scd");
+	e.pluginLoader.loadMapperPlugins(e.satieSrcPath ++ "/mappers/*.scd");
 	e;  // return
 };  // scbrMaker
 )

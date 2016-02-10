@@ -34,7 +34,7 @@
 			if(OSCdef.all.includesKey(groupName) == false,
 				{
 					postf("IdentityDictionary does not include %, creating it\n", groupName);
-					self.makeGroup(groupName, cb);
+					self.makeGroupOSC(groupName, cb);
 				}
 			);
 		};
