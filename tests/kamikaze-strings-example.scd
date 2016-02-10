@@ -35,18 +35,31 @@ s.waitForBoot{
 // The side effect of hitting stop is that after a little while all created sounds
 // will be killed.
 
-// creating a custom group:
+(
+// custom group:
+
 ~scbr.makeSatieGroup(\kamikaze);
 
 r = Routine {
 	loop {
 		var boo;
 
-		boo = ~scbr.makeKamikaze((\test ++ rrand(0, 10000).asSymbol), \string, \kamikaze);
-		boo.set(\gainDB, -40, \note, rrand(42, 72), \t_trig, 1);
-		0.5.wait;
+		boo = ~scbr.makeKamikaze(
+			(\test ++ rrand(0, 10000).asSymbol),
+			\string,
+			[\t_trig, 1,
+				\note, rrand(42, 72),
+				\gainDB, rrand(-60, -40),
+				\aziDeg, rrand(-180, 180)
+			],
+			\kamikaze
+		);
+		// boo.set(\gainDB, -40, \note, rrand(42, 72), \t_trig, 1);
+		rrand(0.1, 1).wait;
 	}
 };
+)
+
 r.play; // you should see Synth number going up and down as it plays
 
 r.stop; // Synths number will eventually go back to 2 (if this example is the only one being run in SC)
