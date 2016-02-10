@@ -45,14 +45,14 @@ r = Routine {
 		~scbr.makeKamikaze(
 			(\test ++ rrand(0, 10000).asSymbol),
 			\string,
+			\kamikaze,
 			[\t_trig, 1,
 				\note, rrand(42, 72),
 				\gainDB, rrand(-60, -40),
 				\aziDeg, rrand(-180, 180)
-			],
-			\kamikaze
+			]
 		);
-		rrand(0.1, 1).wait;
+		rrand(0.05, 0.5).wait;
 	}
 };
 )
