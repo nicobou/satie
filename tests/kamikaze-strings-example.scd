@@ -35,7 +35,9 @@ s.waitForBoot{
 // The side effect of hitting stop is that after a little while all created sounds
 // will be killed.
 
-// creating a custom group:
+(
+// custom group:
+
 ~scbr.makeSatieGroup(\kamikaze);
 
 r = Routine {
@@ -56,6 +58,8 @@ r = Routine {
 		rrand(0.1, 1).wait;
 	}
 };
+)
+
 r.play; // you should see Synth number going up and down as it plays
 
 r.stop; // Synths number will eventually go back to 2 (if this example is the only one being run in SC)
