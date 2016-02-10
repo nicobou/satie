@@ -100,14 +100,14 @@
 			nil;
 		};
 
-		~makeInstance = { | self, name, synthDefName, group = \default |
-			var synth = Synth(synthDefName, target: self.satieGroups[group], addAction: \addToHead );
+		~makeInstance = { | self, name, synthDefName, synthArgs = #[], group = \default |
+			var synth = Synth(synthDefName, args: synthArgs, target: self.satieGroups[group], addAction: \addToHead );
 			self.satieGroupInstances[group].put(name, synth);
 			synth;
 		};
 
-		~makeKamikaze = { | self, name, synthDefName, group = \default |
-			var synth = Synth(synthDefName ++ "_kamikaze", target: self.satieGroups[group], addAction: \addToHead );
+		~makeKamikaze = { | self, name, synthDefName, synthArgs = #[], group = \default |
+			var synth = Synth(synthDefName ++ "_kamikaze", args: synthArgs, target: self.satieGroups[group], addAction: \addToHead );
 			// self.satieGroupInstances[group].put(name, synth);
 			synth;
 		};
