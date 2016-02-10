@@ -42,9 +42,7 @@ s.waitForBoot{
 
 r = Routine {
 	loop {
-		var boo;
-
-		boo = ~scbr.makeKamikaze(
+		~scbr.makeKamikaze(
 			(\test ++ rrand(0, 10000).asSymbol),
 			\string,
 			[\t_trig, 1,
@@ -54,7 +52,6 @@ r = Routine {
 			],
 			\kamikaze
 		);
-		// boo.set(\gainDB, -40, \note, rrand(42, 72), \t_trig, 1);
 		rrand(0.1, 1).wait;
 	}
 };
