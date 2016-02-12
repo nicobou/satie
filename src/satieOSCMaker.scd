@@ -60,12 +60,4 @@
 	postf("satieOSC interface loaded\n");
 	e;
 };
-
-//e.(\goo, {\gotIt.postln;}, "/goo");
-/*
-~cOSC = ~cOSCMaker.value();
-
-~cOSC.newOSC(\soo, {'ok'.postln;}, "/soo");
-~cOSC.removeOSC(\soo);
-*/
 )

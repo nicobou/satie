@@ -26,7 +26,7 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 s.waitForBoot{
 
 		// initialize the OSC interpreter here
-	~oscInterface = ~cOSCMaker.value();
+	~oscInterface = ~spatOSCMaker.value();
 
 	// global variable, potentially used by project processes
 	~projectDirectory =  thisProcess.nowExecutingPath.dirname;    // can be overwritten by OSC messages to audioRenderer

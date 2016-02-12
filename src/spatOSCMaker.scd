@@ -12,7 +12,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (
-~cOSCMaker = {
+~spatOSCMaker = {
 	e = Environment.make({
 
 		// main OSC method
@@ -107,9 +107,9 @@
 
 //e.(\goo, {\gotIt.postln;}, "/goo");
 /*
-~cOSC = ~cOSCMaker.value();
+~spatOSC = ~spatOSCMaker.value();
 
-~cOSC.newOSC(\soo, {'ok'.postln;}, "/soo");
-~cOSC.removeOSC(\soo);
+~spatOSC.newOSC(\soo, {'ok'.postln;}, "/soo");
+~spatOSC.removeOSC(\soo);
 */
 )

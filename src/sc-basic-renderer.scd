@@ -17,7 +17,7 @@
 		// TODO use try catch with this
 		~pluginLoader;
 		~synthDefFactory;
-		//~cOSCMaker;
+		//~spatOSCMaker;
 		~defaultSatieGroup;
 		~satieGroups = Dictionary.new;
 		~satieGroupInstances = Dictionary.new;

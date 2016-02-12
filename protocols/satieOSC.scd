@@ -27,12 +27,6 @@
 	~osc.createSourceOSC(name, ~coreCallback, group);
 };
 
-/*~createFX = { |instanceName, effect, bus = 0, fxGroup = \fx |
-	postf("creating an FX % named % in group % on bus %\n", effect, instanceName, fxGroup, bus);
-	~scbr.makeInstance(instanceName, effect, fxGroup);
-	~scbr.satieGroups[instanceName].set(\in, ~scbr.aux[bus]);
-};*/
-
 ~createGroup = { | groupName, addAction = \addToHead |
 	if (~groupExists.value(groupName),
 		{
@@ -66,84 +60,6 @@
 	postf("Removing group %\n", group);
 	~scbr.killSatieGroup(group);
 };
-
-/*~setInstance = { | sourceName, property, value, group = \default|
-	// set parameters
-	var name = sourceName.asSymbol;
-	var param = property.asSymbol;
-	var val = ~handleBufProperty.value(property, value);
-	var sourceGroup = group.asSymbol;
-	var proxy;
-	if (~groupExists.value(sourceGroup) == true,
-		{
-			postf("Setting % of % in group % to %\n", param, name, sourceGroup, val);
-			~scbr.satieGroups[sourceGroup].[name].set(param, val);
-		},
-		{ postf("the group % does not exist so not doing anything", sourceGroup); }
-	);
-};*/
-
-// kludge!
-/*~handleBufProperty = { |property, value|
-	// we need to handle the special case of passing a bufnum to sndFile.
-	// sndFile expects a bufnum with its context, either a Buffer object or, in our case, a dictionary entry
-	// so we construct the proper object here to allow the user simply call the dictionary entry.
-	// we assume the global object ~playBuffers
-	// FIXME: for some reason this does not propagate to setGroup
-	var val;
-	if (property == \bufnum,
-		{ val = ~playBuffers[value.asSymbol].bufnum;},
-		//{ ~playBuffers[\bleh]; },
-		{ val = value; }
-	);
-	val;
-};*/
-
-/*~setGroup = { | group, property, value|
-	// set parameters
-	var param = property.asSymbol;
-	var val = ~handleBufProperty.value(property, value);
-	var sourceGroup = group.asSymbol;
-	var proxy;
-	if (~groupExists.value(sourceGroup) == true,
-		{
-			postf("setting group %'s param % to % \n", sourceGroup, param, val);
-			~scbr.satieGroups[sourceGroup].group.set(param, val);
-		},
-		{ postf("the group % does not exist so not doing anything", sourceGroup); }
-	);
-};*/
-
-/*~sourceOSC = { | args |
-	var group, name, props, cmd, size;
-	args.postln;
-	size = args.size;
-	props = args.copyRange(2, size - 1);
-	group = args[0].asString.split[2].asSymbol;
-	name = args[0].asString.split[3].asSymbol;
-	cmd = args[1];
-	postf("properties to affect: %\n", props);
-	switch(cmd,
-		\set,
-		{
-			props.pairsDo({ | prop, val |
-				//~prox.existingProxies;
-				postf("** instance: set %'s % to %\n", name, prop, val);
-				//~scbr.satieGroups[group].[name].set(prop.asSymbol, val);
-				~setInstance.value(name, prop, val, group);
-			});
-		},
-		\setGroup,
-		{
-			props.pairsDo({ | prop, val |
-				//~prox.existingProxies;
-				postf("** group: set %'s % to %\n", group, prop, val);
-				//~scbr.satieGroups[group].[name].set(prop.asSymbol, val);
-				~setGroup.value(group, prop, val);
-			});
-		}
-	);
-};*/
 
 // handle any OSC message
 // eg. /SATIE create name - to create a group
