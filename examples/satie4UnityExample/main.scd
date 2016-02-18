@@ -164,7 +164,9 @@ if (~meter == nil,  { ~plotTree=s.meter;});
 
 // specify files to be loaded:
 // note;  project file must be first
-~startupfiles = [~thisDir++"/"++~myProjectFIleName, ~rootSrcPath++"/protocols/satie4unity.scd", ~rootSrcPath++"/utils/dacTest.scd"];
+// ~startupfiles = [~thisDir++"/"++~myProjectFIleName, ~rootSrcPath++"/protocols/satie4unity.scd", ~rootSrcPath++"/utils/dacTest.scd"];
+~startupfiles = [~thisDir++"/"++~myProjectFIleName, ~rootSrcPath++"/protocols/satie4unity.scd"];
+
 
 // next:  locate any .scd files in the project's autoload subdir
 ~autoLoadDirCmd = "ls "++thisProcess.nowExecutingPath.dirname++"/autoload/*.scd";
