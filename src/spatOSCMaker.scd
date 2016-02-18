@@ -12,14 +12,15 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (
-~spatOSCMaker = {
+~spatOSCMaker = {| port = 18032 |
+	var oscPort = port;
 	e = Environment.make({
 
 		// main OSC method
 		~newOSC = {|self, id, cb, path|
 			var idsym = id.asSymbol;
 			//postf("~newOSC id: % path: %\n",idsym,path);
-			OSCdef(idsym, cb, path, recvPort: 18032)
+			OSCdef(idsym, cb, path, recvPort: oscPort)
 		};
 
 		~deleteOSC = {|self, id|

@@ -12,14 +12,16 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (
-~satieOSCMaker = { | rootPath = "/SATIE" |
+~satieOSCMaker = { | rootPath = "/SATIE", port = 18032 |
 	var rootURI = rootPath;
+	var oscPort = port;
 	var e = Environment.make({
 
 		// main OSC method
 		~newOSC = {|self, id, cb , path = \default|
 			var idsym = id.asSymbol;
-			OSCdef(idsym, cb, path, recvPort: 18032)
+			postf("callback passed : %\n", cb);
+			OSCdef(idsym, cb, path, recvPort: oscPort);
 		};
 
 		~deleteOSC = {|self, id|
@@ -57,7 +59,7 @@
 
 	});
 	e.know = true;
-	postf("satieOSC interface loaded\n");
+	"satieOSC interface loaded".inform;
 	e;
 };
 )
