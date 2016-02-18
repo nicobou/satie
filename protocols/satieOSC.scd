@@ -193,5 +193,4 @@
 };
 
 s.sync;
-~osc.newOSC(\satieOSC, ~coreCallback, "/SATIE");
-
+//~osc.newOSC(\satieOSC, ~coreCallback, "/SATIE");
