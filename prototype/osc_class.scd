@@ -1,5 +1,5 @@
 (
-~myOSC = { | oscContext, satieContext |
+~myOSC = { | oscContext, satieContext, oscID = \satieOSC |
 	var osc = oscContext;
 	var satie = satieContext;
 	var e = Environment.make({
@@ -183,7 +183,7 @@
 
 	e.know = true;
 	postf("passed osc env: %\n", osc);
-	osc.newOSC(\satieOSC, e['coreCallback'], "/SATIE");
+	osc.newOSC(oscID, e['coreCallback'], "/SATIE");
 	e;
 };
 
