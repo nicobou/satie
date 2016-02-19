@@ -20,7 +20,7 @@
 		// main OSC method
 		~newOSC = {|self, id, cb , path = \default|
 			var idsym = id.asSymbol;
-			postf("callback passed : %\n", cb);
+			postf("---> newOSC callback passed : %\n", cb);
 			OSCdef(idsym, cb, path, recvPort: oscPort);
 		};
 
@@ -32,6 +32,7 @@
 		// make a synth instance and create its group if needed
 		~createSourceOSC = {|self, sourceName, cb, groupName|
 			//self.newOSC(sourceName, cb,  rootURI +/+ groupName);
+			postf("----> createSource callback passed : %\n", cb);
  			self.newOSC(groupName ++ sourceName, cb,  rootURI +/+ groupName +/+ sourceName);
 			if(OSCdef.all.includesKey(groupName) == false,
 				{

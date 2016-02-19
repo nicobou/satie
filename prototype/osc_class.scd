@@ -4,29 +4,50 @@
 	var satie = satieContext;
 	var e = Environment.make({
 		~createSoundSource = {| self, instanceName, synth, group = \default |
-			instanceName.postln;
+			var name = instanceName;
+			var syn = synth;
+			var sourceGroup = group;
+			if (self.groupExists(sourceGroup) == false,
+				{ postf("Group  % does not exist, creating one\n", sourceGroup);
+					self.createGroup(sourceGroup);
+				}
+			);
+			postf("creating source % using % and adding to group %\n", name, syn, sourceGroup);
+			satie.makeInstance(name, syn, sourceGroup);
+			osc.createSourceOSC(name, e['coreCallback'], group);
 		};
 
 		~createGroup = { | self, groupName, addAction = \addToHead |
-			if (self.groupExists.value(groupName),
+			if (self.groupExists(groupName),
 				{
 					postf("Group % exists\n", groupName);
 				},
 				{
 					postf("Group  % does not exist, creating one\n", groupName);
-					~scbr.makeSatieGroup(groupName, addAction);
-					osc.makeGroupOSC(groupName, self.coreCallback);
+					satie.makeSatieGroup(groupName, addAction);
+					osc.makeGroupOSC(groupName, e['coreCallback']);
 				}
 			);
 		};
 
 		~groupExists = { |self, groupName |
 			var ret;
-			if (~scbr.satieGroups[groupName] != nil,
+			if (satie.satieGroups[groupName] != nil,
 				{ ret = true },
 				{ ret = false}
 			);
 			ret;
+		};
+		~removeSoundSource = { | self, sourceName, group = \default |
+			var name = sourceName;
+			var sourceGroup = group;
+			postf("Removing and cleaning %\n", name);
+			satie.cleanInstance(name, sourceGroup);
+		};
+
+		~removeGroup = { | self, group |
+			postf("Removing group %\n", group);
+			satie.killSatieGroup(group);
 		};
 
 		~coreCallback = { | msg |
@@ -73,30 +94,30 @@
 					switch(dest,
 						\system, {
 							"***************** received createFX".postln;
-							~createGroup.value(name, \addToTail);
+							e.createGroup.value(name, \addToTail);
 						}
 					);
 				},
 				\delete,
 				{
-					var dest = ~getAddressLevel.value(url);
+					var dest = e.getAddressLevel(url);
 					switch(dest,
 						\group, { |group|
 							group = url[1].asSymbol;
-							~removeGroup.value(group);
+							e.removeGroup(group);
 
 						},
 						\instance, { | synthName, group |
 							synthName = url[2].asSymbol;
 							group = url[1].asSymbol;
-							~removeSoundSource.value(synthName, group);
+							e.removeSoundSource(synthName, group);
 						}
 					);
 				},
 				\set,
 				{
 					var dest, group, props;
-					dest = ~getAddressLevel.value(url);
+					dest = e.getAddressLevel(url);
 					group = url[1].asSymbol;
 					props = msg.copyRange(2, msg.size - 1);
 					switch(dest,
@@ -104,7 +125,7 @@
 						{
 							props.pairsDo({ | prop, val |
 								postf("** group: set %'s % to %\n", group, prop, val);
-								~scbr.satieGroups[group].group.set(prop, val);
+								satie.satieGroups[group].group.set(prop, val);
 							});
 						},
 						\instance,
@@ -116,11 +137,11 @@
 								if(prop == \in, // effect's property 'in' needs a special treatment
 									{
 										// postf("----------FX--------- setting property % on effect to %\n", prop, val);
-										~scbr.satieGroupInstances[name].set(prop, ~scbr.aux[val.asInt]);
+										satie.satieGroupInstances[name].set(prop, satie.aux[val.asInt]);
 									},
 									{
 										// postf("-=-=-=-=-=-=- got instance property %\n", prop);
-										~scbr.satieGroupInstances[group].[name].set(prop, val);
+										satie.satieGroupInstances[group].[name].set(prop, val);
 									}
 								);
 							});
@@ -130,11 +151,11 @@
 				\clear,
 				{
 					// rmove all satie groups
-					~scbr.satieGroups.keysDo {|key | ~scbr.killSatieGroup(key)};
+					satie.satieGroups.keysDo {|key | satie.killSatieGroup(key)};
 					// free all OSC
 					OSCdef.freeAll;
 					// re-create satie system level OSC
-					~osc.newOSC(\satieOSC, ~coreCallback, "/SATIE");
+					osc.newOSC(\satieOSC, e['coreCallback'], "/SATIE");
 				}
 			);
 		};
