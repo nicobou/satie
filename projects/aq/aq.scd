@@ -31,8 +31,9 @@ s.waitForBoot{
 	// note order:   name, synthName, fxBus, listenerName, outBusNo, mapName, optArgs
 	~scbr.makeSynthDef2(\zkarpluck1P, \zkarpluck1P,   [~scbr.aux[~fxInputBus]], [~listeningFormat],  [0], \randOffsets1, []);   // for kamikazis
 	~scbr.makeSynthDef2(\zkarpluck2P, \zkarpluck2P,   [~scbr.aux[~fxInputBus]], [~listeningFormat],  [0], \randOffsets1, []);  // for resonant updated klones
-    ~scbr.makeSynthDef2(\particule1, \particule1,   [~scbr.aux[~fxInputBus]], [~listeningFormat],  [0], \defaultMapper, []);  //  for kamakazis
-	//~scbr.makeSynthDef(\particule1, \particule1, [~listeningFormat], [0], [~scbr.aux[~fxInputBus]]);
+    //~scbr.makeSynthDef2(\particule1, \particule1,   [~scbr.aux[~fxInputBus]], [~listeningFormat],  [0], \defaultMapper, []);  //  for kamakazis
+	~scbr.makeSynthDef2(\particule1, \particule1,   [~scbr.aux[~fxInputBus]], [~listeningFormat],  [0], \defaultMapper, []);  //  for kamakazis
+	// ~scbr.makeSynthDef2(\particule1, \particule1,   [~scbr.aux[~fxInputBus]], [\labodomeVBAP],  [0], \defaultMapper, []);  //  for kamakazis
 
 
 	~scbr.makeSynthDef(\busreverb, \freeverb, [~listeningFormat], [0]);

@@ -231,7 +231,7 @@ if (~particule2_pitchSequences == nil,
 			aziScaler = (1 - xzDist)**self.cloudExp;   // increase this exponent to fall off more quickly
 			elevScaler = (1 - yDist)**self.cloudExp;   // increase this exponent to fall off more quickly
 
-
+			//[incidence, vel].postln;
 
 			// assign pitches  for each particle
 			self.cloneCount.do( { arg item;

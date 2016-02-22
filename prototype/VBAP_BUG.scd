@@ -1,10 +1,13 @@
-//  compare attack transient of synth below when run WITH and WITHOUT SuperNova enabled
+//  compare attack transient (risetime: 0.0001)   of synth below when run WITH and WITHOUT SuperNova enabled
+// --- note that ATTACK is seriously softened  when running under supernova
+//  my guess:   VBAP does not initialize itself for the first sample, as it does when running on the normal server
 
 //Server.quitAll;
 
 (                    // evaluate this block FIRST
 
 Server.supernova;    // comment this out to run without supernova --- you may have to quit SC and relaunch when changing from one to the other
+// Server.scsynth;
 
 o = Server.local.options;   // default set up options
 o.blockSize = 2048;
@@ -18,13 +21,14 @@ s.waitForBoot {
 )
 
 
-(                   // evaluate this block LAST   --- note that ATTACK is seriously diminished when running under supernova
+(                   // evaluate this block LAST
 x = Synth(\sheefa, [
 	\force, 0.4,
 	\incidence, 1,
-	\decaySecs, 1,
+	\decayMs, 1,
 	\pitch,47,
-	\t_trig, 1
+	\t_trig, 1,
+	\bufferCount, 1   // delaying the impulse by a buffer preserves the attack when using supernova
 ] );
 )
 
@@ -38,7 +42,7 @@ x = Synth(\sheefa, [
 ~vbuf24 = Buffer.loadCollection(s, ~spk24.getSetsAndMatrices);
 
 
-SynthDef(\sheefa, {| t_trig = 0, decaySecs = 1, force = 0.75, incidence = 0.75,  pitch = 60 |
+SynthDef(\sheefa, {| t_trig = 0, decayMs = 1, force = 0.75, incidence = 0.75,  pitch = 60, bufferCount = 0 |
 	var outsig, z,ampScaler, hfqRolloffAmp, outGainBias;
 	var freqscale, excitationSig, attackSecs,attackAmp, panWeights;
 
@@ -46,6 +50,8 @@ SynthDef(\sheefa, {| t_trig = 0, decaySecs = 1, force = 0.75, incidence = 0.75, 
 	var pitchScaler = (pitch.midicps / 60.midicps);
 
 	var invIncidence = 1  -   Clip.kr(incidence, 0,1)  ;
+
+     var delayTime = ControlDur.ir * bufferCount;
 
 	outGainBias = pitchScaler**0.75;  // correct for lower register boost
 
@@ -83,7 +89,7 @@ SynthDef(\sheefa, {| t_trig = 0, decaySecs = 1, force = 0.75, incidence = 0.75, 
 		attackSig,   // input
 		1,
 		0,  // no pitch offset
-		decaySecs   // global delay
+		decayMs   // global delay
 	);
 
 	outsig = outsig * outGainBias;
@@ -91,7 +97,7 @@ SynthDef(\sheefa, {| t_trig = 0, decaySecs = 1, force = 0.75, incidence = 0.75, 
 	outsig =  LPF.ar(DelayC.ar(
 		outsig,
 		maxdelaytime: 0.5,
-		delaytime: 0),   22050);
+		delaytime: delayTime  ),   22050);
 
 	outsig = BHiPass.ar(outsig, 0);
 

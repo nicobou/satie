@@ -76,7 +76,7 @@ fB	 ??  Inharmonicity factor.
 	// Out.ar(100, son);
 
 	// suggestion:  add amplitude-based filtering to the final output
-	son;   // make sure this is last, so the sound is returned
+	0.05 * son;   // make sure this is last, so the sound is returned
 	 };
 
 /*

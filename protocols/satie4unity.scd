@@ -488,8 +488,17 @@ s.waitForBoot{
 		switch(type,
 			'prop',
 			{
-				var groupName = ~allSourceNodes[name.asSymbol].at(\groupNameSym);
-				~setGroupProperty.value(groupName, args[1], args[2]);
+				if (myProcess[\prop] == nil,
+					{
+						var groupName = ~allSourceNodes[name.asSymbol].at(\groupNameSym);
+						~setGroupProperty.value(groupName, args[1], args[2]);
+					},
+					// else use custom handler
+					{
+						//postf("~~sourceProcessCallback:  calling custom prop handler for %\n", name);
+						myProcess[\prop].value(myProcess,  args[1], args[2]);
+				});
+
 
 			},
 

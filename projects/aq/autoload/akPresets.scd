@@ -52,13 +52,13 @@ OSCdef(\presetCallback ).clear.free;
 OSCdef(\presetCallback, ~presetCallback, "/a.renderer/preset", recvPort: 18032);
 
 
-~preset_sendAll.value(1,5, 100);
+/*~preset_sendAll.value(1,5, 100);
 
 ~preset_setParamAll.value(\c1, 9);
 
 ~preset_setParamAll.value(\c3, 2);
 
-~preset_setParamAll.value(\fb, 7);
+~preset_setParamAll.value(\fb, 7);*/
 
 
 
@@ -67,10 +67,11 @@ OSCdef(\presetCallback, ~presetCallback, "/a.renderer/preset", recvPort: 18032);
 
 	~particule1_instances.do{ |item |
 		var groupName = item.nodeGroupName.asSymbol;
-
-		//groupName.postln;
-
-	~scbr.satieGroups[groupName].set(pname.asSymbol, value);
+		~scbr.satieGroups[groupName].set(pname.asSymbol, value);
+	};
+	~particule2_instances.do{ |item |
+		var groupName = item.nodeGroupName.asSymbol;
+		~scbr.satieGroups[groupName].set(pname.asSymbol, value);
 	};
 };
 
@@ -79,10 +80,11 @@ OSCdef(\presetCallback, ~presetCallback, "/a.renderer/preset", recvPort: 18032);
 
 	~particule1_instances.do{ |item |
 		var groupName = item.nodeGroupName.asSymbol;
-
-		//groupName.postln;
-
-	~scbr.satieGroups[groupName].set(\c1, c1,  \c3, c3, \fb,  fb);
+		~scbr.satieGroups[groupName].set(\c1, c1,  \c3, c3, \fb,  fb);
+	};
+	~particule2_instances.do{ |item |
+		var groupName = item.nodeGroupName.asSymbol;
+		~scbr.satieGroups[groupName].set(\c1, c1,  \c3, c3, \fb,  fb);
 	};
 };
 
@@ -182,7 +184,7 @@ OSCdef(\presetCallback, ~presetCallback, "/a.renderer/preset", recvPort: 18032);
 
 
 
-~setPreset.value(2)
+~setPreset.value(2);
 
 //~scbr.satieGroups[\default].set(\decay, 0.0, \t_trig, 1)
 

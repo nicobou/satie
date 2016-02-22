@@ -29,26 +29,31 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 
 ~name = \particule1;
 
-~function = {| t_trig = 0, decaySecs = 1, force = 0.75, incidence = 0.75,  pitch = 60 |
+~function = {| t_trig = 0, attackDB = -100,  decayMs = 1000, force = 0.75, incidence = 0.75,  pitch = 60, i_blockDelay = 2 |
 		var outsig, z,ampScaler, hfqRolloffAmp, outGainBias;
-		var freqscale, excitationSig, attackSecs,attackAmp;
+		var freqscale, excitationSig, attackSecs,excitationAmp;
+        var attackAmp = attackDB.dbamp;
 
 		var klank_freq_array, klank_amp_array, klank_ring_array, attackSig, lpFq, lpFqOffset;
 		var pitchScaler = (pitch.midicps / 60.midicps);
 
-		var invIncidence = 1  -   Clip.kr(incidence, 0,1)  ;
+		var invIncidence = 1  -   Clip.kr(incidence, 0,1) ;
+
+	    var blockDelaySecs = ControlDur.ir * i_blockDelay;
+	    var decaySecs = decayMs * 0.001;
+
 
 		outGainBias = pitchScaler**0.75;  // correct for lower register boost
 
 		hfqRolloffAmp = (1  -  -30.dbamp) * invIncidence;  // higher freq.  rolloff attenuation factor for incidence
 
 		attackSecs = SampleDur.ir + (0.01 * force);
-		attackAmp =  0.01 + force**1.6;  // sounds better
+		excitationAmp =  0.01 + force**1.6;  // sounds better
 
 		hfqRolloffAmp = (1  -  -60.dbamp) * invIncidence  ;  // higher freq.  rolloff attenuation factor for incidence
 
-		attackSig = EnvGen.ar(Env.perc(attackSecs, 0.0001, attackAmp, -9 ), t_trig) ;
-		// attackSig = Decay.ar(   EnvGen.ar(Env.perc(attackSecs, 0.0001, attackAmp, -9 ), t_trig) ,  decaySecs, ClipNoise.ar(0.01) ) ;   //NOT USED-- ADDS  REVERBERaTION
+		attackSig = EnvGen.ar(Env.perc(attackSecs, 0.0001, excitationAmp, -9 ), t_trig) ;
+		// attackSig = Decay.ar(   EnvGen.ar(Env.perc(attackSecs, 0.0001, excitationAmp, -9 ), t_trig) ,  decaySecs, ClipNoise.ar(0.01) ) ;   //NOT USED-- ADDS  REVERBERaTION
 
 
 
@@ -94,13 +99,14 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 			0,  // no pitch offset
 			decaySecs   // global delay
 		);
+	   // SendTrig.kr(Impulse.kr(0), 0, blockDelaySecs);  // enable this for debugging
 
-		outsig = outsig * outGainBias;
+		outsig = attackAmp*10*attackSig + outsig * outGainBias;
 
+	    DelayN.ar(outsig, ControlDur.ir*10, blockDelaySecs);   // offset output by  N blocks to avoid transient mangulation by supernova
 
 	 //DetectSilence.ar(outsig, doneAction: 2);
 	 //Out.ar(0, outsig);  //enable this for debugging
-	// SendTrig.kr(Impulse.kr(1), 0, pitchScaler);  // enable this for debugging
 
 };
 
@@ -112,7 +118,7 @@ SynthDef(~name, ~function ).add;
 x = Synth(~name, [
 	\force, 0.9,
 	\incidence, 1,
-	\decaySecs, 1,
+	\decayMs, 1,
 	\pitch,60,
 	// \freqs, {12000.0.linrand+800}.dup(12),
            \amps, {0.05.rrand(2)}.dup(12),
@@ -126,7 +132,7 @@ x = Synth(~name, [
 (
 x =  ~scbr.makeKamikaze(\whatever, \particule1, \default, [
 					\aziDeg, 10, \eleDeg, 10, \gainDB, 0,\delayMs, 0, \lpHz , 20000, \hpHz, 10,
-	\decaySecs, 1, \pitch, 55, \force, 1, \incidence, 1, \t_trig, 1]);
+	\decayMs, 1, \pitch, 55, \force, 1, \incidence, 1, \t_trig, 1]);
 
 
 
@@ -148,9 +154,10 @@ t= Task({ {
 		Synth(~name, [
 			\force, index,
 			\incidence, index,
-			\decaySecs, 0.5,
+			\decayMs, 1,
 			//\pitch, 50,
 			\pitch, (20 +  60*index),
+            \t_trig, 1
 		] );
 		0.1.wait;
 	});
