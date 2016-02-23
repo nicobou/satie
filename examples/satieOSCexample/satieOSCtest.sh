@@ -2,7 +2,7 @@
 
 # will create a node using the "default" plugin
 
-OSCPORT=18034
+OSCPORT=18032
 
 clear
 sleep 2

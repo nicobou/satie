@@ -29,6 +29,14 @@ s.waitForBoot{
 	~scbr.makeSynthDef(\busreverb, \freeverb, [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\busgverb, \gverb, [~listeningFormat], [0]);
 
+	// dummy
+	~scbr.makeSynthDef(\dummyPlugin, \emptySource, [\emptySpat], [0]);    // dummy synthdef, used for new nodes
+	// be sure the synthDef is compiled on the server
+	s.sync;
+
+	// instantiate the OSC interface
+	~oscInterface = ~spatOSCMaker.value();
+	~satie4unity = ~satie4unityprotocol.value(~oscInterface, ~scbr);
 	s.sync;
 
 };  // end of  waitforboot

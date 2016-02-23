@@ -165,7 +165,8 @@ if (~meter == nil,  { ~plotTree=s.meter;});
 // specify files to be loaded:
 // note;  project file must be first
 // ~startupfiles = [~thisDir++"/"++~myProjectFIleName, ~rootSrcPath++"/protocols/satie4unity.scd", ~rootSrcPath++"/utils/dacTest.scd"];
-~startupfiles = [~thisDir++"/"++~myProjectFIleName, ~rootSrcPath++"/protocols/satie4unity.scd"];
+// ~startupfiles = [~thisDir++"/"++~myProjectFIleName, ~rootSrcPath++"/protocols/satie4unity.scd"];
+~startupfiles = [~thisDir++"/"++~myProjectFIleName, ~rootSrcPath++"/prototype/satie4unity.scd"];
 
 
 // next:  locate any .scd files in the project's autoload subdir
@@ -178,6 +179,7 @@ while (  { ~done != true} ,
 	{
 		var filePath;
 		filePath = ~pipe.getLine;
+		postf("filePath %\n", filePath);
 
 		if ( filePath != nil,
 			{
@@ -197,7 +199,9 @@ s.waitForBoot {
 	// load project file, Satie4Unity, and any other utility files
 	postf("main.scd:  loading needed files for % project \n", ~myProjectFIleName.splitext[0]);
 	~startupfiles.do { |f|  f.postln;  f.load ; s.sync;};
+
 	s.sync;
+
 
 	// load additional project-specific files from the "autoload" subdir.
 	postf("main.scd: loading % items from %/autoload subdirectory\n", ~files.size, ~myProjectFIleName.splitext[0]);
