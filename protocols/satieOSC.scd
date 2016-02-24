@@ -94,7 +94,7 @@
 					switch(dest,
 						\system, {
 							"***************** received createFX".postln;
-							e.createGroup.value(name, \addToTail);
+							e.createGroup(name, \addToTail);
 						}
 					);
 				},
