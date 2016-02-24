@@ -23,7 +23,10 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 ~satie4unityprotocol = { | oscContext, satieContext, oscID = \satie4unityOSC |
 	var osc = oscContext;
 	var satie = satieContext;
+
 	var e = Environment.make({
+		~allSourceNodes = Dictionary();        //  ~allSourceNodes.postln;
+		~allGroupNodes = Dictionary();        //  ~allGroups.postln;
 		~basicRendererCallback = { "basicRendererCallback called".inform };
 		~coreCallback = { arg msg;
 			var command;
@@ -55,7 +58,7 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 								{
 									groupName = msg[4];
 							});
-							e.createSource.value(sourceName, uriName, groupName);
+							e.createSource(sourceName, uriName, groupName);
 					});
 				},
 				'createGroup',
@@ -68,7 +71,7 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 						// else
 						{
 							var groupName = msg[2];
-							e.createGroup.value(groupName);
+							e.createGroup(groupName);
 						}
 					)
 				},
@@ -80,15 +83,15 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 						{
 							var nodeName = msg[2];
 
-							if (~allGroupNodes.includesKey(nodeName.asSymbol),
-								{   ~removeGroup.value(nodeName);  },
+							if (e.allGroupNodes.includesKey(nodeName.asSymbol),
+								{   e.removeGroup(nodeName);  },
 								// else
 								{
-									~deleteSource.value(nodeName);   });
+									e.deleteSource(nodeName);   });
 						}
 					)
 				},
-				'clear', {~clearScene.value();},
+				'clear', {e.clearScene();},
 				'connect',
 				{
 					if ( (msg.size < 4 ) ,
@@ -98,22 +101,108 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 							var sourceName, listenerName;
 							sourceName = msg[2];
 							listenerName = msg[3];
-							e.createConnection.value(sourceName, listenerName);
+							e.createConnection(sourceName, listenerName);
 						}
 					)
 				};
-		);"coreCallback called".postln;};
+			);
+			"coreCallback called".postln;
+		};
 		~connectionCallback = {};
 		~connectionProcessCallback = {};
 		~sourceNodeCallback = {};
 		~sourceProcessCallback = {};
 		~groupCallback = {};
-		~createSource = { "createSource called".inform };
-		~createSourceProcess = {};
-		~createSourceNode = {};
-		~createGroup = {};
-		~createConnection = { "createConnection called".inform};
-		~setSynth = {};
+		~createSource = {| self, sourceName, uriName , groupName = \default |
+			if (self.allSourceNodes.includesKey(sourceName),
+				{
+					postf("~createSource:   % exists, no action \n", sourceName);
+				},
+				// else create new node
+				{
+					var type;
+					type = self.uriType(uriName);
+
+					switch( type,
+						"plugin", {
+							self.createSourceNode(sourceName.asSymbol, uriName,groupName )
+						},
+						"process", {
+							self.createSourceProcess(sourceName.asSymbol, uriName,groupName )
+						},
+						// "file", {~setSynth.value(name, uriPath)}  not implemented yet
+					);
+				}
+			);
+			"createSource called".inform };
+		~createSourceProcess = { "createSourceProcess called".inform;};
+		~createSourceNode = { | self, sourceName, uriName , groupName = \default |
+			var synthName;
+
+			if (groupName == "", { groupName = \default; });   // make sure group name is ok
+
+			// check to see if group  exists (even if the corresponding groupNode has not yet been instntiated),  if  not, create it
+			if ( satie.satieGroups[groupName.asSymbol] == nil,
+				{
+					postf("~createSource_groupcheck:   source:%    group:  % undefined,  CREATING GROUP NOW \n", sourceName, groupName);
+					self.createGroup(groupName.asSymbol);
+				}
+			);
+
+			postf("~createSourceNode: %:  uri: %  group: %\n", sourceName, uriName, groupName);
+			self.allSourceNodes[sourceName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
+			self.allSourceNodes[sourceName.asSymbol].put(\plugin, \nil);
+
+			// handle any aux send issues here
+			if ( groupName == \effect,
+				{
+					postf("~createSource:  CREATING EFFECTS SOURCE for:%\n", sourceName.asSymbol);
+
+					if (~fxInputBus == nil,    // this should be defined previously in the project's .scd
+						{
+							postf("~createSource:  ~fxInputBus not defined");
+							~fxInputBus = 0;
+					});
+
+					// this is an effects node, so save its aux bus assign
+					~allSourceNodes[sourceName.asSymbol].put(\auxBus, ~scbr.aux[~fxInputBus]);  //  HACK to set up effects send node
+			});
+
+			// now set node's group
+			self.allSourceNodes[sourceName.asSymbol].put(\groupNameSym, groupName.asSymbol);
+
+			// call ~setUri to complete instance creation
+			//~setUri.value(sourceName.asSymbol,uriName.asSymbol);
+
+			// now set up synth
+			if (uriName.asString.contains("plugin://") == false,
+				{
+					warn("~createSource: WARNING: node: %  bad URI format : %,  setting to \dummyPlugin", sourceName, uriName);
+					~setSynth.value(sourceName.asSymbol, \dummyPlugin);
+				},
+				// else  // path ok, proceed
+				{
+					var charIndex = uriName.asString.find("://");
+					var temp = uriName.asString.subStr(charIndex);
+					var type = uriName.asString.subStr(0, charIndex-1);
+					synthName = temp.asString.replace("://", "");
+
+					//postf("~setUri nodeName: %, type: %  plugName: %\n", uriName, type, uriPath);
+					// still needs to be expanded for soundfiles, adc, web etc..
+					switch( type,
+						"plugin", {
+							self.setSynth(sourceName.asSymbol, synthName)
+
+						},
+						// "file", {~setSynth.value(name, uriPath)}  not implemented yet
+					);
+			});
+			osc.sourceOSC(sourceName.asSymbol, ~sourceNodeCallback);   // create OSC callback
+			"createSourceNode called".inform;
+		};
+		~createGroup = { "createGroup called".inform;};
+		~createConnection = { "createConnection called".inform;};
+		~setSynth = { "setSynth called".inform;};
 		~setUri = {};
 		~setProperty = {};
 		~setGroupProperty = {};
@@ -123,7 +212,7 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 		~addMember = { };
 		~dropMember = { };
 		~clearScene = { };
-		~deleteSource = { };
+		~deleteSource = { "deletaSource called".inform;};
 		~removeGroup = { };
 		~clearGroupeNode = { };
 		~clearSourceNode = { };
@@ -133,7 +222,31 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 		~dumpNodes = {};
 		~dumpGroups = {};
 		~isFXuri = {};
-		~uriType = { };
+		~uriType = { | self, uriPath |
+			var charIndex, uriName, type, temp;
+
+			type = nil;
+
+			// type://name (i.e. plugin://DustDust, file://<path>
+
+			// check URI name to make sure its valid
+
+			if (uriPath.asString.contains("://") == false,
+				{
+					error("~getUriSym:  uri type format error: % ", uriPath);
+
+				},
+
+				// else  // path ok, proceed
+				{
+					charIndex = uriPath.asString.find("://");
+
+					temp = uriPath.asString.subStr(charIndex);
+					type = uriPath.asString.subStr(0, charIndex-1);
+					uriName = temp.asString.replace("://", "");
+			});
+			type;
+		};
 
 
 	}); // Environment.make

@@ -51,3 +51,7 @@ testing
 ~helloWorld.pitchSeqName;
 
 */
+
+
+// ~satie4unity.allGroupNodes
+// ~satie4unity.allSourceNodes
