@@ -643,12 +643,12 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 		};
 		~clearGroupeNode = {
 			| self, nameSym |
-			"clearGroupNode called".inform;
 			var node = self.allGroupNodes[nameSym];
 			//var connectionName = node.at(\connectionName);
 			var nodeKeys = node.keys;
 			var thisGroup = self.allGroupNodes[nameSym].at(\group);
 			var memberList = self.allGroupNodes[nameSym].at(\members);
+			"clearGroupNode called".inform;
 
 
 			//~cleaninstance(nameSym, thisGroup);
