@@ -25,7 +25,7 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 (
 s.waitForBoot{
 
-		// initialize the OSC interpreter here
+	// initialize the OSC interpreter here
 	~oscInterface = ~cOSCMaker.value();
 
 	// global variable, potentially used by project processes
@@ -96,9 +96,9 @@ s.waitForBoot{
 			{
 
 				switch (command,
-				'setProjectDir',
+					'setProjectDir',
 					{
-							if ( (msg.size != 3 ) ,
+						if ( (msg.size != 3 ) ,
 							{"~basicRendererCallback: setProjectDir bad arg count: expecting 'setProjectDir projectDirPath' ".warn;},
 							// else
 							{
@@ -111,7 +111,7 @@ s.waitForBoot{
 					},
 					'setOutputTrimDB',
 					{
-							if ( (msg.size < 3 ) ,
+						if ( (msg.size < 3 ) ,
 							{"~basicRendererCallback: setOutputTrimDB missing value".warn;},
 							// else
 							{
@@ -122,7 +122,7 @@ s.waitForBoot{
 					},
 					'setOutputDB',
 					{
-							if ( (msg.size < 3 ) ,
+						if ( (msg.size < 3 ) ,
 							{"~basicRendererCallback: setOutputDB missing value".warn;},
 							// else
 							{
@@ -133,7 +133,7 @@ s.waitForBoot{
 					},
 					'setOutputDIM',
 					{
-							if ( (msg.size < 3 ) ,
+						if ( (msg.size < 3 ) ,
 							{"~basicRendererCallback: setOutputMute missing value".warn;
 								// postf("CREATESOURCE MESS LEN: %", msg.size);
 
@@ -141,7 +141,7 @@ s.waitForBoot{
 							// else
 							{
 								if (msg [2] > 0,
-									 {  ~volume.volume = -30;  },
+									{  ~volume.volume = -30;  },
 									// else
 									{  ~volume.volume =  ~outputDB + ~outputTrimDB;   });
 							}
@@ -226,7 +226,7 @@ s.waitForBoot{
 							{   ~removeGroup.value(nodeName);  },
 							// else
 							{
-									~deleteSource.value(nodeName);   });
+								~deleteSource.value(nodeName);   });
 					}
 				)
 			},
@@ -292,7 +292,7 @@ s.waitForBoot{
 
 
 
-				/*		z = (z+1).mod(20);
+						/*		z = (z+1).mod(20);
 						if ( (z == 0), {postf("\n")});
 						postf("  %  " ++ gainDB.trunc );*/
 
@@ -313,7 +313,7 @@ s.waitForBoot{
 						hpHz = args[1];   // get highpass cutoff value
 						thisSynth.set(\hpHz ,  clip(hpHz, 1, halfSrate ));
 
-								postf("~connectionCallback:  hpHz connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
+						postf("~connectionCallback:  hpHz connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
 
 					}
 				)
@@ -439,7 +439,7 @@ s.waitForBoot{
 
 		switch(type,
 			'prop', {~setProperty.value(name, args[1], args[2]);
-					//postf("~sourceNodeCallback:  nodeName: %  setProp: %  key: % value: %\n", name, args[1], args[2]);
+				//postf("~sourceNodeCallback:  nodeName: %  setProp: %  key: % value: %\n", name, args[1], args[2]);
 
 			},
 			'uri', {~setUri.value(name, args[1])},
@@ -470,7 +470,7 @@ s.waitForBoot{
 		);
 	};
 
-		// e.g  /spatosc/core/source/nodename/prop  key val
+	// e.g  /spatosc/core/source/nodename/prop  key val
 	// source node has unique group, updates are to source's group (to cloned synths etc)
 	~sourceProcessCallback = {
 		| args |
@@ -481,7 +481,7 @@ s.waitForBoot{
 
 		//myProcessSym = ~allSourceNodes[name.asSymbol].at(\process);
 		//myProcess = ~allProcesses[myProcessSym];
-		 myProcess = ~allSourceNodes[name.asSymbol].at(\process);
+		myProcess = ~allSourceNodes[name.asSymbol].at(\process);
 
 		//'~sourceProcessCallback'.postln;
 
@@ -658,7 +658,8 @@ s.waitForBoot{
 		var temp, type, charIndex, processName, processClone, myProcess, cloneGroup, cloneGroupName;
 		var argsString = "";
 		var stringArray;
-
+		var rawArgVec = nil;
+		var argList = List[];
 
 		("sheefa.createSourceProcess:  URI"++uriPath).postln;
 
@@ -666,6 +667,16 @@ s.waitForBoot{
 		charIndex = stringArray[0].asString.find("://");
 		processName = stringArray[0].asString.subStr(charIndex+3);
 		argsString = uriPath.asString.subStr(stringArray[0].size+1);
+		rawArgVec= argsString.asString.split($ );
+
+		// make list of items in argString
+		rawArgVec.do( { arg item;
+			if ( item != "",
+				{
+					argList.add(item);
+			});
+		});
+
 
 
 		if (~allProcesses[processName.asSymbol] == nil,
@@ -706,7 +717,7 @@ s.waitForBoot{
 
 						// send URI's argsString to setup without any error checking
 
-							myProcess[\setup].value(myProcess, sourceName.asSymbol, cloneGroupName.asSymbol, argsString );   // set the state of the process
+						myProcess[\setup].value(myProcess, sourceName.asSymbol, cloneGroupName.asSymbol, argList );   // set the state of the process
 						~setSynth.value(sourceName.asSymbol, "");  // sets dummy plugin as placeholder
 
 						~oscInterface.sourceOSC(sourceName.asSymbol, ~sourceProcessCallback);   // create OSC callback
@@ -1020,8 +1031,8 @@ s.waitForBoot{
 			{
 				if ( (valueCount == 1) ,    // pass value
 					{
-					// DEBUG
-					//postln("~setEvent: " ++ nodeName.asSymbol ++ "        BANG   db: "++db.trunc++ "\n");
+						// DEBUG
+						//postln("~setEvent: " ++ nodeName.asSymbol ++ "        BANG   db: "++db.trunc++ "\n");
 
 						thisSynth.set(eventName.asSymbol, args[0]);
 					},
@@ -1085,21 +1096,21 @@ s.waitForBoot{
 		// first flush all nodes
 		~allSourceNodes.keysDo { |key |
 			//key.postln;
-		~clearSourceNode.value(key);
+			~clearSourceNode.value(key);
 		};
 
 		~allSourceNodes.clear();
 		~allSourceNodes.size;
 
-	// do not clear all groups except default group
+		// do not clear all groups except default group
 
-/*		~scbr.satieGroups.keysDo{ |key |
-			var nodeSym = key;
+		/*		~scbr.satieGroups.keysDo{ |key |
+		var nodeSym = key;
 
-			if (key != \default,
-				{
-					~scbr.killSatieGroup(key);
-			});
+		if (key != \default,
+		{
+		~scbr.killSatieGroup(key);
+		});
 		};*/
 
 	};
@@ -1116,7 +1127,7 @@ s.waitForBoot{
 		});
 	};
 
-		~removeGroup = { | groupName |
+	~removeGroup = { | groupName |
 		if ( ~allGroupNodes.includesKey(groupName.asSymbol) ,
 			{
 				//  No OP  ~clearGroupNode.value(groupName.asSymbol);
@@ -1178,9 +1189,9 @@ s.waitForBoot{
 				// now delete group
 				~removeGroup.value(groupSym); //
 				~scbr.killSatieGroup(groupSym);   // kill the group, since it was unique to this source
-		},
-		// else  its just a regular source
-		{
+			},
+			// else  its just a regular source
+			{
 				~scbr.cleanInstance(nameSym,thisGroupName );
 
 		});
@@ -1258,33 +1269,33 @@ s.waitForBoot{
 	};
 
 
-~isFXuri = { | uriPath |
-	var charIndex, uriName, type, temp;
+	~isFXuri = { | uriPath |
+		var charIndex, uriName, type, temp;
 
-	// type://name (i.e. plugin://DustDust, file://<path>
+		// type://name (i.e. plugin://DustDust, file://<path>
 
-	// check URI name to make sure its valid
+		// check URI name to make sure its valid
 
-	if (uriPath.asString.contains("plugin://") == false,
-		{
-			postf("~getUriSym:  non-plugin type URI: % ", uriPath);
-			// ~setSynth.value(nodeName.asSymbol, \dummyPlugin);
-			false;
-		},
+		if (uriPath.asString.contains("plugin://") == false,
+			{
+				postf("~getUriSym:  non-plugin type URI: % ", uriPath);
+				// ~setSynth.value(nodeName.asSymbol, \dummyPlugin);
+				false;
+			},
 
-		// else  // path ok, proceed
-		{
-			charIndex = uriPath.asString.find("://");
+			// else  // path ok, proceed
+			{
+				charIndex = uriPath.asString.find("://");
 
-			temp = uriPath.asString.subStr(charIndex);
-			type = uriPath.asString.subStr(0, charIndex-1);
-			uriName = temp.asString.replace("://", "");
+				temp = uriPath.asString.subStr(charIndex);
+				type = uriPath.asString.subStr(0, charIndex-1);
+				uriName = temp.asString.replace("://", "");
 
 				if ( ~fxSynthdefRegister.contains(uriName),
 					{ true },
 					{false};);
-	});
-};
+		});
+	};
 
 
 	~uriType = { | uriPath |
@@ -1332,7 +1343,7 @@ s.waitForBoot{
 	// roomsize=50, revtime=3, damping=0.5, inputbw=0.5, spread=15, drylevel=1, earlylevel=0.7, taillevel=0.5, maxroomsize=300
 
 
-/*	  	// tune up reverb
+	/*	  	// tune up reverb
 
 	~rvbname="resonance_SC:spatOSCsource_0".asSymbol;
 	~setEvent.value(~rvbname,  \outputDB, [-10]);
@@ -1345,10 +1356,10 @@ s.waitForBoot{
 	~setEvent.value(~rvbname,  \earlylevel, [3]);
 	~setEvent.value(~rvbname,  \taillevel, [3]);
 
-*/
+	*/
 
 
-		// e.g  /spatosc/core/source/nodename/prop  key val
+	// e.g  /spatosc/core/source/nodename/prop  key val
 	//~sourceNodeCallback.value("/spatosc/core/source/resonance_SC:spatOSCsource_1/prop", "outputDB", -20.0);
 
 
@@ -1411,7 +1422,7 @@ s.waitForBoot{
 	~nodeName=\sourceB;
 	~listenerName=\listener;
 	~connectionName= ~nodeName ++ "->" ++ ~listenerName;
-~connectionCallback.value( ["/spatosc/core/connection/"++ ~connectionName ++"/spread", 100]);
+	~connectionCallback.value( ["/spatosc/core/connection/"++ ~connectionName ++"/spread", 100]);
 
 	~createSource.value(~nodeName);
 

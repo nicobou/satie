@@ -15,9 +15,9 @@
  OSCFunc.trace(true);    // show OSC RX
  OSCFunc.trace(false);
 
-o = OSCresponderNode(s.addr, '/tr', { |time, resp, msg| msg.postln }).add;
+z = OSCresponderNode(s.addr, '/tr', { |time, resp, msg| msg.postln }).add;
 
-o.remove;  // when done, you need to clean up the OSCresponderNode
+z.remove;  // when done, you need to clean up the OSCresponderNode
 
 SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 */
@@ -40,22 +40,31 @@ fB	 ??  Inharmonicity factor.
 
 ~name = \zkarpluck2P;
 
-~function = {  | t_trig=0, c1 = 1, c3=20, fb = 2, randTrigMaxMs = 10000 , note = #[60, 1, 0.5]  |   // note: pitch force incidence
+~function = {  | t_trig=0, c1 = 1, c3=20, fb = 2, randTrigMaxMs = 10000 , note = #[60, 1, 0.5] , i_blockDelay = 2  |   // note: pitch force incidence
 	var env,inp,son;
+	var pos, hfqLoss, idecay, lpassFq;
+	var blockDelaySecs = ControlDur.ir * i_blockDelay;
+	var outsig;
+
+
 	var freq = note[0].midicps;
 	var amp = note[1];
 	var incidence = abs (note[2]);   // apprently this does not work
+	var t_trigDel, delTrigSecs, randTrigMaxSecs;
 
+	amp = amp.clip(0,1);
+	incidence = incidence.clip(0,1);
 
-	var pos = note[2] * 0.5; // unitVal * positionRange
-	var hfqLoss= c3 + (1-amp)*c3*2;  // add more dampening when amplitude gets low
-	var idecay = c1 +  (1-amp)*c1;  //  reduce decay when amplitude gets low
-	var lpassFq = 100 + (incidence**(0.7) * 21900) ;  // used to cut highs when incidence is low
+	 pos = note[2] * 0.5; // unitVal * positionRange
+	 hfqLoss= c3 + (1-amp)*c3*2;  // add more dampening when amplitude gets low
+	 idecay = c1 +  (1-amp)*c1;  //  reduce decay when amplitude gets low
+	 lpassFq = 100 + (incidence**(0.7) * 21900) ;  // used to cut highs when incidence is low
 	// particle use
 
-	var randTrigMaxSecs = randTrigMaxMs*0.001;
-	var delTrigSecs = TRand.kr( 0,  randTrigMaxSecs,  t_trig);
-	var t_trigDel = TDelay.kr(t_trig, delTrigSecs);
+	 randTrigMaxSecs = randTrigMaxMs*0.001;
+	 delTrigSecs = TRand.kr( 0,  randTrigMaxSecs,  t_trig);
+	 t_trigDel = TDelay.kr(t_trig, delTrigSecs);
+
 
 	//incidence = incidence.clip(0,1);
 
@@ -68,7 +77,7 @@ fB	 ??  Inharmonicity factor.
 	inp =   BLowPass.ar(      (amp * LFClipNoise.ar(2000) * EnvGen.ar( env, t_trigDel  ))     , Lag.kr(lpassFq, 0.02) , 5) ;
 
 
-	//SendTrig.kr( EnvGen.kr( env, t_trigDel  ) , 0, note[0] );  //  in synthdef
+	// SendTrig.kr( EnvGen.kr( env, t_trigDel  ) , 0, note );  //  in synthdef
 
 
 	// note:  "gate" arg fixed to constant of 1, to keep plugin alive, "relase" arg not used:
@@ -76,7 +85,11 @@ fB	 ??  Inharmonicity factor.
 	// Out.ar(100, son);
 
 	// suggestion:  add amplitude-based filtering to the final output
-	0.05 * son;   // make sure this is last, so the sound is returned
+	outsig = 0.05 * son;   // make sure this is last, so the sound is returned
+
+
+		    DelayN.ar(outsig, ControlDur.ir*10, blockDelaySecs);   // offset output by  N blocks to avoid transient mangulation by supernova
+
 	 };
 
 /*

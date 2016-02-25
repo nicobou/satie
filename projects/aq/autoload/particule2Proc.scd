@@ -98,8 +98,7 @@ if (~particule2_pitchSequences == nil,
 
 // required function but adaptable to project specifics
 // generates N synths
-~particule2.setup = { | self, nodeName, nodeGroupName, argsString  |
-	var argvec = argsString.split($ );
+~particule2.setup = { | self, nodeName, nodeGroupName, argsList  |
 	var thisGroup = ~scbr.satieGroups[nodeGroupName.asSymbol] ;
 
 	self.nodeName = nodeName;
@@ -107,15 +106,17 @@ if (~particule2_pitchSequences == nil,
 	self.nodeGroup = thisGroup;
 	//'particule2,setup'.postln;
 
-		// project-specific parsing of args string (coming from setUri OSC message string)
-		if ( argvec.size >= 2,
+	// project-specific parsing of args string (coming from setUri OSC message string)
+	if ( argsList.size >= 2,
 		{
+			//~sheefaVec = argvec;
 
-			if ( argvec[0].asString == "cloneCount",
+			//postf(" particule2.setup: node: %    args:   %    size:  %\n", nodeName, argsList, argsList.size);
+			if ( argsList[0].asString == "cloneCount",
 				{
-					self.cloneCount = argvec[1].asInt.clip(1, 1000);   // clip to 1000 to avoid meltdown caused by error
-					// postf(" particule2.setup: node: %   creating % clones \n", nodeName, self.cloneCount);
-			},
+					self.cloneCount = argsList[1].asInt.clip(1, 1000);   // clip to 1000 to avoid meltdown caused by error
+					postf(" particule2.setup: node: %   setting up for % kamakazi clones \n", nodeName, self.cloneCount);
+				},
 				// else bad arg
 				{
 					error("particule2.setup: unrecognized key, expecting 'cloneCount' ");

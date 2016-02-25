@@ -35,6 +35,9 @@
 	// timbre state
 	'pitch' -> 55,
 	'transposition' -> 0,
+	// voice allocation thinning
+	'polyCounter' -> 0,  // polyphony thinning register
+	'debug_thinnerState' -> 0,  // polyphony thinning register
 	'synthCountMax' ->  150,    //to be safe,  this value should be half of the number that breaks the server
 	'synthCountLimitThresh' ->  0.9;   // 90 %  of maxium -  the factor when limiting of  synth triggering (instance generation) begins. A variable threshold is used to thin out triggers (see below)
 
@@ -101,8 +104,7 @@ if (  ~allProcesses.includesKey(\particule4) == true,
 
 // required function but adaptable to project specifics
 // generates N synths
-~particule4.setup = { | self, nodeName, nodeGroupName, argsString  |
-	var argvec = argsString.split($ );
+~particule4.setup = { | self, nodeName, nodeGroupName, argsList  |
 	var thisGroup = ~scbr.satieGroups[nodeGroupName.asSymbol] ;
 
 	self.nodeName = nodeName;
@@ -111,12 +113,14 @@ if (  ~allProcesses.includesKey(\particule4) == true,
 	//'particule4,setup'.postln;
 
 	// project-specific parsing of args string (coming from setUri OSC message string)
-	if ( argvec.size >= 2,
+	if ( argsList.size >= 2,
 		{
+			//~sheefaVec = argvec;
 
-			if ( argvec[0].asString == "cloneCount",
+			postf(" particule4.setup: node: %    args:   %    size:  %\n", nodeName, argsList, argsList.size);
+			if ( argsList[0].asString == "cloneCount",
 				{
-					self.cloneCount = argvec[1].asInt.clip(1, 1000);   // clip to 1000 to avoid meltdown caused by error
+					self.cloneCount = argsList[1].asInt.clip(1, 1000);   // clip to 1000 to avoid meltdown caused by error
 					postf(" particule4.setup: node: %   setting up for % kamakazi clones \n", nodeName, self.cloneCount);
 				},
 				// else bad arg
@@ -159,7 +163,7 @@ if (  ~allProcesses.includesKey(\particule4) == true,
 	self[\properties].put(key, value);
 
 
-	//postf("prop message: key: %    val:% \n", key, value);
+	postf("prop message: key: %    val:% \n", key, value);
 
 	// do nothing for this node, since spatialization is only done using the trigger method
 
@@ -204,7 +208,6 @@ if (  ~allProcesses.includesKey(\particule4) == true,
 	var randOffsetElev;  // random offset for elevation
 	var cloneAziDeg, cloneEleDeg;
 	var muteFlag = 0;
-	var clonesToGenerate = self.cloneCount;
 
 
 	if ( items.size != 9,
@@ -212,6 +215,9 @@ if (  ~allProcesses.includesKey(\particule4) == true,
 			postf("~particule4.trigger:  bad item count, expecing '[ pitch vel incidence]' , received: % items\n",items.size);
 		},
 		{ // else
+
+			var thinner = 999999;  // used for polyphony thinnning.  Initialized to no-thinning value;
+			var synthParams, params;
 
 			if ( self.cloneCount > 0,  { cloneDeltaSecs = 0.001 * self.triggerIntervalMs / self.cloneCount });
 
@@ -231,8 +237,54 @@ if (  ~allProcesses.includesKey(\particule4) == true,
 			hpHz = items[7].asFloat;
 			distance = items[8].asFloat;
 
-			size = ~particule4_pitchSequences.at(seqName.asSymbol).at(\size);
 
+
+
+
+
+			// particle generation limiting, based on current server load
+			// note:  this seems to work best when configured for fewer clones  (like 2)
+			if (s.numSynths > (self.synthCountMax * self.synthCountLimitThresh),
+				{
+					var overThreshRange = self.synthCountMax * self.synthCountLimitThresh;  // amount of synths between threshold and syntchCountMax limit
+					var overThresCount = s.numSynths - overThreshRange;   // syntchCountMax - 250 * .8
+					var muteFactor =  (overThresCount  / overThreshRange).clip(0,1);
+
+					// "THRESHOLD \n".postln;
+					// NOTE:  11 is a good all around value to use, based on emperical observations
+					thinner = (11 *  (1 - muteFactor )).asInt;    // when just over threshold, starts skipping 1 synth note in 10 (1/10),   midway:  1/5,   and at maximum:  1/1
+
+					/*  not used
+					if (force < (muteFactor * 0.3),
+					{
+					muteFlag = 1;
+					postf("MUTING:  FORCE UNDER = % \n", muteFactor * 0.3);
+					});
+
+					// not used
+					if (gainDB < ( -60 * (1 - muteFactor)),
+					{
+					muteFlag = 1;
+					postf("MUTING:  DB UNDER = % \n", -60 * (1 - muteFactor));
+					});*/
+				},
+				// else
+				{
+					self.polyCounter = 1;  // reset poly counter
+
+					if ( self.debugFlag != 0 ,
+						{
+							if  ( self.debug_thinnerState != thinner,
+								{
+									self.debug_thinnerState = thinner;
+									postf("% process: no skipping \n",  self.nodeName);
+							});
+					});
+			});
+
+
+
+			size = ~particule4_pitchSequences.at(seqName.asSymbol).at(\size);
 			xzDist = distance * eleDeg.degrad.cos;  // get (horizontal) distance of node to listener on XZ plane
 			yDist = distance * eleDeg.degrad.sin;  // get (vertical) distance of node to listener projected on Y axis
 
@@ -244,53 +296,35 @@ if (  ~allProcesses.includesKey(\particule4) == true,
 			elevScaler = (1 - yDist)**self.cloudExp;   // increase this exponent to fall off more quickly
 
 
+			params = [
+				\gainDB, gainDB,\delayMs, delayMs, \lpHz , lpHz, \hpHz, hpHz,
+				\decayMs, self.decayMs, \force, force, \incidence, incidence
+			];
+
+			if ( self[\properties] != nil, { synthParams = params++ self[\properties].getPairs;}); // combine param arrays
+
+			// assign pitches  for each particle
+			self.cloneCount.do( { arg item;
+				var nodename=(self.nodeName++"_"++item).asSymbol;
+				var synth, skipFlag;
+
+				skipFlag = self.polyCounter.mod(thinner);
+
+				if (  (skipFlag == 0) &&  ( self.debugFlag != 0) ,
+					{
+						if  ( self.debug_thinnerState != thinner,
+							{
+								self.debug_thinnerState = thinner;
+								postf("% process: skiping 1 / % ,  polyCount: % \n",  self.nodeName, thinner, self.polyCounter);
+						});
+				});
 
 
-			// particle generation limiting, based on current server load
-
-			if (s.numSynths > (self.synthCountMax * self.synthCountLimitThresh),
-				{
-					var overThreshRange = self.synthCountMax * self.synthCountLimitThresh;  // amount of synths between threshold and syntchCountMax limit
-					var overThresCount = s.numSynths - overThreshRange;   // syntchCountMax - 150 * .9
-					var muteFactor =  (overThresCount  / overThreshRange).clip(0,1);
-
-					clonesToGenerate = self.cloneCount * (1 - muteFactor );
-					postf("GENERATING % clones \n", clonesToGenerate.asInt);
-
-					if (force < muteFactor,
-						{
-							muteFlag = 1;
-							// postf("MUTING:  FORCE UNDER = % \n", muteFactor);
-					});
-					if (gainDB < ( -60 * (1 - muteFactor)),
-						{
-							muteFlag = 1;
-							// postf("MUTING:  DB UNDER = % \n", -60 * (1 - muteFactor));
-					});
-
-			});
-
-			if ( muteFlag == 0,
-				{
-					var synthParams, params;
-
-						params = [
-						\aziDeg, cloneAziDeg, \eleDeg, cloneEleDeg, \gainDB, gainDB,\delayMs, delayMs, \lpHz , lpHz, \hpHz, hpHz,
-						\decayMs, self.decayMs, \pitch, pitch, \force, force, \incidence, incidence
-					];
-
-					if ( self[\properties] != nil, { synthParams = params++ self[\properties].getPairs;}); // combine param arrays
-
-					// assign pitches  for each particle
-					clonesToGenerate.do( { arg item;
-						var nodename=(self.nodeName++"_"++item).asSymbol;
-						var synth, cloneParams;
-
-
-
+				if (skipFlag != 0,    // controls synth spawning density  by skipping:  from  1/10  (1 note out of 10)   to  4/5   to 1 / 1, when the system is loaded
+					{
+						var cloneParams;
 						if (self.pitchSeqGlobalMode != 0,
 							{
-
 								position = ~particule4_pitchSequences.at(seqName.asSymbol).at(\pos);
 								incr = ~particule4_pitchSequences.at(seqName.asSymbol).at(\incr);
 								pitch = ~particule4_pitchSequences.at(seqName.asSymbol).at(\pitches)[position];
@@ -305,26 +339,26 @@ if (  ~allProcesses.includesKey(\particule4) == true,
 						});
 
 
-						cloneParams = synthParams++ [\pitch, pitch, \t_trig, 1];
 						//name, synthDefName, group , synthArgs[]
 						/*				synth = ~scbr.makeKamikaze(nodename, self.synth.asSymbol, self.nodeGroupName, []);
 						synth.set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB,\delayMs, delayMs, \lpHz , lpHz, \hpHz, hpHz,
 						\decayMs, self.decayMs, \pitch, self.pitch, \force, force, \incidence, incidence);   // \t_trig,  1
 						*/
 
-						if (item == 0,
+						if (item == 0,   // first clone sounds at give azi and elev
 							{
+							    cloneParams = synthParams++ [\aziDeg, aziDeg,  \eleDeg, eleDeg,   \pitch, pitch, \t_trig, 1];
 								synth = ~scbr.makeKamikaze(nodename, self.synth.asSymbol, self.nodeGroupName, cloneParams);
 							},
-							{    // else schedule clone creation in the future
+							{    // else schedule clone creation in the future with random deivation for azi and elev
 
 								randOffsetAzi = 180.rand2;  // random offset for azimuth
 								randOffsetElev = 90.rand2;  // random offset for elevation
 								cloneAziDeg = aziDeg + (randOffsetAzi * aziScaler);
 								cloneEleDeg =  eleDeg + (randOffsetElev * elevScaler);
 
+								cloneParams = synthParams++ [  \aziDeg, cloneAziDeg, \eleDeg, cloneEleDeg, \pitch, pitch, \t_trig, 1    ];
 
-								//[cloneAziDeg, cloneEleDeg].postln;
 
 								TempoClock.default.sched( (cloneDeltaSecs * item).rand,
 									{
@@ -332,7 +366,9 @@ if (  ~allProcesses.includesKey(\particule4) == true,
 
 										nil });
 						});
-					});
+				});
+				self.polyCounter = self.polyCounter + 1;
+
 			});
 	});
 };
