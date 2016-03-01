@@ -18,6 +18,10 @@ this implementation is based on a one-listener model. In the future, we may wish
 Satie4Unity's message specification is inspired from the SPATOSC specification  (see:   http://code.sat.qc.ca/redmine/projects/spatosc/wiki/spec  )
 */
 
+/*
+// for debugging
+
+*/
 
 (
 ~satie4unityprotocol = { | oscContext, satieContext, oscID = \satie4unityOSC |
@@ -27,7 +31,107 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 	var e = Environment.make({
 		~allSourceNodes = Dictionary();        //  ~allSourceNodes.postln;
 		~allGroupNodes = Dictionary();        //  ~allGroups.postln;
-		~basicRendererCallback = { "basicRendererCallback called".inform };
+		~projectDirectory = nil;
+
+		// used for audio renderer control
+		~volume = s.volume;     // create hook to global audio engine volume / mute control
+		~volume.setVolumeRange(-99, 18);
+		~outputDB = 0;    // current state of the supercollider's output
+		~outputTrimDB = 0;
+
+		if ( satie.satieGroups[\effect] == nil,
+			{~effectProx = satie.makeSatieGroup(\effect, \addToTail);}
+		);
+
+		~allProcesses = ();    // initialize list for processes to register themselves;
+
+		// ~basicRendererCallback = { "basicRendererCallback called".inform };
+		~basicRendererCallback = {
+			arg msg;
+			var command = msg[1];
+			//postf("~basicRendererCallback: command: %, msg: %, \n", command, msg);
+
+			if (msg.size < 2,
+				{"~basicRendererCallback: empty message".warn;
+					postf("~basicRendererCallback MESS LEN: %", msg.size);
+
+				},
+				// else
+				{
+
+					switch (command,
+						'setProjectDir',
+						{
+							if ( (msg.size != 3 ) ,
+								{"~basicRendererCallback: setProjectDir bad arg count: expecting 'setProjectDir projectDirPath' ".warn;},
+								// else
+								{
+									e.projectDirectory = msg[2];
+
+									e.projectDirectory.postln;
+
+								}
+							)
+						},
+						'setOutputTrimDB',
+						{
+							if ( (msg.size < 3 ) ,
+								{"~basicRendererCallback: setOutputTrimDB missing value".warn;},
+								// else
+								{
+									e.outputTrimDB = msg[2];
+									e.volume.volume = e.outputTrimDB + e.outputDB;
+								}
+							)
+						},
+						'setOutputDB',
+						{
+							if ( (msg.size < 3 ) ,
+								{"~basicRendererCallback: setOutputDB missing value".warn;},
+								// else
+								{
+									e.outputDB = msg[2];
+									e.volume.volume = e.outputTrimDB + e.outputDB;
+								}
+							)
+						},
+						'setOutputDIM',
+						{
+							if ( (msg.size < 3 ) ,
+								{"~basicRendererCallback: setOutputMute missing value".warn;
+									// postf("CREATESOURCE MESS LEN: %", msg.size);
+
+								},
+								// else
+								{
+									if (msg [2] > 0,
+										{  e.volume.volume = -30;  },
+										// else
+										{  e.volume.volume =  e.outputDB + e.outputTrimDB;   });
+								}
+							)
+						},
+						'setOutputMute',
+						{
+							//postf("~basicRendererCallback setMute: %\n", msg[2]);
+							if ( (msg.size < 3 ) ,
+								{"~basicRendererCallback: setOutputDIM missing value".warn;  },
+								// else
+								{
+									if (msg [2] > 0,
+										{e.volume.mute;},
+										// else
+										{e.volume.unmute;} );  // full muting implmentation
+								}
+							);
+						}
+					)
+			});
+		};
+
+
+
+
 		~coreCallback = { arg msg;
 			var command;
 			command = msg[1];
@@ -101,23 +205,23 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 							var sourceName, listenerName;
 							sourceName = msg[2];
 							listenerName = msg[3];
+							//'GOING TO CALL createCOnnection'.postln;
 							e.createConnection(sourceName, listenerName);
 						}
 					)
 				};
 			);
-			"coreCallback called".postln;
+			//"coreCallback called".postln;
 		};
-		~connectionCallback = {
-			| args |
+		~connectionCallback = { 	| args |
 			var nodeName, listenerName, connectionName, type, temp, charIndex;
 			var aziDeg, eleDeg, gainDB, delayMs, lpHz, hpHz, spread, distance;
 			var thisSynth;
 			var index;
 			var halfSrate = 0.5 * s.sampleRate;
-			"connectionCallback called".inform;
-			postln("connectionCallback " ++ args);
-			postln("allGroupNodes " ++ e.allGroupNodes);
+			//"connectionCallback called".inform;
+			//postln("connectionCallback " ++ args);
+			//postln("allGroupNodes " ++ e.allGroupNodes);
 
 			//args.postln;
 			connectionName = args[0].asString.split[4].asSymbol;   // this is terrible.  The spatOSC message format should be improved here
@@ -170,7 +274,7 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 							hpHz = args[1];   // get highpass cutoff value
 							thisSynth.set(\hpHz ,  clip(hpHz, 1, halfSrate ));
 
-							postf("~connectionCallback:  hpHz connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
+							//postf("~connectionCallback:  hpHz connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
 
 						}
 					)
@@ -201,7 +305,7 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 			var aziDeg, eleDeg, gainDB, delayMs, lpHz, spread, distance;
 			var thisGroup, thisGroupName;
 			var myProcess;
-			postln("connectionProcessCallback called" ++ args ++"\n");
+			// postln("connectionProcessCallback called" ++ args ++"\n");
 
 			//postf(" ~connectionProcessCallback \n");
 
@@ -321,10 +425,143 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 				{postf("~sourceNodeCallback:  UNMATCHED:  nodeName: %  mesageType: %  size: % args: %\n", name, type, args.size, args)};
 			);
 		};
-		~sourceProcessCallback = { "sourceProcessCallback called".warn;
 
+		// ~sourceProcessCallback = { "sourceProcessCallback called".warn; };
+		// e.g  /spatosc/core/source/nodename/prop  key val
+		// source node has unique group, updates are to source's group (to cloned synths etc)
+		~sourceProcessCallback = {
+			| args |
+			var name, type, values, eventName, state, myProcess, myProcessSym;
+
+			name = args[0].asString.split[4].asSymbol;
+			type = args[0].asString.split[5].asSymbol;
+
+			//myProcessSym = ~allSourceNodes[name.asSymbol].at(\process);
+			//myProcess = self.allProcesses[myProcessSym];
+			myProcess = e.allSourceNodes[name.asSymbol].at(\process);
+
+			//'~sourceProcessCallback'.postln;
+
+			switch(type,
+				'prop',
+				{
+					var groupName = e.allSourceNodes[name.asSymbol].at(\groupNameSym);
+					e.setGroupProperty(groupName, args[1], args[2]);
+
+				},
+
+				'uri',  // not used:  process synths are defined in the process class, or set by events
+				{
+					// ~setUri.value(name, args[1])
+
+				},
+				'state',    // not used
+				{
+				},
+				'event',
+				{
+					//postf("~sourceProcessCallback:  nodeName: %  mesageType: %  size: % args: %\n", name, type, args.size, args);
+					if ( (args.size < 2 ) ,
+						{"~sourceProcessCallback event: OSCrx message with no values".warn;},
+						{  // else
+							values = args;
+							eventName = args[1];
+							values.removeAt(0);
+							values.removeAt(0);
+
+
+							// NOTE:  event names for processes are either:
+							//  \setParam (to the state of a process param)
+							// or
+							// allOtherNames (to call a function with an arg vec)
+							if (( eventName == \setParam)&& (values.size == 2),
+								{
+									// postf("sourceProcessCallback event_setParam: %  % \n", values[0].asSymbol, values[1]);
+									myProcess[values[0].asSymbol] = values[1] ;
+
+								},
+								// else  it is a function call
+								{
+									//postf("~sourceProcessCallback: event_function call:  nodeName: %  event: %  size: % args: %\n", name, eventName.asSymbol, values.size, values);
+									myProcess[eventName.asSymbol].value(myProcess, values);   // call the process corresponding method passing argVec
+							});
+					});
+				},
+				{postf("~sourceProcessCallback:  UNMATCHED:  nodeName: %  mesageType: %  size: % args: %\n", name, type, args.size, args)};
+			);
 		};
-		~groupCallback = { "groupCallback called".warn;};
+
+
+		//~groupCallback = { "groupCallback called".warn;};
+
+		// e.g  /spatosc/core/group/nodename/prop  key val
+		~groupCallback = {
+			| args |
+			var name, type, values, eventName, state;
+			name = args[0].asString.split[4].asSymbol;
+			type = args[0].asString.split[5].asSymbol;
+
+			//'~groupCallback'.postln;
+
+			switch(type,
+				'prop',
+				{
+					//~setProperty.value(name, args[1], args[2])
+
+					//postf("~groupCallback:  nodeName: %  setProp: %  key: % value: %\n", name, args[1], args[2]);
+					e.setGroupProperty(name, args[1], args[2]);
+
+				},
+				'uri',
+				{
+					//postf("~groupCallback:  nodeName: %  setUri: %  \n", name, args[1]);
+					// ~setUri.value(name, args[1])
+
+
+				},
+				'event',
+				{
+					postf("~groupCallback:  nodeName: %  set event: %  size: % args: %\n", name, type, args.size, args);
+					if ( (args.size < 2 ) ,
+						{"~setEvent: OSCrx message with no values".warn;},
+						{  // else
+							values = args;
+							eventName = args[1];
+							values.removeAt(0);
+							values.removeAt(0);
+							e.setGroupEvent(name, eventName, values);
+						}
+					)
+				},
+				'state',
+				{
+					if ( (args.size > 1) ,
+						{
+							state = args[1];
+							//eventName = args[1];
+							//~setState.value(name, state);
+							postf("~groupCallback:  node: %  set state: % \n", name, state);
+						},
+						{"~groupCallback: OSCrx message with no values".warn; })  // else
+				},
+				'add',
+				{
+					postf("~groupCallback:  nodeName: %  add member: %  \n", name, args[1]);
+					e.addMember(name, args[1])
+
+
+				},
+				'drop',
+				{
+					postf("~groupCallback:  nodeName: %  drop member: %  \n", name, args[1]);
+					e.dropMember(name, args[1])
+
+
+				},{postf("~groupCallback:  UNMATCHED:  nodeName: %  mesageType: %  size: % args: %\n", name, type, args.size, args)};
+			);
+		};
+
+
 		~createSource = {| self, sourceName, uriName , groupName = \default |
 			"createSource called".inform;
 			if (self.allSourceNodes.includesKey(sourceName),
@@ -349,7 +586,83 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 			);
 		};
 
-		~createSourceProcess = { "createSourceProcess called".warn;};
+		// ~createSourceProcess = { "createSourceProcess called".warn;};
+
+
+		// called for uri type process://
+		//error check uriName done before call this, uriPath will be a process name
+		// ignore groupName since a unique one will be generated for this node and its clones
+		//  uri path may include arguments
+		// eg. uriPath:  "process://sheefa arg1 1.1 arg2 2.2 arg3"
+
+		~createSourceProcess = { | self, sourceName, uriPath , groupNameDummy = \default |
+			var temp, type, charIndex, processName, processClone, myProcess, cloneGroup, cloneGroupName;
+			var argsString = "";
+			var stringArray;
+
+
+
+			("createSourceProcess:  URI"++uriPath).postln;
+
+			//			~sheefa.allProcesses.postln;
+
+			stringArray = uriPath.asString.split($ );
+			charIndex = stringArray[0].asString.find("://");
+			processName = stringArray[0].asString.subStr(charIndex+3);
+			argsString = uriPath.asString.subStr(stringArray[0].size+1);
+
+
+			if (self.allProcesses[processName.asSymbol] == nil,
+				{
+					postf("~createSourceProcess: undefined process name:"++processName++"   ,  node not created \n");
+				},
+				// else ALL GOOD,  instantiate
+				{
+					if (self.allSourceNodes[sourceName.asSymbol]  != nil,
+						{
+							error("~createSourceProcess source Process node: %,   ALREAYD EXISTS \n", sourceName);
+						},
+						// else node good to go
+						{
+							postf("~createSourceProcess nodeName: %,   PROCESS_NAME: %\n", sourceName, processName);
+							//postf("~createSourceProcess: %:  uri: %  group: %\n", sourceName, uriPath, groupName);
+
+							self.allSourceNodes[sourceName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
+							self.allSourceNodes[sourceName.asSymbol].put(\plugin, \nil);
+
+							// generate groupName unique to source node
+							cloneGroupName = sourceName ++ "_group";
+							cloneGroup = self.createGroup(cloneGroupName.asSymbol);   // create group for this node and its clones
+
+							//cloneGroup.postln;
+
+							// clone a new copy of the process
+							temp = self.allProcesses.at(processName.asSymbol);
+							processClone = temp.copy;
+							//processClone[\nodeName]=sourceName.asSymbol;
+
+							cloneGroup = self.allGroupNodes[cloneGroupName.asSymbol].at(\group); // must be called after createGroup() above
+
+							self.allSourceNodes[sourceName.asSymbol].put(\process, processClone);
+							self.allSourceNodes[sourceName.asSymbol].put(\groupNameSym, cloneGroupName.asSymbol);
+
+							myProcess = self.allSourceNodes[sourceName.asSymbol].at(\process);
+
+							// send URI's argsString to setup without any error checking
+
+							myProcess[\setup].value(myProcess, sourceName.asSymbol, cloneGroupName.asSymbol, argsString );   // set the state of the process
+							self.setSynth(sourceName.asSymbol, "");  // sets dummy plugin as placeholder
+
+							//~oscInterface.sourceOSC(sourceName.asSymbol, ~sourceProcessCallback);   // create OSC callback
+							osc.sourceOSC(sourceName.asSymbol, e.['sourceProcessCallback']);   // create OSC callback
+							postf("~createSourceProcess: CREATED NODE: %,  with  process:  % \n", sourceName, processName);
+
+
+					});
+			});
+		};
+
+
 		~createSourceNode = { | self, sourceName, uriName , groupName = \default |
 			var synthName;
 
@@ -379,7 +692,7 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 					});
 
 					// this is an effects node, so save its aux bus assign
-					self.allSourceNodes[sourceName.asSymbol].put(\auxBus, ~scbr.aux[~fxInputBus]);  //  HACK to set up effects send node
+					self.allSourceNodes[sourceName.asSymbol].put(\auxBus, satie.aux[~fxInputBus]);  //  HACK to set up effects send node
 			});
 
 			// now set node's group
@@ -392,7 +705,7 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 			if (uriName.asString.contains("plugin://") == false,
 				{
 					warn("~createSource: WARNING: node: %  bad URI format : %,  setting to \dummyPlugin", sourceName, uriName);
-					self.setSynth.value(sourceName.asSymbol, \dummyPlugin);
+					self.setSynth(sourceName.asSymbol, \dummyPlugin);
 				},
 				// else  // path ok, proceed
 				{
@@ -414,13 +727,62 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 			osc.sourceOSC(sourceName.asSymbol, e.['sourceNodeCallback']);   // create OSC callback
 			"createSourceNode called".inform;
 		};
-		~createGroup = { "createGroup called".warn;};
+
+		//~createGroup = { "createGroup called".warn;};
+		// returns group
+		~createGroup = { |self,  groupName |
+
+			if (self.allGroupNodes.includesKey(groupName),
+				{
+					postf("createGroup:  GroupNode % exists, no action \n", groupName);
+					self.allGroupNodes[groupName.asSymbol].at(\group);  // return group
+				},
+				// else create new group node
+				{
+					var group;
+
+					if (satie.satieGroups[groupName.asSymbol] != nil, // group already exists in SATIE, no need to create it
+						{
+							group = satie.satieGroups[groupName.asSymbol];
+						},
+						// else  group does not exist in SATIE,  create it
+						{
+							group = satie.makeSatieGroup(groupName.asSymbol);
+							if ( groupName.asSymbol == \default,
+								{
+									postf("~createGroup:  BUG FOUND-- SHOULD NOT HAVE TO INSTANITATE DEFAULT GROUP !!!!");
+							});
+					});
+
+					postf("~createGroupNode:   % \n", groupName);
+					self.allGroupNodes[groupName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
+					self.allGroupNodes[groupName.asSymbol].put(\group , group);  // save group
+					self.allGroupNodes[groupName.asSymbol].put(\groupSym , groupName.asSymbol);  // save group name symbol
+					self.allGroupNodes[groupName.asSymbol].put(\members, List() );  // create dict for members
+					self.allGroupNodes[groupName.asSymbol].put(\plugin, \nil);
+
+					//  set group
+					self.allGroupNodes[groupName.asSymbol].put(\group, group );
+
+					//~oscInterface.groupOSC(groupName.asSymbol, ~groupCallback);   // create OSC callback for this source
+					osc.sourceOSC(groupName.asSymbol, e.['groupCallback']);   // create OSC callback
+
+					group;  // returns groups
+				}
+			);
+		};
+
 		~createConnection = { |self, sourceName, listenerName |
 
-			var connectionName = sourceName ++ "->" ++ listenerName;
-			var myProcess = self.allSourceNodes[sourceName.asSymbol].at(\process);
+			var connectionName, myProcess;
+			postf("createConnection:  for source % and listener % \n", sourceName, listenerName);
 
-			"createConnection called".inform;
+
+			//~sheefa.allSourceNodes[\srcNode];
+
+			connectionName = sourceName ++ "->" ++ listenerName;
+			myProcess = self.allSourceNodes[sourceName.asSymbol].at(\process);
+
 
 			if (  self.allSourceNodes.includesKey(sourceName.asSymbol) == false ,
 				// source not defined  ???
@@ -440,7 +802,7 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 					if ( myProcess != nil,
 						{
 							postf("~createConnection: creating Custom update callback for  %  ", sourceName.asSymbol);
-							osc.connectionOSC(self.allSourceNodes[sourceName.asSymbol].at(\connectionName), self.connectionProcessCallback);
+							osc.connectionOSC(self.allSourceNodes[sourceName.asSymbol].at(\connectionName), e.['connectionProcessCallback']);
 						},
 						//else  regular source node, set up standard connection callback
 						{
@@ -452,8 +814,7 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 
 
 		};
-		~setSynth = {
-			| self, nodeName, pluginName |
+		~setSynth = { 	| self, nodeName, pluginName |
 			var validPluginName = pluginName;
 			var groupName = self.allSourceNodes[nodeName.asSymbol].at(\groupNameSym);
 
@@ -527,34 +888,79 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 
 
 		};
-		~setProperty = {
-
-			| self, nodeName, property, value |
+		~setProperty = { | self, nodeName, property, value |
 			var thisSynth = self.allSourceNodes[nodeName.asSymbol].at(\synth);
 			"setProperty called".inform;
 			//postf("~setProperty: seting % of % to %\n", property, nodeName, value);
 
 			thisSynth.set(property.asSymbol, value);
 		};
-		~setGroupProperty = {};
-		~setState = {
-			| self, nodeName,  state |
+
+
+
+
+		//~setGroupProperty = {};
+
+		~setGroupProperty = { | self, groupName, property, value |
+			var group = self.allGroupNodes[groupName.asSymbol].at(\group).group;
+
+			//postf("~setGroupProperty: seting % of % to %\n", property, groupName, value);
+
+			group.set(property.asSymbol, value);
+		};
+
+
+
+
+		~setState = { | self, nodeName,  state |
 			var thisSynth = self.allSourceNodes[nodeName.asSymbol].at(\synth);
 			"setState called".inform;
 			/*		if ( (state > 0),
 			{
-			~scbr.makeInstance(nodeName.asSymbol, ~allSourceNodes[nodeName.asSymbol].at(\plugin).asSymbol, thisGroupSym);
+			satie.makeInstance(nodeName.asSymbol, ~allSourceNodes[nodeName.asSymbol].at(\plugin).asSymbol, thisGroupSym);
 			},
 			//else turn state off
 			{
-			~scbr.pauseInstance.value(nodeName.asSymbol, thisGroupSym );
+			satie.pauseInstance.value(nodeName.asSymbol, thisGroupSym );
 			}
 			);*/
 			//postf("~setState: seting state of % to %\n", nodeName, state);
 
 
 		};
-		~setGroupEvent = { "setGroupEvent called".warn; };
+
+		//~setGroupEvent = { "setGroupEvent called".warn; };
+
+		// events RX:   /spatosc/core/source/nodename/event eventName v1...vN
+		~setGroupEvent = { | self, groupName, eventName,  args |
+			var valueCount = args.size;
+			var group = self.allGroupNodes[groupName.asSymbol].at(\group).group;
+
+			postln("~setGroupEvent: node:" ++groupName ++" event name:"++eventName++"  arg(s): "++ args );
+
+			if ( (valueCount > 1) ,    // pass vector
+				{
+					group.set(eventName.asSymbol, args);
+				},
+				// else
+				{
+					if ( (valueCount == 1) ,    // pass value
+						{
+							group.set(eventName.asSymbol, args[0]);
+						},
+						// else  no args.. just pass 1
+						{
+							group.set(eventName.asSymbol, 1);
+						}
+					);
+			});
+		};
+
+
+
+
+
+
 		~setEvent = {
 			| self, nodeName, eventName,  args |
 			var valueCount = args.size;
@@ -590,8 +996,51 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 					);
 			});
 		};
-		~addMember = { "addMember called".warn;};
-		~dropMember = { "dropMember called".warn;};
+
+		//~addMember = { "addMember called".warn;};
+		~addMember = { | self,  groupName, nodeName |
+			var memberList = self.allGroupNodes[groupName].at(\members);
+			var group = self.allGroupNodes[groupName].at(\group).group;
+			//
+
+
+			// check to see if member is already in group
+
+			// if not add it
+			// satie.changeGroup(groupName, nodeName);   // assign source node to group's proxySpace
+			//  self.allSourceNodes[nodeName.asSymbol].put(\group, groupProxy);
+			memberList.add(nodeName.asSymbol);
+
+
+			postf("~addMember: group % adding member %\n", groupName, nodeName);
+			// ~groupCopyState(groupName, nodeName);
+		};
+
+
+		//~dropMember = { "dropMember called".warn;};
+
+		~dropMember = { |self  groupName, memberName |
+			var memberList = self.allGroupNodes[groupName].at(\members);
+			var memberNameSym = memberName.asSymbol;
+			var index = -1 ;
+
+			memberList.do({ arg item, i;
+				if ( item == memberNameSym,
+					{ index = i });
+
+			});
+			if (index > -1,
+				{
+					memberList.removeAt(index);
+					memberList.postln;
+					postf("~~dropMember: group % dropping member %\n", groupName, memberName);
+				},
+				// else
+				{
+					postf("~dropMember: group % member % not found \n", groupName, memberName);
+			});
+		};
+
 		~clearScene = {  | self |
 			var nodelist = self.allSourceNodes.keys;
 			"clearScene called".warn;
@@ -608,18 +1057,17 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 
 			// do not clear all groups except default group
 
-			/*		~scbr.satieGroups.keysDo{ |key |
+			/*		satie.satieGroups.keysDo{ |key |
 			var nodeSym = key;
 
 			if (key != \default,
 			{
-			~scbr.killSatieGroup(key);
+			satie.killSatieGroup(key);
 			});
 			};*/
 
 		};
-		~deleteSource = {
-			| self, nodeName |
+		~deleteSource = { | self, nodeName |
 			"deletaSource called".inform;
 			if ( self.allSourceNodes.includesKey(nodeName.asSymbol) ,
 				{
@@ -631,8 +1079,7 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 					self.allSourceNodes.removeAt(nodeName.asSymbol);     // remove node from global dictionary
 			});
 		};
-		~removeGroup = {
-			| self, groupName |
+		~removeGroup = { | self, groupName |
 			"removeGroup called".inform;
 			if ( self.allGroupNodes.includesKey(groupName.asSymbol) ,
 				{
@@ -641,8 +1088,7 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 					self.allGroupNodes.removeAt(groupName.asSymbol);     // remove node from global dictionary
 			});
 		};
-		~clearGroupeNode = {
-			| self, nameSym |
+		~clearGroupeNode = { | self, nameSym |
 			var node = self.allGroupNodes[nameSym];
 			//var connectionName = node.at(\connectionName);
 			var nodeKeys = node.keys;
@@ -668,13 +1114,16 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 				node.removeAt(key);
 			};
 		};
-		~clearSourceNode = {
-			| self, nameSym |
+		~clearSourceNode = {  | self, nameSym |
 			var node = self.allSourceNodes[nameSym];
 			var connectionName = node.at(\connectionName);
 			var nodeKeys = node.keys;
 			var thisGroupName = self.allSourceNodes[nameSym].at(\groupNameSym);
 			"clearSourceNode called".inform;
+
+			postf("clearSourceNode: delete  node  %\n", nameSym);
+			self.allSourceNodes[nameSym].postln;
+			~sheefa = self;
 
 			// is this a process node?
 			if ( self.allSourceNodes[nameSym].at(\process) != nil,
@@ -683,7 +1132,6 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 
 					var myProcess = self.allSourceNodes[nameSym].at(\process);
 
-					//postf("clearSourceNode.deleteGroup()  %\n", groupSym);
 
 					// now kill off the clones in that group
 					//myProcess.at(\nodeGroupProxy).free;
@@ -718,12 +1166,8 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 				node.removeAt(key);
 			};
 		};
-		~globalSetState = { "globalSetState called".warn;};
-		~globalSet = { "globalSet called".warn;};
-		~dumpConnections = { "dumpConnection called".warn;};
-		~dumpNodes = {"dumpNodes called".warn;};
-		~dumpGroups = {"dumpGroups called".warn;};
-		~isFXuri = {"isFXuri called".warn;};
+
+
 		~uriType = { | self, uriPath |
 			var charIndex, uriName, type, temp;
 
@@ -751,6 +1195,53 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 		};
 
 
+		// DEBUGGING FUNCTIONS
+		~dumpConnections = { 	| self |
+			var undefined = 0;
+
+			self.allNodes.keysDo { |key |
+				var nodeSym = key;
+				postf("node: %  :   ", key);
+				postf("\t : node:   %  connectionName:    % \n",  key, self.allNodes[nodeSym].at(\connectionName));
+
+			};
+		};
+
+		~dumpNodes = { 	| self |
+			var connections = 0;
+			self.allSourceNodes.keysDo { |key |
+				var nodeSym = key;
+				postf("node: %  \n", key);
+				self.allSourceNodes[nodeSym].keysDo { | key |
+					postf("\t : %  =  % \n",  key, self.allSourceNodes[nodeSym].at(key));
+				};
+			};
+		};
+
+		~dumpGroups = { 	| self |
+
+			postf("~dumpGroups: %  groups defined via OSCrx: \n", self.allGroupNodes.size);
+			self.allGroupNodes.keysDo { |key |
+				var nodeSym = key;
+				var memberList = self.allGroupNodes[nodeSym].at(\members);
+
+				postf("Group node: %  members: \n", nodeSym);
+				memberList.do { | key |
+					postf("\t : %  \n",  key);
+				};
+
+				postf("node: %  \n", key);
+				self.allGroupNodes[nodeSym].keysDo { | key |
+					postf("\t : %  =  % \n",  key, self.allGroupNodes[nodeSym].at(key));
+				};
+			};
+		};
+
+		// DEPRICATED
+		~globalSetState = { "globalSetState has been depricated".warn;};
+		~globalSet = { "globalSet  has been depricated".warn;};
+		~isFXuri = {"isFXuri has been depricated".warn;};
+
 	}); // Environment.make
 	"satie4unityprotol loaded".inform;
 	e.know = true;
@@ -764,5 +1255,9 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 	osc.basicRendererOSC(\brOSC,e['basicRendererCallback']);
 	e;
 };
+
+
+// uncomment only for debugging
+~satie4unity = ~satie4unityprotocol.value(~oscInterface, ~scbr);
 
 )

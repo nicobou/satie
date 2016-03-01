@@ -65,20 +65,24 @@ if (~particule1_pitchSequences == nil,
 		self.put(property.asSymbol, value);
 	};
 
+
 	// register process to environment
-	if (~allProcesses == nil, {
-		~allProcesses = ();         // environment namespace for project functions
-	});
+if (~satie4unity == nil, {
+	"sheefaProcess:   ~satie4unity protocol undefined, can't register this process".error;
+	}, // else
+{
+
 
 	// if already registered, re-register
-	if (  ~allProcesses.includesKey(\particule1) == true,
+	if (  ~satie4unity.allProcesses.includesKey(\particule1) == true,
 		{
 			'un-registering process: particule1'.postln;
-			~allProcesses.removeAt(\particule1);
+			~satie4unity.allProcesses.removeAt(\particule1);
 	});
 
 	'registering process: particule1'.postln;
-	~allProcesses.put(\particule1, ~particule1);
+	~satie4unity.allProcesses.put(\particule1, ~particule1);
+});
 
 
 	// required

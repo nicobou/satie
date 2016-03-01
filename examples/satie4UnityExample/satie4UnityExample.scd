@@ -35,8 +35,13 @@ s.waitForBoot{
 	s.sync;
 
 	// instantiate the OSC interface
-	~oscInterface = ~spatOSCMaker.value();
-	~satie4unity = ~satie4unityprotocol.value(~oscInterface, ~scbr);
+	if (~oscInterface == nil,{
+		~oscInterface = ~spatOSCMaker.value();
+	});
+
+	if (~satie4unity == nil,{
+		~satie4unity = ~satie4unityprotocol.value(~oscInterface, ~scbr);
+	});
 	s.sync;
 
 };  // end of  waitforboot

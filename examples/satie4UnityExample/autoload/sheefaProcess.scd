@@ -1,4 +1,4 @@
-
+// USES GLOBAL VARIABLES:   ~satie4unity  and ~scbr
 
 
 
@@ -48,19 +48,28 @@
 	};
 
 	// register process to environment
-	if (~allProcesses == nil, {
-		~allProcesses = ();         // environment namespace for project functions
+if (~satie4unity == nil, {
+	"sheefaProcess:   ~satie4unity protocol undefined, can't register this process".error;
+	}, // else
+{
+
+
+
+	// this check is unnecessary. If there is no satie4Unity environment, there can not be an assignment made
+if (~satie4unity.allProcesses == nil, {
+		~satie4unity.allProcesses = ();         // environment namespace for project functions
 	});
+});
 
 	// if already registered, re-register
-	if (  ~allProcesses.includesKey(\sheefa) == true,
+	if (  ~satie4unity.allProcesses.includesKey(\sheefa) == true,
 		{
 			'un-registering process: sheefa'.postln;
-			~allProcesses.removeAt(\sheefa);
+			~satie4unity.allProcesses.removeAt(\sheefa);
 	});
 
 	'registering process: sheefa'.postln;
-	~allProcesses.put(\sheefa, ~sheefa);
+	~satie4unity.allProcesses.put(\sheefa, ~sheefa);
 
 
 	// frees all clone synths
