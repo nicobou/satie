@@ -1,7 +1,4 @@
-
-
-
-
+// USES GLOBAL VARIABLES:   ~satie4unity  and ~scbr
 
 // this file defines  a process class, which is ONLY used by source nodes that have that have a URI of type:   "process" , e.g:      uri://process  "particule1"
 	// you can define any number of these process clases, each one, corresponding to a particular type of processing  behavoir you define
@@ -38,6 +35,26 @@
 
 	];
 
+// required: set these variables to the process name;
+~processName = \particule1;
+~process = ~particule1;
+~process.know=true;
+
+
+if (~satie4unity == nil, {
+	error(~processName ++ ": ~satie4unity protocol undefined, can't register this process");
+}, // else
+{
+	// if already registered, re-register
+	if (  ~satie4unity.allProcesses.includesKey(~processName) == true,
+		{
+			inform("un-registering process: "++~processName);
+			~satie4unity.allProcesses.removeAt(~processName);
+	});
+
+	inform("registering process: "++~processName);
+	~satie4unity.allProcesses.put(~processName, ~process);
+});
 
 // set up class instance dictionary
 
@@ -57,32 +74,7 @@ if (~particule1_pitchSequences == nil,
 
 	});
 
-
-	// required functions and state
-
-	~particule1.know=true;
-	~particule1.property =  {| self, property, value |
-		self.put(property.asSymbol, value);
-	};
-
-	// register process to environment
-	if (~allProcesses == nil, {
-		~allProcesses = ();         // environment namespace for project functions
-	});
-
-	// if already registered, re-register
-	if (  ~allProcesses.includesKey(\particule1) == true,
-		{
-			'un-registering process: particule1'.postln;
-			~allProcesses.removeAt(\particule1);
-	});
-
-	'registering process: particule1'.postln;
-	~allProcesses.put(\particule1, ~particule1);
-
-
-	// required
-
+	// required functions
 
 	~particule1.cleanup = { | self |
 
@@ -144,7 +136,18 @@ if (~particule1_pitchSequences == nil,
 // end of required class functions
 
 // the functions below are not requied
-// however if defined, they will be called by satie4unity when node's "update" message is received
+// however if defined, they will be called by satie4unity
+
+
+// if defined, will be called when node's "prop" message is received
+// otherwise satie4unity will send the  "prop" message to the node's group
+~particule1.prop =  {| self, property, value |
+	//'particule1.property called'.postln;
+		self.put(property.asSymbol, value);
+	};
+
+
+// if defined, will be called when node's "update" message is received
 // otherwise satie4unity will send the  "update" message to the node's group
 ~particule1.updateConnection = { | self, aziDeg, eleDeg, gainDB, delayMs, lpHz, distance |
 
@@ -161,12 +164,9 @@ if (~particule1_pitchSequences == nil,
 	aziScaler = (1 - xzDist)**self.cloudExp;   // increase this exponent to fall off more quickly
 	elevScaler = (1 - yDist)**self.cloudExp;   // increase this exponent to fall off more quickly
 
-
 	//aziScaler.postln;
 
 	//postf(" distance: %    xzDist:  %\n", distance, xzDist);
-
-
 
 	// saving the connection state in case its needed
 	self.aziDeg = aziDeg;
@@ -309,7 +309,7 @@ if (~particule1_pitchSequences == nil,
 
 				if (csvmidifilePath[0] != $/,
 					{
-						csvmidifilePath = ~projectDirectory++"/"++csvmidifilePath;
+						csvmidifilePath = ~satie4unity.projectDirectory++"/"++csvmidifilePath;
 				});
 
 				csvmidifilePath.postln;

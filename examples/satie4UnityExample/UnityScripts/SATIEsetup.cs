@@ -240,17 +240,21 @@ public class SATIEsetup : MonoBehaviour {
 
     void OnDestroy()
 	{
-        OnApplicationQuit();
+//        Debug.Log("SATIEsetup.OnDestroy");
+//        OSCMessage message = new OSCMessage ("/spatosc/core");
+//        message.Append ("clear");
+//        sendOSC (message);
 	}
 
 
 
 
     public void OnApplicationQuit(){
+        Debug.Log("SATIEsetup.OnApplicationQuit:  APP QUIT");
+        Debug.Log("SATIEsetup.OnDestroy");
         OSCMessage message = new OSCMessage ("/spatosc/core");
         message.Append ("clear");
         sendOSC (message);
-        Debug.Log("SATIEsetup.OnApplicationQuit:  APP QUIT");
 
         //disconnect();  don't need this
 

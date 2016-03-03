@@ -1,15 +1,15 @@
 // called from project's  main.scd file
 
-s.waitForBoot{
+//~satie4unity=nil;
 
-	~num_aux_bus = 5;
-	~fxInputBus = 0;  // relative aux bus number that satie will use for this project's synthdef sends to fx synthdefs
+s.waitForBoot{
 
 	~num_aux_bus = 5;
 	~fxInputBus = 0;  // relative aux bus number that satie will use for this project's synthdef sends to fx synthdefs
 
 	// create and initialize a sc-basic-renderer, and set environment variable
 	if (~scbr == nil,{
+		postln("loading SATIE kernal...");
 		~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus, satieSrcPath: ~rootSrcPath);
 	});
 
@@ -29,17 +29,19 @@ s.waitForBoot{
 	~scbr.makeSynthDef(\busreverb, \freeverb, [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\busgverb, \gverb, [~listeningFormat], [0]);
 
+	// dummy
+	~scbr.makeSynthDef(\dummyPlugin, \emptySource, [\emptySpat], [0]);    // dummy synthdef, used for new nodes
+	// be sure the synthDef is compiled on the server
+	s.sync;
+
+	// instantiate the OSC interface
+	if (~oscInterface == nil,{
+		~oscInterface = ~spatOSCMaker.value();
+	});
+	// instiante the satie4Unity protocol
+	if (~satie4unity == nil,{
+		~satie4unity = ~satie4unityprotocol.value(~oscInterface, ~scbr);
+	});
 	s.sync;
 
 };  // end of  waitforboot
-
-
-/*
-testing
-
-~myFile =  "/Users/zack/Dropbox/Unity3D/projects_unity5/balljamDemoSATIE_2015_unity5/Assets/StreamingAssets/midi/pitchSequences/bjGroove.mid.mid.txt";
-~helloWorld.readPitches(~myFile);
-~helloWorld.pitchSeqLen;
-~helloWorld.pitchSeqName;
-
-*/

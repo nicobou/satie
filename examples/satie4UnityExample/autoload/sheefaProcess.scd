@@ -1,7 +1,4 @@
-
-
-
-
+// USES GLOBAL VARIABLES:   ~satie4unity  and ~scbr
 
 // this file defines  a process class, which is ONLY used by source nodes that have that have a URI of type:   "process" , e.g:      uri://process  "sheefa"
 // you can define any number of these process clases, each one, corresponding to a particular type of processing  behavoir you define
@@ -19,7 +16,7 @@
 	// project specific
 
 	// connection state register for this project
-	'aziDeg' -> -10,
+	'g' -> -10,
 	'elevDeg' -> 10,
 	'gainDB' -> -99,
 	'delayMs' -> 0,
@@ -33,6 +30,26 @@
 	'triggerIntervalMs' -> 500,   // time interval, during which the clones will randomly trigger
 ];
 
+// required: set these variables to the process name;
+~processName = \sheefa;
+~process = ~sheefa;
+
+// required:   register process to environment
+if (~satie4unity == nil, {
+	error(~processName ++ ": ~satie4unity protocol undefined, can't register this process");
+}, // else
+{
+	// if already registered, re-register
+	if (  ~satie4unity.allProcesses.includesKey(~processName) == true,
+		{
+			inform("un-registering process: "++~processName);
+			~satie4unity.allProcesses.removeAt(~processName);
+	});
+
+	inform("registering process: "++~processName);
+	~satie4unity.allProcesses.put(~processName, ~process);
+});
+
 
 // define any custom "class"  variables, referenced by all "instants"  of "sheefa" class
 ~sheefa_pitchRoot = 60;
@@ -40,28 +57,14 @@
 
 
 
+// required
+~process.know=true;
+
 // required functions and state
 
-~sheefa.know=true;
 ~sheefa.property =  {| self, property, value |
 	self.put(property.asSymbol, value);
 };
-
-// register process to environment
-if (~allProcesses == nil, {
-	~allProcesses = ();         // environment namespace for project functions
-});
-
-// if already registered, re-register
-if (  ~allProcesses.includesKey(\sheefa) == true,
-	{
-		'un-registering process: sheefa'.postln;
-		~allProcesses.removeAt(\sheefa);
-});
-
-'registering process: sheefa'.postln;
-~allProcesses.put(\sheefa, ~sheefa);
-
 
 // frees all clone synths
 ~sheefa.freeClones = { | self |
@@ -79,15 +82,8 @@ if (  ~allProcesses.includesKey(\sheefa) == true,
 
 // required function,  but modified to suit project needs
 // generates N synths
-~sheefa.setup = { | self, nodeName, nodeGroupName,  argsList   |
+~sheefa.setup = { | self, nodeName, nodeGroupName |
 	var thisGroup = ~scbr.satieGroups[nodeGroupName.asSymbol] ;
-
-	if ( argsList.size >= 2,
-		{
-			postf(" ~sheefa.setup: node: %    arg1:   %    arg2:   %\n", nodeName, argsList[0], argsList[1]);
-	});
-
-
 
 	// generic
 	self.nodeName = nodeName;
@@ -125,7 +121,18 @@ if (  ~allProcesses.includesKey(\sheefa) == true,
 // end of required class functions
 
 // the functions below are not requied
-// however if defined, they will be called by satie4unity when node's "update" message is received
+// however if defined, they will be called by satie4unity, otherwise the messages will get forwarded to the node's group
+
+
+
+// if defined, will be called when node's "prop" message is received
+// otherwise satie4unity will send the  "prop" message to the node's group
+~sheefa.prop =  {| self, property, value |
+	self.put(property.asSymbol, value);
+};
+
+
+// If defined, the funciton below will be called when the node's "udate" message is received
 // otherwise satie4unity will send the  "update" message to the node's group
 ~sheefa.updateConnection = { | self, aziDeg, eleDeg, gainDB, delayMs, lpHz |
 
@@ -155,7 +162,6 @@ if (  ~allProcesses.includesKey(\sheefa) == true,
 
 	thisGroup.set(\spread, spreadVal);
 };
-
 
 // totally custom functions.  Calls to these functions result from OSC events received by satie4unity from Unity, and then applied to these functions,  if they exist
 

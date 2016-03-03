@@ -323,11 +323,11 @@ public class SATIErendererCtl : MonoBehaviour {
 	public void OnApplicationQuit()
     {
 
-        OSCMessage message = new OSCMessage ("/spatosc/core");
-        //message.Append ("fuckme");
-        message.Append ("clear");
-        sendOSC (message);
-        Debug.Log("APP QUIT");
+//        OSCMessage message = new OSCMessage ("/spatosc/core");
+//        //message.Append ("fuckme");
+//        message.Append ("clear");
+//        sendOSC (message);
+//        Debug.Log("APP QUIT");
 		disconnect();
 	}
 	
