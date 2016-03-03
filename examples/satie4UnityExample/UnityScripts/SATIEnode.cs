@@ -189,6 +189,13 @@ public class SATIEnode : MonoBehaviour {
         {
             _PropertyMessages.Add(s);
         }
+        if (uri == "")
+        {
+            uri = "plugin://default";
+            Debug.LogWarning("SATEnode.Awake: URI string is empty, setting URI to default plugin");
+        }
+
+
     }
 
 
@@ -438,7 +445,7 @@ public class SATIEnode : MonoBehaviour {
     {
         string path = "/spatosc/core/"+nodeType+"/" + nodeName + "/uri";
         List<object> items = new List<object>();
-        
+
         items.Add(uriString);        
         
         SATIEsetup.OSCtx(path, items);

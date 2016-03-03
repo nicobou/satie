@@ -18,6 +18,8 @@ this implementation is based on a one-listener model. In the future, we may wish
 Satie4Unity's message specification is inspired from the SPATOSC specification  (see:   http://code.sat.qc.ca/redmine/projects/spatosc/wiki/spec  )
 */
 
+// uses GLOBAL VARIABLES:   ~fxInputBus  (defined in projects)
+
 (
 ~satie4unityprotocol = { | oscContext, satieContext, oscID = \satie4unityOSC |
 	var osc = oscContext;
@@ -637,7 +639,7 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 						},
 						// else node good to go
 						{
-							postf("~createSourceProcess nodeName: %,   PROCESS_NAME: %\n", sourceName, processName);
+							postf("~createSourceProcess nodeName: %,   process name: %\n", sourceName, processName);
 							//postf("~createSourceProcess: %:  uri: %  group: %\n", sourceName, uriPath, groupName);
 
 							self.allSourceNodes[sourceName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
@@ -689,7 +691,7 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 				}
 			);
 
-			// postf("~createSourceNode: %:  uri: %  group: %\n", sourceName, uriName, groupName);
+			postf("~createSourceNode: %:  uri: %  group: %\n", sourceName, uriName, groupName);
 			self.allSourceNodes[sourceName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
 			self.allSourceNodes[sourceName.asSymbol].put(\plugin, \nil);
 
