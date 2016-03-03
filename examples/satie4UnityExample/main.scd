@@ -23,6 +23,8 @@
 // defaults to stereo
 ~listeningFormat = \stereoListener;    // you can also set this to  \domeVBAP  or  \labodomeVBAP  or   \octoVBAP
 
+~listeningFormat = \labodomeVBAP;    // you can also set this to  \domeVBAP  or  \labodomeVBAP  or   \octoVBAP
+
 // or specify the listening format via command line args
 // possible arg values:   "sato", "labo", "octo", or "stereo"
 
@@ -166,7 +168,7 @@ if (~meter == nil,  { ~plotTree=s.meter;});
 // note;  project file must be first
 // ~startupfiles = [~thisDir++"/"++~myProjectFIleName, ~rootSrcPath++"/protocols/satie4unity.scd", ~rootSrcPath++"/utils/dacTest.scd"];
 // ~startupfiles = [~thisDir++"/"++~myProjectFIleName, ~rootSrcPath++"/protocols/satie4unity.scd"];
-~startupfiles = [~thisDir++"/"++~myProjectFIleName, ~rootSrcPath++"/prototype/satie4unity.scd"];
+~startupfiles = [~thisDir++"/"++~myProjectFIleName, ~rootSrcPath++"/protocols/satie4unity.scd"];
 
 
 // next:  locate any .scd files in the project's autoload subdir

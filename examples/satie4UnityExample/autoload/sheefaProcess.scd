@@ -1,195 +1,199 @@
 // USES GLOBAL VARIABLES:   ~satie4unity  and ~scbr
 
-
-
-
 // this file defines  a process class, which is ONLY used by source nodes that have that have a URI of type:   "process" , e.g:      uri://process  "sheefa"
-	// you can define any number of these process clases, each one, corresponding to a particular type of processing  behavoir you define
+// you can define any number of these process clases, each one, corresponding to a particular type of processing  behavoir you define
 
 
 
 // required:  set up class struct
 
-	~sheefa = Environment[
-		// required fields
-		'nodeName' -> \nil,
-		'nodeGroupName' -> \nil,
-		'nodeGroup' -> \nil,
+~sheefa = Environment[
+	// required fields
+	'nodeName' -> \nil,
+	'nodeGroupName' -> \nil,
+	'nodeGroup' -> \nil,
 
-	   // project specific
+	// project specific
 
-		// connection state register for this project
-		'aziDeg' -> -10,
-		'elevDeg' -> 10,
-		'gainDB' -> -99,
-		'delayMs' -> 0,
-		'lpHz' -> 0.5,
-		'hpHz' -> 22040,
+	// connection state register for this project
+	'g' -> -10,
+	'elevDeg' -> 10,
+	'gainDB' -> -99,
+	'delayMs' -> 0,
+	'lpHz' -> 0.5,
+	'hpHz' -> 22040,
 
-		// other stuff
-		// this project
-		'synth' -> \zparticle1,    // used for clones
-		'cloneCount' -> 20,
-		'triggerIntervalMs' -> 500,   // time interval, during which the clones will randomly trigger
-	];
+	// other stuff
+	// this project
+	'synth' -> \zparticle1,    // used for clones
+	'cloneCount' -> 20,
+	'triggerIntervalMs' -> 500,   // time interval, during which the clones will randomly trigger
+];
 
+// required: set these variables to the process name;
+~processName = \sheefa;
+~process = ~sheefa;
 
-	// define any custom "class"  variables, referenced by all "instants"  of "sheefa" class
-	~sheefa_pitchRoot = 60;
-
-
-
-
-	// required functions and state
-
-	~sheefa.know=true;
-	~sheefa.property =  {| self, property, value |
-		self.put(property.asSymbol, value);
-	};
-
-	// register process to environment
+// required:   register process to environment
 if (~satie4unity == nil, {
-	"sheefaProcess:   ~satie4unity protocol undefined, can't register this process".error;
-	}, // else
+	error(~processName ++ ": ~satie4unity protocol undefined, can't register this process");
+}, // else
 {
-
-
-
-	// this check is unnecessary. If there is no satie4Unity environment, there can not be an assignment made
-if (~satie4unity.allProcesses == nil, {
-		~satie4unity.allProcesses = ();         // environment namespace for project functions
+	// if already registered, re-register
+	if (  ~satie4unity.allProcesses.includesKey(~processName) == true,
+		{
+			inform("un-registering process: "++~processName);
+			~satie4unity.allProcesses.removeAt(~processName);
 	});
+
+	inform("registering process: "++~processName);
+	~satie4unity.allProcesses.put(~processName, ~process);
 });
 
-	// if already registered, re-register
-	if (  ~satie4unity.allProcesses.includesKey(\sheefa) == true,
-		{
-			'un-registering process: sheefa'.postln;
-			~satie4unity.allProcesses.removeAt(\sheefa);
+
+// define any custom "class"  variables, referenced by all "instants"  of "sheefa" class
+~sheefa_pitchRoot = 60;
+
+
+
+
+// required
+~process.know=true;
+
+// required functions and state
+
+~sheefa.property =  {| self, property, value |
+	self.put(property.asSymbol, value);
+};
+
+// frees all clone synths
+~sheefa.freeClones = { | self |
+	//self.nodeGroup = nodeGroup;
+	//thisGroup = self.nodeGroup.group;
+
+	//postf("~sheefa.free:  freeing % synthVoices for group %\n",  self.cloneCount, self.nodeGroupName);
+
+	self.cloneCount.do( { arg item;
+		var nodename=(self.nodeName++"_"++item).asSymbol;
+		~scbr.cleanInstance(nodename, self.nodeGroupName );
 	});
-
-	'registering process: sheefa'.postln;
-	~satie4unity.allProcesses.put(\sheefa, ~sheefa);
+};
 
 
-	// frees all clone synths
-	~sheefa.freeClones = { | self |
-		//self.nodeGroup = nodeGroup;
-		//thisGroup = self.nodeGroup.group;
+// required function,  but modified to suit project needs
+// generates N synths
+~sheefa.setup = { | self, nodeName, nodeGroupName |
+	var thisGroup = ~scbr.satieGroups[nodeGroupName.asSymbol] ;
 
-		//postf("~sheefa.free:  freeing % synthVoices for group %\n",  self.cloneCount, self.nodeGroupName);
-
-		self.cloneCount.do( { arg item;
-			var nodename=(self.nodeName++"_"++item).asSymbol;
-			~scbr.cleanInstance(nodename, self.nodeGroupName );
-		});
-	};
+	// generic
+	self.nodeName = nodeName;
+	self.nodeGroupName = nodeGroupName;
+	self.nodeGroup = thisGroup;
 
 
-	// required function,  but modified to suit project needs
-	// generates N synths
-	~sheefa.setup = { | self, nodeName, nodeGroupName |
-		var thisGroup = ~scbr.satieGroups[nodeGroupName.asSymbol] ;
+	// project-specific code after here
+	postf("~sheefa.setup:  generating % synthVoices for group %\n",  self.cloneCount, self.nodeGroupName);
 
-		// generic
-		self.nodeName = nodeName;
-		self.nodeGroupName = nodeGroupName;
-		self.nodeGroup = thisGroup;
+	// generate N  self.cloneCount  synths
+	self.cloneCount.do( { arg item;
+		var nodename=(self.nodeName++"_"++item).asSymbol;
+		var synth;
 
-
-		// project-specific code after here
-		postf("~sheefa.setup:  generating % synthVoices for group %\n",  self.cloneCount, self.nodeGroupName);
-
-		// generate N  self.cloneCount  synths
-		self.cloneCount.do( { arg item;
-			var nodename=(self.nodeName++"_"++item).asSymbol;
-			var synth;
-
-			synth = ~scbr.makeInstance(nodename.asSymbol, self.synth.asSymbol, self.nodeGroupName);
-			// synth now created, so we can set its state
-			synth.set(\gainDB, -99);  // initialise to full attenuatuion
-			synth.set(\randTrigMaxMs, self.triggerIntervalMs);
-		});
-	};
+		synth = ~scbr.makeInstance(nodename.asSymbol, self.synth.asSymbol, self.nodeGroupName);
+		// synth now created, so we can set its state
+		synth.set(\gainDB, -99);  // initialise to full attenuatuion
+		synth.set(\randTrigMaxMs, self.triggerIntervalMs);
+	});
+};
 
 
-	~sheefa.cleanup = { | self |
+~sheefa.cleanup = { | self |
 
-		// add code here to manage project-specific stuff
-		postf("~sheefa.clearSynths: clearing synths in node: % group \n", self.nodeName);
+	// add code here to manage project-specific stuff
+	postf("~sheefa.clearSynths: clearing synths in node: % group \n", self.nodeName);
 
-		self.cloneCount.do( { arg item;
-			var nodename=(self.nodeName++"_"++item).asSymbol;
-			~scbr.cleanInstance(nodename.asSymbol, self.nodeGroupName);
-		});
-	};
+	self.cloneCount.do( { arg item;
+		var nodename=(self.nodeName++"_"++item).asSymbol;
+		~scbr.cleanInstance(nodename.asSymbol, self.nodeGroupName);
+	});
+};
 
-	// end of required class functions
+// end of required class functions
 
-	// the functions below are not requied
-	// however if defined, they will be called by satie4unity when node's "update" message is received
-	// otherwise satie4unity will send the  "update" message to the node's group
-	~sheefa.updateConnection = { | self, aziDeg, eleDeg, gainDB, delayMs, lpHz |
-
-		var 	thisGroup = self.nodeGroup; // ~allSourceNodes[self.nodeName.asSymbol].at(\proxy);
-
-		// saving the connection state in case its needed
-		self.aziDeg = aziDeg;
-		self.elevDeg = eleDeg;
-		self.gainDB = gainDB;
-		self.delayMs = delayMs;
-		self.lpHz = lpHz;
-		self.hpHz = 0.5;  // to be added
-
-		//postf("sheefa.updateConnection: called for node: %    azi: %  \n", self.nodeName, aziDeg);
-
-		// updating the connection of all this node's clones (via group message)
-		thisGroup.set(\aziDeg, self.aziDeg, \eleDeg, self.elevDeg, \gainDB, self.gainDB , \delayMs, self.delayMs, \lpHz, self.lpHz, \hpHz, self.hpHz);
-	};
+// the functions below are not requied
+// however if defined, they will be called by satie4unity, otherwise the messages will get forwarded to the node's group
 
 
-	// if defined, will be called when node's "spread" message is received
-	// otherwise the "spread" message will be applided to the node's group
-	~sheefa.spread = { | self, spreadVal |
 
-		var 	thisGroup = self.nodeGroup;
-		// updating the spread param of all this node's clones (via group message)
-
-		thisGroup.set(\spread, spreadVal);
-	};
+// if defined, will be called when node's "prop" message is received
+// otherwise satie4unity will send the  "prop" message to the node's group
+~sheefa.prop =  {| self, property, value |
+	self.put(property.asSymbol, value);
+};
 
 
-	// totally custom functions.  Calls to these functions result from OSC events received by satie4unity from Unity, and then applied to these functions,  if they exist
+// If defined, the funciton below will be called when the node's "udate" message is received
+// otherwise satie4unity will send the  "update" message to the node's group
+~sheefa.updateConnection = { | self, aziDeg, eleDeg, gainDB, delayMs, lpHz |
 
-	~sheefa.trigger = { arg self, items = #[1,2,3] ;
-		var thisGroup = self.nodeGroup;
-		var gain = self.gainDB;
-		var pitch,  vel, incidence;
+	var 	thisGroup = self.nodeGroup; // ~allSourceNodes[self.nodeName.asSymbol].at(\proxy);
 
-			if ( items.size != 3,
-			{
-				postf("~sheefa.trigger:  bad item count, expecing '[ pitch vel incidence]' , received: % items\n",items.size);
-			},
-			{ // else
+	// saving the connection state in case its needed
+	self.aziDeg = aziDeg;
+	self.elevDeg = eleDeg;
+	self.gainDB = gainDB;
+	self.delayMs = delayMs;
+	self.lpHz = lpHz;
+	self.hpHz = 0.5;  // to be added
 
-				vel =  items[1].asFloat;
+	//postf("sheefa.updateConnection: called for node: %    azi: %  \n", self.nodeName, aziDeg);
 
-				incidence = 1; items[2].asFloat;
+	// updating the connection of all this node's clones (via group message)
+	thisGroup.set(\aziDeg, self.aziDeg, \eleDeg, self.elevDeg, \gainDB, self.gainDB , \delayMs, self.delayMs, \lpHz, self.lpHz, \hpHz, self.hpHz);
+};
 
-				thisGroup.set(\randTrigMaxMs, self.triggerIntervalMs);  // update clones in case value has changed
 
-					// assign pitches  for each particle
-				self.cloneCount.do( { arg item;
-					var nodename=(self.nodeName++"_"++item).asSymbol;
+// if defined, will be called when node's "spread" message is received
+// otherwise the "spread" message will be applided to the node's group
+~sheefa.spread = { | self, spreadVal |
 
-					// this is where we cn calculate clone-specific parameters
-					var clone_pitch = pitch + item;
+	var 	thisGroup = self.nodeGroup;
+	// updating the spread param of all this node's clones (via group message)
 
-					~scbr.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(\note, [ pitch, vel, incidence ] );
+	thisGroup.set(\spread, spreadVal);
+};
 
-					~scbr.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(\t_trig, 1);
-				});
-		});
-	};
+// totally custom functions.  Calls to these functions result from OSC events received by satie4unity from Unity, and then applied to these functions,  if they exist
+
+~sheefa.trigger = { arg self, items = #[1,2,3] ;
+	var thisGroup = self.nodeGroup;
+	var gain = self.gainDB;
+	var pitch,  vel, incidence;
+
+	if ( items.size != 3,
+		{
+			postf("~sheefa.trigger:  bad item count, expecing '[ pitch vel incidence]' , received: % items\n",items.size);
+		},
+		{ // else
+
+			vel =  items[1].asFloat;
+
+			incidence = 1; items[2].asFloat;
+
+			thisGroup.set(\randTrigMaxMs, self.triggerIntervalMs);  // update clones in case value has changed
+
+			// assign pitches  for each particle
+			self.cloneCount.do( { arg item;
+				var nodename=(self.nodeName++"_"++item).asSymbol;
+
+				// this is where we cn calculate clone-specific parameters
+				var clone_pitch = pitch + item;
+
+				~scbr.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(\note, [ pitch, vel, incidence ] );
+
+				~scbr.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(\t_trig, 1);
+			});
+	});
+};
 
 

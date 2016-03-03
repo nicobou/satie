@@ -37,16 +37,17 @@ fB	 ??  Inharmonicity factor.
 
 ~name = \zkarpluck1;
 
-~function = {  | t_trig=0, c1 = 1, c3=20, fb = 2, note = #[60, 1, 0.5]  |   // note: pitch force incidence
+~function = {  | t_trig=0, c1 = 1, c3=20, fb = 2, note = #[60, 1, 0.5],  i_blockDelay = 2  |   // note: pitch force incidence
 	var env,inp,son;
 	var freq = note[0].midicps;
-	var amp = note[1];
+	var amp = note[1].clip(0,1);
 	var incidence = note[2].clip(0,1);
 	var pos = note[2] * 0.5; // unitVal * positionRange
 	var hfqLoss= c3 + (1-amp)*c3*2;  // add more dampening when amplitude gets low
 	var idecay = c1 +  (1-amp)*c1;  //  reduce decay when amplitude gets low
 	var lpassFq = 100 + (incidence**(0.7) * 21900) ;  // used to cut highs when incidence is low
 
+	var blockDelaySecs = ControlDur.ir * i_blockDelay;
 
 
 
@@ -62,7 +63,10 @@ fB	 ??  Inharmonicity factor.
 	// Out.ar(100, son);
 
 	// suggestion:  add amplitude-based filtering to the final output
-	son;   // make sure this is last, so the sound is returned
+	// son;   // make sure this is last, so the sound is returned
+
+	DelayN.ar(son, ControlDur.ir*10, blockDelaySecs);   // offset output by  N blocks to avoid transient mangulation by supernova
+
 	 };
 
 /*

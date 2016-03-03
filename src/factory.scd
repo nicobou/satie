@@ -40,7 +40,7 @@
 					var in, env;
 					in = SynthDef.wrap(srcfunc, prependArgs:  synthArgs);
 					// fade in set to as short as possible for percussive cases
-					env = Linen.kr(gate, 0.005, 1, 0.01, 2);
+					env = EnvGen.kr(Env.cutoff(0.01, 1, 2),  gate, doneAction: 2);
 					//in -> busses
 					toBusArray.do {arg item;
 						Out.ar(item, env * in);
@@ -71,7 +71,7 @@
 					// in
 					in = SynthDef.wrap(src, prependArgs:  synthArgs);
 					// fade in set to as short as possible for percussive cases
-					env = Linen.kr(gate, 0.005, 1, 0.01, 2);
+					env = EnvGen.kr(Env.cutoff(0.01, 1, 2),  gate, doneAction: 2);
 					// in -> busses (busses are taking raw input)
 					srcToBusses.do {arg item;
 						Out.ar(item, env * in);
@@ -94,7 +94,7 @@
 					in = SynthDef.wrap(src, prependArgs:  synthArgs);
 					DetectSilence.ar(in, doneAction: 2);
 					// fade in set to as short as possible for percussive cases
-					env = Linen.kr(gate, 0.005, 1, 0.01, 2);
+					env = EnvGen.kr(Env.cutoff(0.01, 1, 2),  gate, doneAction: 2);
 					// in -> busses (busses are taking raw input)
 					srcToBusses.do {arg item;
 						Out.ar(item, env * in);
