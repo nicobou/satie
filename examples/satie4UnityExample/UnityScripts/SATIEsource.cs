@@ -126,9 +126,12 @@ public class SATIEsource : SATIEnode {
    
 	public override void OnValidate()
 	{
-		base.OnValidate();
+        if (!_start)
+            return;
+        
+        	base.OnValidate();
 		
-		
+  		
 		if (_sourceFocusPercent != sourceFocusPercent)
 		{
 			_sourceFocusPercent = sourceFocusPercent = Mathf.Clamp(sourceFocusPercent, 0f, 100f); 
@@ -165,6 +168,7 @@ public class SATIEsource : SATIEnode {
 
    public override void Start()
     {
+ 
  
 
         //bool result = false;

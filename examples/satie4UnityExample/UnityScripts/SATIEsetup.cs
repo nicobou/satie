@@ -162,6 +162,7 @@ public class SATIEsetup : MonoBehaviour {
 	
     void OnValidate()
     {
+        if (!connected) return;
 
         if (_updateRateMs != updateRateMs )        
             setUpdateRate( updateRateMs );

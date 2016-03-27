@@ -59,9 +59,10 @@ public class SATIEprocess : MonoBehaviour {
         // ELSE
 
 
-        argString =  string.Join("_", launchArgs.ToArray()); 
+        argString =  string.Join(" ", launchArgs.ToArray()); 
 
-        //Debug.Log ("SATIEprocess.Awake:  uriString: " + "process://"+processName+ "_" + argString); 
+        Debug.Log ("SATIEprocess.Awake:  argString: " + argString); 
+        //       Debug.Log ("SATIEprocess.Awake:  uriString: " + "process://"+processName+ "_" + argString); 
         SATIEsourceCS.uri = "process://"+processName+ " " + argString;
 
 	}

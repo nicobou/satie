@@ -27,6 +27,9 @@ public class SATIElistener : SATIEnode {
 
     public override void Start()
     {
+
+        if ( ! this.gameObject.activeInHierarchy)  return;
+
 		nodeType = "listener";
 
         initNode();  // must be called before parent's "Start()"

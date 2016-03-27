@@ -1,39 +1,40 @@
 // USES GLOBAL VARIABLES:   ~satie4unity  and ~scbr
 
 // this file defines  a process class, which is ONLY used by source nodes that have that have a URI of type:   "process" , e.g:      uri://process  "particule1"
-	// you can define any number of these process clases, each one, corresponding to a particular type of processing  behavoir you define
+// you can define any number of these process clases, each one, corresponding to a particular type of processing  behavoir you define
 
 // this class is for updated resonant klones
 
 // required:  set up class struct
 
-	~particule1 = Environment[
-		// required fields
-		'nodeName' -> \nil,
-		'nodeGroupName' -> \nil,
-		'nodeGroup' -> \nil,
+~particule1 = Environment[
+	// required fields
+	'nodeName' -> \nil,
+	'nodeGroupName' -> \nil,
+	'nodeGroup' -> \nil,
 
-		// connection state
-		'aziDeg' -> -10,
-		'elevDeg' -> 10,
-		'gainDB' -> -99,
-		'delayMs' -> 0,
-		'lpHz' -> 0.5,
-		'hpHz' -> 22040,
-		// project specific
-		'synth' -> \zkarpluck1P,  // \zparticle1P,
-		'cloneCount' -> 0,
-		'cloudRadius' -> 5, // NOT IMPLEMENTED
-	   'cloudExp'-> 2,    // increase this value to make cloud more "narrow"  (narrows more quickly as with distance)
-		'triggerIntervalMs' -> 500,   // time interval, during which the clones will randomly trigger
-		// other state
-		'pitchSeqGlobalMode' -> 0,
-		'pitchSeqSym' -> \default,
-		'pitchSeqLen' -> 1,   // not used
-		'pitchSeqIncr' -> 1,   // used, but only to set global sequencer state
-		'pitchSeqPos' -> 0,     // not used
+	// connection state
+	'aziDeg' -> -10,
+	'elevDeg' -> 10,
+	'gainDB' -> -99,
+	'delayMs' -> 0,
+	'lpHz' -> 0.5,
+	'hpHz' -> 22040,
+	// project specific
+	'synth' -> \zkarpluck1P,  // \zparticle1P,
+	'cloneCount' -> 0,
+	'cloudRadius' -> 5, // NOT IMPLEMENTED
+	'cloudExp'-> 2,    // increase this value to make cloud more "narrow"  (narrows more quickly as with distance)
+	'triggerIntervalMs' -> 500,   // time interval, during which the clones will randomly trigger
+	// other state
+	'transposition' -> 0,
+	'pitchSeqGlobalMode' -> 0,
+	'pitchSeqSym' -> \default,
+	'pitchSeqLen' -> 1,   // not used
+	'pitchSeqIncr' -> 1,   // used, but only to set global sequencer state
+	'pitchSeqPos' -> 0,     // not used
 
-	];
+];
 
 // required: set these variables to the process name;
 ~processName = \particule1;
@@ -62,32 +63,32 @@ if (~satie4unity == nil, {
 
 
 
-	// define any custom "class"  variables, referenced by all "instants"  of "particule1" class
+// define any custom "class"  variables, referenced by all "instants"  of "particule1" class
 if (~particule1_pitchSequences == nil,
-		{
-			~particule1_pitchSequences = Dictionary.new();
-			~particule1_pitchSequences.put(\default, Dictionary.new());
-			~particule1_pitchSequences.at(\default).put(\pitches, [60]);
-			~particule1_pitchSequences.at(\default).put(\pos, 0);
-			~particule1_pitchSequences.at(\default).put(\incr,1);
-			~particule1_pitchSequences.at(\default).put(\size,1);
+	{
+		~particule1_pitchSequences = Dictionary.new();
+		~particule1_pitchSequences.put(\default, Dictionary.new());
+		~particule1_pitchSequences.at(\default).put(\pitches, [60]);
+		~particule1_pitchSequences.at(\default).put(\pos, 0);
+		~particule1_pitchSequences.at(\default).put(\incr,1);
+		~particule1_pitchSequences.at(\default).put(\size,1);
 
+});
+
+// required functions
+
+~particule1.cleanup = { | self |
+
+	// add code here to manage project-specific stuff
+	postf("~particule1.clearSynths: clearing synths in node: % group \n", self.nodeName);
+
+	self.cloneCount.do( { arg item;
+		var nodename=(self.nodeName++"_"++item).asSymbol;
+		~scbr.cleanInstance(nodename.asSymbol, self.nodeGroupName);
 	});
+	~particule1_instances.removeAt(self.nodeName);
 
-	// required functions
-
-	~particule1.cleanup = { | self |
-
-		// add code here to manage project-specific stuff
-		postf("~particule1.clearSynths: clearing synths in node: % group \n", self.nodeName);
-
-		self.cloneCount.do( { arg item;
-			var nodename=(self.nodeName++"_"++item).asSymbol;
-			~scbr.cleanInstance(nodename.asSymbol, self.nodeGroupName);
-		});
-		~particule1_instances.removeAt(self.nodeName);
-
-	};
+};
 
 
 // required function but adaptable to project specifics
@@ -143,8 +144,8 @@ if (~particule1_pitchSequences == nil,
 // otherwise satie4unity will send the  "prop" message to the node's group
 ~particule1.prop =  {| self, property, value |
 	//'particule1.property called'.postln;
-		self.put(property.asSymbol, value);
-	};
+	self.put(property.asSymbol, value);
+};
 
 
 // if defined, will be called when node's "update" message is received
@@ -183,39 +184,39 @@ if (~particule1_pitchSequences == nil,
 };
 
 
-	// if defined, will be called when node's "spread" message is received
-	// otherwise the "spread" message will be applided to the node's group
-	~particule1.spread = { | self, spreadVal |
+// if defined, will be called when node's "spread" message is received
+// otherwise the "spread" message will be applided to the node's group
+~particule1.spread = { | self, spreadVal |
 
-		var 	thisGroup = self.nodeGroup;
-		// updating the spread param of all this node's clones (via group message)
+	var 	thisGroup = self.nodeGroup;
+	// updating the spread param of all this node's clones (via group message)
 
-		thisGroup.set(\spread, spreadVal);
-	};
+	thisGroup.set(\spread, spreadVal);
+};
 
 
-	// totally custom functions.  Calls to these functions result from OSC events received by satie4unity from Unity, and then applied to these functions,  if they exist
+// totally custom functions.  Calls to these functions result from OSC events received by satie4unity from Unity, and then applied to these functions,  if they exist
 
-	~particule1.setIncrement = { arg self, items = #[1] ;
+~particule1.setIncrement = { arg self, items = #[1] ;
 
-		if ( items.size != 1,
-			{
-				warn("~particule1.setIncrement:  bad item count,  takes one float arg, received: % items\n",items.size);
-			},
-			//else
-			{
-					postf("particule1.setIncrement:  increment = % \n", items[0].asFloat);
+	if ( items.size != 1,
+		{
+			warn("~particule1.setIncrement:  bad item count,  takes one float arg, received: % items\n",items.size);
+		},
+		//else
+		{
+			postf("particule1.setIncrement:  increment = % \n", items[0].asFloat);
 
-			   if (self.pitchSeqGlobalMode != 0,
+			if (self.pitchSeqGlobalMode != 0,
 				{
-				~particule1_pitchSequences.at(self.pitchSeqSym).put(\incr, items[0].asFloat);
+					~particule1_pitchSequences.at(self.pitchSeqSym).put(\incr, items[0].asFloat);
 				},
 				// else
 				{
 					self.pitchSeqIncr = items[0].asFloat;
 			});
-		});
-	};
+	});
+};
 
 
 // custom method
@@ -265,16 +266,16 @@ if (~particule1_pitchSequences == nil,
 
 						position = ~particule1_pitchSequences.at(seqName.asSymbol).at(\pos);
 						incr = ~particule1_pitchSequences.at(seqName.asSymbol).at(\incr);
-						pitch = ~particule1_pitchSequences.at(seqName.asSymbol).at(\pitches)[position];
+						pitch =  self.transposition + ~particule1_pitchSequences.at(seqName.asSymbol).at(\pitches)[position];
 						~particule1_pitchSequences.at(seqName.asSymbol).put(\pos,  ((position + incr) % size) );
 					},
 					// else   instance specific read
 					{
 						position = self.pitchSeqPos;
 						incr = self.pitchSeqIncr;
-						pitch = ~particule1_pitchSequences.at(seqName.asSymbol).at(\pitches)[position];
+						pitch =  self.transposition + ~particule1_pitchSequences.at(seqName.asSymbol).at(\pitches)[position];
 						self.pitchSeqPos = ((position + incr) % size);
-					});
+				});
 
 
 				~scbr.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(\note, [ pitch, vel, incidence ] );
@@ -292,96 +293,96 @@ if (~particule1_pitchSequences == nil,
 	});
 };
 
-	// custom method
-	~particule1.readPitches = { arg self, items = #["/tmp"] ;
+// custom method
+~particule1.readPitches = { arg self, items = #["/tmp"] ;
 
-		var pitchList, seqName, file, csvmidifilePath;
+	var pitchList, seqName, file, csvmidifilePath;
 
-		//postf("readPitches:   arg 0: % \n",  items[0] );
+	//postf("readPitches:   arg 0: % \n",  items[0] );
 
-		if ( items.size != 1,
-			{
-				warn("~particule1.readPitches:  bad item count, expecting one filePath arg, received: % items\n",items.size);
-			},
-			//else
-			{
-				csvmidifilePath = items[0].asString;
+	if ( items.size != 1,
+		{
+			warn("~particule1.readPitches:  bad item count, expecting one filePath arg, received: % items\n",items.size);
+		},
+		//else
+		{
+			csvmidifilePath = items[0].asString;
 
-				if (csvmidifilePath[0] != $/,
-					{
-						csvmidifilePath = ~satie4unity.projectDirectory++"/"++csvmidifilePath;
-				});
+			if (csvmidifilePath[0] != $/,
+				{
+					csvmidifilePath = ~satie4unity.projectDirectory++"/"++csvmidifilePath;
+			});
 
-				csvmidifilePath.postln;
+			csvmidifilePath.postln;
 
-				pitchList = List.new();
-				seqName = csvmidifilePath.split.last;
-				file = File(csvmidifilePath.standardizePath,"rb");
+			pitchList = List.new();
+			seqName = csvmidifilePath.split.last;
+			file = File(csvmidifilePath.standardizePath,"rb");
 
-				// process only if pitch sequence has not yet been loaded
-				if ( ~particule1_pitchSequences.includesKey(seqName.asSymbol),
-					{
+			// process only if pitch sequence has not yet been loaded
+			if ( ~particule1_pitchSequences.includesKey(seqName.asSymbol),
+				{
 
-						//  file already loaded, just set instance  specific state
-						postf("particule1.readPitches:  sequence % already loaded, skipping file load\n", seqName);
-						self.pitchSeqSym = seqName.asSymbol;
-						self.pitchSeqLen = ~particule1_pitchSequences.at(seqName.asSymbol).at(\size);
-						self.pitchSeqPos = 0;
+					//  file already loaded, just set instance  specific state
+					postf("particule1.readPitches:  sequence % already loaded, skipping file load\n", seqName);
+					self.pitchSeqSym = seqName.asSymbol;
+					self.pitchSeqLen = ~particule1_pitchSequences.at(seqName.asSymbol).at(\size);
+					self.pitchSeqPos = 0;
 
-						// and reset sequence's global state
-						~particule1_pitchSequences.at(seqName.asSymbol).put(\pos, 0);
-						~particule1_pitchSequences.at(seqName.asSymbol).put(\incr, self.pitchSeqIncr);   // using instance specific state.. may overwrite
+					// and reset sequence's global state
+					~particule1_pitchSequences.at(seqName.asSymbol).put(\pos, 0);
+					~particule1_pitchSequences.at(seqName.asSymbol).put(\incr, self.pitchSeqIncr);   // using instance specific state.. may overwrite
 
 
-					},
-					// else  read file and create pitch sequence
-					{
-						//postf("file % length:  %\n", csvmidifilePath, file.length);
+				},
+				// else  read file and create pitch sequence
+				{
+					//postf("file % length:  %\n", csvmidifilePath, file.length);
 
-						file.do({
-							var value, event;
+					file.do({
+						var value, event;
 
-							value = file.getLine();
+						value = file.getLine();
 
-							if (value.contains("Note_on_c"),
-								{
-									event = value.split($,);
-									pitchList.add(event[4].asInt);
-							});
-						});
-
-						file.close;
-
-						if (pitchList.size > 0,
+						if (value.contains("Note_on_c"),
 							{
-								postf("% pitches read from file %\n", pitchList.size,  csvmidifilePath);
-								// add sequence to dictionary
-
-								~particule1_pitchSequences.removeAt(seqName.asSymbol);   // overwrite previous
-
-								~particule1_pitchSequences.put(seqName.asSymbol, Dictionary.new());
-								~particule1_pitchSequences.at(seqName.asSymbol).put(\pitches, pitchList);
-								~particule1_pitchSequences.at(seqName.asSymbol).put(\size, pitchList.size);
-								~particule1_pitchSequences.at(seqName.asSymbol).put(\pos, 0);
-								~particule1_pitchSequences.at(seqName.asSymbol).put(\incr, 1);
-
-
-								//~particule1_pitchSequences.removeAt(seqName.asSymbol);
-								//~particule1_pitchSequences.put(seqName.asSymbol, pitchList);
-								//~particule1_pitchSequences.put(seqName.asSymbol,
-
-								// set instance local state -- currently not used, but available for future deployment
-								self.pitchSeqSym = seqName.asSymbol;
-								self.pitchSeqLen = pitchList.size;
-								self.pitchSeqPos = 0;
-							},
-							//else
-							{
-								warn("no pitches found in file: "++csvmidifilePath);
+								event = value.split($,);
+								pitchList.add(event[4].asInt);
 						});
-				});
-		});
-	};
+					});
+
+					file.close;
+
+					if (pitchList.size > 0,
+						{
+							postf("% pitches read from file %\n", pitchList.size,  csvmidifilePath);
+							// add sequence to dictionary
+
+							~particule1_pitchSequences.removeAt(seqName.asSymbol);   // overwrite previous
+
+							~particule1_pitchSequences.put(seqName.asSymbol, Dictionary.new());
+							~particule1_pitchSequences.at(seqName.asSymbol).put(\pitches, pitchList);
+							~particule1_pitchSequences.at(seqName.asSymbol).put(\size, pitchList.size);
+							~particule1_pitchSequences.at(seqName.asSymbol).put(\pos, 0);
+							~particule1_pitchSequences.at(seqName.asSymbol).put(\incr, 1);
+
+
+							//~particule1_pitchSequences.removeAt(seqName.asSymbol);
+							//~particule1_pitchSequences.put(seqName.asSymbol, pitchList);
+							//~particule1_pitchSequences.put(seqName.asSymbol,
+
+							// set instance local state -- currently not used, but available for future deployment
+							self.pitchSeqSym = seqName.asSymbol;
+							self.pitchSeqLen = pitchList.size;
+							self.pitchSeqPos = 0;
+						},
+						//else
+						{
+							warn("no pitches found in file: "++csvmidifilePath);
+					});
+			});
+	});
+};
 
 /*
 testing

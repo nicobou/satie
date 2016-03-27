@@ -20,6 +20,8 @@ o.remove;  // when done, you need to clean up the OSCresponderNode
 
 SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 
+s.scope
+
 */
 //o= nil;
 

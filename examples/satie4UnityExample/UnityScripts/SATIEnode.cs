@@ -49,8 +49,7 @@ public class SATIEnode : MonoBehaviour {
     public float angleThresh = 5f; 
     public float movementThresh = .05f; 
     private float _movementThreshSqu;
-    private bool _start = false;
-
+ 
     public List <string> PropertyMessages = new List<string>();
     private List <string> _PropertyMessages = new List<string>();  // used to detect changes in the Inspector
 
@@ -67,6 +66,8 @@ public class SATIEnode : MonoBehaviour {
 	[HideInInspector] 
 	public bool updatePosFlag = false;
 
+    [HideInInspector] 
+    public bool _start = false;
 
 
     [HideInInspector] 

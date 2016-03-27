@@ -43,7 +43,7 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 	var freq = note[0].midicps;
 	var amp = note[1];
 
-	var incidence = note[2].clip(0,1);
+	var incidence = note[2].clip(-1,1);
 
 
 	amp = amp * 0.2;      // static gain adjustement

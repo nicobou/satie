@@ -18,6 +18,14 @@ this implementation is based on a one-listener model. In the future, we may wish
 Satie4Unity's message specification is inspired from the SPATOSC specification  (see:   http://code.sat.qc.ca/redmine/projects/spatosc/wiki/spec  )
 */
 
+/*
+for debugguing
+
+~satie4unity = ~satie4unityprotocol.value(~oscInterface, ~scbr);
+
+*/
+
+
 // uses GLOBAL VARIABLES:   ~fxInputBus  (defined in projects)
 
 (
@@ -449,7 +457,7 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 
 							//postf("~sourceProcessCallback: send PROP to group:  nodeName: %  group: %   \n", name,groupName);
 
-							e.setGroupProperty.value(groupName, args[1], args[2]);
+							e.setGroupProperty(groupName, args[1], args[2]);
 					},
 					// else use custom handler
 					{
@@ -611,6 +619,8 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 		var argList = List[];
 
 		("~createSourceProcess:  URI"++uriPath).postln;
+
+			// sheefa = uriPath;
 
 		stringArray = uriPath.asString.split($ );
 		charIndex = stringArray[0].asString.find("://");
@@ -988,7 +998,7 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 			if ( (valueCount > 1) ,    // pass vector
 				{
 					// DEBUG
-					// postln("~setEvent: " ++ nodeName.asSymbol ++ "    args: " ++ args  );
+					//postln("~setEvent: " ++ nodeName.asSymbol ++ "    args: " ++ args  );
 					//if( args[2] < 0.07, {postln("~setEvent: " ++ nodeName.asSymbol ++ "   INCIDENCE  " ++ args[2]  )});
 
 					thisSynth.set(eventName.asSymbol, args);

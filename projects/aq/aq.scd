@@ -26,7 +26,7 @@ s.waitForBoot{
 	//~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\test, \testtone,  [~listeningFormat], [0]);
 	//~scbr.makeSynthDef(\zbell1, \zbell1, [~listeningFormat], [0]);
-	~scbr.makeSynthDef(\pbell1, \pbell1, [~listeningFormat], [0]);
+	~scbr.makeSynthDef(\pbell1, \pbell1, [~listeningFormat], [0], [~scbr.aux[~fxInputBus]]);
 	~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [~listeningFormat], [0], [~scbr.aux[~fxInputBus]]);
 
 	// note order:   name, synthName, fxBus, listenerName, outBusNo, mapName, optArgs
@@ -35,6 +35,7 @@ s.waitForBoot{
     //~scbr.makeSynthDef2(\particule1, \particule1,   [~scbr.aux[~fxInputBus]], [~listeningFormat],  [0], \defaultMapper, []);  //  for kamakazis
 	~scbr.makeSynthDef2(\particule1, \particule1,   [~scbr.aux[~fxInputBus]], [~listeningFormat],  [0], \defaultMapper, []);  //  for kamakazis
 	// ~scbr.makeSynthDef2(\particule1, \particule1,   [~scbr.aux[~fxInputBus]], [\labodomeVBAP],  [0], \defaultMapper, []);  //  for kamakazis
+	~scbr.makeSynthDef2(\particule1dyn, \particule1dyn,   [~scbr.aux[~fxInputBus]], [~listeningFormat],  [0], \defaultMapper, []);  //  for allocated staticlly spatialized particles
 
 
 	~scbr.makeSynthDef(\busreverb, \freeverb, [~listeningFormat], [0]);

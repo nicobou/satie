@@ -27,6 +27,7 @@
 	'triggerIntervalMs' -> 500,   // time interval, during which the clones will randomly trigger
 	// other state
 	'pitchSeqGlobalMode' -> 0,
+	'voiceCount' -> 0,
 	'pitchSeqSym' -> \default,
 	'pitchSeqLen' -> 1,   // not used
 	'pitchSeqIncr' -> 1,   // used, but only to set global sequencer state
@@ -105,7 +106,7 @@ if (~particule2_pitchSequences == nil,
 		{
 			//~sheefaVec = argvec;
 
-			//postf(" particule2.setup: node: %    args:   %    size:  %\n", nodeName, argsList, argsList.size);
+			postf(" particule2.setup: node: %    args:   %    size:  %\n", nodeName, argsList, argsList.size);
 			if ( argsList[0].asString == "cloneCount",
 				{
 					self.cloneCount = argsList[1].asInt.clip(1, 1000);   // clip to 1000 to avoid meltdown caused by error
@@ -117,7 +118,23 @@ if (~particule2_pitchSequences == nil,
 			});
 	});
 
-	self.clonePool = self.cloneCount * 20;
+	if ( argsList.size >= 4,
+		{
+			//~sheefaVec = argvec;
+
+			if ( argsList[2].asString == "voiceCount",
+				{
+					self.voiceCount = argsList[3].asInt.clip(1, 1000);   // clip to 1000 to avoid meltdown caused by error
+					postf(" particule2.setup: node: %   setting up for % voices \n", nodeName, self.voiceCount);
+				},
+				// else bad arg
+				{
+					error("particule2.setup: unrecognized key, expecting 'voiceCount' ");
+			});
+	});
+
+
+	self.clonePool = self.cloneCount * self.voiceCount;
 
 	self.cloneVector =  Array.new(self.clonePool);
 	self.cloneVector.postln;
@@ -147,9 +164,9 @@ if (~particule2_pitchSequences == nil,
 
 // if defined, will be called when node's "prop" message is received
 // otherwise satie4unity will send the  "prop" message to the node's group
-~particule2.prop =  {| self, property, value |
-	self.put(property.asSymbol, value);
-};
+// ~particule2.prop =  {| self, property, value |
+// 	self.put(property.asSymbol, value);
+// };
 
 
 

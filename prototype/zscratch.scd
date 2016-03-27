@@ -4,11 +4,38 @@
 
 //~dumpNodes.value();
 
+
+
+~satie4unity.allSourceNodes[\srcNodeSP].at(\groupNameSym);
+
+
+~satie4unity.allSourceNodes[\srcNodeSP];
+
+~myGroupName = \srcNodeSP_group;
+
+g = ~scbr.satieGroups[~myGroupName].set(\delayMs, 200, \attackDB, -44);
+
+
+g = ~scbr.satieGroups[~myGroupName].run(true);
+
+~nodeName= \bellSnd_8;
+
+
+~satie4unity.setEvent(~nodeName, \note, [80,1,1]);
+~satie4unity.setEvent(~nodeName, \t_trig, 1);
+
+
+
+
+
+
+
 ~groupSym = \default;
 
-~nodeName= \srcNode_0;
+~nodeName= \bellSnd_8;
+~nodeName = \setNodeSP;
 
-~nodeGroupName = ~allSourceNodes[~nodeName.asSymbol].at(\groupNameSym);
+~nodeGroupName = ~satie4unity.allSourceNodes[~nodeName.asSymbol].at(\groupNameSym);
 
 ~listenerName = "listener";
 
