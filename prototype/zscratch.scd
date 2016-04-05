@@ -6,6 +6,27 @@
 
 
 
+~scbr.satieGroupInstances[\default][\sound].set(\gainDB, -10);
+
+~scbr.satieGroupInstances[\default][\sound].set(\loop, 1);
+
+~scbr.satieGroupInstances[\default][\sound].set(\gainDB, -60.1);
+
+TempoClock.default.sched(0.05,
+									{
+~scbr.satieGroupInstances[\default][\sound].set(\gainDB, -60.1);
+
+~scbr.satieGroups[\default].set(\gainDB,  -30);
+
+										nil });
+
+
+
+
+~scbr.satieGroupInstances[\default][\sound].set(\gainDB, -30);
+
+
+
 ~satie4unity.allSourceNodes[\srcNodeSP].at(\groupNameSym);
 
 
