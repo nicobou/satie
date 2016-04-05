@@ -264,7 +264,7 @@ for debugguing
 
 
 							thisSynth.set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB, \delayMs, delayMs, \lpHz, lpHz);
-							//postf("~connectionCallback:  update: lpHz  % \n", lpHz);
+							//postf("~connectionCallback:  update: gain  % \n", gainDB);
 
 						}
 					)
@@ -449,22 +449,22 @@ for debugguing
 
 
 			switch(type,
-			'prop',
-			{
-				if (myProcess[\prop] == nil,
-					{
-						var groupName = e.allSourceNodes[name.asSymbol].at(\groupNameSym);
+				'prop',
+				{
+					if (myProcess[\prop] == nil,
+						{
+							var groupName = e.allSourceNodes[name.asSymbol].at(\groupNameSym);
 
 							//postf("~sourceProcessCallback: send PROP to group:  nodeName: %  group: %   \n", name,groupName);
 
 							e.setGroupProperty(groupName, args[1], args[2]);
-					},
-					// else use custom handler
-					{
-						//postf("~~sourceProcessCallback:  calling custom prop handler for %\n", name);
-						myProcess[\prop].value(myProcess,  args[1], args[2]);
-				});
-			},
+						},
+						// else use custom handler
+						{
+							//postf("~~sourceProcessCallback:  calling custom prop handler for %\n", name);
+							myProcess[\prop].value(myProcess,  args[1], args[2]);
+					});
+				},
 
 				'uri',  // not used:  process synths are defined in the process class, or set by events
 				{
@@ -615,26 +615,26 @@ for debugguing
 			var temp, type, charIndex, processName, processClone, myProcess, cloneGroup, cloneGroupName;
 			var argsString = "";
 			var stringArray;
-		var rawArgVec = nil;
-		var argList = List[];
+			var rawArgVec = nil;
+			var argList = List[];
 
-		("~createSourceProcess:  URI"++uriPath).postln;
+			("~createSourceProcess:  URI"++uriPath).postln;
 
 			// sheefa = uriPath;
 
-		stringArray = uriPath.asString.split($ );
-		charIndex = stringArray[0].asString.find("://");
-		processName = stringArray[0].asString.subStr(charIndex+3);
-		argsString = uriPath.asString.subStr(stringArray[0].size+1);
-		rawArgVec= argsString.asString.split($ );
+			stringArray = uriPath.asString.split($ );
+			charIndex = stringArray[0].asString.find("://");
+			processName = stringArray[0].asString.subStr(charIndex+3);
+			argsString = uriPath.asString.subStr(stringArray[0].size+1);
+			rawArgVec= argsString.asString.split($ );
 
-		// make list of items in argString
-		rawArgVec.do( { arg item;
-			if ( item != "",
-				{
-					argList.add(item);
+			// make list of items in argString
+			rawArgVec.do( { arg item;
+				if ( item != "",
+					{
+						argList.add(item);
+				});
 			});
-		});
 
 
 			if (self.allProcesses[processName.asSymbol] == nil,
@@ -853,7 +853,17 @@ for debugguing
 			if (validPluginName.asSymbol != self.allSourceNodes[nodeName.asSymbol].at(\plugin).asSymbol,
 				{
 					var synth;
+
+					// check to see if a synth has already been allocacted, if so, kill it
+					if  ( self.allSourceNodes[nodeName.asSymbol].at(\synth) != nil,
+						{
+							'~setSynth: REPLACE EXISTING SYNTH'.postln;
+							satie.cleanInstance(nodeName.asSymbol,groupName.asSymbol );
+					});
+
 					self.allSourceNodes[nodeName.asSymbol].put(\plugin, validPluginName.asSymbol);
+
+
 					if ( groupName.asSymbol == \default,
 						{
 							synth = satie.makeInstance(nodeName.asSymbol, validPluginName.asSymbol);  // just being careful, but the call below should work for this too
@@ -868,6 +878,8 @@ for debugguing
 						{
 							synth.set(\in, self.allSourceNodes[nodeName.asSymbol].at(\auxBus) );
 					});
+
+
 
 					self.allSourceNodes[nodeName.asSymbol].put(\synth, synth);
 				},
