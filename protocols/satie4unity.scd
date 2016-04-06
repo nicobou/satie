@@ -951,6 +951,9 @@ for debugguing
 
 		~setState = { | self, nodeName,  state |
 			var thisSynth = self.allSourceNodes[nodeName.asSymbol].at(\synth);
+
+			thisSynth.run(state);
+
 			// "setState called".inform;
 			/*		if ( (state > 0),
 			{
