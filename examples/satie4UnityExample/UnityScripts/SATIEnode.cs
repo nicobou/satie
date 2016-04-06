@@ -38,7 +38,7 @@ public class SATIEnode : MonoBehaviour {
     private bool _state;
 
 
-    public string uri = "";
+    public string uri = "plugin://default";
 
     public string AssetPath = "unused";   // subdirectory of Assets/StreamingAssets
     private string _assetPath = "";
@@ -62,12 +62,12 @@ public class SATIEnode : MonoBehaviour {
     
 	[HideInInspector] 
 	public bool updateRotFlag = false;
-    
+
 	[HideInInspector] 
 	public bool updatePosFlag = false;
 
     [HideInInspector] 
-    public bool _start = false;
+       public bool _start = false;
 
 
     [HideInInspector] 
@@ -98,8 +98,11 @@ public class SATIEnode : MonoBehaviour {
 	public virtual void OnValidate()
     {
 
-        if (!_start)
-            return;
+        if (! _start ) return;
+  
+       // Debug.LogError("SATIEnode.OnValidate() for source: " + nodeName);
+
+
         if (_state != nodeEnabled)
         {
             _state = nodeEnabled;
@@ -193,10 +196,8 @@ public class SATIEnode : MonoBehaviour {
         if (uri == "")
         {
             uri = "plugin://default";
-            Debug.LogWarning("SATEnode.Awake: URI string is empty, setting URI to default plugin");
+            Debug.LogWarning("SATEnode.Awake: node:"+ nodeName +" URI string is empty, setting URI to default plugin");
         }
-
-
     }
 
 
@@ -219,10 +220,27 @@ public class SATIEnode : MonoBehaviour {
        // Debug.Log("SATIEnode.Start:  AssetPath = " + _assetPath);
 		//updatePosFlag = true;  
 		//updateRotFlag = true;
-
-
+       // Debug.LogError("SATIEnode.Start() for source: " + nodeName);
     }
 	
+
+    void OnEnable()
+    {
+        if (!_start)
+            return;
+        if (nodeEnabled)
+            setNodeActive(nodeName, true);
+    }
+
+    void OnDisable()
+    {
+        if (!_start)
+            return;
+        if (nodeEnabled)
+            setNodeActive(nodeName, false);
+    }
+
+
 
     public void setActive(bool state)
     {
@@ -301,7 +319,7 @@ public class SATIEnode : MonoBehaviour {
         {
             nodeName = transform.name; // + "_" + nodeNo;
             result = SATIEsetup.createListener(nodeName, uriString);
-			setURI(nodeName, uriString); // not really used but .....
+			sendUri( uriString); // not really used but .....
         } 
 
 		// this should be done in the superclass-- 
@@ -317,7 +335,7 @@ public class SATIEnode : MonoBehaviour {
 
             nodeName = transform.name;  // + "_" + nodeNo;
             result = SATIEsetup.createSource(nodeName, uriString, src.group);
-             //setURI(nodeName, uriString);   //NO NEED TO DO THIS NOW THAT THE URI IS CREATED WITH THE SOURCE
+             //sendUri(uriString);   //NO NEED TO DO THIS NOW THAT THE URI IS CREATED WITH THE SOURCE
 			//Debug.Log("******************************************SATIEnode.initNode: source nodename; "+nodeName+"  groupName: "+ src.group);
 		}
 		else if (nodeType == "group" )
@@ -332,7 +350,8 @@ public class SATIEnode : MonoBehaviour {
 		}
 
         _state = nodeEnabled;
-       setNodeActive(nodeName, nodeEnabled);
+        // moved to initProperties
+//       setNodeActive(nodeName, nodeEnabled);
         
       //Debug.Log("SATIEnode.Update: CREATING SPAT_OSCNODE: "+nodeName);
 
@@ -354,6 +373,9 @@ public class SATIEnode : MonoBehaviour {
     {
         yield return new WaitForFixedUpdate();
         //yield return new WaitForSeconds(.05f);
+
+        setNodeActive(nodeName, nodeEnabled);
+
         sendProperties();
         
     }
@@ -413,12 +435,12 @@ public class SATIEnode : MonoBehaviour {
 
 
 
-    public virtual void  setNodeActive(string nodeName, bool nodeEnabled)
+    public virtual void  setNodeActive(string nodeName, bool state)
     {
         string path = "/spatosc/core/"+nodeType+"/" + nodeName + "/state";
         List<object> items = new List<object>();
         
-        if (nodeEnabled) 
+        if (state) 
             items.Add(1);
         else 
             items.Add(0);
@@ -440,15 +462,28 @@ public class SATIEnode : MonoBehaviour {
         items.Clear();
 
     }
-
-
-    void setURI(string nodeName, string uriString)
+        
+    // DANGER:  no uriString format checking
+    public  void setUri ( string uriString )
     {
+
+        uri = uriString;
+        if ( _start) 
+        {
+            sendUri ( uriString );
+            sendProperties();
+            updatePosFlag = true;
+            updateRotFlag = true;
+        }
+    }
+
+    public void sendUri(string uriString)
+    {
+     
         string path = "/spatosc/core/"+nodeType+"/" + nodeName + "/uri";
         List<object> items = new List<object>();
 
         items.Add(uriString);        
-        
         SATIEsetup.OSCtx(path, items);
         items.Clear();
     }
@@ -592,7 +627,7 @@ public class SATIEnode : MonoBehaviour {
             } else
                 uriString = uri;
             
-            setURI(nodeName, uriString);
+            sendUri(uriString);
         }
         sendProperties();
         updatePosFlag = updateRotFlag = true;

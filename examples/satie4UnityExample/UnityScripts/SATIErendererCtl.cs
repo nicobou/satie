@@ -32,9 +32,11 @@ public class SATIErendererCtl : MonoBehaviour {
 	public string projectDir; // defaults to $PROJECT/StreamingAssets
 	private string _projectDir;
 
-	public float outputGainDB = -10f;
+    [Range(-90f, 18)]
+   	public float outputGainDB = -10f;
     private float _outputGainDB;
     
+    [Range(-18f, 18)]
     public float outputTrimDB = -0f;
     private float _outputTrimDB;
     
@@ -72,8 +74,12 @@ public class SATIErendererCtl : MonoBehaviour {
 
     }
 
-	public void Awake() 
+
+    public void Awake() 
     {
+        //Debug.Log(string.Format("{0}.Awake(): called", GetType()), transform);
+
+
         SATIEsetupCS = transform.GetComponent<SATIEsetup>();   // look for SATIEsetup component in this transform
         
         if (!SATIEsetupCS)

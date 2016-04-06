@@ -272,7 +272,15 @@ public class SATIEsetup : MonoBehaviour {
 
     // expand this to take multiple messages -- e.g.  mess[]
     public static int sendOSC( OSCMessage mess ) {
+
+        if (sender == null)
+        {
+            Debug.LogError("SATIEsetup.sendOSC():  OSC sender not defined, skipping message: "+mess.Address);
+            return(0);
+        }
+
         int bytesSent = 0;
+
         OSCBundle objectBundle = new OSCBundle();
         objectBundle.Append(mess);
         bytesSent = sender.Send(objectBundle);
