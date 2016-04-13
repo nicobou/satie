@@ -15,10 +15,20 @@ echo "launching spatOSC audio renderer  (SATIE) on " $MY_IP":18032"
 echo
 echo
 
+PROJECT_NAME=$1
+LISTENING_FORMAT=$2
+
+if [ -z $PROJECT_NAME ] ; then
 
 read -p "Enter project name { or <cr> for default example}  : " PROJECT_NAME
+
+fi
+
+if [ -z $LISTENING_FORMAT ] ; then
+
 read -p "Enter listening format {sato, labo, octo, quad, or <cr> for stereo} : " QUERY_LISTENING_FORMAT
 
+fi
 
 // user specified project file
 if [  -z $PROJECT_NAME ] ; then
@@ -27,6 +37,7 @@ if [  -z $PROJECT_NAME ] ; then
 else
     LAUNCH_FILE=projects/$PROJECT_NAME/main.scd
 fi
+
 
 
 

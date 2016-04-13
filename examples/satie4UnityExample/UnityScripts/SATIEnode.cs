@@ -37,6 +37,9 @@ public class SATIEnode : MonoBehaviour {
     public bool nodeEnabled = true;
     private bool _state;
 
+    private bool _start = false;
+
+
 
     public string uri = "plugin://default";
 
@@ -65,10 +68,6 @@ public class SATIEnode : MonoBehaviour {
 
 	[HideInInspector] 
 	public bool updatePosFlag = false;
-
-    [HideInInspector] 
-       public bool _start = false;
-
 
     [HideInInspector] 
 	public static List<SATIEnode> sourceInsatances = new List<SATIEnode>();
@@ -189,6 +188,8 @@ public class SATIEnode : MonoBehaviour {
 
     public virtual  void Awake () 
     {
+        _start = false;
+
         foreach (string s in PropertyMessages)
         {
             _PropertyMessages.Add(s);

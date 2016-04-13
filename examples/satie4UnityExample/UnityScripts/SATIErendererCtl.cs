@@ -212,6 +212,13 @@ public class SATIErendererCtl : MonoBehaviour {
 		sendOSC (message);
 	}
 
+
+    public void setOutputDB (float db)
+    {
+         _outputGainDB = outputGainDB = db;
+        updateGainDB();
+     }
+
 	private void updateGainDB()
     {
         OSCMessage message = new OSCMessage (_oscMessage);
@@ -221,6 +228,13 @@ public class SATIErendererCtl : MonoBehaviour {
         sendOSC (message);
     }
     
+ 
+    public void setOutputTrimDB (float db)
+    {
+        _outputTrimDB = outputTrimDB = db;
+        updateTrimDB();
+    }
+
     private void updateTrimDB()
     {
         OSCMessage message = new OSCMessage (_oscMessage);
@@ -230,6 +244,12 @@ public class SATIErendererCtl : MonoBehaviour {
         sendOSC (message);
     }
     
+    public void setOutputMute (float state)
+    {
+        _mute = mute = (state > 0);
+        updateMute();
+    }
+
     private void updateMute()
     {
         OSCMessage message = new OSCMessage (_oscMessage);
@@ -239,7 +259,13 @@ public class SATIErendererCtl : MonoBehaviour {
         message.Append (state);
         sendOSC (message);
     }
-    
+
+    public void setOutputDIM (float state)
+    {
+        _dim = dim = (state > 0);
+        updateDim();
+    }
+
     private void updateDim()
     {
         OSCMessage message = new OSCMessage (_oscMessage);

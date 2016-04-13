@@ -6,7 +6,12 @@
 
 
 
-~scbr.satieGroupInstances[\default][\sound].set(\gainDB, -10);
+~scbr.satieGroupInstances[\default][\digestion].set(\gainDB, -10);
+
+
+
+~scbr.satieGroupInstances[\default][\digestion].run(0);
+
 
 ~scbr.satieGroupInstances[\default][\sound].set(\loop, 1);
 

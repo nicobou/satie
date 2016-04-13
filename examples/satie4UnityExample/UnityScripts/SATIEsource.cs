@@ -67,6 +67,7 @@ public class SATIEsource : SATIEnode {
     public string sourceDirectivity = "omni";
     public float cardioidDirectivityExp = 1;  // used when "cardioid" type of source diffusity is selected
   
+
     public float sourceFocusPercent = 99f;   // this % value is used in the connection to the listener(s), and determines the "spread" of the source on the listener, 0 = widest (omni), 100 = narrowest 
 	private float _sourceFocusPercent;
 
@@ -74,12 +75,20 @@ public class SATIEsource : SATIEnode {
 	private float _radius;
 
     public float radiusTransitionFactor = 1.5f;
+    private float _radiusTransitionFactor;
+
 
     //private float defaultEffectValue = 100f;  // default connection effect parameters value
 
     public float dopplarEffect = 100f;
+    private float _dopplarEffect;
+
     public float distanceEffect = 100f;
+    private float _distanceEffect;
+
     public float incidenceEffect = 100f;
+    private float _incidenceEffect;
+
 
     [Range(-42f, 24f)]
     public float gainTrimDB = 0f;  // adds  N DB  to node's gain BEFORE node's maxGainClipDB is applied in connection
@@ -96,6 +105,7 @@ public class SATIEsource : SATIEnode {
 	// implemented for a single listener only
 	public bool underWaterProcessing = false;  
 	public bool aboveWaterMuting = false;    // set this to true for underwaterOnly sounds
+
     private bool _aboveWaterState = true;
 
 	[Range(1f, 5000f)]
@@ -119,11 +129,11 @@ public class SATIEsource : SATIEnode {
 	private float _underWaterIncidenceEffect;
 
 
-
+    private bool _initialized = false;
 
     private float SPEED_OF_SOUND = 0.340f;
 
-    //private bool _start = false;
+    //private bool _initialized = false;
 
 
 
@@ -142,7 +152,7 @@ public class SATIEsource : SATIEnode {
 	
  
 
-        if (!_start)
+        if (!_initialized)
             return;
         	
   
@@ -156,6 +166,28 @@ public class SATIEsource : SATIEnode {
 			_radius = radius; 
 			updateConnectionParams();
 		}
+ 
+        if (_radiusTransitionFactor != radiusTransitionFactor)
+        {
+            _radiusTransitionFactor = radiusTransitionFactor; 
+            updateConnectionParams();
+        }
+        if (_dopplarEffect != dopplarEffect)
+        {
+            _dopplarEffect = dopplarEffect; 
+            updateConnectionParams();
+        }
+        if (_distanceEffect != distanceEffect)
+        {
+            _distanceEffect = distanceEffect; 
+            updateConnectionParams();
+        }
+        if (_incidenceEffect != incidenceEffect)
+        {
+            _incidenceEffect = incidenceEffect; 
+            updateConnectionParams();
+        }
+
         if (_maxGainClipDB != maxGainClipDB)
         {
             _maxGainClipDB = maxGainClipDB; 
@@ -198,7 +230,7 @@ public class SATIEsource : SATIEnode {
    public override void Start()
     {
  
-        _start = true;
+        _initialized = true;
 
         //bool result = false;
 		nodeType = "source";
@@ -218,12 +250,29 @@ public class SATIEsource : SATIEnode {
 
         _sourceFocusPercent = sourceFocusPercent = Mathf.Clamp(sourceFocusPercent, 0f, 100f);
 
-		_radius = radius;
+        _radius = radius;
+
+        _radiusTransitionFactor = radiusTransitionFactor;
+
+        _dopplarEffect = dopplarEffect;
+
+
+        _distanceEffect = distanceEffect;
+
+        _incidenceEffect = incidenceEffect;
 
         _maxGainClipDB = maxGainClipDB;
 
+        _underWaterHpHz = underWaterHpHz;
 
- 
+        _underWaterIncidenceEffect = underWaterIncidenceEffect; 
+
+        _underWaterDistanceEffect = underWaterDistanceEffect; 
+
+        _underWaterLpassEffect = underWaterLpassEffect; 
+
+        _underWaterDBdrop = underWaterDBdrop; 
+
         setHorizontalDirectivity(sourceDirectivity);
  
         //Debug.Log("SATIEsetup.setDirectivity " + nodeName + "  htab:" + HorizontalDirectivity + "  vtab:" + VerticalDirectivity);
@@ -840,7 +889,7 @@ public class SATIEsource : SATIEnode {
 
 //    public override void setUri(string uriString)
 //    {
-//        if (!_start)
+//        if (!_initialized)
 //            return;
 //        
 //        base.setUri(uriString);
