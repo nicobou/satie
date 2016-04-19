@@ -43,7 +43,7 @@ s.waitForBoot {
 
 
 
-		Buffer.read(s, Platform.resourceDir +/+ "sounds/a11wlk01.wav");
+		//Buffer.read(s, Platform.resourceDir +/+ "sounds/a11wlk01.wav");
 
 
 
@@ -61,8 +61,15 @@ s.waitForBoot {
 		// create soundfile players
 		//~scbr.makeSynthDef(sfName.asSymbol, \sndFile, [~listeningFormat], [0], [], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
 
-		// create sample buffer playback
-	    ~scbr.makeSynthDef(sfName.asSymbol, \sndBuffer, [~listeningFormat], [0], [], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+		//postf("FX buffer at: %", ~scbr.aux[~fxInputBus]);
+
+		// create sample buffer playback with no rev send
+	    ~scbr.makeSynthDef(sfName.asSymbol, \sndBuffer, [~listeningFormat], [0],  [], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+
+		// create sample buffer playback with  rev send, referenced by   pluginName:rev
+		~scbr.makeSynthDef(sfName.asSymbol++'\:rev', \sndBuffer, [~listeningFormat], [0],  [~scbr.aux[~fxInputBus]], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+
+		//postf("CREATING SYNTHDEF: : %\n", sfName.asSymbol++'\:rev');
 
 	};
 

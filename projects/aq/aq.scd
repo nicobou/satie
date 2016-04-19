@@ -28,8 +28,17 @@ s.waitForBoot{
 	//~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\test, \testtone,  [~listeningFormat], [0]);
 	//~scbr.makeSynthDef(\zbell1, \zbell1, [~listeningFormat], [0]);
-	~scbr.makeSynthDef(\pbell1, \pbell1, [~listeningFormat], [0], [~scbr.aux[~fxInputBus]]);
-	~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [~listeningFormat], [0], [~scbr.aux[~fxInputBus]]);
+
+	~scbr.makeSynthDef(\pbell1, \pbell1, [~listeningFormat], [0]);
+	// same thing but with with reverb send
+	~scbr.makeSynthDef(\pbell1++'\:rev', \pbell1, [~listeningFormat], [0], [~scbr.aux[~fxInputBus]]);
+
+	~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [~listeningFormat], [0]);
+	// same thing but with with reverb send
+	~scbr.makeSynthDef(\zkarpluck1++'\:rev', \zkarpluck1, [~listeningFormat], [0], [~scbr.aux[~fxInputBus]]);
+
+	// effects node
+	~scbr.makeSynthDef(\busgverb, \gverb, [~listeningFormat], [0]);
 
 	// note order:   name, synthName, fxBus, listenerName, outBusNo, mapName, optArgs
 	~scbr.makeSynthDef2(\zkarpluck1P, \zkarpluck1P,   [~scbr.aux[~fxInputBus]], [~listeningFormat],  [0], \randOffsets1, []);   // for kamikazis
