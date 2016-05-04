@@ -162,6 +162,7 @@ public class SATIEsetup : MonoBehaviour {
 	
     void OnValidate()
     {
+        if (!connected) return;
 
         if (_updateRateMs != updateRateMs )        
             setUpdateRate( updateRateMs );
@@ -240,17 +241,21 @@ public class SATIEsetup : MonoBehaviour {
 
     void OnDestroy()
 	{
-        OnApplicationQuit();
+//        Debug.Log("SATIEsetup.OnDestroy");
+//        OSCMessage message = new OSCMessage ("/spatosc/core");
+//        message.Append ("clear");
+//        sendOSC (message);
 	}
 
 
 
 
     public void OnApplicationQuit(){
+        Debug.Log("SATIEsetup.OnApplicationQuit:  APP QUIT");
+        Debug.Log("SATIEsetup.OnDestroy");
         OSCMessage message = new OSCMessage ("/spatosc/core");
         message.Append ("clear");
         sendOSC (message);
-        Debug.Log("SATIEsetup.OnApplicationQuit:  APP QUIT");
 
         //disconnect();  don't need this
 
@@ -267,7 +272,15 @@ public class SATIEsetup : MonoBehaviour {
 
     // expand this to take multiple messages -- e.g.  mess[]
     public static int sendOSC( OSCMessage mess ) {
+
+        if (sender == null)
+        {
+            Debug.LogError("SATIEsetup.sendOSC():  OSC sender not defined, skipping message: "+mess.Address);
+            return(0);
+        }
+
         int bytesSent = 0;
+
         OSCBundle objectBundle = new OSCBundle();
         objectBundle.Append(mess);
         bytesSent = sender.Send(objectBundle);

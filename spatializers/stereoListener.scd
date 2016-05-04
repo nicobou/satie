@@ -27,7 +27,7 @@
 	var delay = delayMs * 0.001;    // convert to seconds
 	var slewDelay = 0.3; //  note: this needs to be improved ... smoother
 	var slewGain = 0.1;
-	var slewFilter = 0.6;
+	var slewFilter = 0.3;   // was 0.6
 	var slewPanning = 0.030;
 	var panWeights;
 
@@ -37,7 +37,7 @@
 	var outsig;
 
 	outsig =  LPF.ar(DelayC.ar(
-		VarLag.kr(gain, slewGain) * in,
+		Lag.kr(gain, slewGain) * in,
 		maxdelaytime: 0.5,
 		delaytime: delay.lag(slewDelay)),   lpHz.lag(slewFilter)    );
 

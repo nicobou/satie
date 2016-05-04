@@ -43,12 +43,30 @@
 
 ];
 
+// required: set these variables to the process name;
+~processName = \particule4;
+~process = ~particule4;
+~process.know=true;
+
+
+if (~satie4unity == nil, {
+	error(~processName ++ ": ~satie4unity protocol undefined, can't register this process");
+}, // else
+{
+	// if already registered, re-register
+	if (  ~satie4unity.allProcesses.includesKey(~processName) == true,
+		{
+			inform("un-registering process: "++~processName);
+			~satie4unity.allProcesses.removeAt(~processName);
+	});
+
+	inform("registering process: "++~processName);
+	~satie4unity.allProcesses.put(~processName, ~process);
+});
 
 // set up class instance dictionary
 
 ~particule4_instances = Dictionary.new();
-
-
 
 // define any custom "class"  variables, referenced by all "instants"  of "particule4" class
 if (~particule4_pitchSequences == nil,
@@ -59,35 +77,11 @@ if (~particule4_pitchSequences == nil,
 		~particule4_pitchSequences.at(\default).put(\pos, 0);
 		~particule4_pitchSequences.at(\default).put(\incr,1);
 		~particule4_pitchSequences.at(\default).put(\size,1);
-
 });
+
 
 
 // required functions and state
-
-~particule4.know=true;
-~particule4.property =  {| self, property, value |
-	self.put(property.asSymbol, value);
-};
-
-// register process to environment
-if (~allProcesses == nil, {
-	~allProcesses = ();         // environment namespace for project functions
-});
-
-// if already registered, re-register
-if (  ~allProcesses.includesKey(\particule4) == true,
-	{
-		'un-registering process: particule4'.postln;
-		~allProcesses.removeAt(\particule4);
-});
-
-'registering process: particule4'.postln;
-~allProcesses.put(\particule4, ~particule4);
-
-
-// required
-
 
 ~particule4.cleanup = { | self |
 
@@ -138,10 +132,13 @@ if (  ~allProcesses.includesKey(\particule4) == true,
 
 // end of required class functions
 
-// the functions below are not requied
-// however if defined, they will be called by satie4unity when node's "update" message is received
-// otherwise satie4unity will send the  "update" message to the node's group
 
+/// the functions below are not requied
+// however if defined, they will be called by satie4unity
+
+
+// if defined, will be called when node's "update" message is received
+// otherwise satie4unity will send the  "update" message to the node's group
 ~particule4.updateConnection = { | self, aziDeg, eleDeg, gainDB, delayMs, lpHz, distance |
 
 	// do nothing for this node, since spatialization is done using the trigger method
@@ -347,7 +344,7 @@ if (  ~allProcesses.includesKey(\particule4) == true,
 
 						if (item == 0,   // first clone sounds at give azi and elev
 							{
-							    cloneParams = synthParams++ [\aziDeg, aziDeg,  \eleDeg, eleDeg,   \pitch, pitch, \t_trig, 1];
+								cloneParams = synthParams++ [\aziDeg, aziDeg,  \eleDeg, eleDeg,   \pitch, pitch, \t_trig, 1];
 								synth = ~scbr.makeKamikaze(nodename, self.synth.asSymbol, self.nodeGroupName, cloneParams);
 							},
 							{    // else schedule clone creation in the future with random deivation for azi and elev
@@ -390,7 +387,7 @@ if (  ~allProcesses.includesKey(\particule4) == true,
 
 			if (csvmidifilePath[0] != $/,
 				{
-					csvmidifilePath = ~projectDirectory++"/"++csvmidifilePath;
+					csvmidifilePath = ~satie4unity.projectDirectory++"/"++csvmidifilePath;
 			});
 
 			csvmidifilePath.postln;

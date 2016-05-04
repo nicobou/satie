@@ -33,6 +33,9 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 
 
 
+
+// NOTE:  this synthdef is unstable when instatiated, so it is muted for the first 10 seconds
+
 ~name = \pbell1;
 
 ~function = { |outbus, t_trig = 1, decayscale = 0.2, i_doneAction = 0,   note = #[60, 0, 0]  |
@@ -43,7 +46,9 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 	var freq = note[0].midicps;
 	var amp = note[1];
 
-	var incidence = note[2].clip(0,1);
+	var incidence = note[2].clip(-1,1);
+
+	var muteEnv = Env.pairs([[0, 0], [8, 0],  [9, 1]], \lin);    // 6 seconds of muting muting to prevent explosion
 
 
 	amp = amp * 0.2;      // static gain adjustement
@@ -94,7 +99,7 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 
 	//input = transient;    // "mallet"
 
-  sig = DynKlank.ar(`[
+	sig = EnvGen.kr(muteEnv)  * DynKlank.ar(`[
     [
       (first = LFNoise1.kr(0.5).range(2424, 2444)) + Line.kr(20, 0, 0.5),
       first + LFNoise1.kr(0.5).range(1,3),

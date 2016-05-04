@@ -32,9 +32,11 @@ public class SATIErendererCtl : MonoBehaviour {
 	public string projectDir; // defaults to $PROJECT/StreamingAssets
 	private string _projectDir;
 
-	public float outputGainDB = -10f;
+    [Range(-90f, 18)]
+   	public float outputGainDB = -10f;
     private float _outputGainDB;
     
+    [Range(-18f, 18)]
     public float outputTrimDB = -0f;
     private float _outputTrimDB;
     
@@ -72,8 +74,12 @@ public class SATIErendererCtl : MonoBehaviour {
 
     }
 
-	public void Awake() 
+
+    public void Awake() 
     {
+        //Debug.Log(string.Format("{0}.Awake(): called", GetType()), transform);
+
+
         SATIEsetupCS = transform.GetComponent<SATIEsetup>();   // look for SATIEsetup component in this transform
         
         if (!SATIEsetupCS)
@@ -206,6 +212,13 @@ public class SATIErendererCtl : MonoBehaviour {
 		sendOSC (message);
 	}
 
+
+    public void setOutputDB (float db)
+    {
+         _outputGainDB = outputGainDB = db;
+        updateGainDB();
+     }
+
 	private void updateGainDB()
     {
         OSCMessage message = new OSCMessage (_oscMessage);
@@ -215,6 +228,13 @@ public class SATIErendererCtl : MonoBehaviour {
         sendOSC (message);
     }
     
+ 
+    public void setOutputTrimDB (float db)
+    {
+        _outputTrimDB = outputTrimDB = db;
+        updateTrimDB();
+    }
+
     private void updateTrimDB()
     {
         OSCMessage message = new OSCMessage (_oscMessage);
@@ -224,6 +244,12 @@ public class SATIErendererCtl : MonoBehaviour {
         sendOSC (message);
     }
     
+    public void setOutputMute (float state)
+    {
+        _mute = mute = (state > 0);
+        updateMute();
+    }
+
     private void updateMute()
     {
         OSCMessage message = new OSCMessage (_oscMessage);
@@ -233,7 +259,13 @@ public class SATIErendererCtl : MonoBehaviour {
         message.Append (state);
         sendOSC (message);
     }
-    
+
+    public void setOutputDIM (float state)
+    {
+        _dim = dim = (state > 0);
+        updateDim();
+    }
+
     private void updateDim()
     {
         OSCMessage message = new OSCMessage (_oscMessage);
@@ -323,11 +355,11 @@ public class SATIErendererCtl : MonoBehaviour {
 	public void OnApplicationQuit()
     {
 
-        OSCMessage message = new OSCMessage ("/spatosc/core");
-        //message.Append ("fuckme");
-        message.Append ("clear");
-        sendOSC (message);
-        Debug.Log("APP QUIT");
+//        OSCMessage message = new OSCMessage ("/spatosc/core");
+//        //message.Append ("fuckme");
+//        message.Append ("clear");
+//        sendOSC (message);
+//        Debug.Log("APP QUIT");
 		disconnect();
 	}
 	

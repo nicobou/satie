@@ -67,9 +67,15 @@ s.waitForBoot {
 	~scbr.makeSynthDef(\snd1, \sndFile, [\stereoPanner], [0], [], [~playBuffers[\bleh].bufnum]);
 	~scbr.makeSynthDef(\snd2, \sndFile, [\stereoPanner], [0], [], [~playBuffers[\alsaTest].bufnum]);
 	// be sure the synthDef is compiled on the server
-	~osc = ~satieOSCMaker.value();
+	~osc = ~satieOSCMaker.value(port: 18032);
+	~newOsc = ~satieOSCMaker.value(port: 18034);
 	s.sync;
 	(~rootSrcPath ++ "/protocols/satieOSC.scd").load;
 	s.sync;
+	~oscOne = ~satieOSCprotocol.value(~osc, ~scbr, oscID: \satieStandard);
+	~osc2 = ~satieOSCprotocol.value(~newOsc, ~scbr);
+	s.sync;
 };
 )
+
+~osc2.createSoundSource(\boo);

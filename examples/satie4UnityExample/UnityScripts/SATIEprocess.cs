@@ -32,6 +32,7 @@ public class SATIEprocess : MonoBehaviour {
 
 	public List <string> parameters = new List<string>();
 	private List <string> _parameters = new List<string>();
+    private bool _start = false;
 
 
 	SATIEsource SATIEsourceCS;
@@ -39,7 +40,7 @@ public class SATIEprocess : MonoBehaviour {
 	void Awake()
 	{
 		// string argvec[];
-		string uriString = "";
+        string argString;
 
 		SATIEsourceCS = transform.GetComponent<SATIEsource>();
 
@@ -49,23 +50,20 @@ public class SATIEprocess : MonoBehaviour {
 			return;
 		}
 
-//		if ( !SATIEsourceCS.uri.Contains("process"))
-//		{
-//			Debug.LogError("SATIEprocess.start(): source node in transform URI type is not a process, aborting");
-//			return;
-//		}
+        if (launchArgs.Count == 0)
+        {
+            SATIEsourceCS.uri = "process://" + processName;
+            return;
+        }
 
-		foreach (string s in launchArgs) 
-		{
-			//Debug.Log ("SATIEprocess.Awake:  launchArg: " + s);
+        // ELSE
 
-			uriString = uriString + s + " ";
 
-			// uriString.Insert (uriString.Length, " " + s);
-		}
+        argString =  string.Join(" ", launchArgs.ToArray()); 
 
-		//Debug.Log ("SATIEprocess.Awake:  uriString: " + "process://"+processName+ " " + uriString); 
-		SATIEsourceCS.uri = "process://"+processName+ " " + uriString;
+        Debug.Log ("SATIEprocess.Awake:  argString: " + argString); 
+        //       Debug.Log ("SATIEprocess.Awake:  uriString: " + "process://"+processName+ "_" + argString); 
+        SATIEsourceCS.uri = "process://"+processName+ " " + argString;
 
 	}
 
@@ -79,8 +77,7 @@ public class SATIEprocess : MonoBehaviour {
 			return;
 		}
 		// else
-
-
+        _start = true;
       	StartCoroutine( afterStart() );
 	
 
@@ -124,6 +121,8 @@ public class SATIEprocess : MonoBehaviour {
 
 	void validateEvents()
 	{
+        if (!_start) return;
+        
 		if (_events.Count != events.Count)
 		{
 			// Debug.Log("_events.Count != events.Count");
@@ -168,7 +167,7 @@ public class SATIEprocess : MonoBehaviour {
 				//            foreach (string item in property)   Debug.Log("\t PROPERTY ATOM: " + item);       
 
 				// if incomplete event abort
-				if (keyword == "") 
+                if (keyword == "" || svalues == "" ) 
 				{
 					Debug.LogWarning("Event Message too short:  " + events [i]);
 					return;
@@ -304,6 +303,7 @@ public class SATIEprocess : MonoBehaviour {
 			else   // message good. Send it now
 			{
 				if (setParamFlag) atoms.Insert(0, "setParam");
+                //Debug.Log("***********  "+atoms);
 				SATIEsourceCS.sendEvent(atoms);
 			}
 		}

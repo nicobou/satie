@@ -42,13 +42,31 @@
 
 ];
 
+// required: set these variables to the process name;
+~processName = \particule3;
+~process = ~particule3;
+~process.know=true;
+
+
+if (~satie4unity == nil, {
+	error(~processName ++ ": ~satie4unity protocol undefined, can't register this process");
+}, // else
+{
+	// if already registered, re-register
+	if (  ~satie4unity.allProcesses.includesKey(~processName) == true,
+		{
+			inform("un-registering process: "++~processName);
+			~satie4unity.allProcesses.removeAt(~processName);
+	});
+
+	inform("registering process: "++~processName);
+	~satie4unity.allProcesses.put(~processName, ~process);
+});
+
 
 // set up class instance dictionary
 
 ~particule3_instances = Dictionary.new();
-
-
-
 
 // define any custom "class"  variables, referenced by all "instants"  of "particule3" class
 if (~particule3_pitchSequences == nil,
@@ -62,32 +80,7 @@ if (~particule3_pitchSequences == nil,
 
 });
 
-
-// required functions and state
-
-~particule3.know=true;
-~particule3.property =  {| self, property, value |
-	self.put(property.asSymbol, value);
-};
-
-// register process to environment
-if (~allProcesses == nil, {
-	~allProcesses = ();         // environment namespace for project functions
-});
-
-// if already registered, re-register
-if (  ~allProcesses.includesKey(\particule3) == true,
-	{
-		'un-registering process: particule3'.postln;
-		~allProcesses.removeAt(\particule3);
-});
-
-'registering process: particule3'.postln;
-~allProcesses.put(\particule3, ~particule3);
-
-
-// required
-
+// required functions
 
 ~particule3.cleanup = { | self |
 
@@ -138,15 +131,19 @@ if (  ~allProcesses.includesKey(\particule3) == true,
 
 // end of required class functions
 
-// the functions below are not requied
-// however if defined, they will be called by satie4unity when node's "update" message is received
-// otherwise satie4unity will send the  "update" message to the node's group
+// end of required class functions
 
+
+// the functions below are not requied
+// however if defined, they will be called by satie4unity
+
+
+// if defined, will be called when node's "update" message is received
+// otherwise satie4unity will send the  "update" message to the node's group
 ~particule3.updateConnection = { | self, aziDeg, eleDeg, gainDB, delayMs, lpHz, distance |
 
 	// do nothing for this node, since spatialization is done using the trigger method
 };
-
 
 // if defined, will be called when node's "spread" message is received
 // otherwise the "spread" message will be applided to the node's group
@@ -162,7 +159,7 @@ if (  ~allProcesses.includesKey(\particule3) == true,
 
 	self[\properties].put(key, value);  // keep property state for initializing synthdefs
 
-	postf("prop message: key: %    val:% \n", key, value);
+	// postf("prop message: key: %    val:% \n", key, value);
 };
 
 
@@ -355,7 +352,7 @@ if (  ~allProcesses.includesKey(\particule3) == true,
 
 			if (csvmidifilePath[0] != $/,
 				{
-					csvmidifilePath = ~projectDirectory++"/"++csvmidifilePath;
+					csvmidifilePath = ~satie4unity.projectDirectory++"/"++csvmidifilePath;
 			});
 
 			csvmidifilePath.postln;

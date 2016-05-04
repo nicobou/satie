@@ -44,7 +44,7 @@
 
 
 	outsig =  LPF.ar(DelayC.ar(
-		VarLag.kr(gain, slewGain) * in,
+		Lag.kr(gain, slewGain) * in,
 		maxdelaytime: 0.5,
 		delaytime: delay.lag(slewDelay)),   lpHz.lag(slewFilter)    );
 
@@ -59,7 +59,7 @@
 
 	//SendTrig.kr(Impulse.kr(4), 0,  VarLag.kr(hpHz, 1, 0, Env.shapeNumber(\sin)  )     );  //  Enable for debugging
 
-	//SendTrig.kr(Impulse.kr(4), 0, aziDeg   );  //  Enable for debugging
+	//SendTrig.kr(Impulse.kr(1), 0, [ Lag.kr(gain, slewGain),  gain ] );  //  Enable for debugging
 
 	outsig * Ramp.kr(panWeights, slewPanning);
 };

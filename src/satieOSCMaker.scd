@@ -12,14 +12,16 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (
-~satieOSCMaker = { | rootPath = "/SATIE" |
+~satieOSCMaker = { | rootPath = "/SATIE", port = 18032 |
 	var rootURI = rootPath;
+	var oscPort = port;
 	var e = Environment.make({
 
 		// main OSC method
 		~newOSC = {|self, id, cb , path = \default|
 			var idsym = id.asSymbol;
-			OSCdef(idsym, cb, path, recvPort: 18032)
+			postf("---> newOSC callback passed : %\n", cb);
+			OSCdef(idsym, cb, path, recvPort: oscPort);
 		};
 
 		~deleteOSC = {|self, id|
@@ -30,6 +32,7 @@
 		// make a synth instance and create its group if needed
 		~createSourceOSC = {|self, sourceName, cb, groupName|
 			//self.newOSC(sourceName, cb,  rootURI +/+ groupName);
+			postf("----> createSource callback passed : %\n", cb);
  			self.newOSC(groupName ++ sourceName, cb,  rootURI +/+ groupName +/+ sourceName);
 			if(OSCdef.all.includesKey(groupName) == false,
 				{
@@ -57,15 +60,7 @@
 
 	});
 	e.know = true;
-	postf("satieOSC interface loaded\n");
+	"satieOSC interface loaded".inform;
 	e;
 };
-
-//e.(\goo, {\gotIt.postln;}, "/goo");
-/*
-~cOSC = ~cOSCMaker.value();
-
-~cOSC.newOSC(\soo, {'ok'.postln;}, "/soo");
-~cOSC.removeOSC(\soo);
-*/
 )

@@ -69,6 +69,7 @@ public class SATIEgroup : SATIEnode {
         
     }
 
+
 	public override void OnValidate()
 	{
 		base.OnValidate();

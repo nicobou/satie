@@ -4,11 +4,64 @@
 
 //~dumpNodes.value();
 
+
+
+~scbr.satieGroupInstances[\default][\digestion].set(\gainDB, -10);
+
+
+
+~scbr.satieGroupInstances[\default][\digestion].run(0);
+
+
+~scbr.satieGroupInstances[\default][\sound].set(\loop, 1);
+
+~scbr.satieGroupInstances[\default][\sound].set(\gainDB, -60.1);
+
+TempoClock.default.sched(0.05,
+									{
+~scbr.satieGroupInstances[\default][\sound].set(\gainDB, -60.1);
+
+~scbr.satieGroups[\default].set(\gainDB,  -30);
+
+										nil });
+
+
+
+
+~scbr.satieGroupInstances[\default][\sound].set(\gainDB, -30);
+
+
+
+~satie4unity.allSourceNodes[\srcNodeSP].at(\groupNameSym);
+
+
+~satie4unity.allSourceNodes[\srcNodeSP];
+
+~myGroupName = \srcNodeSP_group;
+
+g = ~scbr.satieGroups[~myGroupName].set(\delayMs, 200, \attackDB, -44);
+
+
+g = ~scbr.satieGroups[~myGroupName].run(true);
+
+~nodeName= \bellSnd_8;
+
+
+~satie4unity.setEvent(~nodeName, \note, [80,1,1]);
+~satie4unity.setEvent(~nodeName, \t_trig, 1);
+
+
+
+
+
+
+
 ~groupSym = \default;
 
-~nodeName= \srcNode_0;
+~nodeName= \bellSnd_8;
+~nodeName = \setNodeSP;
 
-~nodeGroupName = ~allSourceNodes[~nodeName.asSymbol].at(\groupNameSym);
+~nodeGroupName = ~satie4unity.allSourceNodes[~nodeName.asSymbol].at(\groupNameSym);
 
 ~listenerName = "listener";
 

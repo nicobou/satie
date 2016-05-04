@@ -39,7 +39,7 @@
 
 
 	outsig =  LPF.ar(DelayC.ar(
-		VarLag.kr(gain, slewGain) * in,
+		Lag.kr(gain, slewGain) * in,
 		maxdelaytime: 0.5,
 		delaytime: delay.lag(slewDelay)),   lpHz.lag(slewFilter)    );
 

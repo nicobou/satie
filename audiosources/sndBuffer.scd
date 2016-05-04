@@ -17,8 +17,8 @@
 // Play a buffer
 
 ~name = \sndBuffer;
-~function = { | bufnum = 0, loop = 0, startPos=0, rate = 1, t_trig=0 |
+~function = { | bufnum = 0, loop = 0, startPos=0, rate = 1, t_trig=0, trimDB=0 |
 	// DiskIn.ar(1, bufnum, loop = loop);
-	PlayBuf.ar(1, bufnum, rate, t_trig, startPos, loop);
+	trimDB.dbamp * PlayBuf.ar(1, bufnum, rate, t_trig, startPos, loop);
 };
 
