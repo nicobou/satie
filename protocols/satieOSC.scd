@@ -155,10 +155,10 @@
 	dest = ~getAddressLevel.value(url);
 	name = msg[2].asSymbol;
 	command = msg[1];
-	postf("coreCallback argument: %\n", msg);
+/*	postf("coreCallback argument: %\n", msg);
 	postf("message size: %\n", msg.size);
 	postf("coreCallback url: %\n", url);
-	postf("command is %\n", command);
+	postf("command is %\n", command);*/
 	switch(command,
 		\create,
 		{
@@ -221,7 +221,7 @@
 				\group,
 				{
 					props.pairsDo({ | prop, val |
-						postf("** group: set %'s % to %\n", group, prop, val);
+						// postf("** group: set %'s % to %\n", group, prop, val);
 						~scbr.satieGroups[group].group.set(prop, val);
 					});
 				},
@@ -230,7 +230,7 @@
 					var name;
 					name = url[2].asSymbol;
 					props.pairsDo({ | prop, val |
-						postf("** instance: set %'s % to %\n", name, prop, val);
+						// postf("** instance: set %'s % to %\n", name, prop, val);
 						if(prop == \in, // effect's property 'in' needs a special treatment
 							{
 								// postf("----------FX--------- setting property % on effect to %\n", prop, val);
@@ -258,7 +258,7 @@
 };
 
 ~getAddressLevel = { | url = #[] |
-	url.postln;
+	// url.postln;
 	switch(url.size,
 		1, {
 			if(url[0] == "SATIE",
