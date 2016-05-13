@@ -57,13 +57,20 @@ public class SATIEconnection {
 
 public class SATIEsource : SATIEnode {
 
-    //public string listener="*";
+ 
+	[Header("Source Settings")]
+
+	public List<SATIElistener> myListeners = new List<SATIElistener>(); 
+
+	//public string listener="*";
     public string group = "default";   
   
     //public bool mute = false;   not used
     //private bool _mutestate;
 
-    //  threw out vertical directivity: too complicated to avoid gimble lock.
+	[Header("Connection Settings")]
+
+	//  threw out vertical directivity: too complicated to avoid gimble lock.
     public string sourceDirectivity = "omni";
     public float cardioidDirectivityExp = 1;  // used when "cardioid" type of source diffusity is selected
   
@@ -100,7 +107,8 @@ public class SATIEsource : SATIEnode {
 
 
 
-	public List<SATIElistener> myListeners = new List<SATIElistener>(); 
+
+	[Header("Underwater Settings")]
 
 	// implemented for a single listener only
 	public bool underWaterProcessing = false;  
@@ -133,6 +141,17 @@ public class SATIEsource : SATIEnode {
 
     private float SPEED_OF_SOUND = 0.340f;
 
+
+	[Header("Culling Settings")]
+	public bool cullingMute = false;
+	public float cullMuteThreshDB = -66f;
+	public float cullMuteUpperThreshOffsetDB = 1f;  // Used to calculate highThreshold for debouncing
+
+	private float _cullMuteLowThreshAmp;
+	private float _cullMuteHighThreshAmp;
+
+	private bool _cullMute = false;   // true when distance scaling goes below cullMuteLowThreshDB, false when above cullMuteHighThreshDB
+
     //private bool _initialized = false;
 
 
@@ -144,6 +163,9 @@ public class SATIEsource : SATIEnode {
     SrcDirFnPtr srcDirFnPtr;
 	
    
+
+
+
 	public override void OnValidate()
 	{
 
@@ -155,6 +177,19 @@ public class SATIEsource : SATIEnode {
         if (!_initialized)
             return;
         	
+		// just do this each time.. too lazy to make state change vars
+		_cullMuteLowThreshAmp = Mathf.Pow(10f, cullMuteThreshDB/20f);
+
+		_cullMuteHighThreshAmp = Mathf.Pow(10f, ( cullMuteThreshDB + cullMuteUpperThreshOffsetDB) / 20f);
+
+
+		// this would be in a reset method otherwise
+		if ( !cullingMute && _cullMute)
+		{
+			setNodeActive (nodeName, true);
+			_cullMute = false;
+		}
+
   
         if (_sourceFocusPercent != sourceFocusPercent)
 		{
@@ -247,6 +282,9 @@ public class SATIEsource : SATIEnode {
        
 		//Debug.Log("************\tsource: " + nodeName + "  group_______: " + group);
 
+		_cullMuteLowThreshAmp = Mathf.Pow(10f, cullMuteThreshDB/20f);
+
+		_cullMuteHighThreshAmp = Mathf.Pow(10f, ( cullMuteThreshDB + cullMuteUpperThreshOffsetDB) / 20f);
 
         _sourceFocusPercent = sourceFocusPercent = Mathf.Clamp(sourceFocusPercent, 0f, 100f);
 
@@ -445,6 +483,7 @@ public class SATIEsource : SATIEnode {
             if (conn.listener.updatePosFlag || conn.listener.updateRotFlag || updatePosFlag || updateRotFlag )
 			{
 				computeConnection(conn);
+
 				updatePosFlag = updateRotFlag = false;
 			}
 		}
@@ -464,21 +503,6 @@ public class SATIEsource : SATIEnode {
         List<object> items = new List<object>();
         
 		SATIElistener listener = conn.listener;
-
-
-        if (aboveWaterMuting)
-        {
-            if (!listener.submergedFlag)   // we are above water
-            {
-                if (_aboveWaterState == true)
-                    return;   
-            }
-            else // we are below water
-            {
-                _aboveWaterState = false;
-            }
-        }
-           
 
 
         Transform source = transform;
@@ -503,10 +527,44 @@ public class SATIEsource : SATIEnode {
 
         //For the gain and vdel calculation, we want the distance to the radius:
 		float dist2Radius = distance - myRadius;
+		float scaledDistance = getScaledDist(listener,dist2Radius);
+		float distanceScaler =  1.0f / (1.0f + scaledDistance);
 
-     	
 
-		//  set  cutoff filter to eliminate low frequencies when under water
+		// first test for culling
+		if (cullingMute) 
+		{			
+			if (_cullMute) 
+			{
+				if (distanceScaler < _cullMuteHighThreshAmp) 
+				{
+					return; // node is still too far to take action
+				} else 
+				{
+					setNodeActive (nodeName, true);
+					_cullMute = false;
+					//Debug.Log ("DISABLING CULLING MUTING ");
+
+				}
+			}
+		}
+		// ! _cullMute testing is done at the end of this function
+
+
+		if (aboveWaterMuting)
+		{
+			if (!listener.submergedFlag)   // we are above water
+			{
+				if (_aboveWaterState == true)
+					return;   
+			}
+			else // we are below water
+			{
+				_aboveWaterState = false;
+			}
+		}
+
+				//  set  cutoff filter to eliminate low frequencies when under water
         if (listener.submergedFlag  && underWaterProcessing ) {
 			if (_underWaterHpHz != underWaterHpHz) {
 				_underWaterHpHz = underWaterHpHz;
@@ -578,11 +636,10 @@ public class SATIEsource : SATIEnode {
 		}
 
         
+	
         if (dist2Radius>0f)
         {
             // now from distance, compute gain, lowPassCutoff-fq and variable delay:
-           float distanceScaler;
-            float scaledDistance; 
             float srcDirectivityScaler;
 
 			float distanceEffect = conn.distance;
@@ -591,16 +648,16 @@ public class SATIEsource : SATIEnode {
             
 			vdelMs_ = getVariableDelay(dist2Radius, conn.doppler);   // calculate this independently of underwater status
 
-			if (listener.submergedFlag && underWaterProcessing)
-			{
-				scaledDistance = Mathf.Pow(dist2Radius, underWaterDistanceEffect * 0.01f ); // calculate distanceFactor for underwater
-			}
-			else 
-				scaledDistance = Mathf.Pow(dist2Radius, distanceEffect * 0.01f); // calculate distanceFactor (effect) param
+//			if (listener.submergedFlag && underWaterProcessing)
+//			{
+//				scaledDistance = Mathf.Pow(dist2Radius, underWaterDistanceEffect * 0.01f ); // calculate distanceFactor for underwater
+//			}
+//			else 
+//				scaledDistance = Mathf.Pow(dist2Radius, distanceEffect * 0.01f); // calculate distanceFactor (effect) param
   
             distFq_ = getDistFq(scaledDistance);  // using distance after distanceFactor applied          
 
-            distanceScaler = 1.0f / (1.0f + scaledDistance);
+            //distanceScaler = 1.0f / (1.0f + scaledDistance);
 
 			srcDirectivityScaler = calcSrcDirectivity(conn);  
 
@@ -670,13 +727,37 @@ public class SATIEsource : SATIEnode {
         items.Add(vdelMs_);
         items.Add(distFq_);
         items.Add (distance);
-        //items.Add (dist2Dxz);
 
+		SATIEsetup.OSCtx(path, items);   // send OSC connection update
+
+		items.Clear();
+
+ 
         //Debug.Log("CONNECTION DISTANCE FROM LISTENER: " + distance);
 
-        SATIEsetup.OSCtx(path, items);
-        items.Clear();
-      }
+		// node has entered into culling muting,  set state accordingly
+		if (cullingMute) 
+		{
+			if (!_cullMute && (distanceScaler < _cullMuteLowThreshAmp)) 
+			{
+				setNodeActive (nodeName, false);
+				_cullMute = true;
+				//Debug.Log ("ENABLING CULLING MUTING ");
+			}
+		}
+		
+
+     }
+
+	float getScaledDist (SATIElistener listener, float dist2Radius)
+	{
+		float scaledDistance;
+
+		if (listener.submergedFlag && underWaterProcessing)
+			return Mathf.Pow(dist2Radius, underWaterDistanceEffect * 0.01f); // calculate distanceFactor for underwater
+		else
+			return Mathf.Pow(dist2Radius, distanceEffect * 0.01f); // calculate distanceFactor (effect) param
+	}
 
 
     // returns the projected distance on XZ 
@@ -777,7 +858,6 @@ public class SATIEsource : SATIEnode {
     
     float getGainDB(float distanceScaler, float directivity, float directivityFactor, float gainClip)
     {
-        
         float gainDB;
         
         float directivityScaler = Mathf.Pow(directivity, directivityFactor * 0.01f);

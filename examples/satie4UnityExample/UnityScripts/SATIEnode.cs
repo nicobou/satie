@@ -41,20 +41,23 @@ public class SATIEnode : MonoBehaviour {
 
 
 
-    public string uri = "plugin://default";
-
+ 
     public string AssetPath = "unused";   // subdirectory of Assets/StreamingAssets
     private string _assetPath = "";
 
-     
+	public string uri = "plugin://default";
+
+	public List <string> PropertyMessages = new List<string>();
+	private List <string> _PropertyMessages = new List<string>();  // used to detect changes in the Inspector
+
+	[Header("Node Update Settings")]
+	 
    
     public bool UpdateUsingChangeThresh = false;
     public float angleThresh = 5f; 
     public float movementThresh = .05f; 
     private float _movementThreshSqu;
  
-    public List <string> PropertyMessages = new List<string>();
-    private List <string> _PropertyMessages = new List<string>();  // used to detect changes in the Inspector
 
     // used internally for node's scenegraph update status
     private Quaternion  _lastSpatUpdateRotation;
