@@ -57,7 +57,7 @@ public class SATIEconnection {
 
 public class SATIEsource : SATIEnode {
 
- 
+
 	[Header("Source Settings")]
 
 	public List<SATIElistener> myListeners = new List<SATIElistener>(); 
@@ -67,6 +67,16 @@ public class SATIEsource : SATIEnode {
   
     //public bool mute = false;   not used
     //private bool _mutestate;
+
+	[Header("Culling Settings")]
+	public bool cullingMute = false;
+	public float cullMuteThreshDB = -66f;
+	public float cullMuteUpperThreshOffsetDB = 1f;  // Used to calculate highThreshold for debouncing
+
+	private float _cullMuteLowThreshAmp;
+	private float _cullMuteHighThreshAmp;
+
+	private bool _cullMute = false;   // true when distance scaling goes below cullMuteLowThreshDB, false when above cullMuteHighThreshDB
 
 	[Header("Connection Settings")]
 
@@ -142,15 +152,6 @@ public class SATIEsource : SATIEnode {
     private float SPEED_OF_SOUND = 0.340f;
 
 
-	[Header("Culling Settings")]
-	public bool cullingMute = false;
-	public float cullMuteThreshDB = -66f;
-	public float cullMuteUpperThreshOffsetDB = 1f;  // Used to calculate highThreshold for debouncing
-
-	private float _cullMuteLowThreshAmp;
-	private float _cullMuteHighThreshAmp;
-
-	private bool _cullMute = false;   // true when distance scaling goes below cullMuteLowThreshDB, false when above cullMuteHighThreshDB
 
     //private bool _initialized = false;
 
@@ -162,8 +163,22 @@ public class SATIEsource : SATIEnode {
     delegate float SrcDirFnPtr(float theta);   //holds function for node's H directivity
     SrcDirFnPtr srcDirFnPtr;
 	
-   
 
+
+	void refresh()
+	{
+		_cullMuteLowThreshAmp = Mathf.Pow(10f, cullMuteThreshDB/20f);
+
+		_cullMuteHighThreshAmp = Mathf.Pow(10f, ( cullMuteThreshDB + cullMuteUpperThreshOffsetDB) / 20f);
+
+
+		if ( !cullingMute && _cullMute)
+		{
+			setNodeActive (nodeName, true);
+			_cullMute = false;
+		}
+
+	}
 
 
 	public override void OnValidate()
@@ -177,19 +192,7 @@ public class SATIEsource : SATIEnode {
         if (!_initialized)
             return;
         	
-		// just do this each time.. too lazy to make state change vars
-		_cullMuteLowThreshAmp = Mathf.Pow(10f, cullMuteThreshDB/20f);
-
-		_cullMuteHighThreshAmp = Mathf.Pow(10f, ( cullMuteThreshDB + cullMuteUpperThreshOffsetDB) / 20f);
-
-
-		// this would be in a reset method otherwise
-		if ( !cullingMute && _cullMute)
-		{
-			setNodeActive (nodeName, true);
-			_cullMute = false;
-		}
-
+		refresh();
   
         if (_sourceFocusPercent != sourceFocusPercent)
 		{
@@ -401,7 +404,7 @@ public class SATIEsource : SATIEnode {
                     {
 						Debug.LogError("SATIEsource.connectionInit:  myListeners's gameObj: " + listener.name + " INVALID LISTENER");
                     }
-                }
+               } 
             }
 
             if (tempListeners.Count != myListeners.Count)
@@ -1061,17 +1064,36 @@ public class SATIEsource : SATIEnode {
     {
          List<float> connParams = new List<float>();
 
+        SATIEconnection conn = null;
+        SATIElistener listener = null;
+
         if (!nodeEnabled)
             return connParams;
 
-        SATIEconnection conn = myConnections [0];
-        SATIElistener listener = conn .listener;
+        //Debug.Log("connPARAMS: CONNECTION COUNT: "+ myConnections.Count);
+
+        foreach ( SATIEconnection connection in myConnections)
+        {
+            listener = connection.listener;
+            conn = connection;
+
+            if (conn != null && listener != null) break;
+        }
 
         if (listener == null )
         {
             Debug.LogWarning("SATIEsource.getParticleConnParams(): no listener, can't processes"); 
             return connParams;
         }
+
+        if (conn == null )
+        {
+            Debug.LogWarning("SATIEsource.getParticleConnParams(): no connection, can't processes"); 
+            return connParams;
+        }
+
+
+ 
 
         float newSpread;
 

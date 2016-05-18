@@ -434,7 +434,7 @@ public class SATIEnode : MonoBehaviour {
 		path = "/spatosc/core/"+nodeType+"/" + nodeName + "/event";
 				
 		SATIEsetup.OSCtx(path, items);
-		items.Clear();
+		//items.Clear();
 	}
 
 
