@@ -57,7 +57,8 @@ s.waitForBoot {
 	~scbr.makeSynthDef(\busreverb, \freeverb, [\stereoPanner], [0]);
 	// mono input
 	~scbr.makeSynthDef(\monoIn, \MonoIn, [\stereoPanner], [0]);
-	~scbr.makeSynthDef(\tastee, \testee, [\domeVBAP], [0]);
+	~scbr.makeSynthDef(\tastee, \testee, [\domeVBAP, \stereoPanner], [0]);
+	~scbr.makeSynthDef(\drone, \misDrone, [\domeVBAP, \stereoPanner], [0]);
 	// streaming a soundfile from disk
 	// - load soundfiles
 	~playBuffers = Dictionary();
