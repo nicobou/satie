@@ -6,6 +6,79 @@
 
 
 
+bad values:  15, 26, 29,51, 56,84, 95,
+
+
+
+
+(
+
+~cloneParams =[ \note, [ 60, 1, 1 ], \t_trig, 1 ];
+
+~synthName="drops-95.wav:k:rev".asSymbol;
+x = ~scbr.makeKamikaze(\sheefa, ~synthName, \default, ~cloneParams);
+// x = ~scbr.makeInstance(\sheefa, ~synthName, \default);
+x.set(\gainDB, 0);
+x.set(\t_trig, 1);
+)
+
+
+(
+
+~cloneParams =[ \gainDB, 0, \note, [ 60, 1, 1 ], \t_trig, 1 ];
+
+~synthName="drops-95.wav:k:rev".asSymbol;
+x = ~scbr.makeKamikaze(\sheefa, ~synthName, \default, ~cloneParams);
+
+)
+
+
+	~zombieTrig1_instances.keysDo{ arg key;
+
+		if ( key == ~processName,
+			{
+				key.postln;
+				~satie4unity.allProcesses.at(~processName).at(\synthCountMax).postln;
+		});
+	};
+
+
+
+
+
+(
+~cloneParams =[ \gainDB, 0, \note, [ 60, 1, 1 ], \t_trig, 1 ];
+
+~synthName="drops-95.wav:k:rev".asSymbol;
+
+~incr= 0;
+
+{100.do{ arg item;
+var n = item + ~incr;
+
+	~cloneParams =[ \gainDB, 0, \note, [ 60, (0.3 + (0.7*item)/100),  item/100 ], \t_trig, 1 ];
+
+// ~synthName="drops-"++ n++".wav:k:rev".asString;
+x = ~scbr.makeKamikaze(\sheefa, ~synthName, \default, ~cloneParams);
+
+
+
+
+
+
+	//n.postln;
+			0.1.wait;
+};}.fork
+
+
+)
+
+
+"_______"
+
+
+
+
 ~scbr.satieGroupInstances[\default][\digestion].set(\gainDB, -10);
 
 

@@ -39,7 +39,7 @@ s.waitForBoot {
 	~files.do { |f|
 		var sfName =  f.split.last;
 
-			inform("buffering: "++sfName);
+		inform("buffering: "++sfName);
 
 
 
@@ -51,24 +51,26 @@ s.waitForBoot {
 		//~aqPlayBuffers.add(sfName.asSymbol -> Buffer.cueSoundFile(s, f, 0, 1));
 
 
-	    // generate sample  buffer
+		// generate sample  buffer
 		~aqPlayBuffers.add(sfName.asSymbol -> Buffer.read(s, f));
 
+		// special treatment for samples with the rootName:  "drop"
+		if (sfName.containsi("drop"),
+			{
+				~scbr.makeSynthDef2(sfName.asSymbol++'\:k:rev', \zPsamp1,  [~scbr.aux[~fxInputBus]], [~listeningFormat],  [0], \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]);  //  for kamakazis with no clones
+			},
+			// else  regular sample playback, no kamikazies, for all other samples found
+			{
+					//postf("FX buffer at: %", ~scbr.aux[~fxInputBus]);
+
+				// create sample buffer playback with no rev send
+				~scbr.makeSynthDef(sfName.asSymbol, \sndBuffer, [~listeningFormat], [0],  [], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+
+				// create sample buffer playback with  rev send, referenced by   pluginName:rev
+				~scbr.makeSynthDef(sfName.asSymbol++'\:rev', \sndBuffer, [~listeningFormat], [0],  [~scbr.aux[~fxInputBus]], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
 
 
-		//s.sync;     // enable this line if needed
-
-		// create soundfile players
-		//~scbr.makeSynthDef(sfName.asSymbol, \sndFile, [~listeningFormat], [0], [], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
-
-		//postf("FX buffer at: %", ~scbr.aux[~fxInputBus]);
-
-		// create sample buffer playback with no rev send
-	    ~scbr.makeSynthDef(sfName.asSymbol, \sndBuffer, [~listeningFormat], [0],  [], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
-
-		// create sample buffer playback with  rev send, referenced by   pluginName:rev
-		~scbr.makeSynthDef(sfName.asSymbol++'\:rev', \sndBuffer, [~listeningFormat], [0],  [~scbr.aux[~fxInputBus]], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
-
+		});
 		//postf("CREATING SYNTHDEF: : %\n", sfName.asSymbol++'\:rev');
 
 	};

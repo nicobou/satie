@@ -22,7 +22,7 @@
 	// project specific
 	//'cloneVector' -> [],  // vector to store allocated synths
 	'debugFlag' -> 0,
-	'synth' -> \zkarpluck2P,  // \zparticle2P,
+	'synth' -> \zkarpluck3P,  // \zparticle2P,
 	'kCount' -> 0,
 	// other state
 	'pitchSeqGlobalMode' -> 0,
@@ -31,9 +31,8 @@
 	'pitchSeqIncr' -> 1,   // used, but only to set global sequencer state
 	'pitchSeqPos' -> 0,     // not used
 	// playback state
-    'transposition' -> 0,
+	'transposition' -> 0,
 	'synthCountMax' ->  200,    //to be safe,  this value should be half of the number that breaks the server
-
 ];
 
 // required: set these variables to the process name;
@@ -54,7 +53,9 @@ if (~satie4unity == nil, {
 	});
 
 	inform("registering process: "++~processName);
-	~satie4unity.allProcesses.put(~processName, ~process);
+    ~satie4unity.allProcesses.put(~processName, ~process);
+
+
 });
 
 
@@ -85,7 +86,21 @@ if (~zombieTrig1_pitchSequences == nil,
 	// var nodename=(self.nodeName++"_"++item).asSymbol;
 	// ~scbr.cleanInstance(nodename.asSymbol, self.nodeGroupName);
 	// });
+
+/*	if ( ~satie4unity.maxSynthCount == nil,
+		{
+			error("zombieTrig1.cleanup:   ~satie4unity.maxSynthCount is NIL but should already be defined ");
+		},
+		// else
+		{ ~satie4unity.maxSynthCount = ~satie4unity.maxSynthCount - self.synthCountMax;
+	});
+
+	~satie4unity.maxSynthCount.postln;*/
+
 	~zombieTrig1_instances.removeAt(self.nodeName);
+
+
+
 };
 
 
@@ -99,27 +114,41 @@ if (~zombieTrig1_pitchSequences == nil,
 	self.nodeGroup = thisGroup;
 	//'zombieTrig1,setup'.postln;
 
+
 	// project-specific parsing of args string (coming from setUri OSC message string)
-//	if ( argsList.size >= 2,
-//		{
-//			//~sheefaVec = argvec;
-//
-//			// postf(" zombieTrig1.setup: node: %    args:   %    size:  %\n", nodeName, argsList, argsList.size);
-//			if ( argsList[0].asString == "cloneCount",
-//				{
-//					self.cloneCount = argsList[1].asInt.clip(1, 1000);   // clip to 1000 to avoid meltdown caused by error
-//					postf(" zombieTrig1.setup: node: %   setting up for % kamakazi clones \n", nodeName, self.cloneCount);
-//				},
-//				// else bad arg
-//				{
-//					error("zombieTrig1.setup: unrecognized key, expecting 'cloneCount' ");
-//			});
-//	});
+	//	if ( argsList.size >= 2,
+	//		{
+	//			//~sheefaVec = argvec;
+	//
+	//			// postf(" zombieTrig1.setup: node: %    args:   %    size:  %\n", nodeName, argsList, argsList.size);
+	//			if ( argsList[0].asString == "cloneCount",
+	//				{
+	//					self.cloneCount = argsList[1].asInt.clip(1, 1000);   // clip to 1000 to avoid meltdown caused by error
+	//					postf(" zombieTrig1.setup: node: %   setting up for % kamakazi clones \n", nodeName, self.cloneCount);
+	//				},
+	//				// else bad arg
+	//				{
+	//					error("zombieTrig1.setup: unrecognized key, expecting 'cloneCount' ");
+	//			});
+	//	});
 
 
 	self[\properties] =  Dictionary.new();  // set up state register for synthfef properties
 
 	~zombieTrig1_instances.put(self.nodeName.asSymbol, self);
+
+	~satie4unity.allProcesses.put(~processName, ~process);
+
+/*	if ( ~satie4unity.maxSynthCount == nil,
+		{
+			~satie4unity.maxSynthCount = self.synthCountMax;
+		},
+		// else
+		{
+			~satie4unity.maxSynthCount = ~satie4unity.maxSynthCount + self.synthCountMax;
+	});
+
+	~satie4unity.maxSynthCount.postln;*/
 };
 
 
@@ -202,63 +231,63 @@ if (~zombieTrig1_pitchSequences == nil,
 				},
 				{ // else under voice limit, generate synth
 
-			var nodename=(self.nodeName++"_"++self.kCount).asSymbol;
-			var params;
-			var synthParams;
-			var synth;
+					var nodename=(self.nodeName++"_"++self.kCount).asSymbol;
+					var params;
+					var synthParams;
+					var synth;
 
-			self.kCount= self.kCount + 1;
-
-
-			// kind of stupid ti assert thus value t wat
-			// NO GROUP TX  IN THIS CASE:   thisGroup.set(\randTrigMaxMs, self.triggerIntervalMs);
-			// kamakazi must be fully parameterized at creation
-
-			// items.postln;
-
-			seqName = self.pitchSeqSym;
-			force =  items[0].asFloat;
-			incidence = items[1].asFloat.abs;   // not using negative values
-			aziDeg = items[2].asFloat.raddeg;
-			eleDeg = items[3].asFloat.raddeg;
-			gainDB = items[4].asFloat;
-			delayMs = items[5].asFloat;
-			lpHz = items[6].asFloat;
-			hpHz = items[7].asFloat;
-			distance = items[8].asFloat;
+					self.kCount= self.kCount + 1;
 
 
-			size = ~zombieTrig1_pitchSequences.at(seqName.asSymbol).at(\size);
+					// kind of stupid ti assert thus value t wat
+					// NO GROUP TX  IN THIS CASE:   thisGroup.set(\randTrigMaxMs, self.triggerIntervalMs);
+					// kamakazi must be fully parameterized at creation
 
-			params = [
-				\randTrigMaxMs, self.triggerIntervalMs, \aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB,
-				\delayMs, delayMs, \lpHz , lpHz, \hpHz, hpHz
-			];
+					// items.postln;
 
-			if ( self[\properties] != nil, { synthParams = params++ self[\properties].getPairs;}); // combine param arrays
+					seqName = self.pitchSeqSym;
+					force =  items[0].asFloat;
+					incidence = items[1].asFloat.abs;   // not using negative values
+					aziDeg = items[2].asFloat.raddeg;
+					eleDeg = items[3].asFloat.raddeg;
+					gainDB = items[4].asFloat;
+					delayMs = items[5].asFloat;
+					lpHz = items[6].asFloat;
+					hpHz = items[7].asFloat;
+					distance = items[8].asFloat;
 
-			if (self.pitchSeqGlobalMode != 0,
-				{
 
-					position = ~zombieTrig1_pitchSequences.at(seqName.asSymbol).at(\pos);
-					incr = ~zombieTrig1_pitchSequences.at(seqName.asSymbol).at(\incr);
-					pitch = ~zombieTrig1_pitchSequences.at(seqName.asSymbol).at(\pitches)[position];
-					~zombieTrig1_pitchSequences.at(seqName.asSymbol).put(\pos,  ((position + incr) % size) );
-				},
-				// else   instance specific read
-				{
-					position = self.pitchSeqPos;
-					incr = self.pitchSeqIncr;
-					pitch = ~zombieTrig1_pitchSequences.at(seqName.asSymbol).at(\pitches)[position];
-					self.pitchSeqPos = ((position + incr) % size);
-			});
+					size = ~zombieTrig1_pitchSequences.at(seqName.asSymbol).at(\size);
 
-			cloneParams = synthParams++ [ \note, [ pitch+self.transposition, force, incidence ], \t_trig, 1 ];
+					params = [
+						\randTrigMaxMs, self.triggerIntervalMs, \aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB,
+						\delayMs, delayMs, \lpHz , lpHz, \hpHz, hpHz
+					];
 
-			//[ \note, [ pitch+self.transposition, force, incidence ]].postln;
+					if ( self[\properties] != nil, { synthParams = params++ self[\properties].getPairs;}); // combine param arrays
 
-			synth = ~scbr.makeKamikaze(nodename, self.synth.asSymbol, self.nodeGroupName, cloneParams);
-			// synth.set(\note, [ pitch+self.transposition, force, incidence ], \t_trig, 1);
+					if (self.pitchSeqGlobalMode != 0,
+						{
+
+							position = ~zombieTrig1_pitchSequences.at(seqName.asSymbol).at(\pos);
+							incr = ~zombieTrig1_pitchSequences.at(seqName.asSymbol).at(\incr);
+							pitch = ~zombieTrig1_pitchSequences.at(seqName.asSymbol).at(\pitches)[position];
+							~zombieTrig1_pitchSequences.at(seqName.asSymbol).put(\pos,  ((position + incr) % size) );
+						},
+						// else   instance specific read
+						{
+							position = self.pitchSeqPos;
+							incr = self.pitchSeqIncr;
+							pitch = ~zombieTrig1_pitchSequences.at(seqName.asSymbol).at(\pitches)[position];
+							self.pitchSeqPos = ((position + incr) % size);
+					});
+
+					cloneParams = synthParams++ [ \note, [ pitch+self.transposition, force, incidence ], \t_trig, 1 ];
+
+					//[ \note, [ pitch+self.transposition, force, incidence ]].postln;
+
+					synth = ~scbr.makeKamikaze(nodename, self.synth.asSymbol, self.nodeGroupName, cloneParams);
+					// synth.set(\note, [ pitch+self.transposition, force, incidence ], \t_trig, 1);
 			});
 	});
 };
