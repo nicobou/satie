@@ -32,7 +32,7 @@
 	'pitchSeqPos' -> 0,     // not used
 	// playback state
 	'transposition' -> 0,
-	'synthCountMax' ->  200,    //to be safe,  this value should be half of the number that breaks the server
+	'synthCountMax' ->  200,    //this should be the value that would break the machine for the synthdef
 ];
 
 // required: set these variables to the process name;
@@ -285,6 +285,9 @@ if (~zombieTrig1_pitchSequences == nil,
 					cloneParams = synthParams++ [ \note, [ pitch+self.transposition, force, incidence ], \t_trig, 1 ];
 
 					//[ \note, [ pitch+self.transposition, force, incidence ]].postln;
+
+					//postf("zombieTrig1:trigger(): synthdefname: "++ self.synth.asSymbol++[ pitch+self.transposition, force, incidence ]++" \n");
+					//postf("zombieTrig1:trigger(): synthdefname: "++ cloneParams++" \n");
 
 					synth = ~scbr.makeKamikaze(nodename, self.synth.asSymbol, self.nodeGroupName, cloneParams);
 					// synth.set(\note, [ pitch+self.transposition, force, incidence ], \t_trig, 1);

@@ -29,8 +29,16 @@ while (  { ~done != true} ,
 
 
 
-//  list of  sound buffers
-~aqPlayBuffers = Dictionary();
+//  if not defined, create list of  sound buffers
+if (~aqPlayBuffers == nil,
+	{
+		~aqPlayBuffers = Dictionary();
+
+	},
+	// else
+	{
+		inform("loadSamps: ~aqPlayBuffers already defined, no need to allocate");
+});
 
 
 s.waitForBoot {
@@ -38,39 +46,49 @@ s.waitForBoot {
 
 	~files.do { |f|
 		var sfName =  f.split.last;
-
-		inform("buffering: "++sfName);
-
-
-
-		//Buffer.read(s, Platform.resourceDir +/+ "sounds/a11wlk01.wav");
+		var sfType = "normal";
 
 
 
-		// generate soundfile buffer
-		//~aqPlayBuffers.add(sfName.asSymbol -> Buffer.cueSoundFile(s, f, 0, 1));
-
-
-		// generate sample  buffer
-		~aqPlayBuffers.add(sfName.asSymbol -> Buffer.read(s, f));
+		if (~aqPlayBuffers.at(sfName.asSymbol) == nil,
+			{
+				inform("buffering: "++sfName);
+			// generate sample  buffer
+				~aqPlayBuffers.add(sfName.asSymbol -> Buffer.read(s, f));
+		});
 
 		// special treatment for samples with the rootName:  "drop"
-		if (sfName.containsi("drop"),
-			{
-				~scbr.makeSynthDef2(sfName.asSymbol++'\:k:rev', \zPsamp1,  [~scbr.aux[~fxInputBus]], [~listeningFormat],  [0], \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]);  //  for kamakazis with no clones
-			},
-			// else  regular sample playback, no kamikazies, for all other samples found
-			{
-					//postf("FX buffer at: %", ~scbr.aux[~fxInputBus]);
+
+		if (sfName.containsi("drop"), {sfType = "drop"});
+		if (sfName.containsi("6ch"), {sfType = "6ch"});
+
+		switch (sfType,
+
+			"drop",   { ~scbr.makeSynthDef2(sfName.asSymbol++'\:k:rev', \zPsamp1,  [~scbr.aux[~fxInputBus]], [~listeningFormat],  [0], \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]); }, //  for kamakazis with no clones
+
+			"6ch", {
+				inform("loadSamps: MAKING makeSynthDef2 name:"++sfName.asSymbol++'\:k');
+
+				~scbr.makeSynthDef2(sfName.asSymbol++'\:k', \syncSamp1,  [], [~listeningFormat],  [0], \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+				//~scbr.makeSynthDef(sfName.asSymbol, \syncSamp1, [~listeningFormat], [0],  [], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+				//~scbr.makeSynthDef(sfName.asSymbol++'\:rev', \syncSamp1, [~listeningFormat], [0],  [~scbr.aux[~fxInputBus]], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+			}, //  for kamakazis with no clones
+
+			"normal",  {
+
+				//postf("FX buffer at: %", ~scbr.aux[~fxInputBus]);
 
 				// create sample buffer playback with no rev send
 				~scbr.makeSynthDef(sfName.asSymbol, \sndBuffer, [~listeningFormat], [0],  [], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
 
 				// create sample buffer playback with  rev send, referenced by   pluginName:rev
 				~scbr.makeSynthDef(sfName.asSymbol++'\:rev', \sndBuffer, [~listeningFormat], [0],  [~scbr.aux[~fxInputBus]], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+			}
 
 
-		});
+		);
+
+
 		//postf("CREATING SYNTHDEF: : %\n", sfName.asSymbol++'\:rev');
 
 	};

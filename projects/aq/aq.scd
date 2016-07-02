@@ -18,6 +18,13 @@ s.waitForBoot{
 
 	s.sync;
 
+	// define the phasorSync Generator, used by the syncSamp1 synthdef
+	if (~phasorSync == nil,
+			{
+		"creating phasorSync generator".inform;
+			~phasorSync = Synth.before(s,\globalPhasor);
+	});
+
 	//  declare all the project's needed synthDefs here
 	postf("generating example project synthdefs for % format \n", ~listeningFormat);
 	~scbr.makeSynthDef(\zparticle1, \zparticle1, [~listeningFormat], [0]);
@@ -50,65 +57,7 @@ s.waitForBoot{
 	~scbr.makeSynthDef2(\particule1dyn, \particule1dyn,   [~scbr.aux[~fxInputBus]], [~listeningFormat],  [0], \defaultMapper, []);  //  for allocated staticlly spatialized particles
 
 
-	/*// - load soundfiles
- 	~aqPlayBuffers = Dictionary();
-
-
-	~aqPlayBuffers.add(\underWaterBuff0 -> Buffer.cueSoundFile(s, ~aqSoundDir +/+ "myNoise_Underwater_track01.0.M.wav", 0, 1));
-	~aqPlayBuffers.add(\underWaterBuff1 -> Buffer.cueSoundFile(s, ~aqSoundDir +/+ "myNoise_Underwater_track01.1.M.wav", 0, 1));
-	~aqPlayBuffers.add(\underWaterBuff2 -> Buffer.cueSoundFile(s, ~aqSoundDir +/+ "myNoise_Underwater_track01.2.M.wav", 0, 1));
-	~aqPlayBuffers.add(\underWaterBuff3 -> Buffer.cueSoundFile(s, ~aqSoundDir +/+ "myNoise_Underwater_track01.3.M.wav", 0, 1));
-	~aqPlayBuffers.add(\underWaterBuff4 -> Buffer.cueSoundFile(s, ~aqSoundDir +/+ "myNoise_Underwater_track01.4.M.wav", 0, 1));
-	~aqPlayBuffers.add(\underWaterBuff5 -> Buffer.cueSoundFile(s, ~aqSoundDir +/+ "myNoise_Underwater_track01.5.M.wav", 0, 1));
-	~aqPlayBuffers.add(\underWaterBuff6 -> Buffer.cueSoundFile(s, ~aqSoundDir +/+ "myNoise_Underwater_track01.6.M.wav", 0, 1));
-	~aqPlayBuffers.add(\underWaterBuff7 -> Buffer.cueSoundFile(s, ~aqSoundDir +/+ "myNoise_Underwater_track01.7.M.wav", 0, 1));
-	~aqPlayBuffers.add(\underWaterBuff8 -> Buffer.cueSoundFile(s, ~aqSoundDir +/+ "myNoise_Underwater_track01.8.M.wav", 0, 1));
-	~aqPlayBuffers.add(\underWaterBuff9 -> Buffer.cueSoundFile(s, ~aqSoundDir +/+ "myNoise_Underwater_track01.9.M.wav", 0, 1));
-
-
-	~aqPlayBuffers.add(\caveWaterBuff0 -> Buffer.cueSoundFile(s, ~aqSoundDir +/+ "myNoise_CaveWater_track01.0.M.wav", 0, 1));
-	~aqPlayBuffers.add(\caveWaterBuff1 -> Buffer.cueSoundFile(s, ~aqSoundDir +/+ "myNoise_CaveWater_track01.1.M.wav", 0, 1));
-	~aqPlayBuffers.add(\caveWaterBuff2 -> Buffer.cueSoundFile(s, ~aqSoundDir +/+ "myNoise_CaveWater_track01.2.M.wav", 0, 1));
-	~aqPlayBuffers.add(\caveWaterBuff3 -> Buffer.cueSoundFile(s, ~aqSoundDir +/+ "myNoise_CaveWater_track01.3.M.wav", 0, 1));
-	~aqPlayBuffers.add(\caveWaterBuff4 -> Buffer.cueSoundFile(s, ~aqSoundDir +/+ "myNoise_CaveWater_track01.4.M.wav", 0, 1));
-	~aqPlayBuffers.add(\caveWaterBuff5 -> Buffer.cueSoundFile(s, ~aqSoundDir +/+ "myNoise_CaveWater_track01.5.M.wav", 0, 1));
-	~aqPlayBuffers.add(\caveWaterBuff6 -> Buffer.cueSoundFile(s, ~aqSoundDir +/+ "myNoise_CaveWater_track01.6.M.wav", 0, 1));
-	~aqPlayBuffers.add(\caveWaterBuff7 -> Buffer.cueSoundFile(s, ~aqSoundDir +/+ "myNoise_CaveWater_track01.7.M.wav", 0, 1));
-	~aqPlayBuffers.add(\caveWaterBuff8 -> Buffer.cueSoundFile(s, ~aqSoundDir +/+ "myNoise_CaveWater_track01.8.M.wav", 0, 1));
-	~aqPlayBuffers.add(\caveWaterBuff9 -> Buffer.cueSoundFile(s, ~aqSoundDir +/+ "myNoise_CaveWater_track01.9.M.wav", 0, 1));
-
-
-
-
-
-
- // create soundfile players
-	~scbr.makeSynthDef(\uwSound0, \sndFile, [~listeningFormat], [0], [], [~aqPlayBuffers[\underWaterBuff0].bufnum]);
-	~scbr.makeSynthDef(\uwSound1, \sndFile, [~listeningFormat], [0], [], [~aqPlayBuffers[\underWaterBuff1].bufnum]);
-	~scbr.makeSynthDef(\uwSound2, \sndFile, [~listeningFormat], [0], [], [~aqPlayBuffers[\underWaterBuff2].bufnum]);
-	~scbr.makeSynthDef(\uwSound3, \sndFile, [~listeningFormat], [0], [], [~aqPlayBuffers[\underWaterBuff3].bufnum]);
-	~scbr.makeSynthDef(\uwSound4, \sndFile, [~listeningFormat], [0], [], [~aqPlayBuffers[\underWaterBuff4].bufnum]);
-	~scbr.makeSynthDef(\uwSound5, \sndFile, [~listeningFormat], [0], [], [~aqPlayBuffers[\underWaterBuff5].bufnum]);
-	~scbr.makeSynthDef(\uwSound6, \sndFile, [~listeningFormat], [0], [], [~aqPlayBuffers[\underWaterBuff6].bufnum]);
-	~scbr.makeSynthDef(\uwSound7, \sndFile, [~listeningFormat], [0], [], [~aqPlayBuffers[\underWaterBuff7].bufnum]);
-	~scbr.makeSynthDef(\uwSound8, \sndFile, [~listeningFormat], [0], [], [~aqPlayBuffers[\underWaterBuff8].bufnum]);
-	~scbr.makeSynthDef(\uwSound9, \sndFile, [~listeningFormat], [0], [], [~aqPlayBuffers[\underWaterBuff9].bufnum]);
-
-	~scbr.makeSynthDef(\caveSound0, \sndFile, [~listeningFormat], [0], [], [~aqPlayBuffers[\caveWaterBuff0].bufnum]);
-	~scbr.makeSynthDef(\caveSound1, \sndFile, [~listeningFormat], [0], [], [~aqPlayBuffers[\caveWaterBuff1].bufnum]);
-	~scbr.makeSynthDef(\caveSound2, \sndFile, [~listeningFormat], [0], [], [~aqPlayBuffers[\caveWaterBuff2].bufnum]);
-	~scbr.makeSynthDef(\caveSound3, \sndFile, [~listeningFormat], [0], [], [~aqPlayBuffers[\caveWaterBuff3].bufnum]);
-	~scbr.makeSynthDef(\caveSound4, \sndFile, [~listeningFormat], [0], [], [~aqPlayBuffers[\caveWaterBuff4].bufnum]);
-	~scbr.makeSynthDef(\caveSound5, \sndFile, [~listeningFormat], [0], [], [~aqPlayBuffers[\caveWaterBuff5].bufnum]);
-	~scbr.makeSynthDef(\caveSound6, \sndFile, [~listeningFormat], [0], [], [~aqPlayBuffers[\caveWaterBuff6].bufnum]);
-	~scbr.makeSynthDef(\caveSound7, \sndFile, [~listeningFormat], [0], [], [~aqPlayBuffers[\caveWaterBuff7].bufnum]);
-	~scbr.makeSynthDef(\caveSound8, \sndFile, [~listeningFormat], [0], [], [~aqPlayBuffers[\caveWaterBuff8].bufnum]);
-	~scbr.makeSynthDef(\caveSound9, \sndFile, [~listeningFormat], [0], [], [~aqPlayBuffers[\caveWaterBuff9].bufnum]);
-
-*/
-
-
-
+// - load soundfiles done automatically in the loadSamps file
 
 
 	~scbr.makeSynthDef(\busreverb, \freeverb, [~listeningFormat], [0]);
