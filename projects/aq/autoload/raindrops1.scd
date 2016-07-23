@@ -25,8 +25,10 @@
 	'synthRootName' -> "drops-*.wav:k:rev".asString,  // root synthedef name with wildCard for number
 	'rootNameSynthdefCount' -> 100,     // number of synthDefs corresponding to the RootName,  ranging from 0 to 99:   e.g.   from  "drops-0.wav:k:rev" to "drops-99.wav:k:rev"
 	'kCount' -> 0,
-	'randPitchOffset' -> 0.25,
-	// other state
+	'randPitchOffset' -> 0,
+	'randPitchRange' -> 0.25,
+	// other state,
+    'spread' -> 0,  // register used for kamikazi instantiation
 	'pitchSeqGlobalMode' -> 0,
 	'pitchSeqSym' -> \default,
 	'pitchSeqLen' -> 1,   // not used
@@ -145,7 +147,8 @@ if (~raindrops1_pitchSequences == nil,
 // otherwise the "spread" message will be applided to the node's group
 ~raindrops1.spread = { | self, spreadVal |
 
-	// do nothing for this node, since spatialization is only done using the trigger method
+    self.spread = spreadVal;
+	//postf("spread message:  val:% \n", spreadVal);
 };
 
 
@@ -239,7 +242,7 @@ if (~raindrops1_pitchSequences == nil,
 
 					params = [
 						\randTrigMaxMs, self.triggerIntervalMs, \aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB,
-						\delayMs, delayMs, \lpHz , lpHz, \hpHz, hpHz
+						\delayMs, delayMs, \lpHz , lpHz, \hpHz, hpHz,\spread, self.spread
 					];
 
 					if ( self[\properties] != nil, { synthParams = params++ self[\properties].getPairs;}); // combine param arrays
@@ -260,7 +263,7 @@ if (~raindrops1_pitchSequences == nil,
 					// 		self.pitchSeqPos = ((position + incr) % size);
 					// });
 
-					pitch = 60 + rand2(self.randPitchOffset);      //  -  (force * -10.0);   // center random pitch around midi60, use force to bias 28ve down.
+					pitch = 60 + self.randPitchOffset + rand2(self.randPitchRange);      //  -  (force * -10.0);   // center random pitch around midi60, use force to bias 28ve down.
 
 					scaledForce =  force.clip(-1,1);
 					scaledForce = (0.2) + (0.8 * abs(scaledForce));

@@ -16,6 +16,7 @@
 
 // Play a sample buffer
 
+// uses a delay of two blocks to avoid transient mangulation by supernova
 
 
 // args:   midiPitch60 == no transposition,  force & incidence  between -1 and 1
@@ -31,6 +32,9 @@
 	var lpassFq,hpassFq;
 	var ampScaled;
 	var sig;
+    var i_blockDelay = 2;  // block count, chosen by ear
+	
+    var blockDelaySecs = ControlDur.ir * i_blockDelay;
 
 	incidence = incidence.clip(0,1);
 	amp = amp.clip(-1,1);
@@ -43,10 +47,11 @@
 	sig = trimDB.dbamp * PlayBuf.ar(1, bufnum, rate, t_trig, startPos, loop);
 
 
-	sig = BLowPass.ar(  (ampScaled * sig),  Lag.kr(lpassFq, 0.02) , 5);
+	sig = BLowPass.ar(  (ampScaled * sig),  Lag.kr(lpassFq, 0.01) , 5);
 
-    sig = BHiPass.ar( sig ,  Lag.kr(hpassFq, 0.02) , 5);
+    sig = BHiPass.ar( sig ,  Lag.kr(hpassFq, 0.01) , 5);
 
+	DelayN.ar(sig, ControlDur.ir*10, blockDelaySecs);   // offset output by  N blocks to avoid transient mangulation by supernova
 };
 
 

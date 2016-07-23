@@ -25,6 +25,7 @@
 	'synth' -> \zkarpluck3P,  // \zparticle2P,
 	'kCount' -> 0,
 	// other state
+    'spread' -> 0,  // register used for kamikazi instantiation
 	'pitchSeqGlobalMode' -> 0,
 	'pitchSeqSym' -> \default,
 	'pitchSeqLen' -> 1,   // not used
@@ -172,7 +173,8 @@ if (~zombieTrig1_pitchSequences == nil,
 // otherwise the "spread" message will be applided to the node's group
 ~zombieTrig1.spread = { | self, spreadVal |
 
-	// do nothing for this node, since spatialization is only done using the trigger method
+    self.spread = spreadVal;
+	//postf("spread message:  val:% \n", spreadVal);
 };
 
 
@@ -261,7 +263,7 @@ if (~zombieTrig1_pitchSequences == nil,
 
 					params = [
 						\randTrigMaxMs, self.triggerIntervalMs, \aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB,
-						\delayMs, delayMs, \lpHz , lpHz, \hpHz, hpHz
+						\delayMs, delayMs, \lpHz , lpHz, \hpHz, hpHz,\spread, self.spread
 					];
 
 					if ( self[\properties] != nil, { synthParams = params++ self[\properties].getPairs;}); // combine param arrays
