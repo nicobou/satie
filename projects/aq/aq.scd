@@ -6,8 +6,16 @@
 
 s.waitForBoot{
 
-	~num_aux_bus = 5;
-	~fxInputBus = 0;  // relative aux bus number that satie will use for this project's synthdef sends to fx synthdefs
+	~num_aux_bus = 5;  // THIS MUST BE DEFINED FOR PROJECTS, with a value of 1 or greater
+
+
+	// based on the value of ~num_aux_bus,  the following can be defined
+	~inBus0 = 0;  // relative aux bus number that satie will use for this project's synthdef sends to fx synthdefs
+	~inBus1 = 1;  // relative aux bus number that satie will use for this project's synthdef sends to fx synthdefs
+	~inBus2 = 2;  // relative aux bus number that satie will use for this project's synthdef sends to fx synthdefs
+	~inBus3 = 3;  // relative aux bus number that satie will use for this project's synthdef sends to fx synthdefs
+	~inBus4 = 4;  // relative aux bus number that satie will use for this project's synthdef sends to fx synthdefs
+
 
 	// create and initialize a sc-basic-renderer, and set environment variable
 	if (~scbr == nil,{
@@ -25,12 +33,16 @@ s.waitForBoot{
 			~phasorSync = Synth.before(s,\globalPhasor);
 	});
 
+		// required
+	~scbr.makeSynthDef(\dummyPlugin, \emptySource, [\emptySpat], [0]);    // dummy synthdef, used for new nodes - required for all projects
+
+
 	//  declare all the project's needed synthDefs here
 	postf("generating example project synthdefs for % format \n", ~listeningFormat);
 	~scbr.makeSynthDef(\zparticle1, \zparticle1, [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\pink, \PinkSin, [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\dust, \DustDust, [~listeningFormat], [0]);
-	~scbr.makeSynthDef(\default, \default, [~listeningFormat], [0]);
+	~scbr.makeSynthDef(\default, \default, [~listeningFormat], [~scbr.aux[~inBus0]]);
 	~scbr.makeSynthDef(\zkarpluck0, \zkarpluck0, [~listeningFormat], [0]);
 	//~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\test, \testtone,  [~listeningFormat], [0]);
@@ -38,37 +50,37 @@ s.waitForBoot{
 
 	~scbr.makeSynthDef(\pbell1, \pbell1, [~listeningFormat], [0]);
 	// same thing but with with reverb send
-	~scbr.makeSynthDef(\pbell1++'\:rev', \pbell1, [~listeningFormat], [0], [~scbr.aux[~fxInputBus]]);
+	~scbr.makeSynthDef(\pbell1++'\:rev', \pbell1, [~listeningFormat], [0], [~scbr.aux[~inBus0]]);
 
 	~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [~listeningFormat], [0]);
 	// same thing but with with reverb send
-	~scbr.makeSynthDef(\zkarpluck1++'\:rev', \zkarpluck1, [~listeningFormat], [0], [~scbr.aux[~fxInputBus]]);
+	~scbr.makeSynthDef(\zkarpluck1++'\:rev', \zkarpluck1, [~listeningFormat], [0], [~scbr.aux[~inBus0]]);
 
 	// effects node
+	~scbr.makeSynthDef(\busreverb, \freeverb, [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\busgverb, \gverb, [~listeningFormat], [0]);
 
 	// note order:   name, synthName, fxBus, listenerName, outBusNo, mapName, optArgs
-	~scbr.makeSynthDef2(\zkarpluck1P, \zkarpluck1P,   [~scbr.aux[~fxInputBus]], [~listeningFormat],  [0], \randOffsets1, []);   // for kamikazis
-	~scbr.makeSynthDef2(\zkarpluck2P, \zkarpluck2P,   [~scbr.aux[~fxInputBus]], [~listeningFormat],  [0], \randOffsets1, []);  // for resonant updated klones
-    ~scbr.makeSynthDef2(\zkarpluck3P, \zkarpluck2P,   [~scbr.aux[~fxInputBus]], [~listeningFormat],  [0], \defaultMapper, []);  //  for kamakazis with no clones
+	~scbr.makeSynthDef2(\zkarpluck1P, \zkarpluck1P,   [~scbr.aux[~inBus0]], [~listeningFormat],  [0], \randOffsets1, []);   // for kamikazis
+	~scbr.makeSynthDef2(\zkarpluck2P, \zkarpluck2P,   [~scbr.aux[~inBus0]], [~listeningFormat],  [0], \randOffsets1, []);  // for resonant updated klones
+    ~scbr.makeSynthDef2(\zkarpluck3P, \zkarpluck2P,   [], [~listeningFormat],  [0], \defaultMapper, []);  //  for kamakazis with no clones
+    ~scbr.makeSynthDef2(\zkarpluck3P++'\:rev', \zkarpluck2P,   [~scbr.aux[~inBus0]], [~listeningFormat],  [0], \defaultMapper, []);  //  for kamakazis with no clones
+   ~scbr.makeSynthDef2(\zkarpluck3P++'\:rev1', \zkarpluck2P,   [~scbr.aux[~inBus1]], [~listeningFormat],  [0], \defaultMapper, []);  //  for kamakazis with no clones
 
 
 
-//~scbr.makeSynthDef2(\particule1, \particule1,   [~scbr.aux[~fxInputBus]], [~listeningFormat],  [0], \defaultMapper, []);  //  for kamakazis
-	~scbr.makeSynthDef2(\particule1, \particule1,   [~scbr.aux[~fxInputBus]], [~listeningFormat],  [0], \defaultMapper, []);  //  for kamakazis
-	// ~scbr.makeSynthDef2(\particule1, \particule1,   [~scbr.aux[~fxInputBus]], [\labodomeVBAP],  [0], \defaultMapper, []);  //  for kamakazis
-	~scbr.makeSynthDef2(\particule1dyn, \particule1dyn,   [~scbr.aux[~fxInputBus]], [~listeningFormat],  [0], \defaultMapper, []);  //  for allocated staticlly spatialized particles
+
+//~scbr.makeSynthDef2(\particule1, \particule1,   [~scbr.aux[~inBus0]], [~listeningFormat],  [0], \defaultMapper, []);  //  for kamakazis
+	~scbr.makeSynthDef2(\particule1, \particule1,   [~scbr.aux[~inBus0]], [~listeningFormat],  [0], \defaultMapper, []);  //  for kamakazis
+	// ~scbr.makeSynthDef2(\particule1, \particule1,   [~scbr.aux[~inBus0]], [\labodomeVBAP],  [0], \defaultMapper, []);  //  for kamakazis
+	~scbr.makeSynthDef2(\particule1dyn, \particule1dyn,   [~scbr.aux[~inBus0]], [~listeningFormat],  [0], \defaultMapper, []);  //  for allocated staticlly spatialized particles
 
 
 // - load soundfiles done automatically in the loadSamps file
 
 
-	~scbr.makeSynthDef(\busreverb, \freeverb, [~listeningFormat], [0]);
-	~scbr.makeSynthDef(\busgverb, \gverb, [~listeningFormat], [0]);
 
 
-	// dummy
-	~scbr.makeSynthDef(\dummyPlugin, \emptySource, [\emptySpat], [0]);    // dummy synthdef, used for new nodes
 	// be sure the synthDef is compiled on the server
 
 	s.sync;

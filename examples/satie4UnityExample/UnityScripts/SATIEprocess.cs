@@ -262,7 +262,8 @@ public class SATIEprocess : MonoBehaviour {
 	void sendEvents(List <string> messages, bool setParamFlag)
 	{
 
-		foreach (string s in messages)
+ 
+        foreach (string s in messages)
 		{
 			if (s.Equals("") ) continue;
 			
@@ -271,12 +272,15 @@ public class SATIEprocess : MonoBehaviour {
 
 			List<object> atoms = new List<object>();
 
-			
+            //Debug.LogError(transform.name+":" + s);
+
 			foreach (string value in items)
 			{
 				int ivalue;
 				float fvalue;
 
+
+                //Debug.LogError("\t  value_" + value + "_");
 
 				if (int.TryParse(value, out ivalue))
 				{

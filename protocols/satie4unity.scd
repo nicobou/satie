@@ -26,8 +26,6 @@ for debugguing
 */
 
 
-// uses GLOBAL VARIABLES:   ~fxInputBus  (defined in projects)
-
 (
 ~satie4unityprotocol = { | oscContext, satieContext, oscID = \satie4unityOSC |
 	var osc = oscContext;
@@ -44,6 +42,9 @@ for debugguing
 		~outputDB = 0;    // current state of the supercollider's output
 		~outputTrimDB = 0;
 
+		~satieAuxBusCount = satie.aux.size;
+
+		// make sure this effcts group is defined since all  uri types "effect://name" are assigned to it
 		if ( satie.satieGroups[\effect] == nil,
 			{~effectProx = satie.makeSatieGroup(\effect, \addToTail);}
 		);
@@ -375,12 +376,12 @@ for debugguing
 
 							if (myProcess[\spread] == nil,
 								{
-									postf("~connectionProcessCallback:  setting spread for node's group  %\n", connectionName);
+									//postf("~connectionProcessCallback:  setting spread for node's group  %\n", connectionName);
 									thisGroup.set(\spread, spread);
 								},
 								// else use a custom handler
 								{
-									postf("~connectionProcessCallback:  calling custom spread handler for %\n", connectionName);
+									//postf("~connectionProcessCallback:  calling custom spread handler for %\n", connectionName);
 									myProcess[\spread].value(myProcess, spread);
 
 							});
@@ -578,7 +579,7 @@ for debugguing
 		};
 
 
-		~createSource = {| self, sourceName, uriName , groupName = \default |
+		~createSource = {| self, sourceName, uriPath , groupName = \default |
 			//"createSource called".inform;
 			if (self.allSourceNodes.includesKey(sourceName),
 				{
@@ -587,17 +588,15 @@ for debugguing
 				// else create new node
 				{
 					var type;
-					type = self.uriType(uriName);
+					type = self.getUriType(uriPath);
 
-					switch( type,
-						"plugin", {
-							self.createSourceNode(sourceName.asSymbol, uriName,groupName )
-						},
-						"process", {
-							self.createSourceProcess(sourceName.asSymbol, uriName,groupName )
-						},
-						// "file", {~setSynth.value(name, uriPath)}  not implemented yet
-					);
+					if ( type == "process",  {
+						self.createSourceProcess(sourceName.asSymbol, uriPath,groupName );
+					},
+					// else
+					{
+						self.createSourceNode(sourceName.asSymbol, uriPath,groupName );
+					});
 				}
 			);
 		};
@@ -618,7 +617,7 @@ for debugguing
 			var rawArgVec = nil;
 			var argList = List[];
 
-			("~createSourceProcess:  URI"++uriPath).postln;
+			//("~createSourceProcess:  URI"++uriPath).postln;
 
 			// sheefa = uriPath;
 
@@ -649,7 +648,7 @@ for debugguing
 						},
 						// else node good to go
 						{
-							postf("~createSourceProcess nodeName: %,   process name: %\n", sourceName, processName);
+							postf("~createSourceProcess nodeName: %,   process name: %  URI: % \n", sourceName, processName, uriPath);
 							//postf("~createSourceProcess: %:  uri: %  group: %\n", sourceName, uriPath, groupName);
 
 							self.allSourceNodes[sourceName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
@@ -688,8 +687,15 @@ for debugguing
 		};
 
 
-		~createSourceNode = { | self, sourceName, uriName , groupName = \default |
+		~createSourceNode = { | self, sourceName, uriString , groupName = \default, argsList|
 			var synthName;
+
+			var type;
+
+			// MAKE SURE URI STRING IS VALID -- if not, will post warning and be set to plugin://dummyPlugin
+			uriString = self.checkUri(sourceName, uriString);
+
+			type = self.getUriType(uriString);
 
 			if (groupName == "", { groupName = \default; });   // make sure group name is ok
 
@@ -701,53 +707,26 @@ for debugguing
 				}
 			);
 
-			postf("~createSourceNode: %:  uri: %  group: %\n", sourceName, uriName, groupName);
+			postf("~createSourceNode: %:  uri: %  group: %\n", sourceName, uriString, groupName);
 			self.allSourceNodes[sourceName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
 			self.allSourceNodes[sourceName.asSymbol].put(\plugin, \nil);
-
-			// handle any aux send issues here
-			if ( groupName == \effect,
-				{
-					postf("~createSource:  CREATING EFFECTS SOURCE for:%\n", sourceName.asSymbol);
-
-					if (~fxInputBus == nil,    // this should be defined previously in the project's .scd
-						{
-							postf("~createSource:  ~fxInputBus not defined");
-							~fxInputBus = 0;
-					});
-
-					// this is an effects node, so save its aux bus assign
-					self.allSourceNodes[sourceName.asSymbol].put(\auxBus, satie.aux[~fxInputBus]);  //  HACK to set up effects send node
-			});
+			self.allSourceNodes[sourceName.asSymbol].put(\uriStr, uriString);
 
 			// now set node's group
 			self.allSourceNodes[sourceName.asSymbol].put(\groupNameSym, groupName.asSymbol);
 
-			// call ~setUri to complete instance creation
-			//~setUri.value(sourceName.asSymbol,uriName.asSymbol);
+			// call  setSynth to complete instance creation
+			// note:  setSynth acts on URI
 
-			// now set up synth
-			if (uriName.asString.contains("plugin://") == false,
+			if ( ( (type != "plugin") &&  (type != "effect") ),
 				{
-					warn("~createSource: WARNING: node: %  bad URI format : %,  setting to \dummyPlugin", sourceName, uriName);
+					error("~createSourceNode: BUG FOUND IN CODE:   URL SHOULD BE OK" );
 					self.setSynth(sourceName.asSymbol, \dummyPlugin);
 				},
-				// else  // path ok, proceed
+				// else  // path format ok, proceed
 				{
-					var charIndex = uriName.asString.find("://");
-					var temp = uriName.asString.subStr(charIndex);
-					var type = uriName.asString.subStr(0, charIndex-1);
-					synthName = temp.asString.replace("://", "");
-
-					//postf("~setUri nodeName: %, type: %  plugName: %\n", uriName, type, uriPath);
-					// still needs to be expanded for soundfiles, adc, web etc..
-					switch( type,
-						"plugin", {
-							self.setSynth(sourceName.asSymbol, synthName)
-
-						},
-						// "file", {~setSynth.value(name, uriPath)}  not implemented yet
-					);
+					synthName = self.getUriName(uriString);
+					self.setSynth(sourceName.asSymbol, synthName);
 			});
 			osc.sourceOSC(sourceName.asSymbol, e.['sourceNodeCallback']);   // create OSC callback
 			//"createSourceNode called".inform;
@@ -802,9 +781,6 @@ for debugguing
 			var connectionName, myProcess;
 			//postf("createConnection:  for source % and listener % \n", sourceName, listenerName);
 
-
-			//~sheefa.allSourceNodes[\srcNode];
-
 			connectionName = sourceName ++ "->" ++ listenerName;
 			myProcess = self.allSourceNodes[sourceName.asSymbol].at(\process);
 
@@ -841,7 +817,19 @@ for debugguing
 		};
 		~setSynth = { 	| self, nodeName, pluginName |
 			var validPluginName = pluginName;
-			var groupName = self.allSourceNodes[nodeName.asSymbol].at(\groupNameSym);
+			var sourceNode = self.allSourceNodes[nodeName.asSymbol];
+			var groupName = sourceNode.at(\groupNameSym);
+			var type;
+			var inBus;
+
+
+			var uriPath = sourceNode.at(\uriStr);
+
+
+			type = self.getUriType( uriPath );
+
+
+			//postf("~setSynth: node: %   uriStr: %  type: % \n",  nodeName, uriPath,   type);
 
 			//postf("~setSynth: node: %    NEW: %  CURRENT: % \n", nodeName, pluginName.asSymbol, self.allSourceNodes[nodeName.asSymbol].at(\plugin).asSymbol);
 
@@ -861,27 +849,22 @@ for debugguing
 							satie.cleanInstance(nodeName.asSymbol,groupName.asSymbol );
 					});
 
-					self.allSourceNodes[nodeName.asSymbol].put(\plugin, validPluginName.asSymbol);
+					sourceNode.put(\plugin, validPluginName.asSymbol);
 
 
-					if ( groupName.asSymbol == \default,
+					if ( ( (type == "effect") || (groupName == \effect) ),
 						{
-							synth = satie.makeInstance(nodeName.asSymbol, validPluginName.asSymbol);  // just being careful, but the call below should work for this too
+							inBus = self.getFxInBus(uriPath);
+							postf("~setSynth: assigning inBus: % to effects node % \n", satie.aux[inBus] , nodeName);
+							synth = satie.makeInstance(nodeName.asSymbol, validPluginName.asSymbol, \effect, [\in, satie.aux[inBus] ]);
 						},
+						// else
 						{
 							synth = satie.makeInstance(nodeName.asSymbol, validPluginName.asSymbol, groupName.asSymbol);
-
-					});
-
-					// now if its a node that has an aux send assign, it must be an effects node, so set its synth param with the aux bus number
-					if ( self.allSourceNodes[nodeName.asSymbol].at(\auxBus) != nil,
-						{
-							synth.set(\in, self.allSourceNodes[nodeName.asSymbol].at(\auxBus) );
 					});
 
 
-
-					self.allSourceNodes[nodeName.asSymbol].put(\synth, synth);
+					sourceNode.put(\synth, synth);
 				},
 				{
 					//postf("~setSynth: ignoring set plugin % for node % : plugin already set \n", pluginName, nodeName);
@@ -890,41 +873,37 @@ for debugguing
 			//"setSynth called".inform;
 
 		};
+
+
+		// valid URIs:   process://name  args
+		//	 effect://synthName   <opt> inBus n     // defaults to  inBus=0
+		// plugin://synthName
 		~setUri = { | self, nodeName, uriPath |
-			var charIndex, uriName, type, temp;
-			//"setUri called".inform;
+			var charIndex, type, temp;
+			var synthName = \dummyPlugin;  // default
+			var node = self.allSourceNodes[nodeName.asSymbol];
+			var inBus;
 
-			// type://name (i.e. plugin://DustDust, file://<path>
+			uriPath = self.checkUri(nodeName, uriPath);     // make sure uri is valid, otherwise assigns to "plugin://dummyPlugin"
+			node.put(\uriStr, uriPath);
 
-			// check URI name to make sure its valid
+			type = self.getUriType(uriPath);
 
-			if (uriPath.asString.contains("plugin://") == false,
-				{
-					postf("~setUri: WARNING: node: %  bad URI format : %,  setting to \dummyPlugin", nodeName, uriPath);
-					self.setSynth(nodeName.asSymbol, \dummyPlugin);
+			//postf("~setUri nodeName: %, type: %  plugName: %\n", synthName, type, uriPath);
+			// still needs to be expanded for soundfiles, adc, web etc..
+
+			switch( type,
+				"plugin", {
+					synthName = self.getUriName(uriPath);
 				},
-
-				// else  // path ok, proceed
-				{
-					charIndex = uriPath.asString.find("://");
-
-					temp = uriPath.asString.subStr(charIndex);
-					type = uriPath.asString.subStr(0, charIndex-1);
-					uriName = temp.asString.replace("://", "");
-
-					//postf("~setUri nodeName: %, type: %  plugName: %\n", uriName, type, uriPath);
-					// still needs to be expanded for soundfiles, adc, web etc..
-					switch( type,
-						"plugin", {
-							self.setSynth(nodeName.asSymbol, uriName)
-
-						},
-						// "file", {~setSynth.value(name, uriPath)}  not implemented yet
-					);
-			});
-
-
+				"effect", {
+					synthName = self.getUriName(uriPath);
+				}
+			);
+			self.setSynth(nodeName.asSymbol, synthName);
 		};
+
+
 		~setProperty = { | self, nodeName, property, value |
 			var thisSynth = self.allSourceNodes[nodeName.asSymbol].at(\synth);
 			//"setProperty called".inform;
@@ -932,11 +911,6 @@ for debugguing
 
 			thisSynth.set(property.asSymbol, value);
 		};
-
-
-
-
-		//~setGroupProperty = {};
 
 		~setGroupProperty = { | self, groupName, property, value |
 			var group = self.allGroupNodes[groupName.asSymbol].at(\group).group;
@@ -947,29 +921,14 @@ for debugguing
 		};
 
 
-
-
 		~setState = { | self, nodeName,  state |
 			var thisSynth = self.allSourceNodes[nodeName.asSymbol].at(\synth);
 
 			thisSynth.run(state);
 
-			// "setState called".inform;
-			/*		if ( (state > 0),
-			{
-			satie.makeInstance(nodeName.asSymbol, ~allSourceNodes[nodeName.asSymbol].at(\plugin).asSymbol, thisGroupSym);
-			},
-			//else turn state off
-			{
-			satie.pauseInstance.value(nodeName.asSymbol, thisGroupSym );
-			}
-			);*/
+
 			//postf("~setState: seting state of % to %\n", nodeName, state);
-
-
 		};
-
-		//~setGroupEvent = { "setGroupEvent called".warn; };
 
 		// events RX:   /spatosc/core/source/nodename/event eventName v1...vN
 		~setGroupEvent = { | self, groupName, eventName,  args |
@@ -1206,11 +1165,19 @@ for debugguing
 			};
 		};
 
+		~getUriName = { |  self, uriPath |
+			var stringArray = uriPath.asString.split($ );
+			var charIndex = uriPath.asString.find("://");
+			var temp = uriPath.asString.subStr(charIndex);
+			var uriName = temp.asString.replace("://", "");
 
-		~uriType = { | self, uriPath |
+			uriName.asString.split($ )[0].asString;
+		};
+
+		~getUriType = { | self, uriPath |
 			var charIndex, uriName, type, temp;
 
-			type = nil;
+			type = "";
 
 			// type://name (i.e. plugin://DustDust, file://<path>
 
@@ -1218,8 +1185,7 @@ for debugguing
 
 			if (uriPath.asString.contains("://") == false,
 				{
-					error("~getUriSym:  uri type format error: % ", uriPath);
-
+					if (uriPath.size > 0, {warn("~getUriType:  uri type format error: % ", uriPath);});
 				},
 
 				// else  // path ok, proceed
@@ -1233,6 +1199,90 @@ for debugguing
 			type;
 		};
 
+		~getUriArgs = { |self, uriPath  |
+			var temp,charIndex, processName;
+			var argsString = "";
+			var stringArray;
+			var rawArgVec = nil;
+			var argList = List[];
+
+			//("~getUriArgs:  URI: "++uriPath).postln;
+
+			// sheefa = uriPath;
+
+			stringArray = uriPath.asString.split($ );
+
+			if (stringArray.size < 2,
+				{
+					[];
+				},
+				{
+
+					charIndex = stringArray[0].asString.find("://");
+					processName = stringArray[0].asString.subStr(charIndex+3);
+
+					argsString = uriPath.asString.subStr(stringArray[0].size+1);
+
+					//argsString.postln;
+
+					rawArgVec= argsString.asString.split($ );
+					// make list of items in argString
+					rawArgVec.do( { arg item;
+						if ( item != "",
+							{
+								argList.add(item);
+						});
+					})
+			});
+		};
+
+		// no error checking, must not be called on empty node, or non-effects-type node
+		// uriPath  eg:   effect://reverb satieAuxBus 3
+		~getFxInBus = { | self, uriPath |
+			var synth;
+			var auxBus = 0;  //default bus
+			var satieBus;
+
+
+			var argList = self.getUriArgs(uriPath);
+
+			//("~getFxInBus:  URI: "++uriPath).postln;
+
+
+			// if there are two args, and the first arg is the keyword "inBus"then try to set the effect's \in param to the second arg
+			if (argList.size > 1,
+				{
+					if (argList[0].asString == "inBus",
+						{
+							auxBus = argList[1].asInt.clip(0, self.satieAuxBusCount-1);
+					});
+			});
+
+			auxBus;  // returns auxBus for effects node
+
+			//	satieBus = satie.aux[auxBus];
+			//synth = self.allSourceNodes[nodeName.asSymbol].get(\synth);
+			//synth.set(\in, auxBus);
+			//synth.set(\in, satieBus );
+			//postf("~setFxInBus: setting Aux Bus in %   % for effects node % \n", auxBus, uriPath, nodeName);
+		};
+
+
+		// if URI is ok, returns uriString, else   "plugin://dummyPlugin"
+		~checkUri = { | self, nodeName, uriString |
+			var type = self.getUriType(uriString);
+
+			//uriString.postln;
+			if ( (type != "plugin") && (type != "effect"),
+				{
+					error("~checkUri:  node: %  bad URI: % , using default: plugin://dummyPlugin \n", nodeName, uriString);
+
+					"plugin://dummyPlugin"
+				},
+				{
+					uriString;
+			});
+		};
 
 		// DEBUGGING FUNCTIONS
 		~dumpConnections = { 	| self |

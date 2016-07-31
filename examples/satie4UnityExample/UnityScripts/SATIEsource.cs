@@ -130,7 +130,7 @@ public class SATIEsource : SATIEnode {
 	public float underWaterHpHz = 800;  // low frequency cutoff when underwater
 	private float _underWaterHpHz;
 
-	[Range(0f, -80f)]
+	[Range(-80f, 24)]
 	public float underWaterDBdrop = -40;  //  DB drop of an above water sound, when heard when under water
 	private float _underWaterDBdrop;
 

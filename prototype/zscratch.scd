@@ -9,6 +9,19 @@
 bad values:  15, 26, 29,51, 56,84, 95,
 
 
+~scbr.makeInstance(\sheefa, \busgverb, \effect);
+
+~scbr.makeInstance(\sheefa, \busgverb, \default);
+
+		if ( ~scbr.satieGroups[\effect] == nil,
+			{~effectProx = ~scbr.makeSatieGroup(~satieFXgroupSym, \addToTail);}
+		);
+
+
+~satie4unity.satieAuxBusCount;
+
+~scbr.aux.size
+"sheefa".size
 
 
 (
@@ -523,7 +536,15 @@ gainDB
 
 
 
+		~cleanInstance = { | self, name, group = \default |
 
+
+	~scbr.satieGroupInstances[\default][name].release();
+			// fadeTime must be higher than SATIE internal fadeTime:
+			~scbr.satieGroupInstances[group][name].clear(0.03);
+			~scbr.satieGroupInstances[group].removeAt(name);
+			nil;
+		};
 
 
 

@@ -194,11 +194,12 @@ if (~zombieTrig1_pitchSequences == nil,
 
 	if ( items.size != 1,
 		{
-			warn("~zombieTrig1.setIncrement:  bad item count,  takes one float arg, received: % items\n",items.size);
+			warn("~zombieTrig1.setIncrement: node:"++self.nodeName++":  bad item count,  takes one float arg, received: "++items.size++"  items:  ");
+			items.postln;
 		},
 		//else
 		{
-			postf("zombieTrig1.setIncrement:  increment = % \n", items[0].asFloat);
+			//postf("zombieTrig1.setIncrement:  increment = % \n", items[0].asFloat);
 
 			if (self.pitchSeqGlobalMode != 0,
 				{
