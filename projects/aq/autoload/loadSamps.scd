@@ -2,7 +2,7 @@
 // this file must be evaluated AFTER main.scd and projectName.scd
 
 
-~aqSoundDir="~/".standardizePath ++"Dropbox/Unity3D/projects_unity5/aquaKhoriaShow/Assets/StreamingAssets/sound";
+//~aqSoundDir="~/".standardizePath ++"Dropbox/Unity3D/projects_unity5/aquaKhoriaShow/Assets/StreamingAssets/sound";
 
 ~autoLoadDirCmd = "ls "++~aqSoundDir++"/*.wav "++~aqSoundDir++"/*.aiff "++~aqSoundDir++"/*.aif 2>/dev/null";
 

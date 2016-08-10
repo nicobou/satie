@@ -2,7 +2,9 @@
 
 // called from project's  main.scd file
 
-~aqSoundDir="~/".standardizePath ++"Dropbox/Unity3D/projects_unity5/aquaKhoriaShow/Assets/StreamingAssets/sound";
+//WAS ~aqSoundDir="~/".standardizePath ++"Dropbox/Unity3D/projects_unity5/aquaKhoriaShow/Assets/StreamingAssets/sound";
+
+~aqSoundDir="~/".standardizePath ++"src/aquakhoria/AquaKhoria_UnityProject/Assets/StreamingAssets/sound";
 
 s.waitForBoot{
 
@@ -95,7 +97,61 @@ s.waitForBoot{
 	});
 	s.sync;
 
+	// PROJECT SPECIFIC OSC MESSAGES
+
+~aquakhoriaCallback = {
+	arg msg;
+	var command = msg[1];
+	postf("~aquakhoriaCallback: command: %, msg: %, \n", command, msg);
+
+	if (msg.size < 2,
+		{"~aquakhoriaCallback: empty message".warn;
+			postf("~basicRendererCallback MESS LEN: %", msg.size);
+
+		},
+		// else
+		{
+
+			switch (command,
+				'resetSync',
+				{
+					if (~phasorSync != nil,
+						{
+							"resetting phasorSync generator".inform;
+							~phasorSync.set(\t_trig, 1);
+					});
+
+				},
+
+			/*	,
+				'setOutputTrimDB',
+				{
+					if ( (msg.size < 3 ) ,
+						{"~aquakhoriaCallback: setOutputTrimDB missing value".warn;},
+						// else
+						{
+							//e.outputTrimDB = msg[2];
+							//e.volume.volume = e.outputTrimDB + e.outputDB;
+						}
+					)
+				},
+				*/
+
+			)
+	});
+};
+
+
+// CONNECT TO OSC USING BASIC RENDERER SETTINGS (PORT ETC.)
+~oscInterface.removeBasicRendererOSC(\aquakhoria);
+
+~oscInterface.newOSC(\aquakhoria, ~aquakhoriaCallback, "/satie/aquakhoria");
 };  // end of  waitforboot
+
+
+
+
+
 
 /*
 testing

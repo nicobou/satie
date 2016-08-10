@@ -74,7 +74,8 @@ for debugguing
 								{
 									e.projectDirectory = msg[2];
 
-									e.projectDirectory.postln;
+									//e.projectDirectory.postln;
+                                    postf("~basicRendererCallback: setProjectDir: % \n", e.projectDirectory);
 
 								}
 							)

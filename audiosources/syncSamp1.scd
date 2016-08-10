@@ -16,7 +16,7 @@
 
 // Play a sample buffer using global synchronization index
 
-~name = \syncSamp1;
+ ~name = \syncSamp1;
 
 
 // args:   midiPitch60 == no transposition,  force & incidence  between -1 and 1
@@ -31,12 +31,14 @@ if ( ~syncBus == nil,
 		~syncBus = Bus.audio(s,1); // this will be our sync bus
 });
 
-// set up needed sync signal generator and bus
 
-
+// set up needed sync signal generator and bus for this synthdef
 SynthDef(\globalPhasor, {| t_trig = 0 |
-	Out.ar(~syncBus, Phasor.ar(t_trig, 1, 0, (SampleRate.ir * 6000.0)));         // wraps around once every 100 hours
+	var invSR;
+	invSR = (1 / SampleRate.ir);
+	Out.ar(~syncBus, Phasor.ar(t_trig, invSR, 0,  36000   ));         // increments every second wraps around once every 36000 seconds==10 hours
 }).add;
+
 
 
 // set up VBAP
@@ -51,27 +53,28 @@ copy the code below into the project file   ".main" to be evaluated
 			~phasorSync = Synth.before(s,\globalPhasor);
 		});
 */
-
-~function ={| buf = 0, sampAzi = 0, sampSpr = 0, indexSecs = 0, t_trig = 0, loop = 1, durSecs = 4, fadeSecs = 2, trimDB=0,  note = #[60, 1, 1]   |
+// spread == 0, narrow,  spread == 100  wide
+~function ={| buf = 0, sampAzi = 0, sampSpr = 0, indexSecs = 0, t_trig = 0, loop = 1, durSecs = 4, fadeSecs = 2, trimDB=0,  note = #[60, 1, 1] |
 
 	var mixdown;
 	var mixScalers;
 	var vbapMix;
-	var bufDur = BufFrames.kr(buf) /  BufSampleRate.kr(buf);
-	var framesPerSecond = BufFrames.kr(buf) / bufDur;
+	//var bufDur = BufFrames.kr(buf) /  BufSampleRate.kr(buf);
+	//var framesPerSecond = BufFrames.kr(buf) / bufDur;
 
+	var bufSR = BufSampleRate.ir(buf);
 	var freq = note[0].midicps;   // not used
 	var amp = abs (note[1]);
 	var incidence = abs (note[2]);
-	var rate =  freq/261.6255653006;  // not used
 	var lpassFq,hpassFq;
 	var ampScaled;
+	var interpolation = 4;  // 1 means no interpolation, 2 is linear, 4 is cubic interpolation.
 
-	var offset =  indexSecs * SampleRate.ir; // convert seconds to samps
+	var phasor =  (In.ar(~syncBus, 1) + indexSecs);  // get the global phasor for sample reading index
 
-	var phasor = In.ar(~syncBus, 1) + offset;  // get the global phasor for sample reading index
-	var outSig = BufRd.ar(6, buf, phasor);
+	var wrappedPhasor =  Wrap.ar( phasor,0, BufDur.kr(buf) );   // phasor.Mod(buffDur)
 
+	var outSig = BufRd.ar(6, buf, (wrappedPhasor * bufSR), loop, interpolation);
 
 	var envShape = Env.new([0, 1, 1, 0], [0.01, durSecs, fadeSecs ],[0, 0, 0]);
 
@@ -85,11 +88,8 @@ copy the code below into the project file   ".main" to be evaluated
 
 	hpassFq = 800 - ( ampScaled * 799) ;  // used to pass lows when force is high
 
-
-
 	mixScalers = VBAP.kr(~tmpSpkConfig.numSpeakers, 1.0, ~tmpVbuf.bufnum, sampAzi, 0, sampSpr);
 	vbapMix = mixScalers * outSig;
-
 
 	mixdown =  Mix.ar(vbapMix);
 
@@ -98,9 +98,29 @@ copy the code below into the project file   ".main" to be evaluated
 	mixdown = BLowPass.ar(  (ampScaled * mixdown),  Lag.kr(lpassFq, 0.02) , 5);
 
 	mixdown = BHiPass.ar( mixdown ,  Lag.kr(hpassFq, 0.02) , 5);
+
+	// enable for debugging
+	//Out.ar([0,1],mixdown);
 };
 
 
+// DEBUG
+/*
+SynthDef(\testSyncSamp1, ~function).add;
+
+// open up GUIs for monitoring
+if (~plotTree == nil,  { ~plotTree=s.plotTree;});
+if (~makeGui == nil,  { ~plotTree=s.makeGui;});
+if (~meter == nil,  { ~plotTree=s.meter;});
+
+
+b = Buffer.read(s, "/Users/zack/Dropbox/Unity3D/zkAuthoring/sound/Reaper/6ChanSoundfiles/iceCave6chAcc.wav");
+b = Buffer.read(s, "/Users/zack/Dropbox/Unity3D/zkAuthoring/sound/Reaper/6ChanSoundfiles/6chTestLoop.wav");
+b = Buffer.read(s, "/Users/zack/Dropbox/Unity3D/zkAuthoring/sound/Reaper/6ChanSoundfiles/6chSoundfileTest.wav");
+
+
+~phasorSync.free;
+~phasorSync = Synth.before(s,\globalPhasor);
 
 
 
@@ -108,20 +128,34 @@ copy the code below into the project file   ".main" to be evaluated
 
 
 
+x = Synth(\testSyncSamp1, [\buf, b, \note, #[60, 1, 1], \loop, 0, \indexSecs, 0,  \sampAzi, 360.rand, \durSecs, 300, \fadeSecs, 2, \t_trig, 1 ]);
 
 
-/*  TEST
-SynthDef(~name, ~function ).add;
+~phasorSync.set(\t_trig, 1);
+x.set(\t_trig, 1);
 
 
 
-~v1 =Synth.new(~name,  [ \i_doneAction, 0, \randTrigMaxMs , 500, \durMs, 100, \attackBend, 3 , \attackMS, 10]);
+x.set(\sampAzi, -60);
+x.set(\sampSpr, 100)
+x.set(\startPosSecs, 0);
+x.set(\durSecs, 333.8);
+x.set(\loop, 1);
+x.set(\t_trig, 1);
 
-~v1 =Synth.new(~name);
-~v1.set(\t_trig, 1);
+x.set(\sampAzi, 360.rand);
+
+x.free;
 
 
 */
+
+
+
+
+
+
+
 
 
 
