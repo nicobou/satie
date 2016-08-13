@@ -86,7 +86,8 @@ copy the code below into the project file   ".main" to be evaluated
 
 	lpassFq = 100 + (incidence**(0.7) * 21900) ;  // used to cut highs when incidence is low
 
-	hpassFq = 800 - ( ampScaled * 799) ;  // used to pass lows when force is high
+	// WAS hpassFq = 800 - ( ampScaled * 799) ;  // used to pass lows when force is high
+	hpassFq = 800 - ( incidence * 799) ;  // used to pass lows when incidence is high
 
 	mixScalers = VBAP.kr(~tmpSpkConfig.numSpeakers, 1.0, ~tmpVbuf.bufnum, sampAzi, 0, sampSpr);
 	vbapMix = mixScalers * outSig;
