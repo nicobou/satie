@@ -118,6 +118,22 @@ for debugguing
 								}
 							)
 						},
+						'freeSynths',
+						{
+							if ( (msg.size < 3 ) ,
+								{"~basicRendererCallback: freeSynths missing group name".warn;
+									// postf("freeSynths MESS LEN: %", msg.size);
+
+								},
+								// else
+								{
+									var groupSym = msg [2] .asSymbol;
+
+								    satie.satieGroups[groupSym].freeAll;
+									postf("basicRendererCallback: freeing all synths in % group", groupSym);
+								}
+							)
+						},
 						'setOutputMute',
 						{
 							//postf("~basicRendererCallback setMute: %\n", msg[2]);

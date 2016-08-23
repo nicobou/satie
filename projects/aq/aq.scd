@@ -44,7 +44,7 @@ s.waitForBoot{
 	~scbr.makeSynthDef(\zparticle1, \zparticle1, [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\pink, \PinkSin, [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\dust, \DustDust, [~listeningFormat], [0]);
-	~scbr.makeSynthDef(\default, \default, [~listeningFormat], [~scbr.aux[~inBus0]]);
+	~scbr.makeSynthDef(\default, \default, [~listeningFormat], [0], [~scbr.aux[~inBus0]]);
 	~scbr.makeSynthDef(\zkarpluck0, \zkarpluck0, [~listeningFormat], [0]);
 	//~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\test, \testtone,  [~listeningFormat], [0]);
