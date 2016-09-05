@@ -22,6 +22,8 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 for debugguing
 
 ~satie4unity = ~satie4unityprotocol.value(~oscInterface, ~scbr);
+~satie4unity.debugFlag = true;
+~satie4unity = ~satie4unityprotocol.value(~oscInterface, ~scbr);
 
 */
 
@@ -41,6 +43,7 @@ for debugguing
 		~volume.setVolumeRange(-99, 18);
 		~outputDB = 0;    // current state of the supercollider's output
 		~outputTrimDB = 0;
+		~debugFlag=false;
 
 		~satieAuxBusCount = satie.aux.size;
 
@@ -209,6 +212,7 @@ for debugguing
 						// else
 						{
 							var nodeName = msg[2];
+							// "~coreCallback: OSCrx deleteNode CALLED ".warn;
 
 							if (e.allGroupNodes.includesKey(nodeName.asSymbol),
 								{   e.removeGroup(nodeName);  },
@@ -944,7 +948,7 @@ for debugguing
 			thisSynth.run(state);
 
 
-			//postf("~setState: seting state of % to %\n", nodeName, state);
+			if (self.debugFlag, {postf("~setState: seting state of % to %\n", nodeName, state)});
 		};
 
 		// events RX:   /spatosc/core/source/nodename/event eventName v1...vN
@@ -1083,14 +1087,14 @@ for debugguing
 
 		};
 		~deleteSource = { | self, nodeName |
-			"deletaSource called".inform;
+			//"deletaSource called".inform;
 			if ( self.allSourceNodes.includesKey(nodeName.asSymbol) ,
 				{
 					// if its a sourceProcessNode do this first
 
 
 					self.clearSourceNode(nodeName.asSymbol);
-					//	'REMOVE NODE'.postln;
+						//'REMOVE NODE'.postln;
 					self.allSourceNodes.removeAt(nodeName.asSymbol);     // remove node from global dictionary
 			});
 		};
@@ -1137,7 +1141,7 @@ for debugguing
 			var thisGroupName = self.allSourceNodes[nameSym].at(\groupNameSym);
 			//"clearSourceNode called".inform;
 
-			// postf("clearSourceNode: delete  node  %\n", nameSym);
+			postf("clearSourceNode: delete  node  %\n", nameSym);
 			//self.allSourceNodes[nameSym].postln;
 
 			// is this a process node?
