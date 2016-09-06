@@ -1141,7 +1141,6 @@ for debugguing
 			var thisGroupName = self.allSourceNodes[nameSym].at(\groupNameSym);
 			//"clearSourceNode called".inform;
 
-			postf("clearSourceNode: delete  node  %\n", nameSym);
 			//self.allSourceNodes[nameSym].postln;
 
 			// is this a process node?
@@ -1152,11 +1151,13 @@ for debugguing
 					var myProcess = self.allSourceNodes[nameSym].at(\process);
 
 
+
 					// now kill off the clones in that group
 					//myProcess.at(\nodeGroupProxy).free;
 
 					myProcess.cleanup();   // frees any state the process may have created, i.e. synths
 
+					//  IF THE SYNTH IS NOT CLEANED FROM THE NODE TREE, DO THE SAME AS THE REGULAR SOURCE CASE BELOW
 					satie.cleanInstance(nameSym,thisGroupName );
 
 					// now delete group
@@ -1165,7 +1166,10 @@ for debugguing
 				},
 				// else  its just a regular source
 				{
+					var synth = satie.satieGroupInstances[thisGroupName][nameSym];
 					satie.cleanInstance(nameSym,thisGroupName );
+					synth.free;    // to make sure it gets cleaned from the node tree
+					if (self.debugFlag, {postf("clearSourceNode: delete  node  % in group %\n", nameSym, thisGroupName);});
 
 			});
 

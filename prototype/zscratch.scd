@@ -5,8 +5,32 @@
 //~dumpNodes.value();
 
 
+~satie4unity.deleteSource(\bellSnd_0);
+
+~scbr.satieGroups[\oceanScene]
+
+~scbr.satieGroups[\oceanScene].freeAll;
+
+~scbr.killSatieGroup(\oceanScene)
+
+
+~scbr.satieGroupInstances[\oceanScene].size()
+
+~scbr.satieGroupInstances[\default].size()
+
 
 bad values:  15, 26, 29,51, 56,84, 95,
+
+
+~scbr.cleanInstance("bellSnd_0".asSymbol ,\oceanScene );
+
+
+
+~scbr.cleanInstance("bellSnd_5".asSymbol ,\oceanScene );
+
+~scbr.satieGroupInstances[\oceanScene][\bellSnd_3].free
+~scbr.satieGroupInstances[\oceanScene][\bellSnd_3].clear
+
 
 
 ~scbr.makeInstance(\sheefa, \busgverb, \effect);
@@ -19,6 +43,11 @@ bad values:  15, 26, 29,51, 56,84, 95,
 
 
 ~satie4unity.satieAuxBusCount;
+~satie4unity.clearScene()
+
+~satie4unity.allSourceNodes.size()
+~satie4unity.allGroupNodes.size()
+
 
 ~scbr.aux.size
 "sheefa".size
