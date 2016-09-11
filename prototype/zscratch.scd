@@ -5,9 +5,20 @@
 //~dumpNodes.value();
 
 
-~satie4unity.deleteSource(\bellSnd_0);
+~satie4unity.deleteSource(\bellSnd_1);
 
 ~scbr.satieGroups[\oceanScene]
+
+
+~satie4unity.satieAuxBusCount;
+
+
+
+~satie4unity.clearScene()
+
+~satie4unity.allSourceNodes.size()
+
+
 
 ~scbr.satieGroups[\oceanScene].freeAll;
 
@@ -22,14 +33,32 @@
 bad values:  15, 26, 29,51, 56,84, 95,
 
 
-~scbr.cleanInstance("bellSnd_0".asSymbol ,\oceanScene );
+~scbr.cleanInstance("bellSnd_3".asSymbol ,\oceanScene );
 
 
 
 ~scbr.cleanInstance("bellSnd_5".asSymbol ,\oceanScene );
 
-~scbr.satieGroupInstances[\oceanScene][\bellSnd_3].free
-~scbr.satieGroupInstances[\oceanScene][\bellSnd_3].clear
+~shit = ~scbr.satieGroupInstances[\oceanScene][\bellSnd_3];
+
+~shit.free
+
+~scbr.satieGroupInstances[\default][\vStem_17].free
+
+~scbr.satieGroupInstances[\default][\vStem_18].set(\curve, 6, \warp, 5, \glide, 0, \note, #[60, 1, 1] );
+
+~scbr.satieGroupInstances[\default][\vStem_18].set(\glide, 0, \transp, 0, \startLoop, 0, \endLoop, 999999, \bufnum, b.bufnum, \note, #[60, 1, 1] );
+
+~scbr.satieGroupInstances[\default][\vStem_18].set(\bufnum, b.bufnum);
+
+
+~aqPlayBuffers["vortexDrone.aif".asSymbol]
+
+b
+
+
+
+~scbr.satieGroupInstances[\oceanScene][\bellSnd_2].free
 
 
 
@@ -42,10 +71,6 @@ bad values:  15, 26, 29,51, 56,84, 95,
 		);
 
 
-~satie4unity.satieAuxBusCount;
-~satie4unity.clearScene()
-
-~satie4unity.allSourceNodes.size()
 ~satie4unity.allGroupNodes.size()
 
 

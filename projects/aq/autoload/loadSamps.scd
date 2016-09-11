@@ -58,10 +58,11 @@ s.waitForBoot {
 				~aqPlayBuffers.add(sfName.asSymbol -> Buffer.read(s, f));
 		});
 
-		// special treatment for samples with the rootName:  "drop"
+		// special treatment for samples with specfic rootNames: e.g. "drop"
 
 		if (sfName.containsi("drop"), {sfType = "drop"});
 		if (sfName.containsi("6ch"), {sfType = "6ch"});
+		if (sfName.containsi("vortex"), {sfType = "vortex"});
 
 		switch (sfType,
 
@@ -85,6 +86,15 @@ s.waitForBoot {
 
 				// create sample buffer playback with  rev send, referenced by   pluginName:rev
 				~scbr.makeSynthDef(sfName.asSymbol++'\:rev', \sndBuffer, [~listeningFormat], [0],  [~scbr.aux[~inBus0]], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+			},
+			"vortex",  {
+
+				//postf("FX buffer at: %", ~scbr.aux[~inBus0]);
+
+				// create sample buffer playback with no rev send
+				~scbr.makeSynthDef(sfName.asSymbol, \sndBuffer2, [~listeningFormat], [0],  [], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+
+
 			}
 
 

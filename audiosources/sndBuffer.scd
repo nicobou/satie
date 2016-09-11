@@ -17,6 +17,9 @@
 // Play a buffer
 
 ~name = \sndBuffer;
+
+// note:  bufnum must be first arg !!
+
 ~function = { | bufnum = 0, loop = 0, startPos=0, rate = 1, t_trig=0, trimDB=0, tone=1,  amp=1 |
 	var lpassFq;
 	var sig;
