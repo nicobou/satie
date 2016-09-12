@@ -32,7 +32,8 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 ~name = \sndBuffer2;
 // note:  bufnum must be first arg !!
 
-~function = { | bufnum=0, glide=0.2, loopRel=0, startPos=0, trimDB=0, startLoop=0, endLoop=99999999, ipol=2, curve=0, attackMs=0.01, releaseSecs=1, warp=5, transp=0, note = #[60, 0, 0] |
+~function = { | bufnum=0, glide=0.2, loopRel=0, startPosSecs=0, trimDB=0, startLoop=0, endLoop=99999999, ipol=2, curve=0, attackMs=0.01, releaseSecs=1, warp=5, transp=0, note = #[60, 0, 0] |
+
 
 	var env, sig;
 	var noteFq = (transp + note[0]).midicps;   // using midi 60 == speed of 1,  midi 48 == speed of
@@ -40,6 +41,8 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 	var incidence = abs (note[2]);   // apprently this does not work
 	var rate =  noteFq/261.6255653006;
 	var gate = amp;
+	var attackSecs = attackMs * 0.001;
+	var startPos = startPosSecs * SampleRate.ir;
 	var blockDelaySecs = ControlDur.ir * 2;  // delay time used to avoid transient mangulation by supernova
 
 
@@ -49,7 +52,7 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 
 	rate = VarLag.kr(rate, glide, curve, warp);  // was Lag.kr(rate, glide);
 
-	env = EnvGen.ar(Env.adsr(attackMs, 0,1,releaseSecs), gate, doneAction: 0 );  // no kill,  was doneAction: 2 == kill
+	env = EnvGen.ar(Env.adsr(attackSecs, 0,1,releaseSecs), gate, doneAction: 0 );  // no kill,  was doneAction: 2 == kill
 
 	sig = trimDB.dbamp * env *  LoopBuf.ar(1,bufnum, BufRateScale.kr(bufnum) * rate, gate+loopRel, startPos, startLoop, endLoop, ipol);
 
@@ -58,7 +61,6 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 	//Out.ar(0, sig);   // for debugging
 
 };
-
 
 
 /*
@@ -74,15 +76,18 @@ x.set(\bufnum, b.bufnum, \glide, 1, \startLoop, 0, \endLoop, 999999, \note, #[60
 
 )
 
-x.set(\curve, 6, \warp, 5, \glide, 5, \note, #[72, 1, 1] );
+x.set(\curve, 6, \attackMs, 690, \warp, 5, \glide, 5, \note, #[72, 1, 1] );
 x.set(\glide, 0, \note, #[60, 1, 1] );
 
 x.set(\glide, 0, \transp, -12);
 
-
 x.set(\curve, 6, \warp, 5, \glide, 30, \note, #[120, 1, 1] );
 
 x.set(\releaseSecs, 2, \note, #[66, 0, 1]);   // note off
+
+x.set(\note, #[60, 0, 1]);
+x.set(\startPosSecs, 30.rand, \note, #[60, 1, 1]);
+
 
 x.free;
 
