@@ -27,7 +27,7 @@
 
 ~scbr.satieGroupInstances[\oceanScene].size()
 
-~scbr.satieGroupInstances[\default].size()
+~scbr.satieGroupInstances[\default][\vStem_61].dump
 
 
 bad values:  15, 26, 29,51, 56,84, 95,
@@ -43,7 +43,10 @@ bad values:  15, 26, 29,51, 56,84, 95,
 
 ~shit.free
 
-~scbr.satieGroupInstances[\default][\vStem_17].free
+~scbr.satieGroupInstances[\default]
+
+
+~scbr.satieGroupInstances[\default][vStem_63].free
 
 ~scbr.satieGroupInstances[\default][\vStem_18].set(\curve, 6, \warp, 5, \glide, 0, \note, #[60, 1, 1] );
 

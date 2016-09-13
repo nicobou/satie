@@ -86,15 +86,15 @@ s.waitForBoot {
 
 				// create sample buffer playback with  rev send, referenced by   pluginName:rev
 				~scbr.makeSynthDef(sfName.asSymbol++'\:rev', \sndBuffer, [~listeningFormat], [0],  [~scbr.aux[~inBus0]], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+				~scbr.makeSynthDef(sfName.asSymbol++'\:rev1', \sndBuffer, [~listeningFormat], [0],  [~scbr.aux[~inBus1]], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
 			},
-			"vortex",  {
+			"vortex", {
 
 				//postf("FX buffer at: %", ~scbr.aux[~inBus0]);
 
 				// create sample buffer playback with no rev send
 				~scbr.makeSynthDef(sfName.asSymbol, \sndBuffer2, [~listeningFormat], [0],  [], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
-
-
+				~scbr.makeSynthDef(sfName.asSymbol++'\:rev', \sndBuffer2, [~listeningFormat], [0],  [~scbr.aux[~inBus0]], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
 			}
 
 
