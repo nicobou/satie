@@ -62,7 +62,8 @@ s.waitForBoot {
 
 		if (sfName.containsi("drop"), {sfType = "drop"});
 		if (sfName.containsi("6ch"), {sfType = "6ch"});
-		if (sfName.containsi("vortex"), {sfType = "vortex"});
+		if (sfName.containsi("vortex"), {sfType = "sndBuff2"});
+		if (sfName.containsi("Gull"), {sfType = "sndBuff2"});
 
 		switch (sfType,
 
@@ -88,7 +89,7 @@ s.waitForBoot {
 				~scbr.makeSynthDef(sfName.asSymbol++'\:rev', \sndBuffer, [~listeningFormat], [0],  [~scbr.aux[~inBus0]], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
 				~scbr.makeSynthDef(sfName.asSymbol++'\:rev1', \sndBuffer, [~listeningFormat], [0],  [~scbr.aux[~inBus1]], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
 			},
-			"vortex", {
+			"sndBuff2", {
 
 				//postf("FX buffer at: %", ~scbr.aux[~inBus0]);
 

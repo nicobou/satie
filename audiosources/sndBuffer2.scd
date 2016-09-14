@@ -65,18 +65,26 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 
 /*
 
-b = Buffer.read(s,"/Users/zack/src/aquakhoria/AquaKhoria_UnityProject/Assets/StreamingAssets/sound/vortexDrone.aif");
 
-SynthDef(~name, ~function ).add;
+
+b = Buffer.read(s,"/Users/zack/src/aquakhoria/AquaKhoria_UnityProject/Assets/StreamingAssets/sound/normalGull.wav");
+
+SynthDef(\sheefa, ~function ).add;
 
 (
-x = Synth.new( ~name ); // create the synth
+x = Synth.new( \sheefa ); // create the synth
 
-x.set(\bufnum, b.bufnum, \glide, 1, \startLoop, 0, \endLoop, 999999, \note, #[60, 1, 1]);
+x.set(\bufnum, b.bufnum, \glide, 1, \startLoop, 0, \endLoop, 999999, \releaseSecs, 0.5,  \note, #[60, 1, 1]);
 
 )
 
-x.set(\curve, 6, \attackMs, 690, \warp, 5, \glide, 5, \note, #[72, 1, 1] );
+x.set(\curve, 6, \attackMs, 400, \warp, 5, \transp, 0, \glide, 0, \releaseSecs, 0.5,  \startPosSecs, 0.9, \note, #[60, 1, 1] );
+x.set(\note, #[60, 0, 1]);
+
+
+
+
+
 x.set(\glide, 0, \note, #[60, 1, 1] );
 
 x.set(\glide, 0, \transp, -12);
