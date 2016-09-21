@@ -62,6 +62,7 @@ s.waitForBoot {
 
 		if (sfName.containsi("drop"), {sfType = "drop"});
 		if (sfName.containsi("6ch"), {sfType = "6ch"});
+		if (sfName.containsi("3ch"), {sfType = "3ch"});
 		if (sfName.containsi("vortex"), {sfType = "sndBuff2"});
 		if (sfName.containsi("Gull"), {sfType = "sndBuff2"});
 
@@ -77,6 +78,17 @@ s.waitForBoot {
 				//~scbr.makeSynthDef(sfName.asSymbol, \syncSamp1, [~listeningFormat], [0],  [], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
 				//~scbr.makeSynthDef(sfName.asSymbol++'\:rev', \syncSamp1, [~listeningFormat], [0],  [~scbr.aux[~inBus0]], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
 			}, //  for kamakazis with no clones
+
+			"3ch", {
+				inform("loadSamps: MAKING makeSynthDef(s) for name:"++sfName.asSymbol);
+
+				// no reverb version
+				~scbr.makeSynthDef(sfName.asSymbol,   "3chLooper".asSymbol  , [~listeningFormat], [0],  [], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+
+				// version with  rev send, referenced by   pluginName:rev  inbus N
+				~scbr.makeSynthDef(sfName.asSymbol++'\:rev',  "3chLooper".asSymbol     , [~listeningFormat], [0],  [~scbr.aux[~inBus0]], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+				~scbr.makeSynthDef(sfName.asSymbol++'\:rev1',  "3chLooper".asSymbol     , [~listeningFormat], [0],  [~scbr.aux[~inBus1]], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+			},
 
 			"normal",  {
 
