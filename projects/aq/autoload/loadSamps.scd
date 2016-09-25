@@ -61,8 +61,9 @@ s.waitForBoot {
 		// special treatment for samples with specfic rootNames: e.g. "drop"
 
 		if (sfName.containsi("drop"), {sfType = "drop"});
-		if (sfName.containsi("6ch"), {sfType = "6ch"});
-		if (sfName.containsi("3ch"), {sfType = "3ch"});
+		if (sfName.containsi("iceCave6chAcc"), {sfType = "syncSampZombies"});
+		if (sfName.containsi("3ch"), {sfType = "3chLooper"});
+		if (   (  sfName.containsi("6ch") && sfName.containsi("Whale") )  , {sfType = "6chLoopBuff"});
 		if (sfName.containsi("vortex"), {sfType = "sndBuff2"});
 		if (sfName.containsi("Gull"), {sfType = "sndBuff2"});
 
@@ -70,7 +71,7 @@ s.waitForBoot {
 
 			"drop",   { ~scbr.makeSynthDef2(sfName.asSymbol++'\:k:rev', \zPsamp1,  [~scbr.aux[~inBus0]], [~listeningFormat],  [0], \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]); }, //  for kamakazis with no clones
 
-			"6ch", {
+			"syncSampZombies", {
 				inform("loadSamps: MAKING makeSynthDef2 name:"++sfName.asSymbol++'\:k');
 
 				~scbr.makeSynthDef2(sfName.asSymbol++'\:k', \syncSamp1,  [], [~listeningFormat],  [0], \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]);
@@ -79,7 +80,7 @@ s.waitForBoot {
 				//~scbr.makeSynthDef(sfName.asSymbol++'\:rev', \syncSamp1, [~listeningFormat], [0],  [~scbr.aux[~inBus0]], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
 			}, //  for kamakazis with no clones
 
-			"3ch", {
+			"3chLooper", {
 				inform("loadSamps: MAKING makeSynthDef(s) for name:"++sfName.asSymbol);
 
 				// no reverb version
@@ -89,6 +90,17 @@ s.waitForBoot {
 				~scbr.makeSynthDef(sfName.asSymbol++'\:rev',  "3chLooper".asSymbol     , [~listeningFormat], [0],  [~scbr.aux[~inBus0]], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
 				~scbr.makeSynthDef(sfName.asSymbol++'\:rev1',  "3chLooper".asSymbol     , [~listeningFormat], [0],  [~scbr.aux[~inBus1]], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
 			},
+			"6chLoopBuff", {
+				inform("loadSamps: MAKING makeSynthDef(s) for name:"++sfName.asSymbol);
+
+				// no reverb version
+				~scbr.makeSynthDef(sfName.asSymbol,   "6chLoopbuff".asSymbol  , [~listeningFormat], [0],  [], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+
+				// version with  rev send, referenced by   pluginName:rev  inbus N
+				~scbr.makeSynthDef(sfName.asSymbol++'\:rev',  "6chLoopbuff".asSymbol     , [~listeningFormat], [0],  [~scbr.aux[~inBus0]], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+				~scbr.makeSynthDef(sfName.asSymbol++'\:rev1',  "6chLoopbuff".asSymbol     , [~listeningFormat], [0],  [~scbr.aux[~inBus1]], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+			},
+
 
 			"normal",  {
 

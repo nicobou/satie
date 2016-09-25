@@ -5,6 +5,33 @@
 //~dumpNodes.value();
 
 
+
+~nodeName = \coreLoopBuff;
+~nodeName2= \accLoopBuff;
+~noteName3 = \accentsLoopBuff;
+
+
+
+~scbr.satieGroups[\whaleBellyScene].set(\note, #[60,0,0]);
+
+~scbr.satieGroups[\whaleBellyScene].set(\note, #[60,1,0]);
+
+
+
+~node = ~scbr.satieGroupInstances[\whaleBellyScene][\coreLoopBuff];
+
+
+~node.set(\note, #[60,1,1]);
+~node.set(\amp, 6);
+
+~node.set(\transp, -0);
+
+~node.set(\transp, -2);
+
+
+
+
+
 ~satie4unity.deleteSource(\bellSnd_1);
 
 ~scbr.satieGroups[\oceanScene]
