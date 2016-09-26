@@ -34,11 +34,12 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 
 
 
-// NOTE:  this synthdef is unstable when instatiated, so it is muted for the first 10 seconds
+// NOTE:  this synthdef is unstable when instatiated,
+//  muteSecs:   mutes output and sets the decay to zero and then scales back to normal  during the first muteSecs of the synth's life
 
 ~name = \pbell1;
 
-~function = { |outbus, t_trig = 1, decayscale = 0.2, i_doneAction = 0,   note = #[60, 0, 0]  |
+~function = { |outbus, t_trig = 0, decayscale = 0.2, i_doneAction = 0,  trimDB=0,  muteSecs = 10,  note = #[60, 0, 0]  |
 
 	var sig, input, first, freqscale,  transient, bellFq, halfSR, lpFq, fqScaler,fqRange, fqLowClip, fqHighClip,fqOffset, incidenceScaler,ampScaler;
 	var correctionGain, pulseWidth;
@@ -48,7 +49,8 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 
 	var incidence = note[2].clip(-1,1);
 
-	var muteEnv = Env.pairs([[0, 0], [8, 0],  [9, 1]], \lin);    // 6 seconds of muting muting to prevent explosion
+
+	var muteEnv = Env.pairs([[0, 0], [ 1, 0],  [ 1, 1]], \lin);    //  muteSecs seconds of initial decay muting muting to prevent explosion
 
 
 	amp = amp * 0.2;      // static gain adjustement
@@ -99,7 +101,7 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 
 	//input = transient;    // "mallet"
 
-	sig = EnvGen.kr(muteEnv)  * DynKlank.ar(`[
+	sig = DynKlank.ar(`[
     [
       (first = LFNoise1.kr(0.5).range(2424, 2444)) + Line.kr(20, 0, 0.5),
       first + LFNoise1.kr(0.5).range(1,3),
@@ -142,15 +144,31 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
       0.4,
       0.6
     ] * freqscale.reciprocal.pow(0.5)
-  ], input, freqscale, 0, decayscale);
+  ], input, freqscale, 0, EnvGen.kr(muteEnv, timeScale: muteSecs)  * decayscale);
+
+	sig = trimDB.dbamp * sig * EnvGen.kr(muteEnv, timeScale: muteSecs);
 
 	DetectSilence.ar(sig, doneAction: i_doneAction);
 
-	// Out.ar(0, sig);  //enable this for debugging
+	Out.ar(0, sig);  //enable this for debugging
 
 	sig;
 
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*   DEBUGGING
 
@@ -161,15 +179,32 @@ s.meter
 
 SynthDef(\prayer_bell,  ~function  ).add;
 
-~ballSet =Synth.new("prayer_bell",  [ \i_doneAction, 0, \decayscale , 0.7, \note,  [80,1, 0.5]     ]);
-~ballSet.set(\i_doneAction, 0);
-~ballSet.set(\decayscale, 0.8);
 
-~ballSet.set(\pulseWidth, 100);
+~ballSet =Synth.new("prayer_bell",  [ \i_doneAction, 0, \decayscale , 0.7, \note,  [80,1, 0.5], \muteSecs, 0 ]);
+~ballSet.set(\t_trig, 1);
+~ballSet.free;
+
+
+~ballSet =Synth.new("prayer_bell",  [ \i_doneAction, 0, \decayscale , 0.7, \note,  [80,1, 0.5], \muteSecs, 5 ]);
 ~ballSet.set(\t_trig, 1);
 
 
+
+~ballSet.set(\i_doneAction, 0);
+~ballSet.set(\decayscale, 0.8);
+
+~ballSet.set(\trimDB, 10);
+~ballSet.set(\decayscale, 0.02);
+~ballSet.set(\t_trig, 1);
+
+
+~ballSet.set(\t_trig, 1);
 ~ballSet.set(\note,  [80,0.2, 0.5] );
+
+
+
+
+~ballSet.free;
 
 
 
