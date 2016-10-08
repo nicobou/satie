@@ -42,7 +42,7 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 // amp scales the whole thing
 // initializes to note-on playing state
 
-~function = { | bufnum=0, glide=0.2, loopRel=0, startPosSecs=0, trimDB=0, startLoop=0, endLoopSecs=99999, ipol=2, curve=0, attackMs=0.01, releaseSecs=1, warp=5, transp=0, sampAzi=0, sampSpr=0,  amp=1, note = #[60, 1, 1] |
+~function = { | bufnum=0, glide=0.2, loopRel=0, startPosSecs=0, trimDB=0, startLoop=0, endLoopSecs=99999, ipol=2, curve=0, attackMs=0.01, releaseSecs=1, warp=5, transp=0, sampAzi=0, sampSpr=0,  amp=1, clipBoostDB = 0, note = #[60, 1, 1] |
 
 
 	var env, sig;
@@ -55,6 +55,8 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 	var endLoop = endLoopSecs * SampleRate.ir;
 	var blockDelaySecs = ControlDur.ir * 2;  // delay time used to avoid transient mangulation by supernova
 	var mixScalers,mixdown,vbapScalers;
+	var outsig;
+
 
 
 	/*var eScalers = [1,1,1,1,1,1];    // available for further implementation of custom track weighting is needed... try to avoid, though-- get it right in the track mix first
@@ -81,9 +83,13 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 
 	mixdown =  Mix.ar(vbapScalers * sig);
 
-	mixdown = trimDB.dbamp * env *  amp * DelayN.ar(mixdown, ControlDur.ir*10, blockDelaySecs);  // offset output by  N blocks to avoid transient mangulation by supernova
+	mixdown =  env *  amp * DelayN.ar(mixdown, ControlDur.ir*10, blockDelaySecs);  // offset output by  N blocks to avoid transient mangulation by supernova
 
-	// Out.ar(0, mixdown);   // for debugging
+
+	outsig = trimDB.dbamp * (mixdown * clipBoostDB.dbamp).distort;
+
+
+	// Out.ar(0, outsig);   // for debugging
 
 };
 
@@ -92,7 +98,7 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 
 
 
-b = Buffer.read(s,"/Users/zack/src/aquakhoria/AquaKhoria_UnityProject/Assets/StreamingAssets/sound/6chWhaleBottom.wav");
+b = Buffer.read(s,"/Users/zack/src/aquakhoria/AquaKhoria_UnityProject/Assets/StreamingAssets/sound/6chWhaleHeavy.wav");
 
 SynthDef(\sheefa, ~function ).add;
 
@@ -128,6 +134,8 @@ x.set(\amp,  0);
 x.set(\transp, 0);
 
 
+x.set(\clipBoostDB, 0);
+x.set(\trimDB, 0);
 
 
 

@@ -18,7 +18,7 @@
 o = OSCresponderNode(s.addr, '/tr', { |time, resp, msg| msg.postln }).add;
 o.remove;  // when done, you need to clean up the OSCresponderNode
 
-SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
+SendTrig.kr(Impulse.kr(1), 0, gate);  //  in synthdef
 
 */
 
@@ -39,22 +39,26 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 
 ~name = \pbell1;
 
-~function = { |outbus, t_trig = 0, decayscale = 0.2, i_doneAction = 0,  trimDB=0,  muteSecs = 10,  note = #[60, 0, 0]  |
+// note:  midiPitch  Unit-Incidence Unit-Amplitude  (positive values between 0 and 1)
+~function = { |outbus, decayscale = 0.2, i_doneAction = 0,  trimDB=0,  muteSecs = 10,  note = #[60, 0, 0], t_trig= -1 |
 
 	var sig, input, first, freqscale,  transient, bellFq, halfSR, lpFq, fqScaler,fqRange, fqLowClip, fqHighClip,fqOffset, incidenceScaler,ampScaler;
 	var correctionGain, pulseWidth;
 
 	var freq = note[0].midicps;
-	var amp = note[1];
+	var incidence = note[1].clip(-0.9999, 0.9999);   // safety
+	var  amp = note[2].clip(-0.9999, 0.9999);   // safety
 
-	var incidence = note[2].clip(-1,1);
 
 
 	var muteEnv = Env.pairs([[0, 0], [ 1, 0],  [ 1, 1]], \lin);    //  muteSecs seconds of initial decay muting muting to prevent explosion
 
+	// amp = (amp ** 1) * 0.1;      // static gain adjustement  -- enable and tune here if need be
+	amp =  amp * 0.1;      // static gain adjustement  --
 
-	amp = amp * 0.2;      // static gain adjustement
 	incidence = abs(incidence);
+
+			//SendTrig.kr(Impulse.kr(1), 0, incidence);
 
 	correctionGain =   4- (  (1 -  incidence )**0.5);   // compensate for more wider pulse energy
 	pulseWidth = 1 + (35 * ( 1 - incidence )**0.8);  // pulse width as function of incidence
@@ -79,27 +83,13 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 
 	fqOffset =  (0.2 * bellFq) + ( fqScaler *  0.8 * bellFq ) ;  // use the note's register to calculate the lowPass fq value.
 
-
-	// SendTrig.kr(Impulse.kr(1), 0, ampScaler);
-
 	fqRange =   (0.5*SampleRate.ir) - fqOffset;
 
 	lpFq =  fqOffset + (incidenceScaler * fqRange);
 
-	// WAS transient = LPF.ar(   Trig.ar( t_trig, SampleDur.ir ) !2,  10000 * Ramp.kr( freqscale, 0.01 ) );   // replaced with pulseWidth
-
-	transient = (Trig.ar( t_trig, SampleDur.ir  * pulseWidth) !2 )* correctionGain * ampScaler;
-
-
+	transient = (Trig1.ar(t_trig, SampleDur.ir  * pulseWidth) !2 )* correctionGain * ampScaler;
 
 	input = LPF.ar(transient,  Ramp.ar( K2A.ar (lpFq), 0.005)   );    // "mallet"
-
-
-
-	// WAS  input = LPF.ar(transient,  Ramp.ar(lpFq, 0.01)   );    // "mallet"
-
-
-	//input = transient;    // "mallet"
 
 	sig = DynKlank.ar(`[
     [
@@ -150,7 +140,7 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 
 	DetectSilence.ar(sig, doneAction: i_doneAction);
 
-	Out.ar(0, sig);  //enable this for debugging
+	//Out.ar(0, sig);  //enable this for debugging
 
 	sig;
 
@@ -180,9 +170,33 @@ s.meter
 SynthDef(\prayer_bell,  ~function  ).add;
 
 
-~ballSet =Synth.new("prayer_bell",  [ \i_doneAction, 0, \decayscale , 0.7, \note,  [80,1, 0.5], \muteSecs, 0 ]);
-~ballSet.set(\t_trig, 1);
-~ballSet.free;
+~bell =Synth.new("prayer_bell",  [ \i_doneAction, 0, \decayscale , 0.7, \note,  [61,1, 0.5], \muteSecs, 0 ]);
+
+
+
+
+~bell.set(\note, #[61, 0.9, 0.9], \t_trig, 1);
+
+
+
+~bell.set(\decayscale , 0.7,   \muteSecs, 0)
+
+~bell.set(\t_trig, 1);
+~bell.set(\decayscale, 0.1);
+~bell.set(\gainDB, 0);
+
+
+~bell.free;
+
+
+
+
+
+
+
+
+
+
 
 
 ~ballSet =Synth.new("prayer_bell",  [ \i_doneAction, 0, \decayscale , 0.7, \note,  [80,1, 0.5], \muteSecs, 5 ]);

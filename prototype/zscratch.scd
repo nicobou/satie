@@ -5,6 +5,73 @@
 //~dumpNodes.value();
 
 
+//gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1
+
+~bell = ~scbr.satieGroupInstances[\oceanScene][\bellSnd_6];
+
+
+
+
+SynthDef(\prayer_bell,  ~function  ).add;
+(
+
+~bell.free;
+
+~bell =Synth.new("prayer_bell",  [ \i_doneAction, 0, \decayscale , 0.7,  \muteSecs, 0, \gainDB, 0]);
+
+~bell.set(\note, #[61, 1, 1]);
+)
+
+~bell.set(\t_trig, 1);
+
+
+
+~bell.set(\gainDB, 0);
+
+
+
+// ~bell.set(\note, #[61, 0.9, -1]);
+
+
+~bell.set(\note, #[61, 1, 1]);
+~bell.set(\t_trig, 1);
+
+~bell.set(\note, #[61, 0.0, 0.3]);
+~bell.set(\t_trig, 1);
+
+
+
+
+~bell.set(\amp, 1);
+
+
+~bell.set(\decayscale , 0.7,   \muteSecs, 0)
+
+~bell.set(\t_trig, 1);
+~bell.set(\decayscale, 0.6);
+
+
+
+
+
+
+
+
+
+(
+
+~bell.set(\note, #[61, 0.9, 0.9], \t_trig, 1);
+
+~bell.set(\t_trig, 1);
+~bell.set(\decayscale, 0.1);
+~bell.set(\gainDB, 0);
+
+)
+
+
+
+
+
 
 ~nodeName = \coreLoopBuff;
 ~nodeName2= \accLoopBuff;
@@ -66,9 +133,10 @@ bad values:  15, 26, 29,51, 56,84, 95,
 
 ~scbr.cleanInstance("bellSnd_5".asSymbol ,\oceanScene );
 
-~shit = ~scbr.satieGroupInstances[\oceanScene][\bellSnd_3];
 
-~shit.free
+
+
+~bell.free
 
 ~scbr.satieGroupInstances[\default]
 
