@@ -823,7 +823,7 @@ for debugguing
 					// is this a processNode ?
 					if ( myProcess != nil,
 						{
-							postf("~createConnection: creating Custom update callback for  %  ", sourceName.asSymbol);
+							postf("~createConnection: creating Custom update callback for  %  \n", sourceName.asSymbol);
 							osc.connectionOSC(self.allSourceNodes[sourceName.asSymbol].at(\connectionName), e.['connectionProcessCallback']);
 						},
 						//else  regular source node, set up standard connection callback

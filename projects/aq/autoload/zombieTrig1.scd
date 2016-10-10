@@ -25,7 +25,7 @@
 	'synth' -> \zkarpluck3P,  // \zparticle2P,
 	'kCount' -> 0,
 	// other state
-    'spread' -> 0,  // register used for kamikazi instantiation
+	'spread' -> 0,  // register used for kamikazi instantiation
 	'pitchSeqGlobalMode' -> 0,
 	'pitchSeqSym' -> \default,
 	'pitchSeqLen' -> 1,   // not used
@@ -54,7 +54,7 @@ if (~satie4unity == nil, {
 	});
 
 	inform("registering process: "++~processName);
-    ~satie4unity.allProcesses.put(~processName, ~process);
+	~satie4unity.allProcesses.put(~processName, ~process);
 
 
 });
@@ -88,12 +88,12 @@ if (~zombieTrig1_pitchSequences == nil,
 	// ~scbr.cleanInstance(nodename.asSymbol, self.nodeGroupName);
 	// });
 
-/*	if ( ~satie4unity.maxSynthCount == nil,
-		{
-			error("zombieTrig1.cleanup:   ~satie4unity.maxSynthCount is NIL but should already be defined ");
-		},
-		// else
-		{ ~satie4unity.maxSynthCount = ~satie4unity.maxSynthCount - self.synthCountMax;
+	/*	if ( ~satie4unity.maxSynthCount == nil,
+	{
+	error("zombieTrig1.cleanup:   ~satie4unity.maxSynthCount is NIL but should already be defined ");
+	},
+	// else
+	{ ~satie4unity.maxSynthCount = ~satie4unity.maxSynthCount - self.synthCountMax;
 	});
 
 	~satie4unity.maxSynthCount.postln;*/
@@ -116,23 +116,31 @@ if (~zombieTrig1_pitchSequences == nil,
 	//'zombieTrig1,setup'.postln;
 
 
-	// project-specific parsing of args string (coming from setUri OSC message string)
-	//	if ( argsList.size >= 2,
-	//		{
-	//			//~sheefaVec = argvec;
-	//
-	//			// postf(" zombieTrig1.setup: node: %    args:   %    size:  %\n", nodeName, argsList, argsList.size);
-	//			if ( argsList[0].asString == "cloneCount",
-	//				{
-	//					self.cloneCount = argsList[1].asInt.clip(1, 1000);   // clip to 1000 to avoid meltdown caused by error
-	//					postf(" zombieTrig1.setup: node: %   setting up for % kamakazi clones \n", nodeName, self.cloneCount);
-	//				},
-	//				// else bad arg
-	//				{
-	//					error("zombieTrig1.setup: unrecognized key, expecting 'cloneCount' ");
-	//			});
-	//	});
+	//postf(" zombieTrig1.setup: node: %    args:   %    size:  %\n", nodeName, argsList, argsList.size);
 
+	// project-specific parsing of args string (coming from setUri OSC message string)
+/*	if ( argsList.size >= 2,
+		{
+			//~sheefaVec = argvec;
+
+			postf(" zombieTrig1.setup: node: %    args:   %    size:  %\n", nodeName, argsList, argsList.size);
+
+			if ( argsList[0].asString == "readPitches",
+				{
+					self.readPitches(argsList[1]);
+					postf(" zombieTrig1.setup: node: %   calling readPitches with % \n", nodeName, argsList[1]);
+				},
+				// else bad arg
+				{
+					error("zombieTrig1.setup: unrecognized key, expecting 'readPitches' ");
+			});
+	},
+	// esle missing readFile e
+	{
+		error("zombieTrig1.setup:  incomplete setup message, expecting 'readPitches  /filepath/file'  ");
+
+});
+*/
 
 	self[\properties] =  Dictionary.new();  // set up state register for synthfef properties
 
@@ -140,13 +148,13 @@ if (~zombieTrig1_pitchSequences == nil,
 
 	~satie4unity.allProcesses.put(~processName, ~process);
 
-/*	if ( ~satie4unity.maxSynthCount == nil,
-		{
-			~satie4unity.maxSynthCount = self.synthCountMax;
-		},
-		// else
-		{
-			~satie4unity.maxSynthCount = ~satie4unity.maxSynthCount + self.synthCountMax;
+	/*	if ( ~satie4unity.maxSynthCount == nil,
+	{
+	~satie4unity.maxSynthCount = self.synthCountMax;
+	},
+	// else
+	{
+	~satie4unity.maxSynthCount = ~satie4unity.maxSynthCount + self.synthCountMax;
 	});
 
 	~satie4unity.maxSynthCount.postln;*/
@@ -173,7 +181,7 @@ if (~zombieTrig1_pitchSequences == nil,
 // otherwise the "spread" message will be applided to the node's group
 ~zombieTrig1.spread = { | self, spreadVal |
 
-    self.spread = spreadVal;
+	self.spread = spreadVal;
 	//postf("spread message:  val:% \n", spreadVal);
 };
 
@@ -183,6 +191,11 @@ if (~zombieTrig1_pitchSequences == nil,
 ~zombieTrig1.prop = { | self, key, value |
 
 	self[\properties].put(key, value);  // keep property state for initializing synthdefs
+
+	if ( (self.debugFlag != 0),{
+		postf("node: %  prop message: key: %    val:% \n", self.nodeName, key, value);
+	});
+
 
 	// postf("prop message: key: %    val:% \n", key, value);
 };
@@ -318,11 +331,18 @@ if (~zombieTrig1_pitchSequences == nil,
 					csvmidifilePath = ~satie4unity.projectDirectory++"/"++csvmidifilePath;
 			});
 
-			csvmidifilePath.postln;
+			postf("%: ~zombieTrig1.readPitches:  try to open file:   % items\n", self.nodeName, csvmidifilePath);
 
 			pitchList = List.new();
 			seqName = csvmidifilePath.split.last;
 			file = File(csvmidifilePath.standardizePath,"rb");
+
+			if ( file.isOpen == false,
+				{
+					postf("***************************************************");
+					postf("%: ~zombieTrig1.readPitches:  could not open file: % \n", self.nodeName, csvmidifilePath);
+			});
+
 
 			// process only if pitch sequence has not yet been loaded
 			if ( ~zombieTrig1_pitchSequences.includesKey(seqName.asSymbol),
