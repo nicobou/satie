@@ -94,6 +94,7 @@ s.waitForBoot{
 	// instiante the satie4Unity protocol
 	if (~satie4unity == nil,{
 		~satie4unity = ~satie4unityprotocol.value(~oscInterface, ~scbr);
+		~satie4unity.projectDirectory = "~/src/aquakhoria/AquaKhoria_UnityProject/Assets/StreamingAssets"     // PROJECT SPECIFIC DEFAULT  CAN BE SET AND THEN OVERWRITTEN BY SATIE SCRIPTS IN UNITY PROJECT
 	});
 	s.sync;
 

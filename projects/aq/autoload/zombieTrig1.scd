@@ -119,28 +119,28 @@ if (~zombieTrig1_pitchSequences == nil,
 	//postf(" zombieTrig1.setup: node: %    args:   %    size:  %\n", nodeName, argsList, argsList.size);
 
 	// project-specific parsing of args string (coming from setUri OSC message string)
-/*	if ( argsList.size >= 2,
-		{
-			//~sheefaVec = argvec;
+	/*	if ( argsList.size >= 2,
+	{
+	//~sheefaVec = argvec;
 
-			postf(" zombieTrig1.setup: node: %    args:   %    size:  %\n", nodeName, argsList, argsList.size);
+	postf(" zombieTrig1.setup: node: %    args:   %    size:  %\n", nodeName, argsList, argsList.size);
 
-			if ( argsList[0].asString == "readPitches",
-				{
-					self.readPitches(argsList[1]);
-					postf(" zombieTrig1.setup: node: %   calling readPitches with % \n", nodeName, argsList[1]);
-				},
-				// else bad arg
-				{
-					error("zombieTrig1.setup: unrecognized key, expecting 'readPitches' ");
-			});
+	if ( argsList[0].asString == "readPitches",
+	{
+	self.readPitches(argsList[1]);
+	postf(" zombieTrig1.setup: node: %   calling readPitches with % \n", nodeName, argsList[1]);
+	},
+	// else bad arg
+	{
+	error("zombieTrig1.setup: unrecognized key, expecting 'readPitches' ");
+	});
 	},
 	// esle missing readFile e
 	{
-		error("zombieTrig1.setup:  incomplete setup message, expecting 'readPitches  /filepath/file'  ");
+	error("zombieTrig1.setup:  incomplete setup message, expecting 'readPitches  /filepath/file'  ");
 
-});
-*/
+	});
+	*/
 
 	self[\properties] =  Dictionary.new();  // set up state register for synthfef properties
 
@@ -326,22 +326,12 @@ if (~zombieTrig1_pitchSequences == nil,
 		{
 			csvmidifilePath = items[0].asString;
 
-			if (csvmidifilePath[0] != $/,
+			if (self.debugFlag != 0,
 				{
-					csvmidifilePath = ~satie4unity.projectDirectory++"/"++csvmidifilePath;
+					postf("%: ~zombieTrig1.readPitches: ARG:  %  \n", self.nodeName,csvmidifilePath);
 			});
 
-			postf("%: ~zombieTrig1.readPitches:  try to open file:   % items\n", self.nodeName, csvmidifilePath);
-
-			pitchList = List.new();
 			seqName = csvmidifilePath.split.last;
-			file = File(csvmidifilePath.standardizePath,"rb");
-
-			if ( file.isOpen == false,
-				{
-					postf("***************************************************");
-					postf("%: ~zombieTrig1.readPitches:  could not open file: % \n", self.nodeName, csvmidifilePath);
-			});
 
 
 			// process only if pitch sequence has not yet been loaded
@@ -357,56 +347,83 @@ if (~zombieTrig1_pitchSequences == nil,
 					// and reset sequence's global state  BUT DO NOT RESET READ HEAD
 					// ~zombieTrig1_pitchSequences.at(seqName.asSymbol).put(\pos, 0);
 					~zombieTrig1_pitchSequences.at(seqName.asSymbol).put(\incr, self.pitchSeqIncr);   // using instance specific state.. may overwrite
-
-
 				},
-				// else  read file and create pitch sequence
 				{
-					//postf("file % length:  %\n", csvmidifilePath, file.length);
+					// else  try to read file and create pitch sequence
 
-					file.do({
-						var value, event;
+					pitchList = List.new();
 
-						value = file.getLine();
-
-						if (value.contains("Note_on_c"),
-							{
-								event = value.split($,);
-								pitchList.add(event[4].asInt);
-						});
+					if (csvmidifilePath[0] != $/,
+						{
+							csvmidifilePath = ~satie4unity.projectDirectory++"/"++csvmidifilePath;
 					});
 
-					file.close;
-
-					if (pitchList.size > 0,
+					if (self.debugFlag != 0,
 						{
-							postf("% pitches read from file %\n", pitchList.size,  csvmidifilePath);
-							// add sequence to dictionary
+							postf("%: ~zombieTrig1.readPitches:  try to open file:   % items\n", self.nodeName, csvmidifilePath);
+					});
 
-							~zombieTrig1_pitchSequences.removeAt(seqName.asSymbol);   // overwrite previous
-
-							~zombieTrig1_pitchSequences.put(seqName.asSymbol, Dictionary.new());
-							~zombieTrig1_pitchSequences.at(seqName.asSymbol).put(\pitches, pitchList);
-							~zombieTrig1_pitchSequences.at(seqName.asSymbol).put(\size, pitchList.size);
-							~zombieTrig1_pitchSequences.at(seqName.asSymbol).put(\pos, 0);
-							~zombieTrig1_pitchSequences.at(seqName.asSymbol).put(\incr, 1);
+					file = File(csvmidifilePath.standardizePath,"rb");
 
 
-							//~zombieTrig1_pitchSequences.removeAt(seqName.asSymbol);
-							//~zombieTrig1_pitchSequences.put(seqName.asSymbol, pitchList);
-							//~zombieTrig1_pitchSequences.put(seqName.asSymbol,
 
-							// set instance local state -- currently not used, but available for future deployment
-							self.pitchSeqSym = seqName.asSymbol;
-							self.pitchSeqLen = pitchList.size;
-							self.pitchSeqPos = 0;
+					if  ( file.isOpen == false,
+						{
+							error("~zombieTrig1.readPitches: ***********************************");
+							postf("%: ~zombieTrig1.readPitches:  could not open file: % \n", self.nodeName, csvmidifilePath);
 						},
-						//else
+						//  else file found, try to parse
+
 						{
-							warn("no pitches found in file: "++csvmidifilePath);
+
+							//postf("file % length:  %\n", csvmidifilePath, file.length);
+
+							file.do({
+								var value, event;
+
+								value = file.getLine();
+
+								if (value.contains("Note_on_c"),
+									{
+										event = value.split($,);
+										pitchList.add(event[4].asInt);
+								});
+							});
+
+							file.close;
+
+							if (pitchList.size > 0,
+								{
+									postf("%: ~zombieTrig1.readPitches:  % pitches read from file %\n", self.nodeName, pitchList.size,  csvmidifilePath);
+									// add sequence to dictionary
+
+									~zombieTrig1_pitchSequences.removeAt(seqName.asSymbol);   // overwrite previous
+
+									~zombieTrig1_pitchSequences.put(seqName.asSymbol, Dictionary.new());
+									~zombieTrig1_pitchSequences.at(seqName.asSymbol).put(\pitches, pitchList);
+									~zombieTrig1_pitchSequences.at(seqName.asSymbol).put(\size, pitchList.size);
+									~zombieTrig1_pitchSequences.at(seqName.asSymbol).put(\pos, 0);
+									~zombieTrig1_pitchSequences.at(seqName.asSymbol).put(\incr, 1);
+
+
+									//~zombieTrig1_pitchSequences.removeAt(seqName.asSymbol);
+									//~zombieTrig1_pitchSequences.put(seqName.asSymbol, pitchList);
+									//~zombieTrig1_pitchSequences.put(seqName.asSymbol,
+
+									// set instance local state -- currently not used, but available for future deployment
+									self.pitchSeqSym = seqName.asSymbol;
+									self.pitchSeqLen = pitchList.size;
+									self.pitchSeqPos = 0;
+								},
+								//else
+								{
+									error("~zombieTrig1.readPitches: ***********************************");
+									post(" \t % pitches read from file %\n", pitchList.size,  csvmidifilePath);
+							});
 					});
 			});
 	});
+
 };
 
 /*
