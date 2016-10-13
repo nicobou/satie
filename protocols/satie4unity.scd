@@ -78,7 +78,7 @@ for debugguing
 									e.projectDirectory = msg[2];
 
 									//e.projectDirectory.postln;
-                                    postf("~basicRendererCallback: setProjectDir: % \n", e.projectDirectory);
+									postf("~basicRendererCallback: setProjectDir: % \n", e.projectDirectory);
 
 								}
 							)
@@ -132,7 +132,7 @@ for debugguing
 								{
 									var groupSym = msg [2] .asSymbol;
 
-								    satie.satieGroups[groupSym].freeAll;
+									satie.satieGroups[groupSym].freeAll;
 									postf("basicRendererCallback: freeing all synths in % group", groupSym);
 								}
 							)
@@ -255,75 +255,86 @@ for debugguing
 			type = args[0].asString.split[5].asSymbol;
 			charIndex = connectionName.asString.find("->");
 
+
 			nodeName = connectionName.asString.subStr(0, charIndex-1);
 			//postf("~connectionCallback:  connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
 
-			thisSynth = e.allSourceNodes[nodeName.asSymbol].at(\synth);
-
-			switch(type,
-				'update',
+			if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == false,
 				{
-					if ( (args.size != 7 ) ,
-						{"connectionCallback: OSCrx update message missing values".warn;},
-						// else
-						{
-							// get values from vector, and write to connectionState
-							aziDeg = args[1].raddeg;
-							eleDeg= args[2].raddeg;
-							gainDB = args[3];
-							delayMs = args[4];
-							lpHz = args[5];
-							distance = args[6];  // not used by basic spatializers
-
-							//DEBUG
-							//~allSourceNodes[nodeName.asSymbol].put(\outDB, gainDB);
-
-
-
-							/*		z = (z+1).mod(20);
-							if ( (z == 0), {postf("\n")});
-							postf("  %  " ++ gainDB.trunc );*/
-
-
-							thisSynth.set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB, \delayMs, delayMs, \lpHz, lpHz);
-							//postf("~connectionCallback:  update: gain  % \n", gainDB);
-
-						}
-					)
+					error("*********************************");
+					postf("satie4Unity.connectionCallback:  source node: %  is undefined \n", nodeName);
 				},
-				'hpHz',   //  degree  (0 == noEffect,  1 == full effect)
+				// else all ok
 				{
-					if ( (args.size != 2 ) ,
-						{"connectionCallback: OSCrx hpHz message wrong number of values".warn;},
-						// else
+
+					thisSynth = e.allSourceNodes[nodeName.asSymbol].at(\synth);
+
+
+					switch(type,
+						'update',
 						{
-							// get value from vector, and write to connectionState
-							hpHz = args[1];   // get highpass cutoff value
-							thisSynth.set(\hpHz ,  clip(hpHz, 1, halfSrate ));
+							if ( (args.size != 7 ) ,
+								{"connectionCallback: OSCrx update message missing values".warn;},
+								// else
+								{
+									// get values from vector, and write to connectionState
+									aziDeg = args[1].raddeg;
+									eleDeg= args[2].raddeg;
+									gainDB = args[3];
+									delayMs = args[4];
+									lpHz = args[5];
+									distance = args[6];  // not used by basic spatializers
 
-							//postf("~connectionCallback:  hpHz connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
-
-						}
-					)
-				},
-				'spread',
-				{
-					if ( (args.size > 0 ) ,
-						{
+									//DEBUG
+									//~allSourceNodes[nodeName.asSymbol].put(\outDB, gainDB);
 
 
-							// invert the spread value (usually an exp) to work with SATIE's VBAP-based spatializer (or others)
-							spread = 100 *  ( 1 - (clip(args[1],0,1)));  // get values from vector, and write to connectionState
 
-							thisSynth.set(\spread, spread);
+									/*		z = (z+1).mod(20);
+									if ( (z == 0), {postf("\n")});
+									postf("  %  " ++ gainDB.trunc );*/
 
-							//postf("~connectionCallback:  SPREAD:  connectionName: %  spread: % \n", connectionName, spread);
 
+									thisSynth.set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB, \delayMs, delayMs, \lpHz, lpHz);
+									//postf("~connectionCallback:  update: gain  % \n", gainDB);
+
+								}
+							)
 						},
-						// else
-						{"~connectionCallback: OSCrx spread message with no values".warn; })
-				};
-			);
+						'hpHz',   //  degree  (0 == noEffect,  1 == full effect)
+						{
+							if ( (args.size != 2 ) ,
+								{"connectionCallback: OSCrx hpHz message wrong number of values".warn;},
+								// else
+								{
+									// get value from vector, and write to connectionState
+									hpHz = args[1];   // get highpass cutoff value
+									thisSynth.set(\hpHz ,  clip(hpHz, 1, halfSrate ));
+
+									//postf("~connectionCallback:  hpHz connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
+
+								}
+							)
+						},
+						'spread',
+						{
+							if ( (args.size > 0 ) ,
+								{
+
+
+									// invert the spread value (usually an exp) to work with SATIE's VBAP-based spatializer (or others)
+									spread = 100 *  ( 1 - (clip(args[1],0,1)));  // get values from vector, and write to connectionState
+
+									thisSynth.set(\spread, spread);
+
+									//postf("~connectionCallback:  SPREAD:  connectionName: %  spread: % \n", connectionName, spread);
+
+								},
+								// else
+								{"~connectionCallback: OSCrx spread message with no values".warn; })
+						};
+					);
+			});
 		};
 		~connectionProcessCallback = {
 
@@ -343,74 +354,81 @@ for debugguing
 
 			nodeName = connectionName.asString.subStr(0, charIndex-1);
 
-
-			// We know this is a sourceProcessingNode since this callback was chosen for this node
-			// so by default, we will update the source's group
-
-			thisGroupName = e.allSourceNodes[nodeName.asSymbol].at(\groupNameSym);  // process nodes have unique groups
-			thisGroup = e.allGroupNodes[thisGroupName].at(\group).group;
-
-			myProcess = e.allSourceNodes[nodeName.asSymbol].at(\process);
-
-
-			//postf("~connectionProcessCallback:  connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
-
-			switch(type,
-				'update',
+			if ( e.allSourceNodes[nodeName.asSymbol] == nil,
 				{
-					if ( (args.size != 7 ) ,
-						{"connectionProcessCallback: OSCrx update message missing values".warn;},
-						// else
-						{
-							// get values from vector, and write to connectionState
-							aziDeg = args[1].raddeg;
-							eleDeg= args[2].raddeg;
-							gainDB = args[3];
-							delayMs = args[4];
-							lpHz = args[5];
-							distance = args[6];
-
-							if (myProcess[\updateConnection] == nil,
-								{
-
-									//postf("~connectionProcessCallback:  setting update for nodes group %\n", connectionName);
-									// distance not used by standard spatializers
-									thisGroup.set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB, \delayMs, delayMs, \lpHz, lpHz);
-								},
-								// else use custom handler
-								{
-									// postf("~connectionProcessCallback:  calling custom update handler for %\n", connectionName);
-									// distance used by custom process functions
-									myProcess[\updateConnection].value(myProcess, aziDeg, eleDeg, gainDB, delayMs, lpHz, distance);
-							});
-
-						}
-					)
+					warn("satie4Unity.connectionCallback:  source node: %  is undefined \n", nodeName);
 				},
-				// 'hpHz',   //  degree  (0 == noEffect,  1 == full effect)  Not implemented yet
-				'spread',
+				// else all ok
 				{
-					if ( (args.size > 0 ) ,
+
+					// We know this is a sourceProcessingNode since this callback was chosen for this node
+					// so by default, we will update the source's group
+
+					thisGroupName = e.allSourceNodes[nodeName.asSymbol].at(\groupNameSym);  // process nodes have unique groups
+					thisGroup = e.allGroupNodes[thisGroupName].at(\group).group;
+
+					myProcess = e.allSourceNodes[nodeName.asSymbol].at(\process);
+
+
+					//postf("~connectionProcessCallback:  connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
+
+					switch(type,
+						'update',
 						{
-							//postf("~connectionProcessCallback:  connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
-							spread = args[1];  // get values from vector, and write to connectionState
-
-							if (myProcess[\spread] == nil,
+							if ( (args.size != 7 ) ,
+								{"connectionProcessCallback: OSCrx update message missing values".warn;},
+								// else
 								{
-									//postf("~connectionProcessCallback:  setting spread for node's group  %\n", connectionName);
-									thisGroup.set(\spread, spread);
-								},
-								// else use a custom handler
-								{
-									//postf("~connectionProcessCallback:  calling custom spread handler for %\n", connectionName);
-									myProcess[\spread].value(myProcess, spread);
+									// get values from vector, and write to connectionState
+									aziDeg = args[1].raddeg;
+									eleDeg= args[2].raddeg;
+									gainDB = args[3];
+									delayMs = args[4];
+									lpHz = args[5];
+									distance = args[6];
 
-							});
+									if (myProcess[\updateConnection] == nil,
+										{
+
+											//postf("~connectionProcessCallback:  setting update for nodes group %\n", connectionName);
+											// distance not used by standard spatializers
+											thisGroup.set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB, \delayMs, delayMs, \lpHz, lpHz);
+										},
+										// else use custom handler
+										{
+											// postf("~connectionProcessCallback:  calling custom update handler for %\n", connectionName);
+											// distance used by custom process functions
+											myProcess[\updateConnection].value(myProcess, aziDeg, eleDeg, gainDB, delayMs, lpHz, distance);
+									});
+
+								}
+							)
 						},
-						// else
-						{"~connectionProcessCallback: OSCrx spread message with no values".warn; })
-				};
-			);
+						// 'hpHz',   //  degree  (0 == noEffect,  1 == full effect)  Not implemented yet
+						'spread',
+						{
+							if ( (args.size > 0 ) ,
+								{
+									//postf("~connectionProcessCallback:  connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
+									spread = args[1];  // get values from vector, and write to connectionState
+
+									if (myProcess[\spread] == nil,
+										{
+											//postf("~connectionProcessCallback:  setting spread for node's group  %\n", connectionName);
+											thisGroup.set(\spread, spread);
+										},
+										// else use a custom handler
+										{
+											//postf("~connectionProcessCallback:  calling custom spread handler for %\n", connectionName);
+											myProcess[\spread].value(myProcess, spread);
+
+									});
+								},
+								// else
+								{"~connectionProcessCallback: OSCrx spread message with no values".warn; })
+						};
+					);
+			});
 		};
 		~sourceNodeCallback = {
 			| args |
@@ -803,39 +821,42 @@ for debugguing
 			//postf("createConnection:  for source % and listener % \n", sourceName, listenerName);
 
 			connectionName = sourceName ++ "->" ++ listenerName;
-			myProcess = self.allSourceNodes[sourceName.asSymbol].at(\process);
+			myProcess = nil;
 
 
-			if (  self.allSourceNodes.includesKey(sourceName.asSymbol) == false ,
-				// source not defined  ???
+			if ( self.allSourceNodes.includesKey(sourceName.asSymbol) == false,
 				{
-					postf("warning: ~createConnection: SOURCE % not defined \n", sourceName);
-			});
-
-			if ( self.allSourceNodes[sourceName.asSymbol].includesKey(\connectionName),
-				{
-					'~createConnection:  connection already exists, no action taken'.postln;
+					error("*******************");
+					postf("bug:  satie4Unity.createConnection: node % not defined, can not establish connection \n", sourceName.asString);
 				},
-				// else create new one,  and a corresponding OSC callback
+				// else
 				{
-					self.allSourceNodes[sourceName.asSymbol].put(\connectionName, connectionName.asSymbol);
+					myProcess = self.allSourceNodes[sourceName.asSymbol].at(\process);
 
-					// is this a processNode ?
-					if ( myProcess != nil,
+					if ( self.allSourceNodes[sourceName.asSymbol].includesKey(\connectionName),
 						{
-							postf("~createConnection: creating Custom update callback for  %  \n", sourceName.asSymbol);
-							osc.connectionOSC(self.allSourceNodes[sourceName.asSymbol].at(\connectionName), e.['connectionProcessCallback']);
+							'~createConnection:  connection already exists, no action taken'.postln;
 						},
-						//else  regular source node, set up standard connection callback
+						// else create new one,  and a corresponding OSC callback
 						{
-							osc.connectionOSC(self.allSourceNodes[sourceName.asSymbol].at(\connectionName), e['connectionCallback']);
+							self.allSourceNodes[sourceName.asSymbol].put(\connectionName, connectionName.asSymbol);
+
+							// is this a processNode ?
+							if ( myProcess != nil,
+								{
+									postf("~createConnection: creating Custom update callback for  %  \n", sourceName.asSymbol);
+									osc.connectionOSC(self.allSourceNodes[sourceName.asSymbol].at(\connectionName), e.['connectionProcessCallback']);
+								},
+								//else  regular source node, set up standard connection callback
+								{
+									osc.connectionOSC(self.allSourceNodes[sourceName.asSymbol].at(\connectionName), e['connectionCallback']);
+							});
+
+							// postf("~createConnection: creating callback for  %  ", ~allSourceNodes[sourceName.asSymbol].at(\connectionName));
 					});
-
-					// postf("~createConnection: creating callback for  %  ", ~allSourceNodes[sourceName.asSymbol].at(\connectionName));
 			});
-
-
 		};
+
 		~setSynth = { 	| self, nodeName, pluginName |
 			var validPluginName = pluginName;
 			var sourceNode = self.allSourceNodes[nodeName.asSymbol];
@@ -843,9 +864,7 @@ for debugguing
 			var type;
 			var inBus;
 
-
 			var uriPath = sourceNode.at(\uriStr);
-
 
 			type = self.getUriType( uriPath );
 
@@ -1094,7 +1113,7 @@ for debugguing
 
 
 					self.clearSourceNode(nodeName.asSymbol);
-						//'REMOVE NODE'.postln;
+					//'REMOVE NODE'.postln;
 					self.allSourceNodes.removeAt(nodeName.asSymbol);     // remove node from global dictionary
 			});
 		};
