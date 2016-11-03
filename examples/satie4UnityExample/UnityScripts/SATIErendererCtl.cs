@@ -40,7 +40,7 @@ public class SATIErendererCtl : MonoBehaviour
     public float outputGainDB = -10f;
     private float _outputGainDB;
     
-    [Range(-18f, 18)]
+    [Range(-24f, 24)]
     public float outputTrimDB = -0f;
     private float _outputTrimDB;
     
@@ -50,7 +50,7 @@ public class SATIErendererCtl : MonoBehaviour
     public bool mute = false;
     private bool _mute;
 
-    private bool _start = false;
+    //private bool _start = false;
 
 
     public string outputFormat = "stereo";
@@ -79,9 +79,6 @@ public class SATIErendererCtl : MonoBehaviour
     {
         return port;
     }
-
-
-
 
     public void Awake()
     {
@@ -137,6 +134,38 @@ public class SATIErendererCtl : MonoBehaviour
         updateOutputFormat();
     }
 
+
+    private bool reconnet2renderer()
+    {
+        if (sender != null)
+            return true;
+        try
+        {
+            Debug.Log("SATIErendererCtl.reconnet2renderer(): sending to " + address + ":" + port);
+            connected = true;
+            sender = new OSCTransmitter(address, port);
+            //thread = new Thread(new ThreadStart(listen));
+            //thread.Start();
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("SATIErendererCtl.reconnet2renderer(): OSC failed to connect to " + address + ":" + port + " cannot initialize component");
+            Debug.LogError(e.Message);
+            connected = false;
+            sender = null;
+            return false;
+        }
+        string localHostName = Dns.GetHostName();
+        IPHostEntry hostEntry = Dns.GetHostEntry(localHostName);
+        foreach (IPAddress ipAddr in hostEntry.AddressList)
+        {
+            Debug.Log("SATIErendererCtl.reconnet2renderer(): MY IP:" + ipAddr.ToString());
+        }
+        return true;
+    }
+
+
+
  
     private void updateDSPstate()
     {
@@ -156,8 +185,10 @@ public class SATIErendererCtl : MonoBehaviour
 
         if (projectDir == "")
         {
-            _projectDir = projectDir = "../StreamingAssets";
-            path = Application.streamingAssetsPath;
+            return;   // if no project path is provided, use the one that is definied in the satie server project
+
+//            _projectDir = projectDir = "../StreamingAssets";
+//            path = Application.streamingAssetsPath;
             // Debug.Log ("projectDir EMPTY,  path= "+ path);
         }
         else if (projectDir.StartsWith("$DROPBOX"))    // users can specify $DROPBOX, and assuming a standard filepath like  "C:\Users or /Users,  we replace /Users/name with "~"
@@ -223,6 +254,11 @@ public class SATIErendererCtl : MonoBehaviour
         message.Append("setProjectDir");
         message.Append(path);
         sendOSC(message);
+    }
+
+    public float getOutputDB()
+    {
+        return outputGainDB;
     }
 
 
@@ -353,8 +389,8 @@ public class SATIErendererCtl : MonoBehaviour
     // called when inspector's values are modified
     public virtual void OnValidate()
     {
-        if (!_start)
-            return;
+//        if (!_start)
+//            return;
         
         if (!connected)
             return;
