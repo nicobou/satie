@@ -58,6 +58,10 @@ if  (thisProcess.argv.size >= 1,
  			{
  				~listeningFormat = \octoVBAP;
  			},
+ 			"5one",
+ 			{
+ 				~listeningFormat = \five1VBAP;
+ 			},
  			"quad",
  			{
  				~listeningFormat = \quadVBAP;
@@ -132,7 +136,17 @@ if (  ( ( ~listeningFormat == \domeVBAP)  ||   ( ~listeningFormat == \labodomeVB
 				~outAudioDev = "MADIface USB (23635751)";
 		});
 
-	},  // else
+     });
+    //  OR iF
+	if ( ( ( ~listeningFormat == \quadVBAP)  ||   ( ~listeningFormat == \five1VBAP)  ),
+	{
+
+		if (  ServerOptions.outDevices.indexOfEqual("MOTU UltraLite") != nil,
+		{
+				postln("AudioOutDev: MOTU UltraLite");
+				~outAudioDev = "MOTU UltraLite";
+		});
+}, // else
 	{
 		if ( ~listeningFormat == \stereoListener,
 		{
@@ -158,6 +172,10 @@ switch (~listeningFormat,
 	\octoVBAP,
 	{
 		o.numOutputBusChannels = 8;
+	},
+	\five1VBAP,
+	{
+		o.numOutputBusChannels = 5;
 	},
 	\quadVBAP,
 	{

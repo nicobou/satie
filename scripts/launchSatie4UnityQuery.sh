@@ -26,7 +26,7 @@ fi
 
 if [ -z $LISTENING_FORMAT ] ; then
 
-read -p "Enter listening format {sato, labo, octo, quad, or <cr> for currentConfig} : " QUERY_LISTENING_FORMAT
+read -p "Enter listening format {sato, labo, octo, quad, 5one, or <cr> for currentConfig} : " QUERY_LISTENING_FORMAT
 
 fi
 
@@ -53,6 +53,9 @@ octo)
 ;;
 quad)
     LISTENING_FORMAT=quad
+;;
+5one)
+LISTENING_FORMAT=5one
 ;;
 "" )
     echo setting to stereo
