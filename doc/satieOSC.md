@@ -49,14 +49,14 @@ sets parameter values to a SATIE instance. Any number of `param / value` pairs m
 -   Arguments
     -   **param:** parameter to affect, dependent on the instrument. The common parameters are:
         
-             | Parameter  | Unit     | Description                                     |
-             |------------|----------|-------------------------------------------------|
-             | =gainDB=   | decibels | gain                                            |
-             | =aziDeg=   | degrees  | azimuth +/- 180                                 |
-             | =elevDeg=  | degrees  | elevation +/- 90                                |
-             | =delaySec= | seconds  | delay time for doppler effect                   |
-             | =lpHz=     | hertz    | low pass filter for for doppler                 |
-             | =spread=   | int      | panning spread, 0 - 100. 0 = narrow, 100 = omni |
+| Parameter  | Unit     | Description                                     |
+|------------|----------|-------------------------------------------------|
+| =gainDB=   | decibels | gain                                            |
+| =aziDeg=   | degrees  | azimuth +/- 180                                 |
+| =elevDeg=  | degrees  | elevation +/- 90                                |
+| =delaySec= | seconds  | delay time for doppler effect                   |
+| =lpHz=     | hertz    | low pass filter for for doppler                 |
+| =spread=   | int      | panning spread, 0 - 100. 0 = narrow, 100 = omni |
     
     -   **value:** parameter's value
 
