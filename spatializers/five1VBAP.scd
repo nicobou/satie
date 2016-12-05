@@ -22,6 +22,7 @@
 // 5.1 speaker layout
 
 ~spk5 = VBAPSpeakerArray.new(2, [-45, 45, 135, -135, 0]); // 5 channel ring
+// output channel assignment order from 0 to 5:   [FL, FR ,SR , SL ,C ,SUB]
 
 
 
@@ -37,14 +38,14 @@
 	var slewFilter = 0.6;
 	var slewPanning = 0.030;
 	var panWeights;
-	var outsig;
+	var outsig , sourceSig;
 
-	outsig =  LPF.ar(DelayC.ar(
+	sourceSig =  LPF.ar(DelayC.ar(
 		Lag.kr(gain, slewGain) * in,
 		maxdelaytime: 0.5,
 		delaytime: delay.lag(slewDelay)),   lpHz.lag(slewFilter)    );
 
-	outsig = BHiPass.ar(outsig, VarLag.kr(hpHz, slewFilter )  );
+	sourceSig = BHiPass.ar(sourceSig, VarLag.kr(hpHz, slewFilter )  );
 
 	panWeights = VBAP.kr(numChans: ~spk5.numSpeakers,
 		in: 1.0,
@@ -53,7 +54,9 @@
 		elevation: eleDeg,
 		spread: spread );
 
-	outsig * Lag.kr(panWeights, 0.030);
+	outsig = sourceSig * Lag.kr(panWeights, 0.030);
+
+	[outsig[0],outsig[1], outsig[2], outsig[3], outsig[4], sourceSig];   // output array  [FL, FR ,SR , SL ,C ,SUB]
 };
 
 

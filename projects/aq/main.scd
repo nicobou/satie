@@ -121,6 +121,8 @@ o.blockSize = 2048;
 o.threads = 8;
 
 
+// ~listeningFormat = \five1VBAP;    for debugging testing
+
 if (  ( ( ~listeningFormat == \domeVBAP)  ||   ( ~listeningFormat == \labodomeVBAP)  || ( ~listeningFormat == \octoVBAP)  ),
 	{
 
@@ -141,10 +143,10 @@ if (  ( ( ~listeningFormat == \domeVBAP)  ||   ( ~listeningFormat == \labodomeVB
 	if ( ( ( ~listeningFormat == \quadVBAP)  ||   ( ~listeningFormat == \five1VBAP)  ),
 	{
 
-		if (  ServerOptions.outDevices.indexOfEqual("MOTU UltraLite") != nil,
+		if (  ServerOptions.outDevices.indexOfEqual("MOTU UltraLite mk3 Hybrid") != nil,
 		{
-				postln("AudioOutDev: MOTU UltraLite");
-				~outAudioDev = "MOTU UltraLite";
+				postln("AudioOutDev: MOTU UltraLite mk3 Hybrid");
+				~outAudioDev = "MOTU UltraLite mk3 Hybrid";
 		});
 }, // else
 	{
@@ -175,7 +177,7 @@ switch (~listeningFormat,
 	},
 	\five1VBAP,
 	{
-		o.numOutputBusChannels = 5;
+		o.numOutputBusChannels = 5+1;
 	},
 	\quadVBAP,
 	{
