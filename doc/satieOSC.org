@@ -16,11 +16,10 @@
 #+LATEX_HEADER: \fancyfoot[CE,CO]{Michał Seta | e: mseta@sat.qc.ca }
 #+LATEX_HEADER: \usepackage{epic}
 #+OPTIONS: num:2
-#+OPTIONS: toc:t
+#+OPTIONS: toc:nil
 #+OPTIONS: author:nil
 #+OPTIONS: timestamp:t date:t d:nil <:nil p:nil tags:nil
 #+LANGUAGE: en
-\thispagestyle{fancy}
 
 * Address space
 - /SATIE :: the root address space. At this level we can create and delete synth instances and groups.
