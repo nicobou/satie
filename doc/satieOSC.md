@@ -47,7 +47,7 @@ delete a named instance from the SATIE server. *name* is the uniquely identified
 sets parameter values to a SATIE instance. Any number of `param / value` pairs may be provided
 
 -   Arguments
-    -   **param:** parameter to affect, dependent on the instrument. The common parameters are:
+ -   **param:** parameter to affect, dependent on the instrument. The common parameters are:
         
 | Parameter  | Unit     | Description                                     |
 |------------|----------|-------------------------------------------------|
@@ -58,7 +58,7 @@ sets parameter values to a SATIE instance. Any number of `param / value` pairs m
 | =lpHz=     | hertz    | low pass filter for for doppler                 |
 | =spread=   | int      | panning spread, 0 - 100. 0 = narrow, 100 = omni |
     
-    -   **value:** parameter's value
+ -   **value:** parameter's value
 
 ### clear
 
