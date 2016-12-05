@@ -23,7 +23,7 @@
 // defaults to stereo
 ~listeningFormat = \stereoListener;    // you can also set this to  \domeVBAP  or  \labodomeVBAP  or   \octoVBAP
 
-~listeningFormat = \labodomeVBAP;    // you can also set this to  \domeVBAP  or  \labodomeVBAP  or   \octoVBAP
+//~listeningFormat = \labodomeVBAP;    // you can also set this to  \domeVBAP  or  \labodomeVBAP  or   \octoVBAP
 
 // or specify the listening format via command line args
 // possible arg values:   "sato", "labo", "octo", or "stereo"
@@ -44,6 +44,10 @@ if  (thisProcess.argv.size >= 1,
  			"octo",
  			{
  				~listeningFormat = \octoVBAP;
+ 			},
+ 			"5one",
+ 			{
+ 				~listeningFormat = \five1VBAP;
  			},
  			"quad",
  			{
@@ -81,10 +85,12 @@ if ( ~superNovaFlag != nil,
 });
 
 o = Server.local.options;   // default set up options
-o.memSize = 2**21;        // probably should just leave this the same for everyting
+o.memSize = (2**21).asInt;        // probably should just leave this the same for everyting
 o.device = nil;  // default
 o.blockSize = 2048;
-//o.threads = 8;
+o.threads = 8;
+
+// ~listeningFormat = \five1VBAP;    for debugging testing
 
 if (  ( ( ~listeningFormat == \domeVBAP)  ||   ( ~listeningFormat == \labodomeVBAP)  || ( ~listeningFormat == \octoVBAP)  ),
 	{
@@ -101,7 +107,17 @@ if (  ( ( ~listeningFormat == \domeVBAP)  ||   ( ~listeningFormat == \labodomeVB
 				~outAudioDev = "MADIface USB (23635751)";
 		});
 
-	},  // else
+     });
+    //  OR iF
+	if ( ( ( ~listeningFormat == \quadVBAP)  ||   ( ~listeningFormat == \five1VBAP)  ),
+	{
+
+		if (  ServerOptions.outDevices.indexOfEqual("MOTU UltraLite mk3 Hybrid") != nil,
+		{
+				postln("AudioOutDev: MOTU UltraLite mk3 Hybrid");
+				~outAudioDev = "MOTU UltraLite mk3 Hybrid";
+		});
+}, // else
 	{
 		if ( ~listeningFormat == \stereoListener,
 		{
@@ -111,7 +127,6 @@ if (  ( ( ~listeningFormat == \domeVBAP)  ||   ( ~listeningFormat == \labodomeVB
 		// o.dump;
 		});
 });
-
 
 switch (~listeningFormat,
 	\domeVBAP,
@@ -125,6 +140,10 @@ switch (~listeningFormat,
 	\octoVBAP,
 	{
 		o.numOutputBusChannels = 8;
+	},
+	\five1VBAP,
+	{
+		o.numOutputBusChannels = 5+1;
 	},
 	\quadVBAP,
 	{

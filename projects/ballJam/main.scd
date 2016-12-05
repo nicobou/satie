@@ -56,6 +56,10 @@ if  (thisProcess.argv.size >= 1,
  			{
  				~listeningFormat = \octoVBAP;
  			},
+			"5one",
+ 			{
+ 				~listeningFormat = \five1VBAP;
+ 			},
  			"quad",
  			{
  				~listeningFormat = \quadVBAP;
@@ -120,11 +124,13 @@ if ( ~superNovaFlag != nil,
 });
 
 o = Server.local.options;   // default set up options
-o.memSize = 2**21;        // probably should just leave this the same for everyting
+o.memSize = (2**21).asInt;        // probably should just leave this the same for everyting
 o.device = nil;  // default
 o.blockSize = 2048;
 o.threads = 8;
 
+
+// ~listeningFormat = \five1VBAP;    for debugging testing
 
 if (  ( ( ~listeningFormat == \domeVBAP)  ||   ( ~listeningFormat == \labodomeVBAP)  || ( ~listeningFormat == \octoVBAP)  ),
 	{
@@ -141,7 +147,17 @@ if (  ( ( ~listeningFormat == \domeVBAP)  ||   ( ~listeningFormat == \labodomeVB
 				~outAudioDev = "MADIface USB (23635751)";
 		});
 
-	},  // else
+     });
+    //  OR iF
+	if ( ( ( ~listeningFormat == \quadVBAP)  ||   ( ~listeningFormat == \five1VBAP)  ),
+	{
+
+		if (  ServerOptions.outDevices.indexOfEqual("MOTU UltraLite mk3 Hybrid") != nil,
+		{
+				postln("AudioOutDev: MOTU UltraLite mk3 Hybrid");
+				~outAudioDev = "MOTU UltraLite mk3 Hybrid";
+		});
+}, // else
 	{
 		if ( ~listeningFormat == \stereoListener,
 		{
@@ -151,7 +167,6 @@ if (  ( ( ~listeningFormat == \domeVBAP)  ||   ( ~listeningFormat == \labodomeVB
 		// o.dump;
 		});
 });
-
 
 
 
@@ -168,6 +183,10 @@ switch (~listeningFormat,
 	{
 		o.numOutputBusChannels = 8;
 	},
+	\five1VBAP,
+	{
+		o.numOutputBusChannels = 5+1;
+	},
 	\quadVBAP,
 	{
 		o.numOutputBusChannels = 4;
@@ -177,7 +196,6 @@ switch (~listeningFormat,
 	o.numOutputBusChannels = 2;
 	}
 );
-
 
 
 if ( ~outAudioDev != nil ,
