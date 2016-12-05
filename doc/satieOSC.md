@@ -50,7 +50,7 @@ sets parameter values to a SATIE instance. Any number of `param / value` pairs m
     -   **param:** parameter to affect, dependent on the instrument. The common parameters are:
         
              | Parameter  | Unit     | Description                                     |
-             |------------+----------+-------------------------------------------------|
+             |------------|----------|-------------------------------------------------|
              | =gainDB=   | decibels | gain                                            |
              | =aziDeg=   | degrees  | azimuth +/- 180                                 |
              | =elevDeg=  | degrees  | elevation +/- 90                                |
