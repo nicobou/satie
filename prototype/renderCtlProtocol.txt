@@ -1,0 +1,23 @@
+Satie Renderer Control Protocol
+
+
+
+// higher level messages to renderer
+
+/satie/setProjectDir  directoryPath_string    // project directory path
+
+/satie/freeSynths     // free all synths on server
+
+/satie/outputFormat  format_string		// string to describe which output format to render.
+
+
+
+
+// direct control of renderer's audio output
+
+/satie/setOutputTrimDB  db_float			  // output gain offset in db
+/satie/setOutputDB  db_float				// output gain in db
+/satie/setOutputDIM   state_bool			// attenuate output gain by 30 db
+/satie/setOutputMute   state_bool			// mute output gain  
+
+
