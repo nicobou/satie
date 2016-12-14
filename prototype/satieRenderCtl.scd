@@ -15,6 +15,29 @@
 //  ~satieRendererCtl    psudo class to manage the SATIE audio renderer state, connecting to the server's globals for output level control, etc.
 
 
+~thisDir = thisProcess.nowExecutingPath.dirname ;
+
+~rootSrcPath = ~thisDir++ "/..";
+
+(~rootSrcPath ++ "/src/*.scd").pathMatch.do({arg item; item.loadPaths});
+
+s.waitForBoot{
+
+	// create and initialize a sc-basic-renderer, and set environment variable
+	if (~scbr == nil,{
+		postln("loading SATIE kernal...");
+		~scbr = ~scbrMaker.value(numAudioAux: 1, satieSrcPath: ~rootSrcPath);
+	});
+
+
+	s.sync;
+
+	// instantiate the OSC interface
+	if (~oscInterface == nil,{
+		~oscInterface = ~spatOSCMaker.value();
+	});
+};
+
 
 
 /*
@@ -26,11 +49,15 @@ for debugguing
 ~src = ~satieRendererCtl.value(~oscInterface,~scbr);
 ~src.debugFlag = true;
 
+~src.free;
+~src.oscObj
+
+
 */
 
 
 (
-~satieRendererCtl = { | oscContext, satieContext, oscID = \satieRendererCtlOSC |
+~satieRendererCtl = { | oscContext, satieContext, recvPort=18032 |
 	var osc = oscContext;
 	var satie = satieContext;
 
@@ -43,6 +70,7 @@ for debugguing
 		~outputDB = 0;    // current state of the supercollider's output
 		~outputTrimDB = 0;
 		~debugFlag=false;
+		~oscIDsym = \satieRendererCtlOSC;
 
 
 
@@ -146,15 +174,20 @@ for debugguing
 					)
 			});
 		};
+	    OSCdef(~oscIDsym).clear.free;   // remove if already defined
+		~oscObj = OSCdef(~oscIDsym, ~basicRendererCallback, "/satie/rendererCtl", recvPort);
+
+
+
 	}); // Environment.make
-	"satie4unityprotol loaded".inform;
+	"satieRendererCtl loaded".inform;
 	e.know = true;
 	//postf("passed osc env: %\n", osc);
 
 
 
-	osc.removeBasicRendererOSC(\brOSC);   // remove if already instantiated
-	osc.basicRendererOSC(\brOSC,e['basicRendererCallback']);
+	//osc.removeBasicRendererOSC(\brOSC);   // remove if already instantiated
+	//osc.basicRendererOSC(\brOSC,e['basicRendererCallback']);
 	e;
 };
 
