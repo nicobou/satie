@@ -32,10 +32,7 @@ s.waitForBoot{
 
 	s.sync;
 
-	// instantiate the OSC interface
-	if (~oscInterface == nil,{
-		~oscInterface = ~spatOSCMaker.value();
-	});
+
 };
 
 
@@ -46,7 +43,7 @@ for debugguing
 // uncomment only for debugging
 
 
-~src = ~satieRendererCtl.value(~oscInterface,~scbr);
+~src = ~satieRendererCtl.value(~scbr);
 ~src.debugFlag = true;
 
 ~src.free;
@@ -57,9 +54,9 @@ for debugguing
 
 
 (
-~satieRendererCtl = { | oscContext, satieContext, recvPort=18032 |
-	var osc = oscContext;
+~satieRendererCtl = { | satieContext, rxPort=18032 |
 	var satie = satieContext;
+	var oscAddress = "/satie/rendererCtl";
 
 	var e = Environment.make({
 
@@ -70,7 +67,7 @@ for debugguing
 		~outputDB = 0;    // current state of the supercollider's output
 		~outputTrimDB = 0;
 		~debugFlag=false;
-		~oscIDsym = \satieRendererCtlOSC;
+		~basicRendererCallbackID = \basicRendererCallback;
 
 
 
@@ -174,20 +171,14 @@ for debugguing
 					)
 			});
 		};
-	    OSCdef(~oscIDsym).clear.free;   // remove if already defined
-		~oscObj = OSCdef(~oscIDsym, ~basicRendererCallback, "/satie/rendererCtl", recvPort);
 
-
+		// now connect the OSC callback to this instance
+	    OSCdef(~basicRendererCallbackID).clear.free;   // disconnect older instance,  if it exists
+		OSCdef(~basicRendererCallbackID, ~basicRendererCallback, oscAddress, recvPort: rxPort);  // set up OSC callback
 
 	}); // Environment.make
 	"satieRendererCtl loaded".inform;
 	e.know = true;
-	//postf("passed osc env: %\n", osc);
-
-
-
-	//osc.removeBasicRendererOSC(\brOSC);   // remove if already instantiated
-	//osc.basicRendererOSC(\brOSC,e['basicRendererCallback']);
 	e;
 };
 
