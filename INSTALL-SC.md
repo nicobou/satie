@@ -22,7 +22,7 @@ git submodule init && git submodule update
 mkdir build
 cd build
 cmake ..
-make -j8
+make
 sudo make install
 ```
 
@@ -31,8 +31,10 @@ sudo make install
 git clone https://github.com/supercollider/sc3-plugins.git
 git checkout Version-3.8.0
 git submodule init && git submodule update
+mkdir build
+cd build
 cmake -DSC_PATH=../../supercollider/ -DQUARKS=OFF -DSUPERNOVA=ON ..
-make -j8
+make
 sudo make install
 ```
 
