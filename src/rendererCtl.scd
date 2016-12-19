@@ -14,43 +14,49 @@
 
 //  ~satieRendererCtl    psudo class to manage the SATIE audio renderer state, connecting to the server's globals for output level control, etc.
 
+//
+// for debugguing
+//
+//
+// ~thisDir = thisProcess.nowExecutingPath.dirname ;
+//
+//
+//
+// ~rootSrcPath = ~thisDir++ "/..";
+//
+// (~rootSrcPath ++ "/src/*.scd").pathMatch.do({arg item; item.loadPaths});
+//
+//
+//
+// s.waitForBoot{
+//
+// 	// create and initialize a sc-basic-renderer, and set environment variable
+// 	if (~scbr == nil,{
+// 		postln("loading SATIE kernal...");
+// 		~scbr = ~scbrMaker.value(numAudioAux: 1, satieSrcPath: ~rootSrcPath);
+// 	});
+//
+//
+// 	s.sync;
+//
+//
+// };
 
-~thisDir = thisProcess.nowExecutingPath.dirname ;
-
-~rootSrcPath = ~thisDir++ "/..";
-
-(~rootSrcPath ++ "/src/*.scd").pathMatch.do({arg item; item.loadPaths});
-
-s.waitForBoot{
-
-	// create and initialize a sc-basic-renderer, and set environment variable
-	if (~scbr == nil,{
-		postln("loading SATIE kernal...");
-		~scbr = ~scbrMaker.value(numAudioAux: 1, satieSrcPath: ~rootSrcPath);
-	});
-
-
-	s.sync;
-
-
-};
 
 
 
-/*
-for debugguing
-
-// uncomment only for debugging
+/*// uncomment only for debugging
 
 
 ~src = ~satieRendererCtl.value(~scbr);
 ~src.debugFlag = true;
 
 ~src.free;
-~src.oscObj
+~src.oscObj*/
 
 
-*/
+// create instance to receive control messages via OSC on the rxPort
+
 
 
 (
