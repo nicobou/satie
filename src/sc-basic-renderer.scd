@@ -11,8 +11,21 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+/*
+ADD TO  scbrMaker
+~spatSymbolArray = [\stereoPanner];  // default
+
+renderFormat = { | self, spatSymbolArray |};   // udpates ~spatSymbolArray then calls ~makeSynthDef and ~makeSynthDef2 on all existing source nodes
+
+
+ADD to ~scbrCtl
+
+osc handler for /satie/renderFormat
+
+*/
 (
-~scbrMaker = { | numAudioAux = 0, satieSrcPath |
+~scbrMaker = { | numAudioAux = 0, satieSrcPath, oscRxPort = 18032 |
 	var e = Environment.make({
 		// TODO use try catch with this
 		~pluginLoader;
@@ -140,7 +153,7 @@
 	e.pluginLoader.loadSpatPlugins(e.satieSrcPath ++ "/spatializers/*.scd");
 	e.pluginLoader.loadEffectPlugins(e.satieSrcPath ++ "/effects/*.scd");
 	e.pluginLoader.loadMapperPlugins(e.satieSrcPath ++ "/mappers/*.scd");
-	~scbrCtl.value(~scbr);    // create renderer control object
+	~scbrCtl.value(e, oscRxPort);    // create renderer control object
 	e;  // return
 };  // scbrMaker
 
@@ -150,7 +163,7 @@
 // note: any OSC bindings of previous instances are destoyed before creation of a new instance
 // so it is safe to call repeatedly
 
-~scbrCtl = { | satieContext, rxPort=18032 |
+~scbrCtl = { | satieContext, rxPort |
 	var satie = satieContext;
 	var oscAddress = "/satie/rendererCtl";
 
