@@ -115,6 +115,148 @@
 	e.pluginLoader.loadSpatPlugins(e.satieSrcPath ++ "/spatializers/*.scd");
 	e.pluginLoader.loadEffectPlugins(e.satieSrcPath ++ "/effects/*.scd");
 	e.pluginLoader.loadMapperPlugins(e.satieSrcPath ++ "/mappers/*.scd");
+	~scbrCtl.value(~scbr);    // create renderer control object
 	e;  // return
 };  // scbrMaker
+
+
+// psudo class to control  basic-renderer above
+// Creates instance to receive control messages via OSC on the rxPort
+// note: any OSC bindings of previous instances are destoyed before creation of a new instance
+// so it is safe to call repeatedly
+
+~scbrCtl = { | satieContext, rxPort=18032 |
+	var satie = satieContext;
+	var oscAddress = "/satie/rendererCtl";
+
+	var e = Environment.make({
+
+
+		// used for audio renderer control
+		~volume = s.volume;     // create hook to global audio engine volume / mute control
+		~volume.setVolumeRange(-99, 18);
+		~outputDB = 0;    // current state of the supercollider's output
+		~outputTrimDB = 0;
+		~debugFlag=false;
+		~basicRendererCallbackID = \basicRendererCallback;
+
+
+
+		// ~basicRendererCallback = { "basicRendererCallback called".inform };
+		~basicRendererCallback = {
+			arg msg;
+			var command = msg[1];
+
+			if (~debugFlag == true,
+				{
+					postf("~basicRendererCallback: command: %, msg: %, \n", command, msg);
+			});
+
+			if (msg.size < 2,
+				{"~basicRendererCallback: empty message".warn;
+					postf("~basicRendererCallback MESS LEN: %", msg.size);
+
+				},
+				// else
+				{
+
+					switch (command,
+						'setProjectDir',
+						{
+							if ( (msg.size != 3 ) ,
+								{"~basicRendererCallback: setProjectDir bad arg count: expecting 'setProjectDir projectDirPath' ".warn;},
+								// else
+								{
+									e.projectDirectory = msg[2];
+
+									//e.projectDirectory.postln;
+									postf("~basicRendererCallback: setProjectDir: % \n", e.projectDirectory);
+
+								}
+							)
+						},
+						'setOutputTrimDB',
+						{
+							if ( (msg.size < 3 ) ,
+								{"~basicRendererCallback: setOutputTrimDB missing value".warn;},
+								// else
+								{
+									e.outputTrimDB = msg[2];
+									e.volume.volume = e.outputTrimDB + e.outputDB;
+								}
+							)
+						},
+						'setOutputDB',
+						{
+							if ( (msg.size < 3 ) ,
+								{"~basicRendererCallback: setOutputDB missing value".warn;},
+								// else
+								{
+									e.outputDB = msg[2];
+									e.volume.volume = e.outputTrimDB + e.outputDB;
+								}
+							)
+						},
+						'setOutputDIM',
+						{
+							if ( (msg.size < 3 ) ,
+								{"~basicRendererCallback: setOutputMute missing value".warn;
+									// postf("CREATESOURCE MESS LEN: %", msg.size);
+
+								},
+								// else
+								{
+									if (msg [2] > 0,
+										{  e.volume.volume = -30;  },
+										// else
+										{  e.volume.volume =  e.outputDB + e.outputTrimDB;   });
+								}
+							)
+						},
+						'freeSynths',
+						{
+							if ( (msg.size < 3 ) ,
+								{"~basicRendererCallback: freeSynths missing group name".warn;
+									// postf("freeSynths MESS LEN: %", msg.size);
+
+								},
+								// else
+								{
+									var groupSym = msg [2] .asSymbol;
+
+									satie.satieGroups[groupSym].freeAll;
+									postf("basicRendererCallback: freeing all synths in % group", groupSym);
+								}
+							)
+						},
+						'setOutputMute',
+						{
+							//postf("~basicRendererCallback setMute: %\n", msg[2]);
+							if ( (msg.size < 3 ) ,
+								{"~basicRendererCallback: setOutputDIM missing value".warn;  },
+								// else
+								{
+									if (msg [2] > 0,
+										{e.volume.mute;},
+										// else
+										{e.volume.unmute;} );  // full muting implmentation
+								}
+							);
+						}
+					)
+			});
+		};
+
+		// now connect the OSC callback to this instance
+	    OSCdef(~basicRendererCallbackID).clear.free;   // disconnect older instance,  if it exists
+		OSCdef(~basicRendererCallbackID, ~basicRendererCallback, oscAddress, recvPort: rxPort);  // set up OSC callback
+
+	}); // Environment.make
+	"basicRendererCtl loaded".inform;
+	e.know = true;
+	e;
+};
+
+
+
 )
