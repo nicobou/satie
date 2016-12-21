@@ -16,8 +16,6 @@
 
 //
 // for debugguing
-//
-//
 // ~thisDir = thisProcess.nowExecutingPath.dirname ;
 //
 //
@@ -36,31 +34,31 @@
 // 		~scbr = ~scbrMaker.value(numAudioAux: 1, satieSrcPath: ~rootSrcPath);
 // 	});
 //
+// 	if ( ~osc ==nil, {
+// 		~osc = ~satieOSCMaker.value("/satie", 18032);
+//
+// 	});
+//
 //
 // 	s.sync;
 //
 //
+//
 // };
 
-
-
-
-/*// uncomment only for debugging
-
-
-~src = ~satieRendererCtl.value(~scbr);
-~src.debugFlag = true;
-
-~src.free;
-~src.oscObj*/
-
-
 // create instance to receive control messages via OSC on the rxPort
+//          ~src = ~satieRendererCtl.value(~scbr, ~osc);
+
 
 
 
 (
-~satieRendererCtl = { | satieContext, rxPort=18032 |
+// psudo class to control  basic-renderer above
+// Creates instance to receive control messages via OSC on the rxPort
+// note: any OSC bindings of previous instances are destoyed before creation of a new instance
+// so it is safe to call repeatedly
+
+~satieRendererCtl = { | satieContext, oscContext |
 	var satie = satieContext;
 	var oscAddress = "/satie/rendererCtl";
 
@@ -73,15 +71,16 @@
 		~outputDB = 0;    // current state of the supercollider's output
 		~outputTrimDB = 0;
 		~debugFlag=false;
-		~basicRendererCallbackID = \basicRendererCallback;
 
-
-
-		// ~basicRendererCallback = { "basicRendererCallback called".inform };
-		~basicRendererCallback = {
+		// ~satieRendererCallback = { "satieRendererCallback called".inform };
+		~satieRendererCallback = {
 			arg msg;
 			var command = msg[1];
-			//postf("~basicRendererCallback: command: %, msg: %, \n", command, msg);
+
+			if (~debugFlag == true,
+				{
+					postf("~basicRendererCallback: command: %, msg: %, \n", command, msg);
+			});
 
 			if (msg.size < 2,
 				{"~basicRendererCallback: empty message".warn;
@@ -178,13 +177,17 @@
 			});
 		};
 
+
 		// now connect the OSC callback to this instance
-	    OSCdef(~basicRendererCallbackID).clear.free;   // disconnect older instance,  if it exists
-		OSCdef(~basicRendererCallbackID, ~basicRendererCallback, oscAddress, recvPort: rxPort);  // set up OSC callback
+		// OSCdef(~basicRendererCallbackID).clear.free;   // disconnect older instance,  if it exists
+		// OSCdef(~basicRendererCallbackID, ~basicRendererCallback, oscAddress, recvPort: rxPort);  // set up OSC callback
 
 	}); // Environment.make
-	"satieRendererCtl loaded".inform;
+	"satueRendererCtl loaded".inform;
 	e.know = true;
+		oscContext.removeRendererCtlOSC.value(); // remove any previous OSC  links to callback
+		oscContext.makeRendererCtlOSC( e['satieRendererCallback'] );   // create OSC link to callback
+
 	e;
 };
 

@@ -42,6 +42,15 @@
 			);
 		};
 
+	   // create  OSC callback for satieRendererCtl
+		~makeRendererCtlOSC = {|self, cb|
+			self.newOSC(\rendererCtl, cb,  rootURI +/+ "rendererCtl");
+		};
+
+		// remove  OSC callback for satieRendererCtl.
+		~removeRendererCtlOSC = {|self|
+			self.deleteOSC(\rendererCtl);
+		};
 
 		// create a group
 		~makeGroupOSC = {|self, groupName, cb|
