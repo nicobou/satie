@@ -40,18 +40,18 @@ s.waitForBoot{
 	// here a PinkSin source spatialized by
 	//   - a stereo panner (starting channel 0)
 	//   - a monoSpat (starting channel 2)
-	~scbr.makeSynthDef(\fool, \PinkSin, [\stereoPanner, \monoSpat], [0, 2]);
+	~scbr.makeSynthDef(\fool, \PinkSin, [], [\stereoPanner, \monoSpat], [0, 2]);
 
 	//~scbr.makeSynthDef(\string, \zkarpluck1, [\stereoPanner, \monoSpat], [0, 2]);
-	~scbr.makeSynthDef(\string, \zkarpluck1, [\domeVBAP], [0]);
-	~scbr.makeSynthDef(\pinksin, \PinkSin, [\stereoPanner], [0]);
-	~scbr.makeSynthDef(\testtone, \testtone, [\stereoPanner], [0]);
+	~scbr.makeSynthDef(\string, \zkarpluck1, [], [\domeVBAP], [0]);
+	~scbr.makeSynthDef(\pinksin, \PinkSin, [], [\stereoPanner], [0]);
+	~scbr.makeSynthDef(\testtone, \testtone, [], [\stereoPanner], [0]);
 	// writing to all aux busses (first is starting a 0):
-	~scbr.makeSynthDef(\string_all_aux, \zkarpluck1, [\domeVBAP], [0], ~scbr.aux);
+	~scbr.makeSynthDef(\string_all_aux, \zkarpluck1, [], [\domeVBAP], [0], \defaultMapper, ~scbr.aux);
 	// writing to only to the third audio bus
-	~scbr.makeSynthDef(\string_third_aux, \zkarpluck1, [\domeVBAP], [0], [~scbr.aux[2]]);
+	~scbr.makeSynthDef(\string_third_aux, \zkarpluck1, [], [\domeVBAP], [0], \defaultMapper, [~scbr.aux[2]]);
 	// spatilized reverb effect (input will be set at creation):
-	~scbr.makeSynthDef(\busreverb, \freeverb, [\stereoPanner], [0]);
+	~scbr.makeSynthDef(\busreverb, \freeverb, [], [\stereoPanner], [0]);
 	// streaming a soundfile from disk
 	~playBuffers = (
 		// the first one will work only on linux
@@ -59,11 +59,11 @@ s.waitForBoot{
 		\boo: Buffer.cueSoundFile(s, Platform.resourceDir +/+ "sounds/a11wlk01.wav", 0, 1)
 	);
 	// load sound files using arguments
-	~scbr.makeSynthDef(\snd1, \sndFile, [\stereoPanner], [0], [], [~playBuffers[\boo].bufnum]);
-	~scbr.makeSynthDef(\snd2, \sndFile, [\stereoPanner], [0], [], [~playBuffers[\alsaTest].bufnum]);
+	~scbr.makeSynthDef(\snd1, \sndFile, [], [\stereoPanner], [0], \defaultMapper, [~playBuffers[\boo].bufnum]);
+	~scbr.makeSynthDef(\snd2, \sndFile, [], [\stereoPanner], [0], \defaultMapper, [~playBuffers[\alsaTest].bufnum]);
 	// load synths with arguments
-	~scbr.makeSynthDef(\pink400, \PinkSin, [\stereoPanner], [0], [], [400]);
-	~scbr.makeSynthDef(\pink800, \PinkSin, [\stereoPanner], [0], [], [800]);
+	~scbr.makeSynthDef(\pink400, \PinkSin, [], [\stereoPanner], [0], \defaultMapper, [], [400]);
+	~scbr.makeSynthDef(\pink800, \PinkSin, [], [\stereoPanner], [0], \defaultMapper, [], [800]);
 	// be sure the synthDef is compiled on the server
 	s.sync;
 

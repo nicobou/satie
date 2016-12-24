@@ -27,31 +27,7 @@
 		~satieSrcPath;
 
 		// TODO try catch
-		~makeSynthDef = { | self, name, srcSymbol, spatSymbolArray, busShiftArray = #[0], toBusArray = #[], synthArgs = #[] |
-			// selecting audio source or effect dictionay because
-			// make instance require effects to be added to tail
-			// and audio source to head
-			var dictionary;
-			if (nil != self.pluginLoader.audioPlugins.at(srcSymbol),
-				{
-					dictionary = self.pluginLoader.audioPlugins;
-				},
-				{
-					dictionary = self.pluginLoader.effectPlugins;
-					self.effectSynthDef.add(name.asSymbol);
-				}
-			); //  endif
-			// Factory
-			self.synthDefFactory.makeSynthDef(name,
-				dictionary.at(srcSymbol),
-				spatSymbolArray.collect({ arg item, i;
-					self.pluginLoader.spatPlugins.at(item)}),
-				busShiftArray,
-				toBusArray,
-				synthArgs);
-			nil;  // return
-		};
-		~makeSynthDef2 = {
+		~makeSynthDef = {
 			| self,
 			name,
 			srcSymbol, srcToBusses = #[],
@@ -72,7 +48,7 @@
 				}
 			); //  endif
 			// Factory
-			self.synthDefFactory.makeSynthDef2(
+			self.synthDefFactory.makeSynthDef(
 				/*name:*/ name,
 				/*src:*/ dictionary.at(srcSymbol),
 				/*srcToBusses:*/ srcToBusses,

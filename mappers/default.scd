@@ -12,7 +12,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ~name = \defaultMapper;
-// default mapper does nothing, it could be been named 'identity'
+
+// default mapper does nothing. It could have been named 'identity'
 ~function = {
 			| aziDeg = 0, eleDeg = 0, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 0.5, spread = 1 |
 			[aziDeg, eleDeg, gainDB, delayMs, lpHz, hpHz, spread];
