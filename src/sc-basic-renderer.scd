@@ -26,11 +26,10 @@
 		~aux;
 		~satieSrcPath;
 
-		// TODO try catch
 		~makeSynthDef = {
 			| self,
 			name,
-			srcSymbol, srcToBusses = #[],
+			srcSymbol, srcPreToBusses = #[], srcPostToBusses = #[],
 			spatSymbolArray, firstOutputIndexes = #[0],
 			paramsMapper = \defaultMapper,
 			synthArgs = #[] |
@@ -44,14 +43,15 @@
 				},
 				{
 					dictionary = self.pluginLoader.effectPlugins;
-					self.effectSynthDef.add(name.asSymbol);
+					self.effectSynthDef.add(name.asSymbol);  // ? this needs to be figured out
 				}
 			); //  endif
 			// Factory
 			self.synthDefFactory.makeSynthDef(
 				/*name:*/ name,
 				/*src:*/ dictionary.at(srcSymbol),
-				/*srcToBusses:*/ srcToBusses,
+				/*srcPreToBusses:*/ srcPreToBusses,
+				/*srcPostToBusses:*/ srcPostToBusses,
 				/*spatializers:*/ spatSymbolArray.collect({ arg item, i;
 					self.pluginLoader.spatPlugins.at(item)}),
 				/*firstOutputIndexes:*/ firstOutputIndexes,
@@ -84,7 +84,6 @@
 
 		~makeKamikaze = { | self, name, synthDefName, group = \default, synthArgs = #[] |
 			var synth = Synth(synthDefName ++ "_kamikaze", args: synthArgs, target: self.satieGroups[group], addAction: \addToHead );
-			// self.satieGroupInstances[group].put(name, synth);
 			synth;
 		};
 

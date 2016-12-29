@@ -13,30 +13,36 @@
 
 (
 ~scbrFactory = {
-	var e = Environment.make({  // scbrFactory namespace
-		// function ~make
-		// make a source, n listeners and link them as as follows:
+	var e = Environment.make({
+
+		// Method ~makeSynthDef makes a source, n listeners and link them as follow:
 		//         /--> spatilizer 1
 		//     src ---> ...
 		//         \--> spatializer n
-		// a call to function ~make will create a SynthDef and add it to the server
+		// a call will create a SynthDef and add it to the server.
 		//
-		// @name            the generated SynthDef name
-		// @src             a function the will output a mono signal
-		// @preBusArray    send raw src to busses which indexes are in the array
-		// @destfunArray    an array of function reading the mono signal
-		//                  from the source and write computed signals to outbus
-		// @outBusArray   position of the first bus to write
+		// Method parameters:
+		// @name                  the generated SynthDef name
+		// @src                   a function the will output a mono signal
+		// @preBusArray           send raw src to busses which indexes are in the array
+		// @ppostBusArray         send mixed-to-mono sound source to busses which indexes are in the array
+		// @spatializerArray      an array of function reading the mono signal
+		//                        from the source and write computed signals to outbus
+		// @firstOutputIndexArray position of the first bus to write
+		// @paramsMapper          a mapper function that handle and map spatialiser parameters
+		// @synthArgs             set different default values for parameters
+
 		~makeSynthDef = {| self,
 			name,
 			src,
 			preBusArray = #[],
+			postBusArray = #[],
 			spatializerArray,
 			firstOutputIndexArray = #[0],
             paramsMapper,
 			synthArgs = #[] |
 			SynthDef(name,
-				{ | synth_gate = 1, preBus_gainDB = 0 |
+				{ | synth_gate = 1, preBus_gainDB = 0, postBus_gainDB = 0  |
 					var in, env, out, mapped;
 					// install first the mapper with spatialization parameters, allowing it to take control
 					// over all defined parameter
@@ -50,14 +56,24 @@
 						Out.ar(item, preBus_gainDB.dbamp * env * in);
 					};
 					// in -> dest
-					spatializerArray.do{ arg item, i;
-						var out = SynthDef.wrap(item, prependArgs: [in] ++ mapped);
-						Out.ar(firstOutputIndexArray.wrapAt(i), env * out);
+						// collecting spatializers
+					out = Array.newClear(spatializerArray.size());
+					spatializerArray.do { arg item, i;
+						out.put(i, env * SynthDef.wrap(item, prependArgs: [in] ++ mapped));
+					};
+					    // sending sum of first spatializer to the post busses
+					postBusArray.do { arg item;
+						Out.ar(item, postBus_gainDB.dbamp * env * Mix.new(out.at(0)));
+					};
+					    // sending to out
+					spatializerArray.do { arg item, i;
+						Out.ar(firstOutputIndexArray.wrapAt(i), out.at(i));
 					}
 			}).add;
+
 			// create a kamikaze shadow
 			SynthDef(name ++ "_kamikaze",
-				{ | synth_gate = 1, preBus_gainDB = 0  |
+				{ | synth_gate = 1, preBus_gainDB = 0, postBus_gainDB = 0  |
 					var in, env, out, mapped;
 					// install first the mapper with spatialization parameters, allowing it to take control
 					// over all defined parameter
@@ -72,9 +88,18 @@
 						Out.ar(item, preBus_gainDB.dbamp * env * in);
 					};
 					// in -> dest
-					spatializerArray.do{ arg item, i;
-						var out = SynthDef.wrap(item, prependArgs: [in] ++ mapped);
-						Out.ar(firstOutputIndexArray.wrapAt(i), env * out);
+						// collecting spatializers
+					out = Array.newClear(spatializerArray.size());
+					spatializerArray.do { arg item, i;
+						out.put(i, env * SynthDef.wrap(item, prependArgs: [in] ++ mapped));
+					};
+					   // sending sum of first spatializer to the post busses
+					postBusArray.do { arg item;
+						Out.ar(item, postBus_gainDB.dbamp * env * Mix.new(out.at(0)));
+					};
+					   // sending to out
+					spatializerArray.do { arg item, i;
+						Out.ar(firstOutputIndexArray.wrapAt(i), out.at(i));
 					}
 			}).add;
 		};
