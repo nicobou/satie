@@ -13,3 +13,5 @@
 
 synths = []
 active = False
+destination = "localhost"
+port = 18032

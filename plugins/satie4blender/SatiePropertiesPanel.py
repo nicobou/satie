@@ -1,5 +1,6 @@
 import bpy
 from . import control
+from . import properties
 
 class SatieProperties(bpy.types.Panel):
     bl_space_type = "PROPERTIES"

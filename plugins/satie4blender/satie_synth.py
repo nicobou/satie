@@ -16,6 +16,7 @@ import liblo
 import math
 import os
 from . import utils
+from . import properties as props
 
 print("imported satie synth module")
 
@@ -34,7 +35,7 @@ class SatieSynth():
         self.id = id
         self.synth = plugin
         self.group = "default"
-        self.oscaddress = liblo.Address("localhost", 18032)
+        self.oscaddress = liblo.Address(props.destination, props.port)
         self.oscbaseurl = "/SATIE"
         self.oscURI = None
         self.myParent = parent
