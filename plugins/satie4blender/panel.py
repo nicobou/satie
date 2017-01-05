@@ -23,7 +23,7 @@ class ToolsPanel(bpy.types.Panel):
     bl_category = "SATIE"
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
-    bl_options = {'DEFAULT_OPEN'}
+    bl_options = {'DEFAULT_CLOSED'}
 
     def draw_header(self, context):
         layout = self.layout
