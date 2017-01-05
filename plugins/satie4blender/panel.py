@@ -39,10 +39,10 @@ class ToolsPanel(bpy.types.Panel):
 
         row = layout.row()
         row.prop(context.scene, "SatieSources")
-        row = layout.row()
-        row.prop(context.scene, "OSCdestination")
-        row = layout.row()
-        row.prop(context.scene, "OSCport")
+        # row = layout.row()
+        # row.prop(context.scene, "OSCdestination")
+        # row = layout.row()
+        # row.prop(context.scene, "OSCport")
         row = layout.row()
         row.operator("mesh.satie_sound").active = True
 
@@ -95,14 +95,14 @@ def initToolsProperties():
         name = "OSC destination",
         description = "hostname or IP address of SATIE server",
         default = "localhost",
-        set = control.setOSCdestination
+        update = control.setOSCdestination
     )
 
     bpy.types.Scene.OSCport = bpy.props.IntProperty(
         name = "OSC port",
         description = "OSC port",
         default = 18032,
-        set = control.setOSCport
+        update = control.setOSCport
     )
 
 

@@ -13,5 +13,5 @@
 
 synths = []
 active = False
-destination = "localhost"
+destination = "10.10.30.251"
 port = 18032
