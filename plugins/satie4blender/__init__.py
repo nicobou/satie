@@ -28,6 +28,7 @@ if "bpy" in locals():
     imp.reload(panel)
 else:
     from . import panel
+    from . import SatiePropertiesPanel
 
 import bpy
 
