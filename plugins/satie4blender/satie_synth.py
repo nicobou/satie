@@ -53,7 +53,8 @@ class SatieSynth():
         liblo.send(self.oscaddress, self.oscbaseurl, "create", self.id, self.synth)
 
     def deleteNode(self):
-        liblo.send(self.oscaddress, self.oscURI, "delete")
+        oscURI = os.path.join(self.oscbaseurl, self.group, self.id)
+        liblo.send(self.oscaddress, oscURI, "delete")
 
     def set(self, prop, val):
         oscURI = os.path.join(self.oscbaseurl, self.group, self.id)
