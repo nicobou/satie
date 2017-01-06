@@ -57,15 +57,15 @@ def getSatieSendCtl(self):
 def setSatieSendCtl(self, value):
     props.active = value
     # print(props.active)
-    return None
 
 def setSatieHP(self, value):
     print("HighPass ", self.satieID, value)
 
-def setOSCdestination(self, host):
-    props.destination = host
-    return None
+def setOSCdestination(self, context):
+    print ("setting host to ", context.scene.OSCdestination)
+    destination = context.scene.OSCdestination
+    props.destination = destination
 
-def setOSCport(self, port):
+def setOSCport(self, context):
+    port = context.scene.OSCport    
     props.port = port
-    return None
