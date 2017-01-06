@@ -84,10 +84,18 @@ class SatieSynth():
         
         
     def _getLocation(self):
-        camlocation = bpy.data.objects['Camera'].location
+        cam_world_matrix = bpy.data.objects['Camera'].matrix_world
+        cam_world_matrix.inverted()
+        
+        # world_matrix of cam
+        # world_matrix of prent
+        # multiply
+        # 
 
         parent = self._getParent()
-        location = parent.location - camlocation
+        parent_world_matrix = parent.matrix_world
+        transf = cam_world_matrix * parent_world_matrix
+        location = transf.translation
         return location
 
     def _getParent(self):
