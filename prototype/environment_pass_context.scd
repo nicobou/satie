@@ -1,5 +1,5 @@
 (
-~satieOSCMaker = { | rootPath = "/SATIE", port = 18032 |
+~satieOSCMaker = { | rootPath = "/satie", port = 18032 |
 	var rootURI = rootPath;
 	var oscPort = port;
 	var e = Environment.make({
@@ -37,7 +37,7 @@
 
 	e.know = true;
 	postf("passed osc env: %\n", osc);
-	osc.newOSC(\satieOSC, e['coreCallback'], "/SATIE");
+	osc.newOSC(\satieOSC, e['coreCallback'], "/satie");
 	e;
 };
 )
@@ -46,6 +46,6 @@
 ~protocol = ~oscProtocol.value(~osc);
 /*
 and then from command line:
-oscsend localhost 18032 /SATIE ss create synth
+oscsend localhost 18032 /satie ss create synth
 */
 

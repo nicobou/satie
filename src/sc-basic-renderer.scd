@@ -13,7 +13,7 @@
 
 
 (
-~scbrMaker = { | numAudioAux = 0, satieSrcPath, oscRxPort = 18032 |
+~scbrMaker = { | numAudioAux = 0, satieSrcPath|
 	var e = Environment.make({
 		// TODO use try catch with this
 		~pluginLoader;

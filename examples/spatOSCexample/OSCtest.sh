@@ -1,7 +1,9 @@
 #!/bin/bash
+OSCPORT=18032
 
 # will create a node using the "default" plugin
 clear
+oscsend localhost $OSCPORT /satie/rendererCtl sf setOutputDB -11
 sleep 2
 oscsend localhost 18032 /spatosc/core ss createSource mySound
 clear;  echo CREATE SOURCE NODE mySound

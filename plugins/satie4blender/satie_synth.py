@@ -36,7 +36,7 @@ class SatieSynth():
         self.synth = plugin
         self.group = "default"
         self.oscaddress = liblo.Address(props.destination, props.port)
-        self.oscbaseurl = "/SATIE"
+        self.oscbaseurl = "/satie"
         self.oscURI = None
         self.myParent = parent
         self.selected = False

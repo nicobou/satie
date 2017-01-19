@@ -38,6 +38,21 @@ s.waitForBoot{
 	if (~oscInterface == nil,{
 		~oscInterface = ~spatOSCMaker.value();
 	});
+
+		// instantiate a renderer control object
+	~srCtl = ~satieRendererCtlMaker.value(~scbr);
+
+	// now connect OSC RX message callbacks for rendererControl object
+
+	// to be safe,  remove any previous OSC  callbacks  (if any)
+	~osc.removeRendererCtlOSC.value();
+
+	// create OSC callbacks to control audio renderer
+	// e.g.  /satie/rendererCtl/setOutputDB -12
+	~osc.makeRendererCtlOSC( ~srCtl['satieRendererCallback'] );
+
+
+
 	// instiante the satie4Unity protocol
 	if (~satie4unity == nil,{
 		~satie4unity = ~satie4unityprotocol.value(~oscInterface, ~scbr);

@@ -146,8 +146,8 @@
 };*/
 
 // handle any OSC message
-// eg. /SATIE create name - to create a group
-//     /SATIE/default create name - to create an instance of a synth or effect
+// eg. /satie create name - to create a group
+//     /satie/default create name - to create an instance of a synth or effect
 ~coreCallback = { | msg |
 	var url, dest, obj, command, name, synth;
 	url = msg[0].asString.split;
@@ -252,7 +252,7 @@
 			// free all OSC
 			OSCdef.freeAll;
 			// re-create satie system level OSC
-			~osc.newOSC(\satieOSC, ~coreCallback, "/SATIE");
+			~osc.newOSC(\satieOSC, ~coreCallback, "/satie");
 		}
 	);
 };
@@ -265,7 +265,7 @@
 				\system,
 				{
 					\nope;
-					postf("Wrong system address, expected /SATIE, got %\n", url[0]);
+					postf("Wrong system address, expected /satie, got %\n", url[0]);
 					nil;
 				}
 			);
@@ -277,5 +277,5 @@
 };
 
 s.sync;
-~osc.newOSC(\satieOSC, ~coreCallback, "/SATIE");
+~osc.newOSC(\satieOSC, ~coreCallback, "/satie");
 

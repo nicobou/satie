@@ -6,12 +6,11 @@
 #X obj -57 230 s \$0-toSatie;
 #X obj 314 262 OSCtx;
 #X obj 373 250 tgl 36 0 empty empty onLineStatus 40 7 0 16 -262144
--1 -1 14792 14792;
+-1 -1 18676 18676;
 #X msg 290 42 connect localhost 18032;
 #X obj 334 146 r \$0-toSatie;
 #X obj 288 8 loadbang;
 #X obj 31 615 s \$0-toSatie;
-#X obj 334 188 OSCprepend /satie/rendererCtl;
 #X msg -56 189 freeSynths default;
 #X msg 31 436 setProjectDir /Users/zack/src/aquakhoria/AquaKhoria_UnityProject/Assets/StreamingAssets
 ;
@@ -21,10 +20,10 @@
 -66577 0;
 #X floatatom 852 152 5 0 0 0 - - -;
 #X obj 856 131 hsl 128 15 -40 0 0 0 empty empty empty 0 0 0 10 -262144
--1 -1 0 1;
+-1 -1 5700 1;
 #X floatatom 917 220 5 0 0 0 - - -;
 #X obj 919 195 hsl 128 15 -66 18 0 0 empty empty empty 0 0 0 10 -262144
--1 -1 0 1;
+-1 -1 4300 1;
 #X obj 753 57 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
 #X obj 802 106 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
@@ -35,22 +34,23 @@
 #X msg 820 98 setOutputMute \$1;
 #X msg 774 50 setOutputDIM \$1;
 #X msg 322 84 connect 192.168.0.13 18032;
+#X obj 334 188 OSCprepend /satie/rendererCtl;
 #X connect 3 0 4 0;
 #X connect 5 0 3 0;
-#X connect 6 0 9 0;
+#X connect 6 0 25 0;
 #X connect 7 0 5 0;
-#X connect 9 0 3 0;
-#X connect 10 0 2 0;
+#X connect 9 0 2 0;
+#X connect 10 0 8 0;
 #X connect 11 0 8 0;
-#X connect 12 0 8 0;
-#X connect 14 0 22 0;
-#X connect 15 0 14 0;
-#X connect 16 0 21 0;
-#X connect 17 0 16 0;
-#X connect 18 0 24 0;
-#X connect 19 0 23 0;
-#X connect 21 0 20 0;
-#X connect 22 0 20 0;
-#X connect 23 0 20 0;
-#X connect 24 0 20 0;
+#X connect 13 0 21 0;
+#X connect 14 0 13 0;
+#X connect 15 0 20 0;
+#X connect 16 0 15 0;
+#X connect 17 0 23 0;
+#X connect 18 0 22 0;
+#X connect 20 0 19 0;
+#X connect 21 0 19 0;
+#X connect 22 0 19 0;
+#X connect 23 0 19 0;
+#X connect 24 0 3 0;
 #X connect 25 0 3 0;

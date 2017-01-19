@@ -12,7 +12,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (
-~satieOSCMaker = { | rootPath = "/SATIE", port = 18032 |
+~satieOSCMaker = { | rootPath = "/satie", port = 18032 |
 	var rootURI = rootPath;
 	var oscPort = port;
 	var e = Environment.make({

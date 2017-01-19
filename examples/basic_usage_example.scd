@@ -12,10 +12,11 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (
+
 Exception.debug = true;
 Server.supernova;
 o = Server.local.options;
-o.numOutputBusChannels = 8;
+o.numOutputBusChannels = 2;
 o.memSize = 2**20;
 o.blockSize = 2048;
 // s.reboot;
@@ -63,7 +64,23 @@ s.waitForBoot {
 	~scbr.makeSynthDef(\snd1, \sndFile, [], [], [\stereoPanner], [0], \defaultMapper, [~playBuffers[\bleh].bufnum]);
 	~scbr.makeSynthDef(\snd2, \sndFile, [], [], [\stereoPanner], [0], \defaultMapper, [~playBuffers[\alsaTest].bufnum]);
 	// be sure the synthDef is compiled on the server
-	~osc = ~satieOSCMaker.value();
+
+	// instantiate a renderer control object
+	~srCtl = ~satieRendererCtlMaker.value(~scbr);
+
+	~osc = ~satieOSCMaker.value();   // create an OSC RX message mapper object receiveing on port 18032 by default
+
+
+	// now connect OSC RX message callbacks for rendererControl object
+
+	// to be safe,  remove any previous OSC  callbacks  (if any)
+	~osc.removeRendererCtlOSC.value();
+
+	// create OSC callbacks to control audio renderer
+	// e.g.  /satie/rendererCtl/setOutputDB -12
+	~osc.makeRendererCtlOSC( ~srCtl['satieRendererCallback'] );
+
+
 	s.sync;
 	(~rootSrcPath ++ "/protocols/satieOSC.scd").load;
 	s.sync;

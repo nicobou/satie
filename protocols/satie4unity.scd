@@ -1379,7 +1379,7 @@ for debugguing
 	"satie4unityprotol loaded".inform;
 	e.know = true;
 	postf("passed osc env: %\n", osc);
-	// osc.newOSC(oscID, e['coreCallback'], "/SATIE");
+	// osc.newOSC(oscID, e['coreCallback'], "/satie");
 	osc.removeBasicRendererOSC(\createSoundSource);
 
 	osc.newOSC(\createSoundSource, e['coreCallback'], "/spatosc/core");

@@ -58,7 +58,7 @@
 // note: any OSC bindings of previous instances are destoyed before creation of a new instance
 // so it is safe to call repeatedly
 
-~satieRendererCtl = { | satieContext, oscContext |
+~satieRendererCtlMaker = { | satieContext, oscContext |
 	var satie = satieContext;
 	var oscAddress = "/satie/rendererCtl";
 
@@ -185,9 +185,6 @@
 	}); // Environment.make
 	"satueRendererCtl loaded".inform;
 	e.know = true;
-		oscContext.removeRendererCtlOSC.value(); // remove any previous OSC  links to callback
-		oscContext.makeRendererCtlOSC( e['satieRendererCallback'] );   // create OSC link to callback
-
 	e;
 };
 
