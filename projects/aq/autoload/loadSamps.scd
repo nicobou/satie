@@ -1,10 +1,8 @@
 // reads soundfiles into sound buffers using same names
 // this file must be evaluated AFTER main.scd and projectName.scd
+// global:  ~thisProjectSoundDir is defined in projectName.scd
 
-
-//~aqSoundDir="~/".standardizePath ++"Dropbox/Unity3D/projects_unity5/aquaKhoriaShow/Assets/StreamingAssets/sound";
-
-~autoLoadDirCmd = "ls "++~aqSoundDir++"/*.wav "++~aqSoundDir++"/*.aiff "++~aqSoundDir++"/*.aif 2>/dev/null";
+~autoLoadDirCmd = "ls "++~thisProjectSoundDir++"/*.wav "++~thisProjectSoundDir++"/*.aiff "++~thisProjectSoundDir++"/*.aif 2>/dev/null";
 
 
 
@@ -69,36 +67,38 @@ s.waitForBoot {
 
 		switch (sfType,
 
-			"drop",   { ~scbr.makeSynthDef2(sfName.asSymbol++'\:k:rev', \zPsamp1,  [~scbr.aux[~inBus0]], [~listeningFormat],  [0], \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]); }, //  for kamakazis with no clones
+			"drop",   { ~scbr.makeSynthDef(sfName.asSymbol++'\:k:rev', \zPsamp1,  [~scbr.aux[~inBus0]],  [],[~listeningFormat],  [0], \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]); }, //  for kamakazis with no clones
 
 			"syncSampZombies", {
 				inform("loadSamps: MAKING makeSynthDef2 name:"++sfName.asSymbol++'\:k');
 
-				~scbr.makeSynthDef2(sfName.asSymbol++'\:k', \syncSamp1,  [], [~listeningFormat],  [0], \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]);
-				~scbr.makeSynthDef2(sfName.asSymbol++'\:k:rev', \syncSamp1,  [~scbr.aux[~inBus0]], [~listeningFormat],  [0], \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]);
-				//~scbr.makeSynthDef(sfName.asSymbol, \syncSamp1, [~listeningFormat], [0],  [], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
-				//~scbr.makeSynthDef(sfName.asSymbol++'\:rev', \syncSamp1, [~listeningFormat], [0],  [~scbr.aux[~inBus0]], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+				~scbr.makeSynthDef(sfName.asSymbol++'\:k', \syncSamp1,  [], [], [~listeningFormat],  [0], \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+				~scbr.makeSynthDef(sfName.asSymbol++'\:k:rev', \syncSamp1,  [~scbr.aux[~inBus0]], [], [~listeningFormat],  [0], \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+
 			}, //  for kamakazis with no clones
 
 			"3chLooper", {
 				inform("loadSamps: MAKING makeSynthDef(s) for name:"++sfName.asSymbol);
 
 				// no reverb version
-				~scbr.makeSynthDef(sfName.asSymbol,   "3chLooper".asSymbol  , [~listeningFormat], [0],  [], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+				~scbr.makeSynthDef(sfName.asSymbol,   "3chLooper".asSymbol  ,[], [], [~listeningFormat], [0],  \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+
+				// note order:   name, synthName, fxBusPre, fxBisPost, listenerName, outBusNo, mapName, optArgs
+				//~scbr.makeSynthDef("3chBellyA.wav".asSymbol,   "3chLooper".asSymbol, [], [], [~listeningFormat], [0],  \defaultMapper, [~aqPlayBuffers["3chBellyA.wav".asSymbol].bufnum] );
 
 				// version with  rev send, referenced by   pluginName:rev  inbus N
-				~scbr.makeSynthDef(sfName.asSymbol++'\:rev',  "3chLooper".asSymbol     , [~listeningFormat], [0],  [~scbr.aux[~inBus0]], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
-				~scbr.makeSynthDef(sfName.asSymbol++'\:rev1',  "3chLooper".asSymbol     , [~listeningFormat], [0],  [~scbr.aux[~inBus1]], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+				~scbr.makeSynthDef(sfName.asSymbol++'\:rev',  "3chLooper".asSymbol,  [~scbr.aux[~inBus0]], [], [~listeningFormat], [0],  \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+				~scbr.makeSynthDef(sfName.asSymbol++'\:rev1',  "3chLooper".asSymbol, [~scbr.aux[~inBus1]], [], [~listeningFormat], [0],  \defaultMapper,  [~aqPlayBuffers[sfName.asSymbol].bufnum]);
 			},
 			"6chLoopBuff", {
 				inform("loadSamps: MAKING makeSynthDef(s) for name:"++sfName.asSymbol);
 
 				// no reverb version
-				~scbr.makeSynthDef(sfName.asSymbol,   "6chLoopbuff".asSymbol  , [~listeningFormat], [0],  [], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+				~scbr.makeSynthDef(sfName.asSymbol,   "6chLoopbuff".asSymbol, [], [],[~listeningFormat], [0],  \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]);
 
 				// version with  rev send, referenced by   pluginName:rev  inbus N
-				~scbr.makeSynthDef(sfName.asSymbol++'\:rev',  "6chLoopbuff".asSymbol     , [~listeningFormat], [0],  [~scbr.aux[~inBus0]], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
-				~scbr.makeSynthDef(sfName.asSymbol++'\:rev1',  "6chLoopbuff".asSymbol     , [~listeningFormat], [0],  [~scbr.aux[~inBus1]], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+				~scbr.makeSynthDef(sfName.asSymbol++'\:rev',  "6chLoopbuff".asSymbol,  [~scbr.aux[~inBus0]] ,  [], [~listeningFormat],  [0], \defaultMapper,  [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+				~scbr.makeSynthDef(sfName.asSymbol++'\:rev1',  "6chLoopbuff".asSymbol,  [~scbr.aux[~inBus1]] ,  [], [~listeningFormat], [0],  \defaultMapper,  [~aqPlayBuffers[sfName.asSymbol].bufnum]);
 			},
 
 
@@ -107,19 +107,19 @@ s.waitForBoot {
 				//postf("FX buffer at: %", ~scbr.aux[~inBus0]);
 
 				// create sample buffer playback with no rev send
-				~scbr.makeSynthDef(sfName.asSymbol, \sndBuffer, [~listeningFormat], [0],  [], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+				~scbr.makeSynthDef(sfName.asSymbol, \sndBuffer, [], [],[~listeningFormat], [0], \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]);
 
 				// create sample buffer playback with  rev send, referenced by   pluginName:rev
-				~scbr.makeSynthDef(sfName.asSymbol++'\:rev', \sndBuffer, [~listeningFormat], [0],  [~scbr.aux[~inBus0]], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
-				~scbr.makeSynthDef(sfName.asSymbol++'\:rev1', \sndBuffer, [~listeningFormat], [0],  [~scbr.aux[~inBus1]], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+				~scbr.makeSynthDef(sfName.asSymbol++'\:rev', \sndBuffer,  [~scbr.aux[~inBus0]],  [],[~listeningFormat], [0],   \defaultMapper,  [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+				~scbr.makeSynthDef(sfName.asSymbol++'\:rev1', \sndBuffer,  [~scbr.aux[~inBus1]],   [],[~listeningFormat], [0],  \defaultMapper , [~aqPlayBuffers[sfName.asSymbol].bufnum]);
 			},
 			"sndBuff2", {
 
 				//postf("FX buffer at: %", ~scbr.aux[~inBus0]);
 
 				// create sample buffer playback with no rev send
-				~scbr.makeSynthDef(sfName.asSymbol, \sndBuffer2, [~listeningFormat], [0],  [], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
-				~scbr.makeSynthDef(sfName.asSymbol++'\:rev', \sndBuffer2, [~listeningFormat], [0],  [~scbr.aux[~inBus0]], [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+				~scbr.makeSynthDef(sfName.asSymbol, \sndBuffer2,[], [], [~listeningFormat], [0],  \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+				~scbr.makeSynthDef(sfName.asSymbol++'\:rev', \sndBuffer2,[~scbr.aux[~inBus0]] , [], [~listeningFormat], [0],  \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]);
 			}
 
 

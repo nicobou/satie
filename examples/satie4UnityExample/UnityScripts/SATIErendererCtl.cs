@@ -57,7 +57,7 @@ public class SATIErendererCtl : MonoBehaviour
     // builtin choices:  stereo quad five.one seven.one octo dome mono labodome
     private string _outputFormat;
 
-    private string _oscMessage = "/a.renderer";
+    private string _oscMessage = "/satie/rendererCtl";
 
     private OSCTransmitter sender = null;
     private bool connected = false;
@@ -89,7 +89,7 @@ public class SATIErendererCtl : MonoBehaviour
         
         if (!SATIEsetupCS)
         {
-            Debug.LogWarning("SATIErendererCtl.Awake: SATIEsetup class component not found in " + transform.name + " :  Using local address and port");
+            Debug.LogWarning(transform.name + " : " + GetType() +  " Awake(): SATIEsetup class component not found in transform :  Using local address and port");
         }
         else
         {
@@ -99,7 +99,7 @@ public class SATIErendererCtl : MonoBehaviour
         
         try
         {
-            Debug.Log("SATIErendererCtl.Awake: sending to " + address + ":" + port);
+            Debug.Log(transform.name + " : " + GetType() +  " Awake():  sending to " + address + ":" + port);
             connected = true;
             sender = new OSCTransmitter(address, port);
             //thread = new Thread(new ThreadStart(listen));
@@ -107,7 +107,7 @@ public class SATIErendererCtl : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogError("SATIErendererCtl.Awake: OSC failed to connect to " + address + ":" + port + " cannot initialize component");
+            Debug.LogError(transform.name + " : " + GetType() +  " Awake():  OSC failed to connect to " + address + ":" + port + " cannot initialize component");
             Debug.LogError(e.Message);
             connected = false;
             sender = null;
@@ -117,7 +117,7 @@ public class SATIErendererCtl : MonoBehaviour
         IPHostEntry hostEntry = Dns.GetHostEntry(localHostName);
         foreach (IPAddress ipAddr in hostEntry.AddressList)
         {
-            Debug.Log("SATIErendererCtl.Awake: MY IP:" + ipAddr.ToString());
+            Debug.Log(transform.name + " : " + GetType() +  " Awake():  MY IP:" + ipAddr.ToString());
         }
 
         _dspState = dspState;
@@ -141,7 +141,7 @@ public class SATIErendererCtl : MonoBehaviour
             return true;
         try
         {
-            Debug.Log("SATIErendererCtl.reconnet2renderer(): sending to " + address + ":" + port);
+            Debug.Log(transform.name + " : " + GetType() +  " reconnet2renderer(): sending to " + address + ":" + port);
             connected = true;
             sender = new OSCTransmitter(address, port);
             //thread = new Thread(new ThreadStart(listen));
@@ -149,7 +149,7 @@ public class SATIErendererCtl : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogError("SATIErendererCtl.reconnet2renderer(): OSC failed to connect to " + address + ":" + port + " cannot initialize component");
+            Debug.LogError(transform.name + " : " + GetType() +  " reconnet2renderer(): OSC failed to connect to " + address + ":" + port + " cannot initialize component");
             Debug.LogError(e.Message);
             connected = false;
             sender = null;
@@ -159,7 +159,7 @@ public class SATIErendererCtl : MonoBehaviour
         IPHostEntry hostEntry = Dns.GetHostEntry(localHostName);
         foreach (IPAddress ipAddr in hostEntry.AddressList)
         {
-            Debug.Log("SATIErendererCtl.reconnet2renderer(): MY IP:" + ipAddr.ToString());
+            Debug.Log(transform.name + " : " + GetType() +  " reconnet2renderer(): MY IP:" + ipAddr.ToString());
         }
         return true;
     }
@@ -211,7 +211,7 @@ public class SATIErendererCtl : MonoBehaviour
 
             if (!path.Contains("Dropbox") || (!path.Contains("Users") && !path.Contains("Utilisateurs")))
             {
-                Debug.LogWarning("SATIErendererCtl.updateProjectDir: no DROPBOX and/or /Users directory found, setting project path to default");
+                Debug.LogWarning(transform.name + " : " + GetType() +  " updateProjectDir(): no DROPBOX and/or /Users directory found, setting project path to default");
                 return;
             }
 
@@ -230,7 +230,7 @@ public class SATIErendererCtl : MonoBehaviour
 
             if (pathItems.Length < usersIndex + 3)   // /users/name/relativestuff.....
             {
-                Debug.LogError("SATIErendererCtl.updateProjectDir: poorly formated directory path (BUG??), setting project path to default");
+                Debug.LogError(transform.name + " : " + GetType() +  " updateProjectDir(): poorly formated directory path (BUG??), setting project path to default");
                 return;
             }
 
@@ -339,7 +339,7 @@ public class SATIErendererCtl : MonoBehaviour
         string OSCaddress = "/satie/" + projectName;
         OSCMessage message = new OSCMessage(OSCaddress);
  
-        Debug.Log(transform.name + " " + GetType() + "sending projectMess:    project: " + OSCaddress + "   key: " + key);
+        Debug.Log(transform.name + " " + GetType() + " projectMess()  sending projectMess:    project: " + OSCaddress + "   key: " + key);
 
         message.Append(key);
         sendOSC(message);
@@ -351,7 +351,7 @@ public class SATIErendererCtl : MonoBehaviour
         string OSCaddress = "/satie/" + projectName;
         OSCMessage message = new OSCMessage(OSCaddress);
 
-        Debug.Log(transform.name + " " + GetType() + "sending projectMess:    project: " + OSCaddress + "   key: " + key);
+        Debug.Log(transform.name + " " + GetType() + "projectMess() sending projectMess:    project: " + OSCaddress + "   key: " + key);
         message.Append(key);
         message.Append(val);
         sendOSC(message);
@@ -362,7 +362,7 @@ public class SATIErendererCtl : MonoBehaviour
         string OSCaddress = "/satie/" + projectName;
         OSCMessage message = new OSCMessage(OSCaddress);
 
-        Debug.Log(transform.name + " " + GetType() + "sending projectMess:    project: " + OSCaddress + "   key: " + key);
+        Debug.Log(transform.name + " " + GetType() + " projectMess() sending projectMess:    project: " + OSCaddress + "   key: " + key);
         message.Append(key);
         message.Append(val);
         sendOSC(message);
@@ -483,7 +483,7 @@ public class SATIErendererCtl : MonoBehaviour
         }
         else
         {
-            Debug.LogError("SATIErendererCtl.sendOSC: OSC not initialized, can't send message");
+            Debug.LogError(transform.name + " : " + GetType() +  " sendOSC(): OSC not initialized, can't send message");
             return(bytesSent);
         }
     }

@@ -20,18 +20,6 @@
 ~myProjectFIleName = "ballJam.scd";
 
 
-~thisDir = thisProcess.nowExecutingPath.dirname ;
-
-// Only edit this path to point to the sate root if you have moved location of this example project directory to a different level of the satie distribution directory tree
-// by default it is: ~rootSrcPath = ~thisDir++ "/../..";
-
-~rootSrcPath = ~thisDir++ "/../..";
-
-
-// set these flags depending on your environment
-~outAudioDev = nil;
-~superNovaFlag = true;
-
 
 // defaults to stereo
 ~listeningFormat = \stereoListener;    // you can also set this to  \domeVBAP  or  \labodomeVBAP  or   \octoVBAP
@@ -69,9 +57,9 @@ if  (thisProcess.argv.size >= 1,
  			~listeningFormat = \stereoListener;  	}
  		);
  		postf("% main.scd : parsing comand line arg:  setting listening format to %\n", ~myProjectFIleName, ~listeningFormat);
-
 },
-// else check environment variable for listening format
+
+	// else check environment variable for listening format
 {
 // check to see if the BASH environment variable is set to either "sato" or "labodome"
 (
@@ -102,19 +90,27 @@ if ( l != nil,
 
 p.close;                    // close the pipe to avoid that nasty buildup
 );
+
 });
 
 
 
 
 
-
-
-
+// set these flags depending on your environment
+~outAudioDev = nil;
+~superNovaFlag = true;
 
 
 
 // NO NEED TO MODIFY ANYTHING ELSE BELOW
+
+~thisDir = thisProcess.nowExecutingPath.dirname ;
+
+// Only edit this path to point to the sate root if you have moved location of this example project directory to a different level of the satie distribution directory tree
+// by default it is: ~rootSrcPath = ~thisDir++ "/../..";
+
+~rootSrcPath = ~thisDir++ "/../..";
 
 
 
@@ -226,8 +222,14 @@ if (~meter == nil,  { ~plotTree=s.meter;});
 
 
 // specify files to be loaded:
-// note;  project file must be first
-~startupfiles = [~thisDir++"/"++~myProjectFIleName, ~rootSrcPath++"/protocols/satie4unity.scd", ~rootSrcPath++"/utils/dacTest.scd"];
+// note;  satie4unity file must be first
+
+
+~startupfiles = [~rootSrcPath++"/protocols/satie4unity.scd", ~thisDir++"/"++~myProjectFIleName];
+
+// add additional files here
+~startupfiles.add(~rootSrcPath++"/utils/dacTest.scd");
+
 
 // next:  locate any .scd files in the project's autoload subdir
 ~autoLoadDirCmd = "ls "++thisProcess.nowExecutingPath.dirname++"/autoload/*.scd";
