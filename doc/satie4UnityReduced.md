@@ -38,8 +38,14 @@
 
 /satie/source/update sourceName azimuthRADIANS elevationRADIANS gainDB delayMS  lpHZ  distanceMETERS
 /satie/source/spread  sourceName value  // exponent for incidence effect:  0 = no effect;  1 = normal;   >1 = more intense               
+/satie/source/hpHz  sourceName hpHZ                
+
 
 /satie/process/update processName azimuthRADIANS elevationRADIANS gainDB delayMS  lpHZ  distanceMETERS
 /satie/process/spread  processName value  // exponent for incidence effect:  0 = no effect;  1 = normal;   >1 = more intense               
+
+
+
+
 
 ```
