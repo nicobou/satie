@@ -5,12 +5,12 @@
 
 ```javascript
 
-/satie/scene createSource  nodeName  synthDefName<uriPath>   groupName<optional>   // default group name is 'default'
+/satie/scene createSource  nodeName  synthDefName<uriPath>   groupName<opt>   // default group name is 'default'
 /satie/scene createGroup nodeName
 /satie/scene deleteNode nodeName
 /satie/scene clear
 
-/satie/scene/prop keyword value(s) (string, float or int)     // to set scene parameters like 'dspState'  or 'listenerFormat' etc
+/satie/scene/prop keyword value (string, float or int)     // to set scene parameters like 'dspState'  or 'listenerFormat' etc
 
 
 ```
@@ -21,12 +21,12 @@
 ```javascript
 
 // /satie/source/uri sourceName type://name  (e.g.  plugin://synthDefName )
-/satie/source/prop sourceName keyword value(string, float or int)     
+/satie/source/prop sourceName keyword value (string, float or int)     
 /satie/source/state sourceName value  // 1=DSP_active 0=DSP_inactive
 /satie/source/event sourceName eventName <opt> atom1 atom2...atomN    
 
 // /satie/group/uri groupName type://name  (e.g.  plugin://synthDefName )
-/satie/group/prop groupName keyword value(string, float or int)     
+/satie/group/prop groupName keyword value (string, float or int)     
 /satie/group/state groupName value  // 1=DSP_active 0=DSP_inactive
 /satie/group/event groupName eventName <opt> atom1 atom2...atomN    
 
