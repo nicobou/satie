@@ -26,12 +26,12 @@
 /satie/source/event sourceName eventName <opt> atom1 atom2...atomN    
 
 // /satie/group/uri groupName type://name  (e.g.  plugin://synthDefName )
-/satie/group/prop groupName keyword value (string, float or int)     
+/satie/group/prop groupName keyword value ( string, float or int )     
 /satie/group/state groupName value  // 1=DSP_active 0=DSP_inactive
 /satie/group/event groupName eventName <opt> atom1 atom2...atomN    
 
 // /satie/process/uri processName type://name  (e.g.  process://processType )
-/satie/process/prop processName keyword value(string, float or int)     
+/satie/process/prop processName keyword value ( string, float or int )     
 /satie/process/state processName value  // 1=active 0=inactive
 /satie/process/event processName eventName <opt> atom1 atom2...atomN    
 
