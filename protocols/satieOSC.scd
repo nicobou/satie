@@ -261,7 +261,7 @@
 	// url.postln;
 	switch(url.size,
 		1, {
-			if(url[0] == "SATIE",
+			if(url[0] == "satie",
 				\system,
 				{
 					\nope;
