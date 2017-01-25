@@ -54,6 +54,8 @@ for debugguing
 
 		~allProcesses = ();    // initialize list for processes to register themselves;
 
+
+		/*
 		// ~basicRendererCallback = { "basicRendererCallback called".inform };
 		~basicRendererCallback = {
 			arg msg;
@@ -156,7 +158,7 @@ for debugguing
 		};
 
 
-
+*/
 
 		~coreCallback = { arg msg;
 			var command;
@@ -1379,13 +1381,13 @@ for debugguing
 	"satie4unityprotol loaded".inform;
 	e.know = true;
 	postf("passed osc env: %\n", osc);
-	// osc.newOSC(oscID, e['coreCallback'], "/satie");
-	osc.removeBasicRendererOSC(\createSoundSource);
 
-	osc.newOSC(\createSoundSource, e['coreCallback'], "/spatosc/core");
+	// connect to OSC
+	osc.removeBasicRendererOSC(\createSoundSource);  // disconnect any previous handlers
+	osc.newOSC(\createSoundSource, e['coreCallback'], "/spatosc/core");   // connect handler
 
-	osc.removeBasicRendererOSC(\brOSC);
-	osc.basicRendererOSC(\brOSC,e['basicRendererCallback']);
+	//osc.removeBasicRendererOSC(\brOSC);
+	//osc.basicRendererOSC(\brOSC,e['basicRendererCallback']);
 	e;
 };
 

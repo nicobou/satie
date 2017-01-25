@@ -1,6 +1,7 @@
 
 
-
+// this file must be evaluated AFTER main.scd and projectName.scd
+// globals:  ~thisProjectSoundDir and  ~thisProjectResourcePath   are defined in projectName.scd
 
 
 // this file defines  a process class, which is ONLY used by source nodes that have that have a URI of type:   "process" , e.g:      uri://process  "zombieTrig1"
@@ -11,6 +12,9 @@
 //  FOR USE WITH SYNTHDEFS that generate delayed random offsets for clones
 
 // required:  set up class struct
+
+//
+
 
 ~zombieTrig1= Environment[
 	// required fields
@@ -34,6 +38,7 @@
 	// playback state
 	'transposition' -> 0,
 	'synthCountMax' ->  200,    //this should be the value that would break the machine for the synthdef
+	'csvMidiFileDir' ->  ~thisProjectResourcePath
 ];
 
 // required: set these variables to the process name;
@@ -355,7 +360,7 @@ if (~zombieTrig1_pitchSequences == nil,
 
 					if (csvmidifilePath[0] != $/,
 						{
-							csvmidifilePath = ~satie4unity.projectDirectory++"/"++csvmidifilePath;
+							csvmidifilePath = self.csvMidiFileDir++"/"++csvmidifilePath;
 					});
 
 					if (self.debugFlag != 0,

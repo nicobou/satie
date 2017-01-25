@@ -14,7 +14,10 @@
 (
 ~spatOSCMaker = {| port = 18032 |
 	var oscPort = port;
+	var rootURI = "/satie";
+
 	e = Environment.make({
+
 
 		// main OSC method
 		~newOSC = {|self, id, cb, path|
@@ -88,7 +91,8 @@
 			self.deleteOSC(connectionName ++ \hpHz);
 		};
 
-				//  /a.renderer    for control messages to the renderer
+/*
+		//  /a.renderer    for control messages to the renderer
 		~basicRendererOSC = {|self, id, cb|
 				//path.postln;
 			self.newOSC(id, cb,  "/a.renderer");
@@ -98,7 +102,17 @@
 		~removeBasicRendererOSC = {|self, id|
 			self.deleteOSC(id);
 		};
+*/
 
+	   // create  OSC callback for satieRendererCtl
+		~makeRendererCtlOSC = {|self, cb|
+			self.newOSC(\rendererCtl, cb,  rootURI +/+ "rendererCtl");
+		};
+
+		// remove  OSC callback for satieRendererCtl.
+		~removeRendererCtlOSC = {|self|
+			self.deleteOSC(\rendererCtl);
+		};
 
 
 	});
