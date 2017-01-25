@@ -1,4 +1,4 @@
-## H2 Inbound OSC Messages
+# H2 Inbound OSC Messages
 ## H2 Scene Messages
 
 
@@ -9,6 +9,9 @@
 /satie/scene createGroup nodeName
 /satie/scene deleteNode nodeName
 /satie/scene clear
+
+/satie/scene/prop keyword value(s) (string, float or int)     // to set scene parameters like 'dspState'  or 'listenerFormat' etc
+
 
 ```
 
