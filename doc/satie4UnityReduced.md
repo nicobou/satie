@@ -7,6 +7,7 @@
 
 /satie/scene createSource  nodeName  synthDefName<uriPath>   groupName<opt>   // default group name is 'default'
 /satie/scene createGroup nodeName
+/satie/scene createProcess nodeName
 /satie/scene deleteNode nodeName
 /satie/scene clear
 
