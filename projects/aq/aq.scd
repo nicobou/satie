@@ -146,20 +146,20 @@ s.waitForBoot{
 					});
 
 				},
-
-			/*	,
-				'setOutputTrimDB',
-				{
-					if ( (msg.size < 3 ) ,
-						{"~aquakhoriaCallback: setOutputTrimDB missing value".warn;},
-						// else
+						'setProjectDir',
 						{
-							//e.outputTrimDB = msg[2];
-							//e.volume.volume = e.outputTrimDB + e.outputDB;
-						}
-					)
-				},
-				*/
+							if ( (msg.size != 3 ) ,
+								{"~aquakhoriaCallback: setProjectDir bad arg count: expecting 'setProjectDir projectDirPath' ".warn;},
+								// else
+								{
+									~satie4unity.projectDirectory = msg[2];
+
+									//e.projectDirectory.postln;
+									postf("~basicRendererCallback: setProjectDir: % \n", ~satie4unity.projectDirectory);
+
+								}
+							)
+						},
 
 			)
 	});

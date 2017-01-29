@@ -21,9 +21,9 @@ Satie4Unity's message specification is inspired from the SPATOSC specification  
 /*
 for debugguing
 
-~satie4unity = ~satie4unityprotocol.value(~oscInterface, ~scbr);
+
+~satie4unity = ~satie4unityprotocol.value(~osc, ~scbr);
 ~satie4unity.debugFlag = true;
-~satie4unity = ~satie4unityprotocol.value(~oscInterface, ~scbr);
 
 */
 
@@ -53,112 +53,6 @@ for debugguing
 		);
 
 		~allProcesses = ();    // initialize list for processes to register themselves;
-
-
-		/*
-		// ~basicRendererCallback = { "basicRendererCallback called".inform };
-		~basicRendererCallback = {
-			arg msg;
-			var command = msg[1];
-			//postf("~basicRendererCallback: command: %, msg: %, \n", command, msg);
-
-			if (msg.size < 2,
-				{"~basicRendererCallback: empty message".warn;
-					postf("~basicRendererCallback MESS LEN: %", msg.size);
-
-				},
-				// else
-				{
-
-					switch (command,
-						'setProjectDir',
-						{
-							if ( (msg.size != 3 ) ,
-								{"~basicRendererCallback: setProjectDir bad arg count: expecting 'setProjectDir projectDirPath' ".warn;},
-								// else
-								{
-									e.projectDirectory = msg[2];
-
-									//e.projectDirectory.postln;
-									postf("~basicRendererCallback: setProjectDir: % \n", e.projectDirectory);
-
-								}
-							)
-						},
-						'setOutputTrimDB',
-						{
-							if ( (msg.size < 3 ) ,
-								{"~basicRendererCallback: setOutputTrimDB missing value".warn;},
-								// else
-								{
-									e.outputTrimDB = msg[2];
-									e.volume.volume = e.outputTrimDB + e.outputDB;
-								}
-							)
-						},
-						'setOutputDB',
-						{
-							if ( (msg.size < 3 ) ,
-								{"~basicRendererCallback: setOutputDB missing value".warn;},
-								// else
-								{
-									e.outputDB = msg[2];
-									e.volume.volume = e.outputTrimDB + e.outputDB;
-								}
-							)
-						},
-						'setOutputDIM',
-						{
-							if ( (msg.size < 3 ) ,
-								{"~basicRendererCallback: setOutputMute missing value".warn;
-									// postf("CREATESOURCE MESS LEN: %", msg.size);
-
-								},
-								// else
-								{
-									if (msg [2] > 0,
-										{  e.volume.volume = -30;  },
-										// else
-										{  e.volume.volume =  e.outputDB + e.outputTrimDB;   });
-								}
-							)
-						},
-						'freeSynths',
-						{
-							if ( (msg.size < 3 ) ,
-								{"~basicRendererCallback: freeSynths missing group name".warn;
-									// postf("freeSynths MESS LEN: %", msg.size);
-
-								},
-								// else
-								{
-									var groupSym = msg [2] .asSymbol;
-
-									satie.satieGroups[groupSym].freeAll;
-									postf("basicRendererCallback: freeing all synths in % group", groupSym);
-								}
-							)
-						},
-						'setOutputMute',
-						{
-							//postf("~basicRendererCallback setMute: %\n", msg[2]);
-							if ( (msg.size < 3 ) ,
-								{"~basicRendererCallback: setOutputDIM missing value".warn;  },
-								// else
-								{
-									if (msg [2] > 0,
-										{e.volume.mute;},
-										// else
-										{e.volume.unmute;} );  // full muting implmentation
-								}
-							);
-						}
-					)
-			});
-		};
-
-
-*/
 
 		~coreCallback = { arg msg;
 			var command;
@@ -207,6 +101,33 @@ for debugguing
 						}
 					)
 				},
+				'createProcess',
+				{
+					postf("~coreCallback: createProcess:  command: %, messLen: %   msg: %, \n", command, msg.size, msg);
+
+					if ( (msg.size < 3 ) ,
+						{"~coreCallback: OSCrx createProcess message missing values".warn;
+							postf("createProcess MESS LEN: %", msg.size);
+
+						},
+						// else
+						{
+							var sourceName = msg[2];
+							var uriName = "";
+							var groupName = "";
+
+							if (msg.size > 3,
+								{
+									uriName = msg[3];
+							});
+
+							if (msg.size > 4,
+								{
+									groupName = msg[4];
+							});
+							e.createProcess(sourceName, uriName, groupName);
+					});
+				},
 				'deleteNode',
 				{
 					if ( (msg.size < 3 ) ,
@@ -224,236 +145,349 @@ for debugguing
 						}
 					)
 				},
-				'clear', {e.clearScene();},
-				'connect',
+				'clear',
 				{
-					if ( (msg.size < 4 ) ,
-						{"~coreCallback: OSCrx connect message missing values".warn;},
-						// else
-						{
-							var sourceName, listenerName;
-							sourceName = msg[2];
-							listenerName = msg[3];
-							//'GOING TO CALL createCOnnection'.postln;
-							e.createConnection(sourceName, listenerName);
-						}
-					)
+					e.clearScene();
+
 				};
 			);
 			//"coreCallback called".postln;
 		};
-		~connectionCallback = { 	| args |
-			var nodeName, listenerName, connectionName, type, temp, charIndex;
+
+		// osc rx   ARGS:  sourceName azimuthRADIANS elevationRADIANS gainDB delayMS  lpHZ  distanceMETERS
+		~sourceUpdateHandler = { 	| args |
+			var nodeName  = args[1];
 			var aziDeg, eleDeg, gainDB, delayMs, lpHz, hpHz, spread, distance;
 			var thisSynth;
-			var index;
-			var halfSrate = 0.5 * s.sampleRate;
-			//"connectionCallback called".inform;
-			//postln("connectionCallback " ++ args);
-			//postln("allGroupNodes " ++ e.allGroupNodes);
 
-			//args.postln;
-			connectionName = args[0].asString.split[4].asSymbol;   // this is terrible.  The spatOSC message format should be improved here
-			type = args[0].asString.split[5].asSymbol;
-			charIndex = connectionName.asString.find("->");
-
-
-			nodeName = connectionName.asString.subStr(0, charIndex-1);
-			//postf("~connectionCallback:  connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
-
+			// postf("~sourceUpdateHandler:  nodeName: %  size: % args: %\n", nodeName, args.size, args);
 			if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == false,
 				{
-					error("*********************************");
-					postf("satie4Unity.connectionCallback:  source node: %  is undefined \n", nodeName);
+					error("satie4Unity.sourceUpdateHandler:  source node: "++nodeName++"  is undefined \n");
 				},
 				// else all ok
 				{
-
 					thisSynth = e.allSourceNodes[nodeName.asSymbol].at(\synth);
 
+					if ( thisSynth == nil, {error("satie4Unity.sourceUpdateHandler:  source node: "++nodeName++"  BUG FOUND: undefined SYNTH  \n");});
 
-					switch(type,
-						'update',
+					if ( (args.size != 8 ) ,
+						{"satie4Unity.sourceUpdateHandler:  message missing values".warn;},
+						// else
 						{
-							if ( (args.size != 7 ) ,
-								{"connectionCallback: OSCrx update message missing values".warn;},
-								// else
-								{
-									// get values from vector, and write to connectionState
-									aziDeg = args[1].raddeg;
-									eleDeg= args[2].raddeg;
-									gainDB = args[3];
-									delayMs = args[4];
-									lpHz = args[5];
-									distance = args[6];  // not used by basic spatializers
+							// get values from vector, and write to connectionState
+							aziDeg = args[2].raddeg;
+							eleDeg= args[3].raddeg;
+							gainDB = args[4];
+							delayMs = args[5];
+							lpHz = args[6];
+							distance = args[7];  // not used by basic spatializers
 
-									//DEBUG
-									//~allSourceNodes[nodeName.asSymbol].put(\outDB, gainDB);
-
-
-
-									/*		z = (z+1).mod(20);
-									if ( (z == 0), {postf("\n")});
-									postf("  %  " ++ gainDB.trunc );*/
-
-
-									thisSynth.set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB, \delayMs, delayMs, \lpHz, lpHz);
-									//postf("~connectionCallback:  update: gain  % \n", gainDB);
-
-								}
-							)
-						},
-						'hpHz',   //  degree  (0 == noEffect,  1 == full effect)
-						{
-							if ( (args.size != 2 ) ,
-								{"connectionCallback: OSCrx hpHz message wrong number of values".warn;},
-								// else
-								{
-									// get value from vector, and write to connectionState
-									hpHz = args[1];   // get highpass cutoff value
-									thisSynth.set(\hpHz ,  clip(hpHz, 1, halfSrate ));
-
-									//postf("~connectionCallback:  hpHz connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
-
-								}
-							)
-						},
-						'spread',
-						{
-							if ( (args.size > 0 ) ,
-								{
-
-
-									// invert the spread value (usually an exp) to work with SATIE's VBAP-based spatializer (or others)
-									spread = 100 *  ( 1 - (clip(args[1],0,1)));  // get values from vector, and write to connectionState
-
-									thisSynth.set(\spread, spread);
-
-									//postf("~connectionCallback:  SPREAD:  connectionName: %  spread: % \n", connectionName, spread);
-
-								},
-								// else
-								{"~connectionCallback: OSCrx spread message with no values".warn; })
-						};
-					);
+							thisSynth.set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB, \delayMs, delayMs, \lpHz, lpHz);
+							//postf("sourceUpdateHandler:  update: gain  % \n", gainDB);
+					});
 			});
 		};
-		~connectionProcessCallback = {
 
-			| args |
-			var nodeName, listenerName, connectionName, type, temp, charIndex;
-			var aziDeg, eleDeg, gainDB, delayMs, lpHz, spread, distance;
-			var thisGroup, thisGroupName;
-			var myProcess;
-			// postln("connectionProcessCallback called" ++ args ++"\n");
+		// osc rx   ARGS:  sourceName hpHz
+		~sourceHpHzHandler = { 	| args |
+			var nodeName  = args[1];
+			var hpHz;
+			var thisSynth;
+			var halfSrate = 0.5 * s.sampleRate;
 
-			//postf(" ~connectionProcessCallback \n");
-
-			//args.postln;
-			connectionName = args[0].asString.split[4].asSymbol;   // this is terrible.  The spatOSC message format should be improved here
-			type = args[0].asString.split[5].asSymbol;
-			charIndex = connectionName.asString.find("->");
-
-			nodeName = connectionName.asString.subStr(0, charIndex-1);
-
-			if ( e.allSourceNodes[nodeName.asSymbol] == nil,
+			// postf("sourceHpHzHandler:  nodeName: %  size: % args: %\n", nodeName, args.size, args);
+			if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == false,
 				{
-					warn("satie4Unity.connectionCallback:  source node: %  is undefined \n", nodeName);
+					error("satie4Unity.sourceHpHzHandler:  source node: "++nodeName++"  is undefined \n");
 				},
 				// else all ok
 				{
+					thisSynth = e.allSourceNodes[nodeName.asSymbol].at(\synth);
 
+					if ( thisSynth == nil, {error("satie4Unity.sourceHpHzHandler:  source node: "++nodeName++"  BUG FOUND: undefined SYNTH  \n");});
+
+					if ( (args.size != 3 ) ,
+						{"satie4Unity.sourceHpHzHandler: bad arg count for hpHz message".warn;},
+						// else
+						{
+							// get value from vector, and write to connectionState
+							hpHz = args[2];   // get highpass cutoff value
+							thisSynth.set(\hpHz ,  clip(hpHz, 1, halfSrate ));
+					});
+			});
+		};
+
+
+		// osc rx   ARGS:  sourceName spread
+		~sourceSpreadHandler = { 	| args |
+			var nodeName  = args[1];
+			var spread;
+			var thisSynth;
+
+			// postf("sourceHpHzHandler:  nodeName: %  size: % args: %\n", nodeName, args.size, args);
+			if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == false,
+				{
+					error("satie4Unity.sourceHpHzHandler:  source node: %  is undefined \n", nodeName);
+				},
+				// else all ok
+				{
+					thisSynth = e.allSourceNodes[nodeName.asSymbol].at(\synth);
+					if ( thisSynth == nil, {error("satie4Unity.sourceHpHzHandler:  source node: "++nodeName++"  BUG FOUND: undefined SYNTH  \n");});
+
+					if ( (args.size != 3 ) ,
+						{"satie4Unity.sourceSpreadHandler: bad arg count for hpHz message".warn;},
+
+						// else
+						{
+							// invert the spread value (usually an exp) to work with SATIE's VBAP-based spatializer (or others)
+							spread = 100 *  ( 1 - (clip(args[2],0,1)));  // get values from vector, and write to connectionState
+							thisSynth.set(\spread, spread);
+							//postf("~connectionCallback:  SPREAD:  connectionName: %  spread: % \n", connectionName, spread);
+					});
+			});
+		};
+
+
+		// osc rx   ARGS:  processName azimuthRADIANS elevationRADIANS gainDB delayMS  lpHZ  distanceMETERS
+		~processUpdateHandler = { 	| args |
+			var nodeName  = args[1];
+			var aziDeg, eleDeg, gainDB, delayMs, lpHz, hpHz, spread, distance;
+			var thisGroupName, thisGroup,  myProcess;
+
+			// postf("~sourceUpdateHandler:  nodeName: %  size: % args: %\n", nodeName, args.size, args);
+			if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == false,
+				{
+					error("satie4Unity.processUpdateHandler:  process node: "++nodeName++"  is undefined \n");
+				},
+				// else all ok
+				{
 					// We know this is a sourceProcessingNode since this callback was chosen for this node
 					// so by default, we will update the source's group
 
 					thisGroupName = e.allSourceNodes[nodeName.asSymbol].at(\groupNameSym);  // process nodes have unique groups
 					thisGroup = e.allGroupNodes[thisGroupName].at(\group).group;
-
 					myProcess = e.allSourceNodes[nodeName.asSymbol].at(\process);
+					// thisSynth = e.allSourceNodes[nodeName.asSymbol].at(\synth);
 
+					if ( myProcess == nil, {error("satie4Unity.processUpdateHandler:  process node: "++nodeName++"  BUG FOUND: undefined process  \n");});
 
-					//postf("~connectionProcessCallback:  connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
-
-					switch(type,
-						'update',
+					if ( (args.size != 8 ) ,
+						{"satie4Unity.processUpdateHandler:  message missing values".warn;},
+						// else
 						{
-							if ( (args.size != 7 ) ,
-								{"connectionProcessCallback: OSCrx update message missing values".warn;},
-								// else
+							// get values from vector, and write to connectionState
+							aziDeg = args[2].raddeg;
+							eleDeg= args[3].raddeg;
+							gainDB = args[4];
+							delayMs = args[5];
+							lpHz = args[6];
+							distance = args[7];  // not used by basic spatializers
+
+							if (myProcess[\updateConnection] == nil,
 								{
-									// get values from vector, and write to connectionState
-									aziDeg = args[1].raddeg;
-									eleDeg= args[2].raddeg;
-									gainDB = args[3];
-									delayMs = args[4];
-									lpHz = args[5];
-									distance = args[6];
-
-									if (myProcess[\updateConnection] == nil,
-										{
-
-											//postf("~connectionProcessCallback:  setting update for nodes group %\n", connectionName);
-											// distance not used by standard spatializers
-											thisGroup.set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB, \delayMs, delayMs, \lpHz, lpHz);
-										},
-										// else use custom handler
-										{
-											// postf("~connectionProcessCallback:  calling custom update handler for %\n", connectionName);
-											// distance used by custom process functions
-											myProcess[\updateConnection].value(myProcess, aziDeg, eleDeg, gainDB, delayMs, lpHz, distance);
-									});
-
-								}
-							)
-						},
-						// 'hpHz',   //  degree  (0 == noEffect,  1 == full effect)  Not implemented yet
-						'spread',
-						{
-							if ( (args.size > 0 ) ,
-								{
-									//postf("~connectionProcessCallback:  connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
-									spread = args[1];  // get values from vector, and write to connectionState
-
-									if (myProcess[\spread] == nil,
-										{
-											//postf("~connectionProcessCallback:  setting spread for node's group  %\n", connectionName);
-											thisGroup.set(\spread, spread);
-										},
-										// else use a custom handler
-										{
-											//postf("~connectionProcessCallback:  calling custom spread handler for %\n", connectionName);
-											myProcess[\spread].value(myProcess, spread);
-
-									});
+									//postf("~connectionProcessCallback:  setting update for nodes group %\n", connectionName);
+									// distance not used by standard spatializers
+									thisGroup.set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB, \delayMs, delayMs, \lpHz, lpHz);
 								},
-								// else
-								{"~connectionProcessCallback: OSCrx spread message with no values".warn; })
-						};
-					);
+								// else use custom handler
+								{
+									// postf("~connectionProcessCallback:  calling custom update handler for %\n", connectionName);
+									// distance used by custom process functions
+									myProcess[\updateConnection].value(myProcess, aziDeg, eleDeg, gainDB, delayMs, lpHz, distance);
+							});
+					});
 			});
 		};
+
+		// osc rx   ARGS:  sourceName spread
+		~processSpreadHandler = { 	| args |
+			var nodeName  = args[1];
+			var spread;
+			var thisGroupName, thisGroup,  myProcess;
+
+			// postf("sourceHpHzHandler:  nodeName: %  size: % args: %\n", nodeName, args.size, args);
+			if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == false,
+				{
+					error("satie4Unity.processSpreadHandler:  process node: "++nodeName++"  is undefined \n");
+				},
+				// else all ok
+				{
+					thisGroupName = e.allSourceNodes[nodeName.asSymbol].at(\groupNameSym);  // process nodes have unique groups
+					thisGroup = e.allGroupNodes[thisGroupName].at(\group).group;
+					myProcess = e.allSourceNodes[nodeName.asSymbol].at(\process);
+
+					if ( myProcess == nil, {error("satie4Unity.processSpreadHandler:  process node: "++nodeName++"  BUG FOUND: undefined process  \n");});
+
+					if ( (args.size != 3 ) ,
+						{"satie4Unity.processSpreadHandler: bad arg count for hpHz message".warn;},
+
+						// else
+						{
+							// invert the spread value (usually an exp) to work with SATIE's VBAP-based spatializer (or others)
+							spread = 100 *  ( 1 - (clip(args[2],0,1)));  // get values from vector, and write to connectionState
+
+
+							if (myProcess[\spread] == nil,
+								{
+									//postf("~connectionProcessCallback:  setting spread for node's group  %\n", connectionName);
+									thisGroup.set(\spread, spread);
+								},
+								// else use a custom handler
+								{
+									//postf("~connectionProcessCallback:  calling custom spread handler for %\n", connectionName);
+									myProcess[\spread].value(myProcess, spread);
+
+							});
+
+
+
+
+					});
+			});
+		};
+
+
+		// ~connectionProcessCallback = {
+		//
+		// 	| args |
+		// 	var nodeName, type;
+		// 	var aziDeg, eleDeg, gainDB, delayMs, lpHz, spread, distance;
+		// 	var thisGroup, thisGroupName;
+		// 	var myProcess;
+		// 	// postln("connectionProcessCallback called" ++ args ++"\n");
+		//
+		// 	//postf(" ~connectionProcessCallback \n");
+		//
+		// 	//args.postln;
+		// 	connectionName = args[0].asString.split[4].asSymbol;   // this is terrible.  The spatOSC message format should be improved here
+		// 	type = args[0].asString.split[5].asSymbol;
+		// 	charIndex = connectionName.asString.find("->");
+		//
+		// 	nodeName = connectionName.asString.subStr(0, charIndex-1);
+		//
+		// 	if ( e.allSourceNodes[nodeName.asSymbol] == nil,
+		// 		{
+		// 			warn("satie4Unity.connectionCallback:  source node: %  is undefined \n", nodeName);
+		// 		},
+		// 		// else all ok
+		// 		{
+		//
+		// 			// We know this is a sourceProcessingNode since this callback was chosen for this node
+		// 			// so by default, we will update the source's group
+		//
+		// 			thisGroupName = e.allSourceNodes[nodeName.asSymbol].at(\groupNameSym);  // process nodes have unique groups
+		// 			thisGroup = e.allGroupNodes[thisGroupName].at(\group).group;
+		//
+		// 			myProcess = e.allSourceNodes[nodeName.asSymbol].at(\process);
+		//
+		//
+		// 			//postf("~connectionProcessCallback:  connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
+		//
+		// 			switch(type,
+		// 				'update',
+		// 				{
+		// 					if ( (args.size != 7 ) ,
+		// 						{"connectionProcessCallback: OSCrx update message missing values".warn;},
+		// 						// else
+		// 						{
+		// 							// get values from vector, and write to connectionState
+		// 							aziDeg = args[1].raddeg;
+		// 							eleDeg= args[2].raddeg;
+		// 							gainDB = args[3];
+		// 							delayMs = args[4];
+		// 							lpHz = args[5];
+		// 							distance = args[6];
+		//
+		// 							if (myProcess[\updateConnection] == nil,
+		// 								{
+		//
+		// 									//postf("~connectionProcessCallback:  setting update for nodes group %\n", connectionName);
+		// 									// distance not used by standard spatializers
+		// 									thisGroup.set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB, \delayMs, delayMs, \lpHz, lpHz);
+		// 								},
+		// 								// else use custom handler
+		// 								{
+		// 									// postf("~connectionProcessCallback:  calling custom update handler for %\n", connectionName);
+		// 									// distance used by custom process functions
+		// 									myProcess[\updateConnection].value(myProcess, aziDeg, eleDeg, gainDB, delayMs, lpHz, distance);
+		// 							});
+		//
+		// 						}
+		// 					)
+		// 				},
+		// 				// 'hpHz',   //  degree  (0 == noEffect,  1 == full effect)  Not implemented yet
+		// 				'spread',
+		// 				{
+		// 					if ( (args.size > 0 ) ,
+		// 						{
+		// 							//postf("~connectionProcessCallback:  connectionName: %  type: %  size: % args: %\n", connectionName, type, args.size, args);
+		// 							spread = args[1];  // get values from vector, and write to connectionState
+		//
+		// 							if (myProcess[\spread] == nil,
+		// 								{
+		// 									//postf("~connectionProcessCallback:  setting spread for node's group  %\n", connectionName);
+		// 									thisGroup.set(\spread, spread);
+		// 								},
+		// 								// else use a custom handler
+		// 								{
+		// 									//postf("~connectionProcessCallback:  calling custom spread handler for %\n", connectionName);
+		// 									myProcess[\spread].value(myProcess, spread);
+		//
+		// 							});
+		// 						},
+		// 						// else
+		// 					{"~connectionProcessCallback: OSCrx spread message with no values".warn; })
+		// 				};
+		// 			);
+		// 	});
+		// };
+		//
+
+		// e.g  /satie/source/prop nodeName  key val
 		~sourceNodeCallback = {
 			| args |
 			var name, type, values, eventName, state;
-			name = args[0].asString.split[4].asSymbol;
-			type = args[0].asString.split[5].asSymbol;
 
-			//'~sourceNodeCallback'.postln;
+			name = args[1];
+			type = args[0].asString.split[3].asSymbol;
+
+			'~sourceNodeCallback'.postln;
+
+			if ( e.allSourceNodes.includesKey(name.asSymbol) == false,
+				{
+					error("satie4Unity.sourceNodeCallback:  source node: "++name++" is undefined \n");
+			});
+
+			if ( e.debugFlag,
+				{
+					postf("~sourceNodeCallback:  arg1nodeName: %  type : %    arg2: %   arg3: %  \n", name, type, args[2], args[3]);
+			});
+
 
 			switch(type,
-				'prop', {e.setProperty(name, args[1], args[2]);
-					//postf("~sourceNodeCallback:  nodeName: %  setProp: %  key: % value: %\n", name, args[1], args[2]);
+				'prop',
+				{
+					if ( (args.size > 2) ,
+						{
+							e.setProperty(name, args[2], args[3]);
+							//postf("~sourceNodeCallback:  nodeName: %  setProp: %  key: % value: %\n", name, args[2], args[3]);
+						},
+						{
+							"sourceNodeCallback_prop:  osc message: missing values".warn;
 
+					}); // else
 				},
-				'uri', {e.setUri(name, args[1])},
+				'uri', {e.setUri(name, args[2])},
 				'event',
 				{
 					//postf("~sourceNodeCallback:  nodeName: %  mesageType: %  size: % args: %\n", name, type, args.size, args);
-					if ( (args.size < 2 ) ,
-						{"~setEvent: OSCrx message with no values".warn;},
+					if ( (args.size < 3 ) ,
+						{"sourceNodeCallback_setEvent: osc message: missing values".warn; },
 						{  // else
 							values = args;
-							eventName = args[1];
+							eventName = args[2];
+							values.removeAt(0);   // trim off oscAddr nodeName eventName
 							values.removeAt(0);
 							values.removeAt(0);
 							e.setEvent(name, eventName, values);
@@ -462,9 +496,9 @@ for debugguing
 				},
 				'state',
 				{
-					if ( (args.size > 1) ,
+					if ( (args.size > 2) ,
 						{
-							state = args[1];
+							state = args[2];
 							e.setState(name, state);
 						},
 						{"~setState: OSCrx message with no values".warn; })  // else
@@ -474,21 +508,27 @@ for debugguing
 		};
 
 		// ~sourceProcessCallback = { "sourceProcessCallback called".warn; };
-		// e.g  /spatosc/core/source/nodename/prop  key val
+		// e.g  /satie/source/prop nodeName  key val
 		// source node has unique group, updates are to source's group (to cloned synths etc)
 		~sourceProcessCallback = { | args |
 			var name, type, values, eventName, state, myProcess, myProcessSym;
+			name = args[1];
+			type = args[0].asString.split[3].asSymbol;
 
+			if ( e.allSourceNodes.includesKey(name.asSymbol) == false,
+			{
+					error("satie4Unity.sourceProcessCallback:  process node: "++name++" is undefined \n");
+			});
 
-			name = args[0].asString.split[4].asSymbol;
-			type = args[0].asString.split[5].asSymbol;
-
-			//myProcessSym = ~allSourceNodes[name.asSymbol].at(\process);
-			//myProcess = self.allProcesses[myProcessSym];
 			myProcess = e.allSourceNodes[name.asSymbol].at(\process);
 
-			//'~sourceProcessCallback'.postln;
+			if ( myProcess== nil,
+			{
+				error("satie4Unity.sourceProcessCallback:  process node: "++name++" missing proces \n");
+			});
 
+
+			//'~sourceProcessCallback'.postln;
 
 			switch(type,
 				'prop',
@@ -499,31 +539,23 @@ for debugguing
 
 							//postf("~sourceProcessCallback: send PROP to group:  nodeName: %  group: %   \n", name,groupName);
 
-							e.setGroupProperty(groupName, args[1], args[2]);
+							e.setGroupProperty(groupName, args[2], args[3]);
 						},
 						// else use custom handler
 						{
 							//postf("~~sourceProcessCallback:  calling custom prop handler for %\n", name);
-							myProcess[\prop].value(myProcess,  args[1], args[2]);
+							myProcess[\prop].value(myProcess,  args[2], args[3]);
 					});
-				},
-
-				'uri',  // not used:  process synths are defined in the process class, or set by events
-				{
-					// ~setUri.value(name, args[1])
-
-				},
-				'state',    // not used
-				{
 				},
 				'event',
 				{
 					//postf("~sourceProcessCallback:  nodeName: %  mesageType: %  size: % args: %\n", name, type, args.size, args);
-					if ( (args.size < 2 ) ,
+					if ( (args.size < 3 ) ,
 						{"~sourceProcessCallback event: OSCrx message with no values".warn;},
 						{  // else
 							values = args;
-							eventName = args[1];
+							eventName = args[2];
+							values.removeAt(0);  // remove first three elements in array:  oscAddress nodeName eventName
 							values.removeAt(0);
 							values.removeAt(0);
 
@@ -552,71 +584,77 @@ for debugguing
 
 		//~groupCallback = { "groupCallback called".warn;};
 
-		// e.g  /spatosc/core/group/nodename/prop  key val
-		~groupCallback = {
+		// e.g  /satie/source/prop nodeName  key val
+		~groupNodeCallback = {
 			| args |
 			var name, type, values, eventName, state;
-			name = args[0].asString.split[4].asSymbol;
-			type = args[0].asString.split[5].asSymbol;
 
-			//'~groupCallback'.postln;
+			name = args[1];
+			type = args[0].asString.split[3].asSymbol;
+
+			if ( e.debugFlag,
+				{
+					postf("~groupCallback:  arg1nodeName: %  type : %    argCount: %   args: %  \n", name, type, args.size,  args);
+			});
 
 			switch(type,
 				'prop',
 				{
-					//~setProperty.value(name, args[1], args[2])
-
-					//postf("~groupCallback:  nodeName: %  setProp: %  key: % value: %\n", name, args[1], args[2]);
-					e.setGroupProperty(name, args[1], args[2]);
+					if ( (args.size < 4 ) ,
+						{"~groupCallback.prop: message missing values".warn;},
+						// else
+						{
+							//postf("~groupCallback:  nodeName: %  setProp: %  key: % value: %\n", name, args[2], args[3]);
+							e.setGroupProperty(name, args[2], args[3]);
+					});
 
 				},
 				'uri',
 				{
-					//postf("~groupCallback:  nodeName: %  setUri: %  \n", name, args[1]);
+					//not implemented
 					// ~setUri.value(name, args[1])
-
-
 				},
 				'event',
 				{
-					postf("~groupCallback:  nodeName: %  set event: %  size: % args: %\n", name, type, args.size, args);
-					if ( (args.size < 2 ) ,
-						{"~setEvent: OSCrx message with no values".warn;},
+					//postf("~groupCallback:  nodeName: %  mesageType: %  size: % args: %\n", name, type, args.size, args);
+					if ( (args.size < 3 ) ,
+						{"groupCallback.event: osc message: missing values".warn; },
 						{  // else
 							values = args;
-							eventName = args[1];
+							eventName = args[2];
+							values.removeAt(0);   // trim off oscAddr nodeName eventName
 							values.removeAt(0);
 							values.removeAt(0);
 							e.setGroupEvent(name, eventName, values);
-						}
-					)
+					});
 				},
 				'state',
 				{
-					if ( (args.size > 1) ,
-						{
-							state = args[1];
-							//eventName = args[1];
-							//~setState.value(name, state);
-							postf("~groupCallback:  node: %  set state: % \n", name, state);
-						},
-						{"~groupCallback: OSCrx message with no values".warn; })  // else
+					// not implemented
 				},
 				'add',
 				{
-					postf("~groupCallback:  nodeName: %  add member: %  \n", name, args[1]);
-					e.addMember(name, args[1])
+					if ( (args.size < 3 ) ,
+						{"groupCallback.add:  osc message: missing values".warn; },
+						{
+							postf("~groupCallback.add:  nodeName: %  add member: %  \n", name, args[2]);
 
-
+							e.addMember(name, args[2]);
+					});
 				},
 				'drop',
 				{
-					postf("~groupCallback:  nodeName: %  drop member: %  \n", name, args[1]);
-					e.dropMember(name, args[1])
+					if ( (args.size < 3 ) ,
+						{"groupCallback.drop:  osc message: missing values".warn; },
+						{
+							postf("~groupCallback.drop:  nodeName: %  add member: %  \n", name, args[2]);
 
-
-				},{postf("~groupCallback:  UNMATCHED:  nodeName: %  mesageType: %  size: % args: %\n", name, type, args.size, args)};
-			);
+							e.dropMember(name, args[2]);
+					});
+				},
+				{
+					postf("~groupCallback:  UNMATCHED:  nodeName: %  mesageType: %  size: % args: %\n", name, type, args.size, args);
+			});
 		};
 
 
@@ -631,16 +669,44 @@ for debugguing
 					var type;
 					type = self.getUriType(uriPath);
 
+					postf("~createSource:   NAME: %   type :%  \n", sourceName, type);
+
+					if (  (type=="plugin")  ||  (type=="effect"),
+						{
+							self.createSourceNode(sourceName.asSymbol, uriPath,groupName );
+						},
+						// else
+						{
+							postf("~createSource: node  %  URI: %,  wrong type,  no action \n", sourceName, type);
+					});
+
+				}
+			);
+		};
+
+
+		~createProcess = {| self, sourceName, uriPath , groupName = \default |
+			"~createProcess called".inform;
+			if (self.allSourceNodes.includesKey(sourceName),
+				{
+					postf("~createSource:   % exists, no action \n", sourceName);
+				},
+				// else create new node
+				{
+					var type;
+					type = self.getUriType(uriPath);
+
 					if ( type == "process",  {
 						self.createSourceProcess(sourceName.asSymbol, uriPath,groupName );
 					},
 					// else
 					{
-						self.createSourceNode(sourceName.asSymbol, uriPath,groupName );
+						postf("~createProcess: node  %  URI: %,  wrong type,  no action \n", sourceName, type);
 					});
 				}
 			);
 		};
+
 
 		// ~createSourceProcess = { "createSourceProcess called".warn;};
 
@@ -718,8 +784,7 @@ for debugguing
 							myProcess[\setup].value(myProcess, sourceName.asSymbol, cloneGroupName.asSymbol, argList );   // set the state of the process
 							self.setSynth(sourceName.asSymbol, "");  // sets dummy plugin as placeholder
 
-							//~oscInterface.sourceOSC(sourceName.asSymbol, ~sourceProcessCallback);   // create OSC callback
-							osc.sourceOSC(sourceName.asSymbol, e.['sourceProcessCallback']);   // create OSC callback
+							// osc.sourceOSC(sourceName.asSymbol, e.['sourceProcessCallback']);   // DO NOT create OSC callback
 							postf("~createSourceProcess: CREATED NODE: %,  with  process:  % \n", sourceName, processName);
 
 
@@ -730,7 +795,6 @@ for debugguing
 
 		~createSourceNode = { | self, sourceName, uriString , groupName = \default, argsList|
 			var synthName;
-
 			var type;
 
 			// MAKE SURE URI STRING IS VALID -- if not, will post warning and be set to plugin://dummyPlugin
@@ -769,8 +833,6 @@ for debugguing
 					synthName = self.getUriName(uriString);
 					self.setSynth(sourceName.asSymbol, synthName);
 			});
-			osc.sourceOSC(sourceName.asSymbol, e.['sourceNodeCallback']);   // create OSC callback
-			//"createSourceNode called".inform;
 		};
 
 		//~createGroup = { "createGroup called".warn;};
@@ -809,54 +871,11 @@ for debugguing
 					//  set group
 					self.allGroupNodes[groupName.asSymbol].put(\group, group );
 
-					//~oscInterface.groupOSC(groupName.asSymbol, ~groupCallback);   // create OSC callback for this source
-					osc.sourceOSC(groupName.asSymbol, e.['groupCallback']);   // create OSC callback
+					//osc.sourceOSC(groupName.asSymbol, e.['groupCallback']);   // NO NEED TO create OSC callback
 
 					group;  // returns groups
 				}
 			);
-		};
-
-		~createConnection = { |self, sourceName, listenerName |
-
-			var connectionName, myProcess;
-			//postf("createConnection:  for source % and listener % \n", sourceName, listenerName);
-
-			connectionName = sourceName ++ "->" ++ listenerName;
-			myProcess = nil;
-
-
-			if ( self.allSourceNodes.includesKey(sourceName.asSymbol) == false,
-				{
-					error("*******************");
-					postf("bug:  satie4Unity.createConnection: node % not defined, can not establish connection \n", sourceName.asString);
-				},
-				// else
-				{
-					myProcess = self.allSourceNodes[sourceName.asSymbol].at(\process);
-
-					if ( self.allSourceNodes[sourceName.asSymbol].includesKey(\connectionName),
-						{
-							'~createConnection:  connection already exists, no action taken'.postln;
-						},
-						// else create new one,  and a corresponding OSC callback
-						{
-							self.allSourceNodes[sourceName.asSymbol].put(\connectionName, connectionName.asSymbol);
-
-							// is this a processNode ?
-							if ( myProcess != nil,
-								{
-									postf("~createConnection: creating Custom update callback for  %  \n", sourceName.asSymbol);
-									osc.connectionOSC(self.allSourceNodes[sourceName.asSymbol].at(\connectionName), e.['connectionProcessCallback']);
-								},
-								//else  regular source node, set up standard connection callback
-								{
-									osc.connectionOSC(self.allSourceNodes[sourceName.asSymbol].at(\connectionName), e['connectionCallback']);
-							});
-
-							// postf("~createConnection: creating callback for  %  ", ~allSourceNodes[sourceName.asSymbol].at(\connectionName));
-					});
-			});
 		};
 
 		~setSynth = { 	| self, nodeName, pluginName |
@@ -963,8 +982,11 @@ for debugguing
 		};
 
 
-		~setState = { | self, nodeName,  state |
+		~setState = { | self, nodeName,  value |
 			var thisSynth = self.allSourceNodes[nodeName.asSymbol].at(\synth);
+			var state;
+
+			if ( value == 0 , { state = false}, {state = true});
 
 			thisSynth.run(state);
 
@@ -996,11 +1018,6 @@ for debugguing
 					);
 			});
 		};
-
-
-
-
-
 
 		~setEvent = { | self, nodeName, eventName,  args |
 			var valueCount = args.size;
@@ -1382,12 +1399,75 @@ for debugguing
 	e.know = true;
 	postf("passed osc env: %\n", osc);
 
-	// connect to OSC
-	osc.removeBasicRendererOSC(\createSoundSource);  // disconnect any previous handlers
-	osc.newOSC(\createSoundSource, e['coreCallback'], "/spatosc/core");   // connect handler
+	// connect renderer oscMessage RX to handlers
+	osc.removeBasicRendererOSC(\satieScene);  // disconnect any previous handlers
+	osc.newOSC(\satieScene, e['coreCallback'], "/satie/scene");   // connect handler
 
-	//osc.removeBasicRendererOSC(\brOSC);
-	//osc.basicRendererOSC(\brOSC,e['basicRendererCallback']);
+	// sources
+	osc.removeBasicRendererOSC(\satieSrcProp);  // disconnect any previous handlers
+	osc.newOSC(\satieSrcProp, e['sourceNodeCallback'], "/satie/source/prop");   // connect handler
+
+	osc.removeBasicRendererOSC(\satieSrcState);  // disconnect any previous handlers
+	osc.newOSC(\satieSrcState, e['sourceNodeCallback'], "/satie/source/state");   // connect handler
+
+	osc.removeBasicRendererOSC(\satieSrcEvent);  // disconnect any previous handlers
+	osc.newOSC(\satieSrcEvent, e['sourceNodeCallback'], "/satie/source/event");   // connect handler
+
+	osc.removeBasicRendererOSC(\satieSrcUpdate);  // disconnect any previous handlers
+	osc.newOSC(\satieSrcUpdate, e['sourceUpdateHandler'], "/satie/source/update");   // connect handler
+
+	osc.removeBasicRendererOSC(\satieSrcHpHz);  // disconnect any previous handlers
+	osc.newOSC(\satieSrcHpHz, e['sourceHpHzHandler'], "/satie/source/hpHz");   // connect handler
+
+	osc.removeBasicRendererOSC(\satieSrcSpread);  // disconnect any previous handlers
+	osc.newOSC(\satieSrcSpread, e['sourceSpreadHandler'], "/satie/source/spread");   // connect handler
+
+
+
+
+
+	// groups
+	osc.removeBasicRendererOSC(\satieGroupProp);  // disconnect any previous handlers
+	osc.newOSC(\satieGroupProp, e['groupNodeCallback'], "/satie/group/prop");   // connect handler
+
+	osc.removeBasicRendererOSC(\satieGroupEvent);  // disconnect any previous handlers
+	osc.newOSC(\satieGroupEvent, e['groupNodeCallback'], "/satie/group/event");   // connect handler
+
+	osc.removeBasicRendererOSC(\satieGroupAdd);  // disconnect any previous handlers
+	osc.newOSC(\satieGroupAdd, e['groupNodeCallback'], "/satie/group/add");   // connect handler
+
+	osc.removeBasicRendererOSC(\satieGroupDrop);  // disconnect any previous handlers
+	osc.newOSC(\satieGroupDrop, e['groupNodeCallback'], "/satie/group/drop");   // connect handler
+
+
+
+
+
+
+
+
+	// source processes
+	osc.removeBasicRendererOSC(\satieProcessProp);  // disconnect any previous handlers
+	osc.newOSC(\satieProcessProp, e['sourceProcessCallback'], "/satie/process/prop");   // connect handler
+
+	osc.removeBasicRendererOSC(\satieProcessState);  // disconnect any previous handlers
+	osc.newOSC(\satieProcessState, e['sourceProcessCallback'], "/satie/process/state");   // connect handler
+
+	osc.removeBasicRendererOSC(\satieProcessEvent);  // disconnect any previous handlers
+	osc.newOSC(\satieProcessEvent, e['sourceProcessCallback'], "/satie/process/event");   // connect handler
+
+	osc.removeBasicRendererOSC(\satieProcessUpdate);  // disconnect any previous handlers
+	osc.newOSC(\satieProcessUpdate, e['processUpdateHandler'], "/satie/process/update");   // connect handler
+
+	osc.removeBasicRendererOSC(\satieProcessSpread);  // disconnect any previous handlers
+	osc.newOSC(\satieProcessSpread, e['processSpreadHandler'], "/satie/process/spread");   // connect handler
+
+
+
+
+
+
+
 	e;
 };
 

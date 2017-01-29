@@ -1,6 +1,6 @@
 // called from project's  main.scd file
 
-//~satie4unity=nil;
+~satie4unity=nil;     // uncomment for debug
 
 s.waitForBoot{
 
@@ -27,6 +27,8 @@ s.waitForBoot{
 	// instiante the satie4Unity protocol, and set environment variable
 	if (~satie4unity == nil,{
 		~satie4unity = ~satie4unityprotocol.value(~osc, ~scbr);
+		~satie4unity.debugFlag = true;
+
 	});
 
 

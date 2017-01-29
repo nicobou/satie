@@ -164,11 +164,13 @@ if (~satie4unity == nil, {
 };
 
 // totally custom functions.  Calls to these functions result from OSC events received by satie4unity from Unity, and then applied to these functions,  if they exist
+// this message is called via the following osc message:   /satie/process/event processName trigger pitch  vel incidence
 
 ~sheefa.trigger = { arg self, items = #[1,2,3] ;
 	var thisGroup = self.nodeGroup;
 	var gain = self.gainDB;
 	var pitch,  vel, incidence;
+
 
 	if ( items.size != 3,
 		{
@@ -176,9 +178,9 @@ if (~satie4unity == nil, {
 		},
 		{ // else
 
+			pitch = items[0].asFloat;
 			vel =  items[1].asFloat;
-
-			incidence = 1; items[2].asFloat;
+			incidence = items[2].asFloat;
 
 			thisGroup.set(\randTrigMaxMs, self.triggerIntervalMs);  // update clones in case value has changed
 
