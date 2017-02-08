@@ -30,6 +30,11 @@
 /satie/group/prop groupName keyword value ( string, float or int )     
 /satie/group/state groupName value  // 1=DSP_active 0=DSP_inactive
 /satie/group/event groupName eventName <opt> atom1 atom2...atomN    
+/satie/group/add groupName sourceName    
+/satie/group/drop groupName sourceName   
+
+
+
 
 // /satie/process/uri processName type://name  (e.g.  process://processType )
 /satie/process/prop processName keyword value ( string, float or int )     
