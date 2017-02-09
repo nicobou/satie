@@ -19,66 +19,60 @@ echo TESTING BASIC SATIE4UNITY COMMANDS
 sleep 2
 
 echo CREATE SOURCE NODE mySound
-oscsend localhost $OSCPORT /spatosc/core sss createSource mySound plugin://default
+oscsend localhost $OSCPORT /satie/scene createSource mySound plugin://default
 sleep 2
 
-#echo CREATE LISTENER NODE mySound
-#LISTENER ALWAYS EXISTS, NO NEED TO CREATE
-#oscsend localhost $OSCPORT /spatosc/core ss createListener ear
-#sleep 2
-
-echo CONNECT TO LISTENER ear
-oscsend localhost $OSCPORT /spatosc/core sss connect mySound ear
-sleep 1
 
 echo PAN LEFT
-oscsend localhost $OSCPORT "/spatosc/core/connection/mySound->ear/update" ffffff -1.57 0 -12 0 22050 0.5 # azi ele  gainDB del lpf
+oscsend localhost $OSCPORT "/satie/source/update" sfffffff mySound -1.57 0 -12 0 22050 0.5  10 # azi ele  gainDB del lpf distance
 sleep 1
 
-oscsend localhost $OSCPORT "/spatosc/core/connection/mySound->ear/update" ffffff 1.57 0 3 0 22050 0.5 # azi ele  gainDB del lpf
+oscsend localhost $OSCPORT "/satie/source/update" sfffffff mySound 1.57 0 3 0 22050 0.5  10 # azi ele  gainDB del lpf distance
+
 echo PAN RIGHT, GAIN = 3db
 sleep 1
-oscsend localhost $OSCPORT "/spatosc/core/connection/mySound->ear/update" ffffff 0 0 0 0 22050 0.5 # azi ele  gainDB del lpf
+oscsend localhost $OSCPORT "/satie/source/update" sfffffff mySound 0 0 0 0 22050 0.5  10 # azi ele  gainDB del lpf distance
+
 echo PAN CENTER, GAIN = 0db
 sleep 1
-oscsend localhost $OSCPORT "/spatosc/core/connection/mySound->ear/update" ffffff -.78 0 -16 0 1000 0.5 # azi ele  gainDB del lpf
+oscsend localhost $OSCPORT "/satie/source/update" sfffffff mySound -.78 0 -16 0 1000 0.5  10 # azi ele  gainDB del lpf distance
+
 echo PAN LEFT. GAIN = -16db LPF = 1000
 sleep 1
-oscsend localhost $OSCPORT "/spatosc/core/connection/mySound->ear/update" ffffff 0 0 -6 0 22050 0.5 # azi ele  gainDB del lpf
+oscsend localhost $OSCPORT "/satie/source/update" sfffffff mySound 0 0 -6 0 22050 0.5  10 # azi ele  gainDB del lpf distance
+
 echo PAN CENTER, GAIN = -6, LPF = 22050
 sleep 1
-oscsend localhost $OSCPORT "/spatosc/core/connection/mySound->ear/update" ffffff .78 0 -24 0 22050 0.1 # azi ele  gainDB del lpf
+oscsend localhost $OSCPORT "/satie/source/update" sfffffff mySound .78 0 -24 0 22050 0.1  10 # azi ele  gainDB del lpf distance
+
 echo  PAN RIGHT, GAIN = -24db
 sleep 1
-oscsend localhost $OSCPORT "/spatosc/core/connection/mySound->ear/spread" f 0
+oscsend localhost $OSCPORT "/satie/source/spread"  sf mySound 0
 echo  SPREAD WIDE
 sleep 1
-oscsend localhost $OSCPORT "/spatosc/core/connection/mySound->ear/spread" f 20
+oscsend localhost $OSCPORT "/satie/source/spread"  sf mySound  20
 echo  SPREAD NARROW
 sleep 1
-oscsend localhost $OSCPORT "/spatosc/core/connection/mySound->ear/spread" f 1
+oscsend localhost $OSCPORT "/satie/source/spread"  sf mySound  1
 echo  SPREAD NORMAL
 sleep 1
-oscsend localhost $OSCPORT /spatosc/core/source/mySound/state f 0
+oscsend localhost $OSCPORT "/satie/source/state"  sf mySound 0
 echo  STATE = 0
 sleep 1
-oscsend localhost $OSCPORT /spatosc/core/source/mySound/state f 1
+oscsend localhost $OSCPORT "/satie/source/state"  sf mySound 1
 echo  STATE = 1
 sleep 1
-oscsend localhost $OSCPORT /spatosc/core/source/mySound/uri s plugin://zkarpluck1
-echo  'SET URI to  plugin://zkarpluck1'
-sleep 1
-oscsend localhost $OSCPORT /spatosc/core/source/mySound/event sff note  60 1
+oscsend localhost $OSCPORT "/satie/source/event" ssff mySound note  60 1
 echo  SET NOTE VALUES: 60 1  : midiPitch  amp
-oscsend localhost $OSCPORT /spatosc/core/source/mySound/event sf t_trig 1
+oscsend localhost $OSCPORT "/satie/source/event" ssf mySound t_trig 1
 echo  TRIGGER NOTE
 sleep 1
-oscsend localhost $OSCPORT "/spatosc/core/connection/mySound->ear/update" ffffff 0 0 3 0 22050 0.1 # azi ele  gainDB del lpf
+oscsend localhost $OSCPORT "/satie/source/update" sfffffff mySound  0 0 3 0 22050 0.1  10 # azi ele  gainDB del lpf distance
 echo PAN CENTER, GAIN = 3db
 sleep 1
-oscsend localhost $OSCPORT /spatosc/core/source/mySound/event sff note 76 .5
+oscsend localhost $OSCPORT "/satie/source/event" ssff mySound note  76 .5
 echo  SET NOTE VALUES: 76 .5  :  midiPitch  amp
-oscsend localhost $OSCPORT /spatosc/core/source/mySound/event sf t_trig 1
+oscsend localhost $OSCPORT "/satie/source/event" ssf mySound t_trig 1
 echo  TRIGGER NOTE
 sleep 1
 oscsend localhost $OSCPORT /spatosc/core/source/mySound/uri s plugin://pink

@@ -1,583 +1,202 @@
-#N canvas 1043 22 1327 1294 10;
-#X floatatom 248 338 5 0 0 0 - - -;
-#X floatatom 287 338 5 0 0 0 - - -;
-#X floatatom 326 338 5 0 0 0 - - -;
-#N canvas 0 22 290 211 pack3f 0;
-#X obj 79 103 pack f f f;
-#X obj 99 73 t b f;
-#X obj 144 71 t b f;
-#X obj 63 44 inlet;
-#X obj 110 41 inlet;
-#X obj 162 45 inlet;
-#X obj 80 137 outlet;
-#X connect 0 0 6 0;
-#X connect 1 0 0 0;
-#X connect 1 1 0 1;
-#X connect 2 0 0 0;
-#X connect 2 1 0 2;
-#X connect 3 0 0 0;
-#X connect 4 0 1 0;
-#X connect 5 0 2 0;
-#X restore 248 358 pd pack3f;
-#X floatatom 324 482 5 0 0 0 - - -;
-#X floatatom 362 484 5 0 0 0 - - -;
-#X floatatom 401 484 5 0 0 0 - - -;
-#N canvas 0 22 290 211 pack3f 0;
-#X obj 79 103 pack f f f;
-#X obj 99 73 t b f;
-#X obj 144 71 t b f;
-#X obj 63 44 inlet;
-#X obj 110 41 inlet;
-#X obj 162 45 inlet;
-#X obj 80 137 outlet;
-#X connect 0 0 6 0;
-#X connect 1 0 0 0;
-#X connect 1 1 0 1;
-#X connect 2 0 0 0;
-#X connect 2 1 0 2;
-#X connect 3 0 0 0;
-#X connect 4 0 1 0;
-#X connect 5 0 2 0;
-#X restore 323 504 pd pack3f;
-#X msg 248 378 setPosition mySound \$1 \$2 \$3;
-#X msg 323 525 setPosition ear \$1 \$2 \$3;
-#X obj 70 714 s toSpatOSC;
-#X msg 29 57 clearScene;
-#X text 95 56 <-- Clear the whole scene;
-#X obj 436 -119 cnv 15 250 150 empty empty More_info: 10 12 1 12 -228856
--128992 0;
-#N canvas 114 513 788 356 HOW_TO_SET_NODE_PROPERTIES 0;
-#X msg 141 -109 setNodeStringProperty mySound foo bar;
-#X msg 141 -80 removeNodeStringProperty mySound foo;
-#X msg 143 -29 removeNodeIntProperty mySound channel;
-#X text 368 -109 <-- Add / remove string properties (node must exist)
-;
-#X text 376 -49 <-- Add / remove int properties (node must exist);
-#X text 433 42 <-- Add / remove int properties (node must exist);
-#X msg 144 -50 setNodeIntProperty mySound channel 4;
-#X obj 43 117 s toSpatOSC;
-#X msg 146 25 setNodeFloatProperty mySound transposition \$1;
-#X floatatom 147 -1 5 0 0 0 - - -;
-#X msg 146 47 removeNodeFloatProperty mySound transposition;
-#X floatatom 153 88 5 0 0 0 - - -;
-#X msg 152 114 setNodeFloatProperty ear bar \$1;
-#X msg 152 136 removeNodeFloatProperty ear bar;
-#X text 444 114 works on listener notes too;
-#X connect 0 0 7 0;
-#X connect 1 0 7 0;
-#X connect 2 0 7 0;
-#X connect 6 0 7 0;
-#X connect 8 0 7 0;
-#X connect 9 0 8 0;
-#X connect 10 0 7 0;
-#X connect 11 0 12 0;
-#X connect 13 0 7 0;
-#X restore 464 -80 pd HOW_TO_SET_NODE_PROPERTIES;
-#N canvas 43 124 450 300 ABOUT_SCHEDULING 0;
-#X obj 235 187 bng 15 250 50 0 empty empty output_messages 17 7 0 10
--262144 -1 -1;
-#X msg 114 175 setSynchronous \$1;
-#X obj 114 149 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+#N canvas 479 699 842 527 16;
+#X obj 17 10 cnv 15 800 500 empty empty renderer_messages 20 12 0 18
+-262130 -66577 0;
+#X obj 53 368 OSCtx;
+#X obj 112 356 tgl 36 0 empty empty onLineStatus 40 7 0 16 -262144
+-1 -1 15214 15770;
+#X msg 26 161 connect localhost 18032;
+#X obj 67 328 r \$0-toSatie;
+#X obj 24 127 loadbang;
+#X floatatom 459 148 5 0 0 0 - - -, f 5;
+#X obj 463 127 hsl 128 15 -40 0 0 0 empty empty empty 0 0 0 10 -262144
+-1 -1 0 1;
+#X floatatom 524 216 5 0 0 0 - - -, f 5;
+#X obj 526 191 hsl 128 15 -66 18 0 0 empty empty empty 0 0 0 10 -262144
+-1 -1 0 1;
+#X obj 360 53 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
-#X obj 165 223 s toSpatOSC;
-#X obj 236 132 == 0;
-#X obj 236 161 metro 30;
-#X text 37 20 By default \, SpatOSC operates in "synchronous" mode
-\, meaning that every time a node or connection's state changes \,
-an OSC message will go out immediately (well \, only if the value actually
-changes). By disabling synchronous mode \, you must manually bang the
-object to emit changes via OSC. This can let you manage network load
-more precisely.;
-#X connect 0 0 3 0;
-#X connect 1 0 3 0;
-#X connect 2 0 1 0;
-#X connect 2 0 4 0;
-#X connect 4 0 5 0;
-#X connect 5 0 0 0;
-#X restore 464 -59 pd ABOUT_SCHEDULING;
-#N canvas 960 172 785 538 PHYSICAL_MODELLING_FACTORS 1;
-#X obj 35 5 cnv 15 300 500 empty empty connection_effects 20 12 0 14
--233017 -66577 0;
-#X msg 72 169 0;
-#X msg 79 189 100;
-#X text 107 189 normal;
-#X text 113 206 more extreme;
-#X msg 74 224 setDopplerFactor mySound ear \$1;
-#X obj 31 487 s toSpatOSC;
-#X msg 87 206 200;
-#X msg 58 54 0;
-#X msg 68 71 100;
-#X text 97 70 normal;
-#X text 104 88 more extreme;
-#X msg 78 88 200;
-#X msg 58 114 setDistanceFactor mySound ear \$1;
-#X msg 90 273 0;
-#X text 124 270 no effect;
-#X msg 100 290 100;
-#X text 129 289 normal;
-#X text 143 307 more extreme;
-#X msg 110 307 200;
-#X obj 344 6 cnv 15 370 500 empty empty when_sources_are_near_(option)
-20 12 0 14 -233017 -66577 0;
-#X msg 361 223 setRadius mySound \$1;
-#X floatatom 362 201 5 0 0 1 meters - -;
-#X floatatom 382 284 5 1 10 1 scaler_(applied_to_radius_meters) - -
+#X obj 409 102 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+1;
+#X msg 583 216 setOutputDB \$1;
+#X msg 512 150 setOutputTrimDB \$1;
+#X msg 427 94 setOutputMute \$1;
+#X msg 381 46 setOutputDIM \$1;
+#X msg 58 203 connect 192.168.0.13 18032;
+#X obj 368 295 s \$0-toSatieRenderer;
+#N canvas 933 533 707 581 old 0;
+#X obj 40 221 s \$0-toSatie;
+#X msg 40 42 setProjectDir /Users/zack/src/aquakhoria/AquaKhoria_UnityProject/Assets/StreamingAssets
 ;
-#X msg 381 305 setTransitionRadiusFactor mySound \$1;
-#X obj 362 337 s toSpatOSC;
-#X msg 91 329 setDirectivityFactor mySound ear \$1;
-#X text 354 38 when a source is within a certain radius of the listener
-\, the connection effects of distance attenuation and rolloff attenuation/filtering
-can be supressed. The "transitionRadiousFactor" describes a larger
-radious \, over which \, the rolloff effect is scaled back to normal.
+#X msg 78 136 setProjectDir /Users/metalab/src/aquakhoria/AquaKhoria_UnityProject/Assets/StreamingAssets
 ;
-#X obj 363 480 s toSpatOSC;
-#X msg 363 409 0;
-#X floatatom 363 438 5 -40 0 1 maxClip_db - -;
-#X msg 363 457 setMaxGainClip mySound ear \$1;
-#X msg 393 410 -24;
-#X msg 101 379 0;
-#X msg 111 396 100;
-#X text 140 395 normal;
-#X text 154 413 more extreme;
-#X msg 121 413 200;
-#X text 94 461 (indidence effect of source on listener);
-#X text 52 34 DISTANCE EFFECT;
-#X text 68 152 DOPPLER EFFECT;
-#X text 98 169 none;
-#X text 87 52 none;
-#X text 135 376 none;
-#X text 86 254 SOURCE DIRECTIVITY EFFECT;
-#X text 98 360 SOURCE INCIDENCE EFFECT;
-#X text 355 366 Clips connection output level to N db;
-#X text 384 385 useful when sounds come "too close";
-#X msg 361 151 1;
-#X msg 375 177 0;
-#X text 400 174 disables radius effect;
-#X text 386 144 sound will have no inicidence or attenuation within
-1m radius;
-#X msg 381 260 5;
-#X text 409 261 incidence suppression zone extends to 5 * radius;
-#X msg 101 439 setIncidenceFactor mySound ear \$1;
-#X connect 1 0 5 0;
-#X connect 2 0 5 0;
-#X connect 5 0 6 0;
-#X connect 7 0 5 0;
-#X connect 8 0 13 0;
-#X connect 9 0 13 0;
-#X connect 12 0 13 0;
-#X connect 13 0 6 0;
-#X connect 14 0 26 0;
-#X connect 16 0 26 0;
-#X connect 19 0 26 0;
-#X connect 21 0 25 0;
-#X connect 22 0 21 0;
-#X connect 23 0 24 0;
-#X connect 24 0 25 0;
-#X connect 26 0 6 0;
-#X connect 29 0 30 0;
-#X connect 30 0 31 0;
-#X connect 31 0 28 0;
-#X connect 32 0 30 0;
-#X connect 33 0 54 0;
-#X connect 34 0 54 0;
-#X connect 37 0 54 0;
-#X connect 48 0 22 0;
-#X connect 49 0 22 0;
-#X connect 52 0 23 0;
-#X connect 54 0 6 0;
-#X restore 464 -38 pd PHYSICAL_MODELLING_FACTORS;
-#N canvas 276 875 923 460 ADVANCED_CONNECTION_FEATURES 1;
-#X msg 80 78 \; toSpatOSC setAutoConnect \$1;
-#X obj 80 53 tgl 15 1 empty empty auto-connect 17 7 1 12 -262144 -1
--1 1 1;
-#X msg 78 196 \; toSpatOSC setConnectFilter \$1;
-#X obj 78 171 symbol;
-#X msg 77 132 ear;
-#X msg 113 133 ignore;
-#X msg 516 217 createListener ear;
-#X text 636 183 <-- Create a sound source;
-#X text 646 217 <-- Create a listener;
-#X msg 514 182 createSource mySound;
-#X msg 517 248 connect mySound ear;
-#X text 643 249 <-- Connect source to listener;
-#X text 644 283 <-- Disconnect source from listener;
-#X obj 463 340 s toSpatOSC;
-#X msg 471 93 clearScene;
-#X msg 495 138 setAutoConnect 0;
-#X text 74 7 autoconnect us on by default \, so connections are automatically
-made between all sources and listener(s).;
-#X text 468 17 However \, in sum cases \, it may be necessary to create
-connections explicitly among sources and listener(s). In ssuch a case
-\, the following messages can be used;
-#X text 551 91 (clear the scene and start fresh for this example);
-#X text 603 137 <-- Disable automatic connections;
-#X msg 516 285 disconnect mySound ear;
+#X connect 1 0 0 0;
+#X connect 2 0 0 0;
+#X restore 37 39 pd old;
+#X msg 586 253 freeSynths default;
+#X obj 586 288 s \$0-toSatieRenderer;
+#N canvas 118 35 600 572 works 0;
+#X obj 103 79 OSCprepend /satie/scene;
+#X obj 103 31 r \$0-toSatieScene;
+#X obj 98 548 s \$0-toSatie;
+#X obj 218 457 OSCprepend /satie/rendererCtl;
+#X obj 218 421 r \$0-toSatieRenderer;
+#X obj 149 162 OSCprepend /satie/source;
+#X obj 149 126 r \$0-toSatieSource;
+#X obj 188 223 r \$0-toSatieGroup;
+#X obj 188 259 OSCprepend /satie/group;
+#X obj 211 312 r \$0-toSatieProcess;
+#X obj 211 348 OSCprepend /satie/process;
+#X connect 0 0 2 0;
 #X connect 1 0 0 0;
 #X connect 3 0 2 0;
 #X connect 4 0 3 0;
+#X connect 5 0 2 0;
+#X connect 6 0 5 0;
+#X connect 7 0 8 0;
+#X connect 8 0 2 0;
+#X connect 9 0 10 0;
+#X connect 10 0 2 0;
+#X restore 37 71 pd works;
+#N canvas 378 157 555 669 GROUP_TEST 1;
+#X obj 6 8 cnv 15 500 700 empty empty group 20 12 0 18 -204786 -66577
+0;
+#X floatatom 248 160 5 0 0 0 - - -, f 5;
+#X obj 274 231 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+1;
+#X obj 281 292 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+1;
+#X obj 86 110 s \$0-toSatieScene;
+#X msg 96 73 deleteNode groupA;
+#X msg 293 227 /state groupA \$1;
+#X msg 300 288 /event groupA \$1;
+#X obj 221 505 s \$0-toSatieGroup;
+#X msg 249 190 /prop groupA sheefa \$1;
+#X msg 74 31 createGroup groupA;
+#X msg 291 398 /add groupA sourceA;
+#X msg 284 439 /drop groupA sourceA;
+#X connect 1 0 9 0;
+#X connect 2 0 6 0;
+#X connect 3 0 7 0;
+#X connect 5 0 4 0;
+#X connect 6 0 8 0;
+#X connect 7 0 8 0;
+#X connect 9 0 8 0;
+#X connect 10 0 4 0;
+#X connect 11 0 8 0;
+#X connect 12 0 8 0;
+#X restore 658 47 pd GROUP_TEST;
+#N canvas 1396 180 823 630 SOURCE_TEST 1;
+#X obj 3 9 cnv 15 800 600 empty empty source 20 12 0 18 -191407 -66577
+0;
+#X floatatom 25 137 5 0 0 0 - - -, f 5;
+#X obj 51 208 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+1;
+#X obj 58 269 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+1;
+#X obj 100 107 s \$0-toSatieScene;
+#X msg 70 204 /state sourceA \$1;
+#X msg 110 70 deleteNode sourceA;
+#X obj 29 317 s \$0-toSatieSource;
+#X obj 334 289 hotpack3 0 0 0;
+#X obj 334 89 hsl 128 15 -180 180 0 0 empty empty empty -2 -8 0 10
+-262144 -1 -1 9700 1;
+#X obj 334 258 deg2rad;
+#X obj 412 115 vsl 15 128 -90 90 0 0 empty empty empty 0 -9 0 10 -262144
+-1 -1 6200 1;
+#X obj 412 257 deg2rad;
+#X obj 478 92 vsl 15 128 -66 0 0 0 empty empty empty 0 -9 0 10 -262144
+-1 -1 9300 1;
+#X obj 278 290 vsl 15 128 30 90 0 0 empty empty empty 0 -9 0 10 -262144
+-1 -1 500 1;
+#X obj 278 429 mtof;
+#X obj 329 550 s \$0-toSatieSource;
+#X obj 398 382 hsl 128 15 0 2 0 0 empty empty empty -2 -8 0 10 -262144
+-1 -1 8300 1;
+#X msg 279 467 /hpHz sourceA \$1;
+#X msg 396 412 /spread sourceA \$1;
+#X msg 26 167 /prop sourceA sheefa \$1;
+#X msg 77 265 /event sourceA fuckme \$1;
+#X msg 88 28 createSource sourceA plugin://default default;
+#X msg 20 59 clear;
+#X msg 333 330 /update sourceA \$1 \$2 \$3 10 5000 10;
+#X connect 1 0 20 0;
+#X connect 2 0 5 0;
+#X connect 3 0 21 0;
+#X connect 5 0 7 0;
+#X connect 6 0 4 0;
+#X connect 8 0 24 0;
+#X connect 9 0 10 0;
+#X connect 10 0 8 0;
+#X connect 11 0 12 0;
+#X connect 12 0 8 1;
+#X connect 13 0 8 2;
+#X connect 14 0 15 0;
+#X connect 15 0 18 0;
+#X connect 17 0 19 0;
+#X connect 18 0 16 0;
+#X connect 19 0 16 0;
+#X connect 20 0 7 0;
+#X connect 21 0 7 0;
+#X connect 22 0 4 0;
+#X connect 23 0 4 0;
+#X connect 24 0 16 0;
+#X restore 658 84 pd SOURCE_TEST;
+#N canvas 1035 218 735 739 PROCESS_TEST 0;
+#X obj 5 8 cnv 15 700 700 empty empty process 20 12 0 18 -204800 -66577
+0;
+#X floatatom 248 160 5 0 0 0 - - -, f 5;
+#X obj 86 110 s \$0-toSatieScene;
+#X obj 73 363 hotpack3 0 0 0;
+#X obj 73 163 hsl 128 15 -180 180 0 0 empty empty empty -2 -8 0 10
+-262144 -1 -1 2900 1;
+#X obj 73 332 deg2rad;
+#X obj 151 189 vsl 15 128 -90 90 0 0 empty empty empty 0 -9 0 10 -262144
+-1 -1 0 1;
+#X obj 151 331 deg2rad;
+#X obj 217 166 vsl 15 128 -66 0 0 0 empty empty empty 0 -9 0 10 -262144
+-1 -1 11000 1;
+#X obj 137 456 hsl 128 15 0 2 0 0 empty empty empty -2 -8 0 10 -262144
+-1 -1 12700 1;
+#X msg 96 73 deleteNode processA;
+#X msg 249 190 /prop processA sheefa \$1;
+#X msg 135 486 /spread processA \$1;
+#X obj 252 340 s \$0-toSatieProcess;
+#X obj 68 624 s \$0-toSatieProcess;
+#X msg 74 31 createProcess processA process://sheefa default;
+#X msg 72 404 /update processA \$1 \$2 \$3 10 5000 10;
+#X msg 295 247 /event processA trigger 60 0 0;
+#X msg 303 293 /event processA piss 60 0 0;
+#X connect 1 0 11 0;
+#X connect 3 0 16 0;
+#X connect 4 0 5 0;
+#X connect 5 0 3 0;
+#X connect 6 0 7 0;
+#X connect 7 0 3 1;
+#X connect 8 0 3 2;
+#X connect 9 0 12 0;
+#X connect 10 0 2 0;
+#X connect 11 0 13 0;
+#X connect 12 0 14 0;
+#X connect 15 0 2 0;
+#X connect 16 0 14 0;
+#X connect 17 0 13 0;
+#X connect 18 0 13 0;
+#X restore 657 18 pd PROCESS_TEST;
+#X msg 77 262 connect 192.168.0.12 18032;
+#X connect 1 0 2 0;
+#X connect 3 0 1 0;
+#X connect 4 0 1 0;
 #X connect 5 0 3 0;
 #X connect 6 0 13 0;
-#X connect 9 0 13 0;
-#X connect 10 0 13 0;
-#X connect 14 0 13 0;
-#X connect 15 0 13 0;
-#X connect 20 0 13 0;
-#X restore 464 -15 pd ADVANCED_CONNECTION_FEATURES;
-#X floatatom 339 564 5 0 0 0 - - -;
-#X floatatom 377 563 5 0 0 0 - - -;
-#X floatatom 416 563 5 0 0 0 - - -;
-#N canvas 0 22 290 211 pack3f 0;
-#X obj 79 103 pack f f f;
-#X obj 99 73 t b f;
-#X obj 144 71 t b f;
-#X obj 63 44 inlet;
-#X obj 110 41 inlet;
-#X obj 162 45 inlet;
-#X obj 80 137 outlet;
-#X connect 0 0 6 0;
-#X connect 1 0 0 0;
-#X connect 1 1 0 1;
-#X connect 2 0 0 0;
-#X connect 2 1 0 2;
-#X connect 3 0 0 0;
-#X connect 4 0 1 0;
-#X connect 5 0 2 0;
-#X restore 338 583 pd pack3f;
-#X msg 338 604 setOrientation ear \$1 \$2 \$3;
-#X text 369 338 <-- change source position;
-#X text 442 481 <-- change listener position;
-#N canvas 640 309 460 696 other 0;
-#X obj 8 63 cnv 15 440 200 empty empty events 10 12 1 14 -228856 -1
-0;
-#X obj 25 242 s toSpatOSC;
-#X obj 51 156 metro 200;
-#X obj 25 178 timer;
-#X obj 50 137 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
-1;
-#X msg 25 202 sendNodeEvent ear timeCode \$1;
-#X obj 6 -103 cnv 15 440 160 empty empty enable/disable_DSP 10 12 1
-14 -228856 -1 0;
-#X obj 23 -3 s toSpatOSC;
-#X msg 23 -36 setActive mySound \$1;
-#X obj 23 -61 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
-1;
-#X obj 166 -56 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
-1;
-#X msg 167 -34 setActive ear \$1;
-#X text 21 -79 enables/disables all connections with named node;
-#X text 74 65 aribitrary events of any length can be sent "through"
-to nodes on the target audio renderer(s) [note: the state of the event
-is not stored in the audio sceene];
-#X msg 174 152 sendNodeEvent mySound envelope 1 300 1 50 0;
-#X msg 228 179 sendNodeEvent mySound start;
-#X msg 272 206 sendNodeEvent mySound stop;
-#X obj 229 227 s toSpatOSC;
-#X obj 7 270 cnv 15 440 300 empty empty other 10 12 1 14 -228856 -1
-0;
-#X text 32 291 (Azimuth Elevation Distance): alternative way to specify
-position of sources and listeners;
-#X floatatom 214 324 5 0 0 0 - - -;
-#X floatatom 252 323 5 0 0 0 - - -;
-#X floatatom 290 325 5 0 0 0 - - -;
-#N canvas 0 22 290 211 pack3f 0;
-#X obj 79 103 pack f f f;
-#X obj 99 73 t b f;
-#X obj 144 71 t b f;
-#X obj 63 44 inlet;
-#X obj 110 41 inlet;
-#X obj 162 45 inlet;
-#X obj 80 137 outlet;
-#X connect 0 0 6 0;
-#X connect 1 0 0 0;
-#X connect 1 1 0 1;
-#X connect 2 0 0 0;
-#X connect 2 1 0 2;
-#X connect 3 0 0 0;
-#X connect 4 0 1 0;
-#X connect 5 0 2 0;
-#X restore 213 344 pd pack3f;
-#X msg 213 365 setPositionAED mySound \$1 \$2 \$3;
-#X floatatom 35 327 5 0 0 0 - - -;
-#X floatatom 73 327 5 0 0 0 - - -;
-#X floatatom 111 328 5 0 0 0 - - -;
-#N canvas 0 22 290 211 pack3f 0;
-#X obj 79 103 pack f f f;
-#X obj 99 73 t b f;
-#X obj 144 71 t b f;
-#X obj 63 44 inlet;
-#X obj 110 41 inlet;
-#X obj 162 45 inlet;
-#X obj 80 137 outlet;
-#X connect 0 0 6 0;
-#X connect 1 0 0 0;
-#X connect 1 1 0 1;
-#X connect 2 0 0 0;
-#X connect 2 1 0 2;
-#X connect 3 0 0 0;
-#X connect 4 0 1 0;
-#X connect 5 0 2 0;
-#X restore 34 346 pd pack3f;
-#X msg 34 367 setPositionAED ear \$1 \$2 \$3;
-#X obj 33 428 s toSpatOSC;
-#X msg 38 491 setURI ear plugin://spooler~;
-#X obj 38 520 s toSpatOSC;
-#X text 33 474 implemented for listener as well \, but not used;
-#X connect 2 0 3 1;
-#X connect 3 0 5 0;
-#X connect 4 0 2 0;
-#X connect 5 0 1 0;
-#X connect 8 0 7 0;
+#X connect 7 0 6 0;
+#X connect 8 0 12 0;
 #X connect 9 0 8 0;
-#X connect 10 0 11 0;
-#X connect 11 0 7 0;
+#X connect 10 0 15 0;
+#X connect 11 0 14 0;
+#X connect 12 0 17 0;
+#X connect 13 0 17 0;
 #X connect 14 0 17 0;
 #X connect 15 0 17 0;
-#X connect 16 0 17 0;
-#X connect 20 0 23 0;
-#X connect 21 0 23 1;
-#X connect 22 0 23 2;
-#X connect 23 0 24 0;
-#X connect 24 0 30 0;
-#X connect 25 0 28 0;
-#X connect 26 0 28 1;
-#X connect 27 0 28 2;
-#X connect 28 0 29 0;
-#X connect 29 0 30 0;
-#X connect 31 0 32 0;
-#X restore 464 8 pd other;
-#X text 464 559 <-- change listener orientation;
-#X text 411 406 <-- change source orientation;
-#X floatatom 289 407 5 0 0 0 - - -;
-#X floatatom 327 406 5 0 0 0 - - -;
-#X floatatom 366 406 5 0 0 0 - - -;
-#N canvas 0 22 290 211 pack3f 0;
-#X obj 79 103 pack f f f;
-#X obj 99 73 t b f;
-#X obj 144 71 t b f;
-#X obj 63 44 inlet;
-#X obj 110 41 inlet;
-#X obj 162 45 inlet;
-#X obj 80 137 outlet;
-#X connect 0 0 6 0;
-#X connect 1 0 0 0;
-#X connect 1 1 0 1;
-#X connect 2 0 0 0;
-#X connect 2 1 0 2;
-#X connect 3 0 0 0;
-#X connect 4 0 1 0;
-#X connect 5 0 2 0;
-#X restore 288 426 pd pack3f;
-#X msg 288 447 setOrientation mySound \$1 \$2 \$3;
-#N canvas 719 172 721 728 sourceNode_directivity 0;
-#X msg -12 190 setDirectivity mySound omni omni;
-#X msg -197 118 printDirectivities;
-#X text -298 -159 by default sound source nodes are omnidirectional
-\, emitting sound in all directions. The following messages allow sound
-source nodes to emit sound directionally.;
-#X msg -268 58 setDirectivity mySound omni omni;
-#X obj -173 188 s toSpatOSC;
-#X text -272 23 usage: setDirectivity nodeName lateralDirectivity verticalDirectivity
-;
-#X text -300 -93 spatOSC provides four preset directivity patterns
-to choose from: OMMI \, cardoid \, superCardoid \, cone and hemisphere.
-;
-#X text -300 -51 A node uses twp patterns to define its directivity:
-one lateral \, and one vertival. Both are combined to form a 3-D shape
-that determines how the source's sound is emitted.;
-#X text -68 60 <-the node fully omnidirectional;
-#X msg -12 159 setDirectivity mySound cone cone;
-#X msg -13 97 setDirectivity mySound cardioid cardioid;
-#X msg -12 128 setDirectivity mySound hypercardioid hypercardioid;
-#X msg -11 215 setDirectivity mySound hemisphere hemisphere;
-#X msg -11 245 setDirectivity mySound omni cone;
-#X msg -98 353 createDirectivity sheefa 1 1 1 1 1 1 1 1 1 1 1 1 1 0
-0 0 0 0 0 0 0 0 0 0 0 0 0;
-#X text -94 319 usage: createDirectivity tableName v1 v2 ....... vn
-\, where 0 <= v <= 1;
-#X text -98 394 the values in the table \, used to describe a table
-from 0 to pi \, represent a directivity (rolloff) function [unit scale
-from 0 to 1];
-#X connect 0 0 4 0;
-#X connect 1 0 4 0;
-#X connect 3 0 4 0;
-#X connect 9 0 4 0;
-#X connect 10 0 4 0;
-#X connect 11 0 4 0;
-#X connect 12 0 4 0;
-#X connect 13 0 4 0;
-#X connect 14 0 4 0;
-#X restore 527 9 pd sourceNode_directivity;
-#N canvas 164 601 527 378 global-settings 0;
-#X obj 33 191 s toSpatOSC;
-#X msg 34 112 setSceneRotation 0 0 \$1;
-#X floatatom 34 79 5 0 0 0 - - -;
-#X msg 54 143 setSceneTranslation 0 0 0;
-#X text 21 16 use this message to change the global orientation and
-translation of the audio-scene. Useful for remapping the scene's axes
-to work with other 3D envrionments.;
-#X connect 1 0 0 0;
-#X connect 2 0 1 0;
-#X connect 3 0 0 0;
-#X restore 467 -101 pd global-settings;
-#X msg 334 719 setActive ear \$1 \, setActive mySound \$1;
-#X text 353 696 (de)activate nodes;
-#X obj 334 697 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
-1;
-#X text 327 190 <-- specify plugin for source;
-#X text 33 -7 defaule: uses Basic Renderer translator on port 18032
-;
-#X text 377 140 note: connections automatically made as soon as listener
-exists;
-#X msg 139 188 setURI mySound plugin://dust;
-#X msg 157 219 setURI mySound plugin://pink;
-#X msg 171 245 setURI mySound plugin://default;
-#X text 374 128 <-- Create a sound source and listener and set to Active
-;
-#X msg 209 302 sendNodeEvent mySound noteOn 60 0.1;
-#N canvas 0 433 836 665 PLUGIN_TEST 0;
-#X text -329 102 freq=440 \, amp=0.5 \, t_gate=0 \, pos = 0.14 \, c1
-= 1 \, c3=20 \, fb = 2 \;;
-#X msg 60 372 freq \$1;
-#X msg -109 395 amp \$1;
-#X msg -197 141 pos \$1;
-#X msg -137 144 c1 \$1;
-#X msg -87 143 c3 \$1;
-#X msg -29 142 fb \$1;
-#X obj 135 472 s toSpatOSC;
-#X obj 135 439 prepend sendNodeEvent;
-#X msg 140 121 t_gate 1;
-#X obj 140 88 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
--1;
-#X obj 133 19 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
-1;
-#X msg 224 98 bang \, bang;
-#X obj 59 210 vsl 15 128 80 1000 1 0 empty empty fq 0 -9 0 10 -262144
--1 -1 0 1;
-#X floatatom 72 351 5 0 0 0 - - -;
-#X msg 105 182 300;
-#X msg 89 248 200;
-#X obj -88 219 vsl 15 128 0.001 1 1 0 empty empty amp 0 -9 0 10 -262144
--1 -1 0 1;
-#X floatatom -75 360 5 0 0 0 - - -;
-#X msg -58 257 200;
-#X obj 167 45 metro 1000;
-#X obj 135 408 prepend mySound;
-#X obj -58 421 prepend mySound;
-#X obj -62 450 prepend setNodeFloatProperty;
-#X floatatom 303 55 5 0 0 0 - - -;
-#X connect 1 0 22 0;
-#X connect 2 0 22 0;
-#X connect 8 0 7 0;
-#X connect 9 0 21 0;
-#X connect 10 0 9 0;
-#X connect 11 0 20 0;
-#X connect 12 0 9 0;
-#X connect 13 0 14 0;
-#X connect 14 0 1 0;
-#X connect 15 0 13 0;
-#X connect 16 0 13 0;
-#X connect 17 0 18 0;
-#X connect 17 0 2 0;
-#X connect 19 0 17 0;
-#X connect 20 0 10 0;
-#X connect 21 0 8 0;
-#X connect 22 0 23 0;
-#X connect 23 0 7 0;
-#X connect 24 0 20 1;
-#X restore 335 53 pd PLUGIN_TEST;
-#X obj 228 616 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
--1 -1;
-#X obj 34 -34 tgl 20 0 empty empty success 25 10 0 10 -258113 -1 -1
-1 1;
-#X obj 83 -77 r toSpatOSC;
-#X text 88 -55 Usage: [spatosc s:translator s:oscUrl];
-#X obj 34 -56 spatosc;
-#X msg 45 93 createSource mySound \, setActive mySound 1 \, createListener
-ear;
-#X msg 188 267 setURI mySound plugin://labodomeTest;
-#X obj 892 138 until;
-#X obj 898 201 f;
-#X obj 928 201 + 1;
-#X msg 993 383 createSource testSource\$1 \, setActive testSource\$1
-1;
-#X obj 1029 616 s toSpatOSC;
-#X msg 1117 65 createListener ear;
-#X obj 1114 104 s toSpatOSC;
-#X msg 119 843 removeTranslator default;
-#X text 322 778 <- this is the default one created on startup;
-#X obj 61 914 s toSpatOSC;
-#X msg 45 784 addTranslator default BasicTranslator osc.udp://192.168.0.17:18032
-;
-#X obj 883 76 t f b;
-#X msg 932 107 0;
-#X msg 1058 29 clearScene;
-#X msg 881 34 40;
-#X floatatom 956 18 5 0 0 0 - - -;
-#X obj 928 46 f;
-#X obj 902 -51 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
--1 -1;
-#X msg 665 497 setIncidenceFactor testSource1 ear \$1;
-#X floatatom 665 448 5 0 0 0 - - -;
-#X msg 1015 415 setURI testSource\$1 plugin://default;
-#X msg 753 442 setNodeFloatProperty testSource\$1 fb 100 \, setNodeFloatProperty
-testSource\$1 c1 1 \, setNodeFloatProperty testSource\$1 c3 6;
-#X msg 1034 463 setURI testSource\$1 plugin://zkarpluck1;
-#X msg 787 340 setURI testSource\$1 plugin://default;
-#X obj 897 239 t f f f b;
-#X connect 0 0 3 0;
-#X connect 1 0 3 1;
-#X connect 2 0 3 2;
-#X connect 3 0 8 0;
-#X connect 4 0 7 0;
-#X connect 5 0 7 1;
-#X connect 6 0 7 2;
-#X connect 7 0 9 0;
-#X connect 8 0 10 0;
-#X connect 9 0 10 0;
-#X connect 11 0 10 0;
-#X connect 18 0 21 0;
-#X connect 19 0 21 1;
-#X connect 20 0 21 2;
-#X connect 21 0 22 0;
-#X connect 22 0 10 0;
-#X connect 28 0 31 0;
-#X connect 29 0 31 1;
-#X connect 30 0 31 2;
-#X connect 31 0 32 0;
-#X connect 32 0 10 0;
-#X connect 35 0 10 0;
-#X connect 37 0 35 0;
-#X connect 41 0 10 0;
-#X connect 42 0 10 0;
-#X connect 43 0 10 0;
-#X connect 45 0 10 0;
-#X connect 47 0 10 0;
-#X connect 49 0 51 0;
-#X connect 51 0 48 0;
-#X connect 52 0 10 0;
-#X connect 53 0 10 0;
-#X connect 54 0 55 0;
-#X connect 55 0 56 0;
-#X connect 55 0 78 0;
-#X connect 56 0 55 1;
-#X connect 57 0 58 0;
-#X connect 59 0 60 0;
-#X connect 61 0 63 0;
-#X connect 64 0 63 0;
-#X connect 65 0 54 0;
-#X connect 65 1 66 0;
-#X connect 66 0 55 1;
-#X connect 67 0 60 0;
-#X connect 68 0 65 0;
-#X connect 69 0 70 1;
-#X connect 70 0 65 0;
-#X connect 71 0 70 0;
-#X connect 72 0 58 0;
-#X connect 73 0 72 0;
-#X connect 75 0 58 0;
-#X connect 77 0 58 0;
-#X connect 78 0 75 0;
-#X connect 78 1 77 0;
-#X connect 78 2 57 0;
-#X connect 78 3 59 0;
+#X connect 16 0 1 0;
+#X connect 19 0 20 0;
+#X connect 25 0 1 0;
