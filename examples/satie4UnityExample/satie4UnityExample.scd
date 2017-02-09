@@ -1,6 +1,6 @@
 // called from project's  main.scd file
 
-~satie4unity=nil;     // uncomment for debug
+//~satie4unity=nil;     // uncomment for debug
 
 s.waitForBoot{
 
