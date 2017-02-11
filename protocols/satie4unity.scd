@@ -674,7 +674,10 @@ for debugguing
 			var rawArgVec = nil;
 			var argList = List[];
 
-			//("~createSourceProcess:  URI"++uriPath).postln;
+			if ( e.debugFlag,
+				{
+					("~createSourceProcess:  URI"++uriPath).postln;
+			});
 
 			// sheefa = uriPath;
 
