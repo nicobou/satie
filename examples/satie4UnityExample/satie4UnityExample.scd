@@ -2,6 +2,10 @@
 
 //~satie4unity=nil;     // uncomment for debug
 
+// this is hardwired since it must be defined at init itme, prior to receiving messages from any OSC clients
+~thisProjectResourcePath = "~/".standardizePath ++"src/satie4UnityProject/Assets/StreamingAssets";
+
+
 s.waitForBoot{
 
 	~num_aux_bus = 2;
@@ -34,6 +38,7 @@ s.waitForBoot{
 	if (~satie4unity == nil,{
 		~satie4unity = ~satie4unityprotocol.value(~osc, ~scbr);
 		~satie4unity.debugFlag = true;
+		~satie4unity.projectDirectory = ~thisProjectResourcePath;
 
 	});
 
