@@ -32,7 +32,18 @@ public class SATIElistener : SATIEnode {
 
         if ( ! this.gameObject.activeInHierarchy)  return;
 
-		nodeType = "listener";
+
+
+        // renderer can only render for one listener
+        if (listenerInsatances.Count != 0)
+        {
+            Debug.LogError(transform.name + " : " + GetType() + " : " + "Start(): duplicate listener:  only one listener can be defined in scene, aborting");
+            Destroy(this);
+            return;
+        }
+
+        // otherwise al good, continue
+        nodeType = "listener";
 
         initNode();  // must be called before parent's "Start()"
         base.Start();

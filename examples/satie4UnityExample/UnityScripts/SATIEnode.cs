@@ -40,6 +40,8 @@ public class SATIEnode : MonoBehaviour
 
     private bool _start = false;
 
+    [HideInInspector] 
+    public bool isProcess = false;
 
 
  
@@ -277,11 +279,11 @@ public class SATIEnode : MonoBehaviour
 
         List <SATIEnode> nodeList = new List<SATIEnode>();
 
-
+        //  if  "PROCESS" becomes a node type, it will need to be subclassed from source, and given a new type
         switch (nodeType)
         {
             case "listener":
-                nodeList = listenerInsatances;
+                nodeList = listenerInsatances;                    
                 break;
             case "source":
                 nodeList = sourceInsatances;
@@ -290,6 +292,7 @@ public class SATIEnode : MonoBehaviour
                 nodeList = groupInsatances;
                 break;
         }
+                
 
         foreach (SATIEnode node in nodeList)
         {
@@ -328,14 +331,21 @@ public class SATIEnode : MonoBehaviour
         if (nodeType == "listener")
         {
             nodeName = transform.name; // + "_" + nodeNo;
-            result = SATIEsetup.createListener(nodeName, uriString);
-            sendUri(uriString); // not really used but .....
+
+            // satie creates one single listener by default, no need to tell satie to create a listener
+            //result = SATIEsetup.createListener(nodeName, uriString);
+            // sendUri(uriString); // not used any more
         } 
 
 		// this should be done in the superclass-- 
 		else if (nodeType == "source")
         {
             SATIEsource src = (SATIEsource)this;
+
+            if (uriString.Contains("process://"))
+            {
+                isProcess = true;
+            }
 
             // go agead an make this node with this group name, even if the group has not been created yet
             //string groupName = "";
@@ -344,7 +354,11 @@ public class SATIEnode : MonoBehaviour
 //				groupName = gameObject.tag;
 
             nodeName = transform.name;  // + "_" + nodeNo;
-            result = SATIEsetup.createSource(nodeName, uriString, src.group);
+ 
+            if (isProcess) 
+                result = SATIEsetup.createProcess(nodeName, uriString, src.group);
+            else
+                result = SATIEsetup.createSource(nodeName, uriString, src.group);
             //sendUri(uriString);   //NO NEED TO DO THIS NOW THAT THE URI IS CREATED WITH THE SOURCE
             //Debug.Log("******************************************SATIEnode.initNode: source nodename; "+nodeName+"  groupName: "+ src.group);
         }
@@ -368,7 +382,7 @@ public class SATIEnode : MonoBehaviour
 
         SATIEsetup.SATIEnodeList.Add(this);
 
-        transform.name = nodeName;  // overwrite node name with spatOSC unique name
+        transform.name = nodeName;  // overwrite node name with satie unique name
 
 
 
@@ -403,9 +417,14 @@ public class SATIEnode : MonoBehaviour
 
         List<object> items = new List<object>();
 
-        path = "/spatosc/core/" + nodeType + "/" + nodeName + "/event";
+        if (isProcess)
+            path = "/satie/process/event";
+        else 
+            path = "/satie/" + nodeType + "/event";
         
-        
+ 
+        items.Add(nodeName);
+               
         items.Add(keyWord);
 
         
@@ -432,38 +451,47 @@ public class SATIEnode : MonoBehaviour
         items.Clear();
     }
 
-  
+    //   /satie/source/event sourceName eventName <opt> atom1 atom2...atomN    
     public void sendEvent(List<object> items)   // items contains keyword data1 data2..... dataN
     {
-
-
         string path;
+        List<object> outList = new List<object>(items);
 
-        path = "/spatosc/core/" + nodeType + "/" + nodeName + "/event";
+        outList.Insert(0, nodeName);
+
+        if (isProcess)
+            path = "/satie/process/event";
+        else 
+            path = "/satie/" + nodeType + "/event";
   
-        string sheefa = "";
-
-        foreach (object o in items)
-        {
-            sheefa += o.ToString();
-            sheefa += "";
-        }
- 
 		
-        //Debug.Log(transform.name + " : " + GetType() + " : " + "sendEvent: "+path+" : "+sheefa  );
+        if (debug)
+        {
+            string sheefa = "";
 
+            foreach (object o in items)
+            {
+                sheefa += o.ToString();
+                sheefa += " ";
+            }
+            Debug.Log(transform.name + " : " + GetType() + " : " + "sendEvent: " + path + " " + nodeName+" " + sheefa);
+        }
 
-        SATIEsetup.OSCtx(path, items);
-        //items.Clear();
+        SATIEsetup.OSCtx(path, outList);
+        outList.Clear();
     }
 
 
-
+    //  /satie/source/state sourceName value 
     public virtual void  setNodeActive(string nodeName, bool state)
     {
-        string path = "/spatosc/core/" + nodeType + "/" + nodeName + "/state";
+        string path = "/satie/" + nodeType + "/state";
+        // string path = "/spatosc/core/" + nodeType + "/" + nodeName + "/state";
+
         List<object> items = new List<object>();
-        
+
+        items.Add(nodeName);
+
         if (state)
             items.Add(1);
         else
@@ -474,9 +502,10 @@ public class SATIEnode : MonoBehaviour
     }
 
 
+    //  /satie/scene deleteNode nodeName
     public virtual void deleteNode(string nodeName)
     {
-        string path = "/spatosc/core";
+        string path = "/satie/scene";
         List<object> items = new List<object>();
 
         items.Add("deleteNode");
@@ -486,31 +515,33 @@ public class SATIEnode : MonoBehaviour
         items.Clear();
 
     }
-        
-    // DANGER:  no uriString format checking
-    public  void setUri(string uriString)
-    {
-
-        uri = uriString;
-        if (_start)
-        {
-            sendUri(uriString);
-            sendProperties();
-            updatePosFlag = true;
-            updateRotFlag = true;
-        }
-    }
-
-    public void sendUri(string uriString)
-    {
      
-        string path = "/spatosc/core/" + nodeType + "/" + nodeName + "/uri";
-        List<object> items = new List<object>();
+    // No longer used
+    // DANGER:  no uriString format checking
+//    public  void setUri(string uriString)
+//    {
+//
+//        uri = uriString;
+//        if (_start)
+//        {
+//            sendUri(uriString);
+//            sendProperties();
+//            updatePosFlag = true;
+//            updateRotFlag = true;
+//        }
+//    }
 
-        items.Add(uriString);        
-        SATIEsetup.OSCtx(path, items);
-        items.Clear();
-    }
+    // No longer used
+//    public void sendUri(string uriString)
+//    {
+//     
+//        string path = "/spatosc/core/" + nodeType + "/" + nodeName + "/uri";
+//        List<object> items = new List<object>();
+//
+//        items.Add(uriString);        
+//        SATIEsetup.OSCtx(path, items);
+//        items.Clear();
+//    }
 
 
 
@@ -712,8 +743,9 @@ public class SATIEnode : MonoBehaviour
             }
             else
                 uriString = uri;
-            
-            sendUri(uriString);
+
+            // no need to do this now
+            // sendUri(uriString);
         }
         sendProperties();
         updatePosFlag = updateRotFlag = true;
@@ -769,7 +801,7 @@ public class SATIEnode : MonoBehaviour
     }
 
 
-
+    //  /satie/scene/prop keyword value 
     public void sendOSCprop(string keyword, string svalue)
     {
         
@@ -779,9 +811,15 @@ public class SATIEnode : MonoBehaviour
         float fvalue = 0;
 
 
-        string path = "/spatosc/core/" + nodeType + "/" + nodeName + "/prop";
+        string path;
+        SATIEsource src;
 
- 
+        if (isProcess)
+            path = "/satie/process/prop";
+        else
+            path = "/satie/" + nodeType + "/prop";
+
+        items.Add(nodeName);
         items.Add(keyword);
 
 

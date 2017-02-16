@@ -64,6 +64,7 @@ public class SATIEsource : SATIEnode {
 
 	//public string listener="*";
     public string group = "default";   
+
   
     //public bool mute = false;   not used
     //private bool _mutestate;
@@ -451,18 +452,19 @@ public class SATIEsource : SATIEnode {
                 
 				myConnections.Add(conn);
 
-                //   /spatosc/core connect srcNode listenerNode
-                string path = "/spatosc/core";
-                List<object> items = new List<object>();
-                
-                
-                items.Add("connect");
-                items.Add(nodeName);
-				items.Add(listener.name);
-                
-                
-                SATIEsetup.OSCtx(path, items);
-                items.Clear();
+                // connections exist by default in SATIE, no need to instantiate
+//                //   /spatosc/core connect srcNode listenerNode
+//                string path = "/spatosc/core";
+//                List<object> items = new List<object>();
+//                
+//                
+//                items.Add("connect");
+//                items.Add(nodeName);
+//				items.Add(listener.name);
+//                
+//                
+//                SATIEsetup.OSCtx(path, items);
+//                items.Clear();
             }
         }
 	}
@@ -489,10 +491,13 @@ public class SATIEsource : SATIEnode {
 	// best called in the context of lateUpdate() since flags can be set to true during FixedUpdate() or Uptade()
  	public void evalConnections()
     {
+
 		if (!nodeEnabled) return;
 
 		foreach ( SATIEconnection conn in myConnections)
 		{
+
+
             if (conn.listener.updatePosFlag || conn.listener.updateRotFlag || updatePosFlag || updateRotFlag )
 			{
 				computeConnection(conn);
@@ -511,12 +516,18 @@ public class SATIEsource : SATIEnode {
     {
 
 
-
-        string path;
+        string path, pathRoot;
+            
         List<object> items = new List<object>();
         
 		SATIElistener listener = conn.listener;
 
+        string oscToken;
+
+        if (isProcess)
+            pathRoot = "/satie/process";
+        else
+            pathRoot = "/satie/source";
 
         Transform source = transform;
  
@@ -579,9 +590,12 @@ public class SATIEsource : SATIEnode {
 
 				//  set  cutoff filter to eliminate low frequencies when under water
         if (listener.submergedFlag  && underWaterProcessing ) {
-			if (_underWaterHpHz != underWaterHpHz) {
+			if (_underWaterHpHz != underWaterHpHz) 
+            {
 				_underWaterHpHz = underWaterHpHz;
-				path = "/spatosc/core/connection/" + source.name + "->" + listener.name + "/hpHz";
+
+                path = pathRoot+"/hpHz";
+                items.Add (source.name);             
 				items.Add (_underWaterHpHz);             
 				SATIEsetup.OSCtx (path, items);   // send spread message via OSC
 				items.Clear ();
@@ -589,9 +603,12 @@ public class SATIEsource : SATIEnode {
 			}
 		} else 
 		{
-			if (_underWaterHpHz == underWaterHpHz) {
+			if (_underWaterHpHz == underWaterHpHz) 
+            {
 				_underWaterHpHz = 1f;		// reset the cutoff filter to normal
-				path = "/spatosc/core/connection/" + source.name + "->" + listener.name + "/hpHz";
+                path = pathRoot+"/hpHz";
+
+                items.Add (source.name);             
 				items.Add (_underWaterHpHz);             
 				SATIEsetup.OSCtx (path, items);   // send spread message via OSC
 				items.Clear ();
@@ -600,13 +617,10 @@ public class SATIEsource : SATIEnode {
 		}
 
 
-		// handle spread
-		path = "/spatosc/core/connection/" + source.name + "->"+listener.name+"/spread";
-
 		// Using radius effect?  then check to see if we are within the radius transition distance; if so, reduce the localization effect for panning: via spread
 		if ( myRadius > 0f )    
         {
-			// have not yet debugged this case when underWaterProcessing is used
+ 			// have not yet debugged this case when underWaterProcessing is used
 
  
 			float radiusTransitionDistance = myRadius * conn.radiusTransitionFactor;
@@ -620,7 +634,10 @@ public class SATIEsource : SATIEnode {
 
             if ( newSpread != conn.currentspread )   // changed ?
             {
-                // path = "/spatosc/core/connection/" + source.name + "->"+listener.name+"/spread";   REDUNDANT LINE COMMENTED OUT
+                // handle spread
+                path = pathRoot+"/spread";
+                items.Add (source.name);             
+
                 conn.currentspread = newSpread;
 
                 items.Add(newSpread);             
@@ -640,6 +657,10 @@ public class SATIEsource : SATIEnode {
 
 			if (conn.currentspread != newSpread)
 			{
+                // handle spread
+                path = pathRoot+"/spread";
+                items.Add (source.name);             
+
 				conn.currentspread = newSpread;
 				items.Add(newSpread);             
 				SATIEsetup.OSCtx(path, items);   // send spread message via OSC
@@ -725,7 +746,8 @@ public class SATIEsource : SATIEnode {
         // /spatosc/core/connection/sourceNode->listenerNode/update azimuthRADIANS elevationRADIANS gainDB delayMS  lpHZ 
         // Debug.Log("  AZI: "+ azimuth*Mathf.Rad2Deg+"  Elev: "+elevation*Mathf.Rad2Deg); 
 
-        path = "/spatosc/core/connection/" + source.name + "->"+listener.name+"/update";
+        path = pathRoot+"/update";
+        items.Add (source.name);             
 
 
 
@@ -772,6 +794,7 @@ public class SATIEsource : SATIEnode {
     //  SPREAD seems to be mishandled... an additional connection param should be added for that
 
 
+    // returns list with 8 elements:    asimuth elevation gainDB vdelMs distFq HpHz distance spread
 
     public List <float>  getParticleConnParams(Vector3 particleXYZ)
     {
@@ -782,6 +805,8 @@ public class SATIEsource : SATIEnode {
         Transform source = transform;
         SATIEconnection conn = null;
         SATIElistener listener = null;
+
+        string path, pathRoot;
 
         float HpHz = 1f;  // using temp variable here
 
@@ -851,16 +876,18 @@ public class SATIEsource : SATIEnode {
         else 
             newSpread = conn.spread; 
 
-        if (conn.currentspread != newSpread)
-        {
-            string path = "/spatosc/core/connection/" + source.name + "->"+listener.name+"/spread";
-
-            conn.currentspread = newSpread;
-            items.Add(newSpread);             
-            SATIEsetup.OSCtx(path, items);   // send spread message via OSC
-            items.Clear();
-            //SATIEsetup.OSCdebug("/debug/getSpreadIndex", conn.spread);
-        }
+        // do not update renderer
+//        if (conn.currentspread != newSpread)
+//        {
+//            path = pathRoot+"/spread";
+//            items.Add (source.name);             
+//
+//            conn.currentspread = newSpread;
+//            items.Add(newSpread);             
+//            SATIEsetup.OSCtx(path, items);   // send spread message via OSC
+//            items.Clear();
+//            //SATIEsetup.OSCdebug("/debug/getSpreadIndex", conn.spread);
+//        }
 
 
 
@@ -958,6 +985,7 @@ public class SATIEsource : SATIEnode {
         connParams.Add(distFq_);        //4
         connParams.Add(HpHz); //5     using a temp variable in debugging this
         connParams.Add(distance);      // 6
+        connParams.Add(newSpread);      // 7
 
         //Debug.Log(transform.name+": getParticleConnParams: UNDERWATER FLAG: "+ underWaterProcessing+" :  hz= "+HpHz);
 

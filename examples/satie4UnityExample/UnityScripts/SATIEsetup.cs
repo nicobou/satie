@@ -24,7 +24,6 @@ using System.Net;
 using OSC.NET;
 using UnityEngine.UI;
 
-// this script must be attached to a game object called "spatOSCroot"
 
 public class SATIEsetup : MonoBehaviour {
 
@@ -294,7 +293,7 @@ public class SATIEsetup : MonoBehaviour {
     public void OnApplicationQuit(){
         Debug.Log("SATIEsetup.OnApplicationQuit:  APP QUIT");
         Debug.Log("SATIEsetup.OnDestroy");
-        OSCMessage message = new OSCMessage ("/spatosc/core");
+        OSCMessage message = new OSCMessage ("/satie/scene");
         message.Append ("clear");
         sendOSC (message);
 
@@ -363,10 +362,11 @@ public class SATIEsetup : MonoBehaviour {
 //bool DllExport setNodeStringProperty(char *node, char *key, char *value);
 //bool DllExport removeNodeStringProperty(char *node, char *key);
 
+    //    /satie/scene createSource  nodeName  synthDefName<uriPath>   groupName<opt> 
     public static bool createSource(string nodeName, string uriString, string groupName)
     {
         int result;
-        string path = "/spatosc/core";
+        string path = "/satie/scene";
         OSCMessage message = new OSCMessage (path);
         message.Append("createSource");
         message.Append(nodeName);
@@ -381,28 +381,49 @@ public class SATIEsetup : MonoBehaviour {
             return true;
     }
 
-    public static bool createListener(string nodeName, string uriString)
+    //    /satie/scene createProcess  nodeName  synthDefName<uriPath>   groupName<opt> 
+    public static bool createProcess(string nodeName, string uriString, string groupName)
     {
         int result;
-        string path = "/spatosc/core";
+        string path = "/satie/scene";
         OSCMessage message = new OSCMessage (path);
-        message.Append("createListener");
+        message.Append("createProcess");
         message.Append(nodeName);
         message.Append(uriString);
+        message.Append(groupName);
 
-        
         result = sendOSC(message);
-        
+
         if (result == 0)
             return false;
         else
             return true;
     }
 
+
+    // no longer used
+//    public static bool createListener(string nodeName, string uriString)
+//    {
+//        int result;
+//        string path = "/spatosc/core";
+//        OSCMessage message = new OSCMessage (path);
+//        message.Append("createListener");
+//        message.Append(nodeName);
+//        message.Append(uriString);
+//
+//        
+//        result = sendOSC(message);
+//        
+//        if (result == 0)
+//            return false;
+//        else
+//            return true;
+//    }
+
     public static bool createGroup(string nodeName)
     {
         int result;
-        string path = "/spatosc/core";
+        string path = "/satie/scene";
         OSCMessage message = new OSCMessage (path);
         message.Append("createGroup");
         message.Append(nodeName);
@@ -416,20 +437,7 @@ public class SATIEsetup : MonoBehaviour {
     }
 
 
-//	// Much Better version!!  NEEDS TESTING 
-//	public  void sendEvent (string keyWord, List<object> values)
-//	{
-//		string path = "/spatosc/core/"+nodeType+"/" + nodeName + "/event";
-//		List<object> items = new List<object>();
-//		
-//		items.Add(keyWord);
-//		
-//		foreach (object o in values)
-//			items.Add(o);
-//		
-//		SATIEsetup.OSCtx(path, items);
-//		items.Clear();
-//	}
+
 
 
     public static bool OSCtx(string path, List<object> items)
@@ -527,41 +535,40 @@ public class SATIEsetup : MonoBehaviour {
 
 /*
  * 
- * CORE 
-     /spatosc/core createSource  nodeName uriPath<or emptyString>  groupName<or emptyString>
-    /spatosc/core createListener nodeName
+ * SCENE messages 
+ * 
+    /satie/scene createSource  nodeName  synthDefName<uriPath>   groupName<opt>   // default group name is 'default'
+    /satie/scene createGroup nodeName
+    /satie/scene createProcess nodeName
+    /satie/scene deleteNode nodeName
+    /satie/scene clear
 
-    /spatosc/core createGroup nodeName
-    /spatosc/core deleteNode nodeName
-    /spatosc/core connect srcNode listenerNode
-    /spatosc/core disconnect srcNode listenerNode
-    /spatosc/core clear
+    /satie/scene/prop keyword value (string, float or int)     // to set scene parameters like 'dspState'  or 'listenerFormat' etc
+
     
     NODE messages
     
-    /spatosc/core/listener/nodeName/uri  type://name  (e.g.  plugin://testnoise~ )
-    /spatosc/core/listener/nodeName/prop keyword value(s) (string, float or int)     
-    /spatosc/core/listener/nodeName/state value  // 1=DSP_active 0=DSP_inactive
-    /spatosc/core/listener/nodeName/event  eventName <opt> atom1 atom2...atomN      
-    
-    /spatosc/core/source/nodeName/uri  type://name  (e.g.  plugin://testnoise~ )
-    /spatosc/core/source/nodeName/prop keyword value(s) (string, float or int)     
-    /spatosc/core/source/nodeName/state value  // 1=DSP_active 0=DSP_inactive
-    /spatosc/core/source/nodeName/event  eventName <opt> atom1 atom2...atomN    
-    
-    /spatosc/core/group/nodeName/uri  type://name  (e.g.  plugin://testnoise~ )
-    /spatosc/core/group/nodeName/prop keyword value(s) (string, float or int)     
-    /spatosc/core/group/nodeName/state value  // 1=DSP_active 0=DSP_inactive
-    /spatosc/core/group/nodeName/event  eventName <opt> atom1 atom2...atomN    
-    
-    CONNECTION messages
-    
-    /spatosc/core/connection/sourceNode->listenerNode/update azimuthRADIANS elevationRADIANS gainDB delayMS  lpHZ   
-    /spatosc/core/connection/sourceNode->listenerNode/spread  value  // exponent for incidence effect:  0 = no effect;  1 = normal;   >1 = more intense               
-    
-    GROUP messages
-    
-    /spatosc/core/group/nodeName/add sourceNode
-    /spatosc/core/group/nodeName/drop  sourceNode
+/satie/source/prop sourceName keyword value (string, float or int)     
+/satie/source/state sourceName value  // 1=DSP_active 0=DSP_inactive
+/satie/source/event sourceName eventName <opt> atom1 atom2...atomN    
+
+/satie/group/prop groupName keyword value ( string, float or int )     
+/satie/group/state groupName value  // 1=DSP_active 0=DSP_inactive
+/satie/group/event groupName eventName <opt> atom1 atom2...atomN    
+
+/satie/process/prop processName keyword value ( string, float or int )     
+/satie/process/state processName value  // 1=active 0=inactive
+/satie/process/event processName eventName <opt> atom1 atom2...atomN    
+
+
+/satie/source/update sourceName azimuthRADIANS elevationRADIANS gainDB delayMS  lpHZ  distanceMETERS
+/satie/source/spread  sourceName value  // exponent for incidence effect:  0 = no effect;  1 = normal;   >1 = more intense               
+/satie/source/hpHz  sourceName hpHZ                
+
+
+/satie/process/update processName azimuthRADIANS elevationRADIANS gainDB delayMS  lpHZ  distanceMETERS
+/satie/process/spread  processName value  // exponent for incidence effect:  0 = no effect;  1 = normal;   >1 = more intense               
+
+
         
 */

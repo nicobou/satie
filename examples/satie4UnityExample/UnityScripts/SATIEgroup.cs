@@ -97,7 +97,8 @@ public class SATIEgroup : SATIEnode {
 	
     public void dropMember (SATIEsource source)
 	{
-        string path = "/spatosc/core/group/" + nodeName + "/drop";
+        string path = "/satie/group/drop";
+
         List<object> items = new List<object>();
 
         members.Remove(source.name);
@@ -110,7 +111,7 @@ public class SATIEgroup : SATIEnode {
 
 	public void addMember (SATIEsource source )
 	{
-        string path = "/spatosc/core/group/" + nodeName + "/add";
+        string path = "/satie/group/add";
         List<object> items = new List<object>();
 
         source.group = name;
