@@ -1,6 +1,0 @@
-# Project-Specific Ignores
-# ============================
-
-# Ignore SpaceNavigator Plugin from Asset Store at is throws missing DLL errors
-# https://github.com/PatHightree/SpaceNavigator/issues/11
-/SpaceNavigator
