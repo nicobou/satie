@@ -1,4 +1,4 @@
-
+// USES GLOBAL VARIABLE:   ~procMan
 
 
 
@@ -48,20 +48,8 @@
 ~process.know=true;
 
 
-if (~satie4unity == nil, {
-	error(~processName ++ ": ~satie4unity protocol undefined, can't register this process");
-}, // else
-{
-	// if already registered, re-register
-	if (  ~satie4unity.allProcesses.includesKey(~processName) == true,
-		{
-			inform("un-registering process: "++~processName);
-			~satie4unity.allProcesses.removeAt(~processName);
-	});
-
-	inform("registering process: "++~processName);
-	~satie4unity.allProcesses.put(~processName, ~process);
-});
+// regester this process with satie
+~procMan.registerProcessEnv(~processName, ~process);
 
 
 // set up class instance dictionary
@@ -89,7 +77,7 @@ if (~particule3_pitchSequences == nil,
 	// add code here to manage project-specific stuff
 	postf("~particule3.clearSynths: clearing synths in node: % group \n", self.nodeName);
 	// var nodename=(self.nodeName++"_"++item).asSymbol;
-	// ~scbr.cleanInstance(nodename.asSymbol, self.nodeGroupName);
+	// ~procMan.satie.cleanInstance(nodename.asSymbol, self.nodeGroupName);
 	// });
 	~particule3_instances.removeAt(self.nodeName);
 };
@@ -98,7 +86,7 @@ if (~particule3_pitchSequences == nil,
 // required function but adaptable to project specifics
 // generates N synths
 ~particule3.setup = { | self, nodeName, nodeGroupName, argsList  |
-	var thisGroup = ~scbr.satieGroups[nodeGroupName.asSymbol] ;
+	var thisGroup = ~procMan.satie.satieGroups[nodeGroupName.asSymbol] ;
 
 	self.nodeName = nodeName;
 	self.nodeGroupName = nodeGroupName;
@@ -327,7 +315,7 @@ if (~particule3_pitchSequences == nil,
 
 						//[ \note, [ pitch+self.transposition, force, incidence ]].postln;
 
-						synth = ~scbr.makeKamikaze(nodename, self.synth.asSymbol, self.nodeGroupName, cloneParams);
+						synth = ~procMan.satie.makeKamikaze(nodename, self.synth.asSymbol, self.nodeGroupName, cloneParams);
 						// synth.set(\note, [ pitch+self.transposition, force, incidence ], \t_trig, 1);
 				});
 				self.polyCounter = self.polyCounter + 1;

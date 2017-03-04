@@ -29,20 +29,16 @@ for debugguing
 
 
 (
-~satie4unityprotocol = { | oscContext, satieContext, oscID = \satie4unityOSC |
+~satie4unityprotocol = { | oscContext, satieContext, satieProcessContext,  oscID = \satie4unityOSC |
 	var osc = oscContext;
 	var satie = satieContext;
+	var procMan = satieProcessContext;
 
 	var e = Environment.make({
 		~allSourceNodes = Dictionary();        //  ~allSourceNodes.postln;
 		~allGroupNodes = Dictionary();        //  ~allGroups.postln;
 		~projectDirectory = nil;
 
-		// No LONGER used for audio renderer control
-		//		~volume = s.volume;     // create hook to global audio engine volume / mute control
-		//		~volume.setVolumeRange(-99, 18);
-		//		~outputDB = 0;    // current state of the supercollider's output
-		//		~outputTrimDB = 0;
 		~debugFlag=false;
 
 		~satieAuxBusCount = satie.aux.size;
@@ -52,7 +48,7 @@ for debugguing
 			{~effectProx = satie.makeSatieGroup(\effect, \addToTail);}
 		);
 
-		~allProcesses = ();    // initialize list for processes to register themselves;
+		// procMan.allProcesses = ();    // initialize list for processes to register themselves;
 
 		~coreCallback = { arg msg;
 			var command;
@@ -161,8 +157,8 @@ for debugguing
 			var thisSynth;
 
 			if (e.debugFlag,
-			{
-				// postf("~sourceUpdateHandler:  nodeName: %  size: % args: %\n", nodeName, args.size, args);
+				{
+					// postf("~sourceUpdateHandler:  nodeName: %  size: % args: %\n", nodeName, args.size, args);
 			});
 
 			if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == false,
@@ -668,7 +664,8 @@ for debugguing
 		// eg. uriPath:  "process://sheefa arg1 1.1 arg2 2.2 arg3"
 
 		~createSourceProcess = { | self, sourceName, uriPath , groupNameDummy = \default |
-			var temp, type, charIndex, processName, processClone, myProcess, cloneGroup, cloneGroupName;
+			var temp, type, charIndex, processName, myProcess, cloneGroup, cloneGroupName;
+			var processClone = nil;
 			var argsString = "";
 			var stringArray;
 			var rawArgVec = nil;
@@ -695,18 +692,17 @@ for debugguing
 				});
 			});
 
-
-			if (self.allProcesses[processName.asSymbol] == nil,
+			if (self.allSourceNodes[sourceName.asSymbol]  != nil,
 				{
-					postf("~createSourceProcess: undefined process name:"++processName++"   ,  node not created \n");
+					error("~createSourceProcess source Process node: %,   ALREAYD EXISTS, aborting \n", sourceName);
 				},
 				// else ALL GOOD,  instantiate
 				{
-					if (self.allSourceNodes[sourceName.asSymbol]  != nil,
+					processClone = procMan.cloneProcess(processName.asSymbol);
+					if (processClone == nil,
 						{
-							error("~createSourceProcess source Process node: %,   ALREAYD EXISTS \n", sourceName);
-						},
-						// else node good to go
+							error("~createSourceProcess: undefined process name:"++processName++"   ,  node not created \n");
+						},						// else node good to go
 						{
 							postf("~createSourceProcess nodeName: %,   process name: %  URI: % \n", sourceName, processName, uriPath);
 							//postf("~createSourceProcess: %:  uri: %  group: %\n", sourceName, uriPath, groupName);
@@ -718,12 +714,6 @@ for debugguing
 							cloneGroupName = sourceName ++ "_group";
 							cloneGroup = self.createGroup(cloneGroupName.asSymbol);   // create group for this node and its clones
 
-							//cloneGroup.postln;
-
-							// clone a new copy of the process
-							temp = self.allProcesses.at(processName.asSymbol);
-							processClone = temp.copy;
-							//processClone[\nodeName]=sourceName.asSymbol;
 
 							cloneGroup = self.allGroupNodes[cloneGroupName.asSymbol].at(\group); // must be called after createGroup() above
 

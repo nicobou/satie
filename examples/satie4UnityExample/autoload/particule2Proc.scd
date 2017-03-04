@@ -1,4 +1,4 @@
-
+// USES GLOBAL VARIABLE:   ~procMan
 
 
 
@@ -42,21 +42,8 @@
 ~process = ~particule2;
 ~process.know=true;
 
-if (~satie4unity == nil, {
-	error(~processName ++ ": ~satie4unity protocol undefined, can't register this process");
-}, // else
-{
-	// if already registered, re-register
-	if (  ~satie4unity.allProcesses.includesKey(~processName) == true,
-		{
-			inform("un-registering process: "++~processName);
-			~satie4unity.allProcesses.removeAt(~processName);
-	});
-
-	inform("registering process: "++~processName);
-	~satie4unity.allProcesses.put(~processName, ~process);
-});
-
+// regester this process with satie
+~procMan.registerProcessEnv(~processName, ~process);
 
 
 // set up class instance dictionary
@@ -85,7 +72,7 @@ if (~particule2_pitchSequences == nil,
 	postf("~particule2.clearSynths: clearing synths in node: % group \n", self.nodeName);
 	self.clonePool.do( { arg item;
 		var nodename=(self.nodeName++"_"++item).asSymbol;
-		~scbr.cleanInstance(nodename.asSymbol, self.nodeGroupName);
+		~procMan.satie.cleanInstance(nodename.asSymbol, self.nodeGroupName);
 	});
 	~particule2_instances.removeAt(self.nodeName);
 };
@@ -94,7 +81,7 @@ if (~particule2_pitchSequences == nil,
 // required function but adaptable to project specifics
 // generates N synths
 ~particule2.setup = { | self, nodeName, nodeGroupName, argsList  |
-	var thisGroup = ~scbr.satieGroups[nodeGroupName.asSymbol] ;
+	var thisGroup = ~procMan.satie.satieGroups[nodeGroupName.asSymbol] ;
 
 	self.nodeName = nodeName;
 	self.nodeGroupName = nodeGroupName;
@@ -145,7 +132,7 @@ if (~particule2_pitchSequences == nil,
 		var nodename=(self.nodeName++"_"++item).asSymbol;
 		var synth;
 
-		synth = ~scbr.makeInstance(nodename.asSymbol, self.synth.asSymbol, self.nodeGroupName);
+		synth = ~procMan.satie.makeInstance(nodename.asSymbol, self.synth.asSymbol, self.nodeGroupName);
 		self.cloneVector.add(synth);
 		synth.set(\gainDB, -99);  // instantiate full attenuated
 	});

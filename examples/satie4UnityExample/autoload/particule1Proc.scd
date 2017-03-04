@@ -1,4 +1,4 @@
-// USES GLOBAL VARIABLES:   ~satie4unity  and ~scbr
+// USES GLOBAL VARIABLE:   ~procMan
 
 // this file defines  a process class, which is ONLY used by source nodes that have that have a URI of type:   "process" , e.g:      uri://process  "particule1"
 // you can define any number of these process clases, each one, corresponding to a particular type of processing  behavoir you define
@@ -41,21 +41,9 @@
 ~process = ~particule1;
 ~process.know=true;
 
+// regester this process with satie
+~procMan.registerProcessEnv(~processName, ~process);
 
-if (~satie4unity == nil, {
-	error(~processName ++ ": ~satie4unity protocol undefined, can't register this process");
-}, // else
-{
-	// if already registered, re-register
-	if (  ~satie4unity.allProcesses.includesKey(~processName) == true,
-		{
-			inform("un-registering process: "++~processName);
-			~satie4unity.allProcesses.removeAt(~processName);
-	});
-
-	inform("registering process: "++~processName);
-	~satie4unity.allProcesses.put(~processName, ~process);
-});
 
 // set up class instance dictionary
 
@@ -84,7 +72,7 @@ if (~particule1_pitchSequences == nil,
 
 	self.cloneCount.do( { arg item;
 		var nodename=(self.nodeName++"_"++item).asSymbol;
-		~scbr.cleanInstance(nodename.asSymbol, self.nodeGroupName);
+		~procMan.satie.cleanInstance(nodename.asSymbol, self.nodeGroupName);
 	});
 	~particule1_instances.removeAt(self.nodeName);
 
@@ -94,7 +82,7 @@ if (~particule1_pitchSequences == nil,
 // required function but adaptable to project specifics
 // generates N synths
 ~particule1.setup = { | self, nodeName, nodeGroupName, argsList  |
-	var thisGroup = ~scbr.satieGroups[nodeGroupName.asSymbol] ;
+	var thisGroup = ~procMan.satie.satieGroups[nodeGroupName.asSymbol] ;
 
 	self.nodeName = nodeName;
 	self.nodeGroupName = nodeGroupName;
@@ -124,7 +112,7 @@ if (~particule1_pitchSequences == nil,
 		var nodename=(self.nodeName++"_"++item).asSymbol;
 		var synth;
 
-		synth = ~scbr.makeInstance(nodename.asSymbol, self.synth.asSymbol, self.nodeGroupName);
+		synth = ~procMan.satie.makeInstance(nodename.asSymbol, self.synth.asSymbol, self.nodeGroupName);
 		synth.set(\gainDB, -99);  // instantiate full attenuated
 	});
 	postf("~particule1.setup:  generating % synthVoices for group %\n",  self.cloneCount, self.nodeGroupName);
@@ -278,9 +266,9 @@ if (~particule1_pitchSequences == nil,
 				});
 
 
-				~scbr.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(\note, [ pitch, vel, incidence ] );
+				~procMan.satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(\note, [ pitch, vel, incidence ] );
 
-				~scbr.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(\t_trig, 1);
+				~procMan.satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(\t_trig, 1);
 			});
 
 			// calculate azimuths for each particle

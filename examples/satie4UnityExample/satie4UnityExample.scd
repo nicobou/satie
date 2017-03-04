@@ -34,9 +34,14 @@ s.waitForBoot{
 		~srCtl = ~satieRendererCtlMaker.value(~scbr);
 	});
 
+	// instantiate a process manager , and set environment variable
+	if (~procMan == nil,{
+		~procMan = ~pmMaker.value(~scbr);
+	});
+
 	// instiante the satie4Unity protocol, and set environment variable
 	if (~satie4unity == nil,{
-		~satie4unity = ~satie4unityprotocol.value(~osc, ~scbr);
+		~satie4unity = ~satie4unityprotocol.value(~osc, ~scbr, ~procMan);
 		~satie4unity.debugFlag = true;
 		~satie4unity.projectDirectory = ~thisProjectResourcePath;
 
