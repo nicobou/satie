@@ -37,7 +37,7 @@ for debugguing
 	var e = Environment.make({
 		~allSourceNodes = Dictionary();        //  ~allSourceNodes.postln;
 		~allGroupNodes = Dictionary();        //  ~allGroups.postln;
-		~projectDirectory = nil;
+//		~projectDirectory = nil;
 
 		~debugFlag=false;
 
@@ -1341,29 +1341,29 @@ for debugguing
 	}); // Environment.make
 	"satie4unityprotol loaded".inform;
 	e.know = true;
-	postf("passed osc env: %\n", osc);
+	// postf("passed osc env: %\n", osc);
 
 	// connect renderer oscMessage RX to handlers
-	osc.removeBasicRendererOSC(\satieScene);  // disconnect any previous handlers
+	osc.deleteOSC(\satieScene);  // disconnect any previous handlers
 	osc.newOSC(\satieScene, e['coreCallback'], "/satie/scene");   // connect handler
 
 	// sources
-	osc.removeBasicRendererOSC(\satieSrcProp);  // disconnect any previous handlers
+	osc.deleteOSC(\satieSrcProp);  // disconnect any previous handlers
 	osc.newOSC(\satieSrcProp, e['sourceNodeCallback'], "/satie/source/prop");   // connect handler
 
-	osc.removeBasicRendererOSC(\satieSrcState);  // disconnect any previous handlers
+	osc.deleteOSC(\satieSrcState);  // disconnect any previous handlers
 	osc.newOSC(\satieSrcState, e['sourceNodeCallback'], "/satie/source/state");   // connect handler
 
-	osc.removeBasicRendererOSC(\satieSrcEvent);  // disconnect any previous handlers
+	osc.deleteOSC(\satieSrcEvent);  // disconnect any previous handlers
 	osc.newOSC(\satieSrcEvent, e['sourceNodeCallback'], "/satie/source/event");   // connect handler
 
-	osc.removeBasicRendererOSC(\satieSrcUpdate);  // disconnect any previous handlers
+	osc.deleteOSC(\satieSrcUpdate);  // disconnect any previous handlers
 	osc.newOSC(\satieSrcUpdate, e['sourceUpdateHandler'], "/satie/source/update");   // connect handler
 
-	osc.removeBasicRendererOSC(\satieSrcHpHz);  // disconnect any previous handlers
+	osc.deleteOSC(\satieSrcHpHz);  // disconnect any previous handlers
 	osc.newOSC(\satieSrcHpHz, e['sourceHpHzHandler'], "/satie/source/hpHz");   // connect handler
 
-	osc.removeBasicRendererOSC(\satieSrcSpread);  // disconnect any previous handlers
+	osc.deleteOSC(\satieSrcSpread);  // disconnect any previous handlers
 	osc.newOSC(\satieSrcSpread, e['sourceSpreadHandler'], "/satie/source/spread");   // connect handler
 
 
@@ -1371,16 +1371,16 @@ for debugguing
 
 
 	// groups
-	osc.removeBasicRendererOSC(\satieGroupProp);  // disconnect any previous handlers
+	osc.deleteOSC(\satieGroupProp);  // disconnect any previous handlers
 	osc.newOSC(\satieGroupProp, e['groupNodeCallback'], "/satie/group/prop");   // connect handler
 
-	osc.removeBasicRendererOSC(\satieGroupEvent);  // disconnect any previous handlers
+	osc.deleteOSC(\satieGroupEvent);  // disconnect any previous handlers
 	osc.newOSC(\satieGroupEvent, e['groupNodeCallback'], "/satie/group/event");   // connect handler
 
-	osc.removeBasicRendererOSC(\satieGroupAdd);  // disconnect any previous handlers
+	osc.deleteOSC(\satieGroupAdd);  // disconnect any previous handlers
 	osc.newOSC(\satieGroupAdd, e['groupNodeCallback'], "/satie/group/add");   // connect handler
 
-	osc.removeBasicRendererOSC(\satieGroupDrop);  // disconnect any previous handlers
+	osc.deleteOSC(\satieGroupDrop);  // disconnect any previous handlers
 	osc.newOSC(\satieGroupDrop, e['groupNodeCallback'], "/satie/group/drop");   // connect handler
 
 
@@ -1391,22 +1391,22 @@ for debugguing
 
 
 	// processes
-	osc.removeBasicRendererOSC(\satieProcessProp);  // disconnect any previous handlers
+	osc.deleteOSC(\satieProcessProp);  // disconnect any previous handlers
 	osc.newOSC(\satieProcessProp, e['processCallback'], "/satie/process/prop");   // connect handler
 
-	osc.removeBasicRendererOSC(\satieProcessState);  // disconnect any previous handlers
+	osc.deleteOSC(\satieProcessState);  // disconnect any previous handlers
 	osc.newOSC(\satieProcessState, e['processCallback'], "/satie/process/state");   // connect handler
 
-	osc.removeBasicRendererOSC(\satieProcessEvent);  // disconnect any previous handlers
+	osc.deleteOSC(\satieProcessEvent);  // disconnect any previous handlers
 	osc.newOSC(\satieProcessEvent, e['processCallback'], "/satie/process/event");   // connect handler
 
-	osc.removeBasicRendererOSC(\satieProcessUpdate);  // disconnect any previous handlers
+	osc.deleteOSC(\satieProcessUpdate);  // disconnect any previous handlers
 	osc.newOSC(\satieProcessUpdate, e['processUpdateHandler'], "/satie/process/update");   // connect handler
 
-	osc.removeBasicRendererOSC(\satieProcessSpread);  // disconnect any previous handlers
+	osc.deleteOSC(\satieProcessSpread);  // disconnect any previous handlers
 	osc.newOSC(\satieProcessSpread, e['processSpreadHandler'], "/satie/process/spread");   // connect handler
 
-	osc.removeBasicRendererOSC(\satieProcessHpHz);  // disconnect any previous handlers
+	osc.deleteOSC(\satieProcessHpHz);  // disconnect any previous handlers
 	osc.newOSC(\satieProcessHpHz, e['processHpHzHandler'], "/satie/process/hpHz");   // connect handler
 
 

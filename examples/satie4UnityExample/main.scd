@@ -19,7 +19,6 @@
 //  REQUIRED project file name declaration
 ~myProjectFIleName = "satie4UnityExample.scd";
 
-
 // defaults to stereo
 ~listeningFormat = \stereoListener;    // you can also set this to  \domeVBAP  or  \labodomeVBAP  or   \octoVBAP
 
@@ -154,7 +153,6 @@ switch (~listeningFormat,
 	o.numOutputBusChannels = 2;
 	}
 );
-
 
 
 if ( ~outAudioDev != nil ,

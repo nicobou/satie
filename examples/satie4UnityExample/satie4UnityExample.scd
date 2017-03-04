@@ -2,8 +2,11 @@
 
 //~satie4unity=nil;     // uncomment for debug
 
-// this is hardwired since it must be defined at init itme, prior to receiving messages from any OSC clients
-~thisProjectResourcePath = "~/".standardizePath ++"src/satie4UnityProject/Assets/StreamingAssets";
+// Optional Definition:   value of this variable can be overwritten via OSC messages from Project
+~thisProjectResourcePath = "~/".standardizePath ++"Dropbox/REMOTE_projects/unityProjects/satie4UnityProject_REVISED/Assets/StreamingAssets";
+
+//Note:  the Project Name is generated  using the name of  the Project FIle (defined in main.scd)
+~myProjectName = ~myProjectFIleName.splitext(".scd")[0];
 
 
 s.waitForBoot{
@@ -17,6 +20,8 @@ s.waitForBoot{
 	// ~inBus3 = 3;  // relative aux bus number that satie will use for this project's synthdef sends to fx synthdefs
 	// ~inBus4 = 4;  // relative aux bus number that satie will use for this project's synthdef sends to fx synthdefs
 
+
+
 	// create and initialize an instance of SATIE, and set environment variable
 	if (~scbr == nil,{
 		postln("loading SATIE kernal...");
@@ -25,13 +30,16 @@ s.waitForBoot{
 
 	// instantiate the OSC interface, and set environment variable
 	if (~osc == nil,{
-		~osc = ~spatOSCMaker.value();   // create an OSC RX message mapper object receiveing on port 18032 by default
+		~osc = ~satieOSCMaker.value();   // create an OSC RX message mapper object receiveing on port 18032 by default
 	});
 
-
-	// instantiate a renderer control object, and set environment variable
-		if (~srCtl == nil,{
+	// instantiate a renderer OSC control object, and set environment variable
+	if (~srCtl == nil,{
 		~srCtl = ~satieRendererCtlMaker.value(~scbr);
+		~osc.removeRendererCtlOSC.value();  // to be safe,  remove any previous OSC  callbacks  (if any)
+
+		// create OSC callbacks to control audio renderer
+		~osc.makeRendererCtlOSC( ~srCtl['satieRendererCallback'] );  // e.g.  /satie/rendererCtl/setOutputDB -12
 	});
 
 	// instantiate a process manager , and set environment variable
@@ -43,8 +51,6 @@ s.waitForBoot{
 	if (~satie4unity == nil,{
 		~satie4unity = ~satie4unityprotocol.value(~osc, ~scbr, ~procMan);
 		~satie4unity.debugFlag = true;
-		~satie4unity.projectDirectory = ~thisProjectResourcePath;
-
 	});
 
 
@@ -52,7 +58,7 @@ s.waitForBoot{
 	s.sync;
 
 	//  declare all the project's needed synthDefs here
-   // makeSynthDef args:    name, synthName, fxBusPre, fxBisPost, spatializerName, outBusNo, mapName, optArgs
+	// makeSynthDef args:    name, synthName, fxBusPre, fxBisPost, spatializerName, outBusNo, mapName, optArgs
 
 
 	postf("generating example project synthdefs for % format \n", ~listeningFormat);
@@ -76,14 +82,42 @@ s.waitForBoot{
 	s.sync;
 
 
-	// now connect OSC RX message callbacks for rendererControl object
-	// to be safe,  remove any previous OSC  callbacks  (if any)
-	~osc.removeRendererCtlOSC.value();
 
-	// create OSC callbacks to control audio renderer
-	// e.g.  /satie/rendererCtl/setOutputDB -12
-	~osc.makeRendererCtlOSC( ~srCtl['satieRendererCallback'] );
+	// set up PROJECT SPECIFIC OSC MESSAGE RX
+	~myProjectCallback = {   	// receives OSC messages that look like:   /satie/project/myProjectname data1 .... dataN
+		arg msg;
+		var command = msg[1];
+		//postf(~myProjectName++" Project:  command: %, msg: %, \n", command, msg);
 
+		if (msg.size < 2,
+			{~myProjectName++" Project:  empty message".warn;
+				postf(~myProjectName++" Project:  MESS LEN: %", msg.size);
+
+			},
+			// else
+			{
+				// parse out project messages here
+				switch (command,
+					'setProjectDir',
+					{
+						if ( (msg.size != 3 ) ,
+							{~myProjectName++" Project: setProjectDir bad arg count: expecting 'setProjectDir projectDirPath' ".warn;},
+							// else
+							{
+								~thisProjectResourcePath = msg[2];
+
+								//e.projectDirectory.postln;
+								postf(~myProjectName++" Project: setting project directory to: % \n", ~thisProjectResourcePath);
+							}
+						)
+				})
+		});
+	};
+
+
+	// set up to receive OSC project messages: e.g.  /satie/project/myProjectname data1 .... dataN
+	~osc.removeProjectOSC(~myProjectName.asSymbol);   // just in case
+	~osc.makeProjectOSC(~myProjectName.asSymbol, ~myProjectCallback);   // now create osc callback for project
 
 	s.sync;    // maks sure satue4Unity is fully instantiated before moving on
 

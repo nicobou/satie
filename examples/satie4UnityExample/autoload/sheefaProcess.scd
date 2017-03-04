@@ -1,4 +1,4 @@
-// USES GLOBAL VARIABLE:   ~procMan
+// USES GLOBAL VARIABLES:   ~procMan and  ~thisProjectResourcePath
 
 // this file defines  a process class, which is ONLY used by source nodes that have that have a URI of type:   "process" , e.g:      uri://process  "sheefa"
 // you can define any number of these process clases, each one, corresponding to a particular type of processing  behavoir you define

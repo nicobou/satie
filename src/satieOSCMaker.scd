@@ -20,7 +20,7 @@
 		// main OSC method
 		~newOSC = {|self, id, cb , path = \default|
 			var idsym = id.asSymbol;
-			postf("---> newOSC callback passed : %\n", cb);
+			//postf("---> newOSC callback passed : %\n", cb);
 			OSCdef(idsym, cb, path, recvPort: oscPort);
 		};
 
@@ -50,6 +50,16 @@
 		// remove  OSC callback for satieRendererCtl.
 		~removeRendererCtlOSC = {|self|
 			self.deleteOSC(\rendererCtl);
+		};
+
+		// create  OSC callback for satie projects
+		~makeProjectOSC = {|self, projectName, cb|
+			self.newOSC(projectName.asSymbol, cb,  rootURI+/+"project"+/+projectName);
+		};
+
+		// remove  OSC callback for satie projects
+		~removeProjectOSC = {|self, projectName|
+			self.deleteOSC(projectName.asSymbol);
 		};
 
 		// create a group
