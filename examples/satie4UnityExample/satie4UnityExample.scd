@@ -11,14 +11,11 @@
 
 s.waitForBoot{
 
-	~num_aux_bus = 2;
-
-	// based on the value of ~num_aux_bus,  the following can be defined
+	// we define the following busses,  and set the falue of ~num_aux_bus accordingly
 	~inBus0 = 0;  // relative aux bus number that satie will use for this project's synthdef sends to fx synthdefs
 	~inBus1 = 1;  // relative aux bus number that satie will use for this project's synthdef sends to fx synthdefs
-	// ~inBus2 = 2;  // relative aux bus number that satie will use for this project's synthdef sends to fx synthdefs
-	// ~inBus3 = 3;  // relative aux bus number that satie will use for this project's synthdef sends to fx synthdefs
-	// ~inBus4 = 4;  // relative aux bus number that satie will use for this project's synthdef sends to fx synthdefs
+
+	~num_aux_bus = 2;
 
 
 
@@ -52,7 +49,6 @@ s.waitForBoot{
 		~satie4unity = ~satie4unityprotocol.value(~osc, ~scbr, ~procMan);
 		~satie4unity.debugFlag = true;
 	});
-
 
 
 	s.sync;
@@ -104,7 +100,7 @@ s.waitForBoot{
 							{~myProjectName++" Project: setProjectDir bad arg count: expecting 'setProjectDir projectDirPath' ".warn;},
 							// else
 							{
-								~thisProjectResourcePath = msg[2];
+								~thisProjectResourcePath = msg[2];     // optionally referenced by certain processes
 
 								//e.projectDirectory.postln;
 								postf(~myProjectName++" Project: setting project directory to: % \n", ~thisProjectResourcePath);

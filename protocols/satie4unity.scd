@@ -48,8 +48,6 @@ for debugguing
 			{~effectProx = satie.makeSatieGroup(\effect, \addToTail);}
 		);
 
-		// procMan.allProcesses = ();    // initialize list for processes to register themselves;
-
 		~coreCallback = { arg msg;
 			var command;
 			command = msg[1];
@@ -150,6 +148,69 @@ for debugguing
 			//"coreCallback called".postln;
 		};
 
+		// accepts arbitrary key value pairs and applies them to the named source node
+		~sourceSetHandler = { 	| args |
+			var nodeName  = args[1];
+			var props = args.copyRange(2, args.size - 1);
+			var thisSynth;
+
+
+			//= e.allSourceNodes[nodeName.asSymbol].at(\synth);
+			if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == false,
+				{
+					error("satie4Unity.sourceSetHandler:  source node: "++nodeName++"  is undefined \n");
+				}, // else node exists,  process event
+				{
+					if (  (  ( (props.size&1)==1) || (props.size == 0) ),
+						{
+							error("satie4Unity.sourceSetHandler: BAD ARGS: "++props);
+						}, // else args good
+						{
+							thisSynth = e.allSourceNodes[nodeName.asSymbol].at(\synth);
+							if ( thisSynth == nil,
+								{
+									error("satie4Unity.sourceSetHandler:  source node: "++nodeName++"  BUG FOUND: undefined SYNTH  \n");
+
+								},   // else
+								{
+									props.pairsDo({ | prop, val |
+										var defaultFlag=true;
+											switch(prop,
+											'hpHz',
+											{
+												var halfSrate = 0.5 * s.sampleRate;
+
+												thisSynth.set(\hpHz ,  clip(val, 1, halfSrate ));
+												postf("** instance: set %'s % to %\n", nodeName, prop, val);
+												defaultFlag=false;
+											},
+											'spread',
+											{
+												// invert and scale the spread value (usually an exp) to work with SATIE's VBAP-based spatializer (or others)
+												var spread = 100 *  ( 1 - (clip(val,0,1)));  //
+												thisSynth.set(\spread, spread);
+												postf("** instance: set %'s % to %\n", nodeName, prop, val);
+												defaultFlag=false;
+											},
+											'in',
+											{
+												thisSynth.set(prop, satie.aux[val.asInt]);
+												defaultFlag = false;
+										});
+										// else just set the prop val pair
+										if (defaultFlag,
+											{
+												postf(" satie4Unity.sourceSetHandler Default  ** instance: set %'s % to %\n", nodeName, prop, val);
+												thisSynth.set(prop, val);
+										});
+
+									});
+								});
+						});
+				});
+			};
+
+
 		// osc rx   ARGS:  sourceName azimuthRADIANS elevationRADIANS gainDB delayMS  lpHZ  distanceMETERS
 		~sourceUpdateHandler = { 	| args |
 			var nodeName  = args[1];
@@ -217,7 +278,6 @@ for debugguing
 					});
 			});
 		};
-
 
 		// osc rx   ARGS:  sourceName spread
 		~sourceSpreadHandler = { 	| args |
@@ -630,7 +690,6 @@ for debugguing
 			);
 		};
 
-
 		~createProcess = {| self, sourceName, uriPath , groupName = \default |
 			"~createProcess called".inform;
 			if (self.allSourceNodes.includesKey(sourceName),
@@ -653,10 +712,7 @@ for debugguing
 			);
 		};
 
-
 		// ~createSourceProcess = { "createSourceProcess called".warn;};
-
-
 		// called for uri type process://
 		//error check uriName done before call this, uriPath will be a process name
 		// ignore groupName since a unique one will be generated for this node and its clones
@@ -729,8 +785,6 @@ for debugguing
 
 							// osc.sourceOSC(sourceName.asSymbol, e.['processCallback']);   // DO NOT create OSC callback
 							postf("~createSourceProcess: CREATED NODE: %,  with  process:  % \n", sourceName, processName);
-
-
 					});
 			});
 		};
@@ -876,36 +930,6 @@ for debugguing
 			);
 			//"setSynth called".inform;
 
-		};
-
-
-		// valid URIs:
-		//   process://name  args
-		//	 effect://synthName   <opt> inBus n     // defaults to  inBus=0
-		//   plugin://synthName
-		~setUri = { | self, nodeName, uriPath |
-			var charIndex, type, temp;
-			var synthName = \dummyPlugin;  // default
-			var node = self.allSourceNodes[nodeName.asSymbol];
-			var inBus;
-
-			uriPath = self.checkUri(nodeName, uriPath);     // make sure uri is valid, otherwise assigns to "plugin://dummyPlugin"
-			node.put(\uriStr, uriPath);
-
-			type = self.getUriType(uriPath);
-
-			//postf("~setUri nodeName: %, type: %  plugName: %\n", synthName, type, uriPath);
-			// still needs to be expanded for soundfiles, adc, web etc..
-
-			switch( type,
-				"plugin", {
-					synthName = self.getUriName(uriPath);
-				},
-				"effect", {
-					synthName = self.getUriName(uriPath);
-				}
-			);
-			self.setSynth(nodeName.asSymbol, synthName);
 		};
 
 
@@ -1118,7 +1142,7 @@ for debugguing
 
 		~clearSourceNode = {  | self, nameSym |
 			var node = self.allSourceNodes[nameSym];
-			var connectionName = node.at(\connectionName);
+			//var connectionName = node.at(\connectionName);
 			var nodeKeys = node.keys;
 			var thisGroupName = self.allSourceNodes[nameSym].at(\groupNameSym);
 			//"clearSourceNode called".inform;
@@ -1158,10 +1182,10 @@ for debugguing
 			//postf("~clearing:  node: % and connection: %\n",  nameSym, connectionName);
 
 			// disconnect callbacks
-			if (node.includesKey(\connectionName),
+	/*		if (node.includesKey(\connectionName),
 				{
 					osc.removeConnectionOSC( node.at(\connectionName).asSymbol );
-			});
+			});*/
 
 			osc.removeSourceOSC(nameSym);
 			//  clear node's local dictionary
@@ -1292,7 +1316,7 @@ for debugguing
 		};
 
 		// DEBUGGING FUNCTIONS
-		~dumpConnections = { 	| self |
+/*		~dumpConnections = { 	| self |
 			var undefined = 0;
 
 			self.allNodes.keysDo { |key |
@@ -1301,10 +1325,10 @@ for debugguing
 				postf("\t : node:   %  connectionName:    % \n",  key, self.allNodes[nodeSym].at(\connectionName));
 
 			};
-		};
+		};*/
 
 		~dumpNodes = { 	| self |
-			var connections = 0;
+			//var connections = 0;
 			self.allSourceNodes.keysDo { |key |
 				var nodeSym = key;
 				postf("node: %  \n", key);
@@ -1366,6 +1390,8 @@ for debugguing
 	osc.deleteOSC(\satieSrcSpread);  // disconnect any previous handlers
 	osc.newOSC(\satieSrcSpread, e['sourceSpreadHandler'], "/satie/source/spread");   // connect handler
 
+	osc.deleteOSC(\satieSrcSet);  // disconnect any previous handlers
+	osc.newOSC(\satieSrcSet, e['sourceSetHandler'], "/satie/source/set");   // connect handler
 
 
 
