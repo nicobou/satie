@@ -25,7 +25,18 @@
 /satie/source/prop sourceName keyword value (string, float or int)     
 /satie/source/state sourceName value  // 1=DSP_active 0=DSP_inactive
 /satie/source/event sourceName eventName <opt> atom1 atom2...atomN    
+
 /satie/source/set sourceName key1 val1 key2 val2 .... keyN valN
+/satie/source/uBlob sourceName byte1 ... byte12     // packed encoded update message  (some loss)
+// byte order
+// aziElev 
+// gainDB (4 bytes)
+// delayMS (2 bytes)
+// lpHz (2 bytes)
+// distanceM (2 bytes)
+
+
+
 
 // /satie/group/uri groupName type://name  (e.g.  plugin://synthDefName )
 /satie/group/prop groupName keyword value ( string, float or int )     
