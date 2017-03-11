@@ -27,7 +27,7 @@
 /satie/source/event sourceName eventName <opt> atom1 atom2...atomN    
 
 /satie/source/set sourceName key1 val1 key2 val2 .... keyN valN
-/satie/source/uBlob sourceName byte1 ... byte12     // packed encoded update message  (some loss)
+/satie/source/ublob sourceName byte1 ... byte12     // for update blob: packed encoded update message  (some loss)
 // byte order
 // aziElev 
 // gainDB (4 bytes)
