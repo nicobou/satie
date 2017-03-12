@@ -37,7 +37,7 @@ for debugguing
 	var e = Environment.make({
 		~allSourceNodes = Dictionary();        //  ~allSourceNodes.postln;
 		~allGroupNodes = Dictionary();        //  ~allGroups.postln;
-//		~projectDirectory = nil;
+		//		~projectDirectory = nil;
 
 		~debugFlag=false;
 
@@ -175,7 +175,7 @@ for debugguing
 								{
 									props.pairsDo({ | prop, val |
 										var defaultFlag=true;
-											switch(prop,
+										switch(prop,
 											'hpHz',
 											{
 												var halfSrate = 0.5 * s.sampleRate;
@@ -205,10 +205,10 @@ for debugguing
 										});
 
 									});
-								});
-						});
-				});
-			};
+							});
+					});
+			});
+		};
 
 
 		// osc rx   ARGS:  sourceName azimuthRADIANS elevationRADIANS gainDB delayMS  lpHZ  distanceMETERS
@@ -1182,9 +1182,9 @@ for debugguing
 			//postf("~clearing:  node: % and connection: %\n",  nameSym, connectionName);
 
 			// disconnect callbacks
-	/*		if (node.includesKey(\connectionName),
-				{
-					osc.removeConnectionOSC( node.at(\connectionName).asSymbol );
+			/*		if (node.includesKey(\connectionName),
+			{
+			osc.removeConnectionOSC( node.at(\connectionName).asSymbol );
 			});*/
 
 			osc.removeSourceOSC(nameSym);
@@ -1316,15 +1316,15 @@ for debugguing
 		};
 
 		// DEBUGGING FUNCTIONS
-/*		~dumpConnections = { 	| self |
-			var undefined = 0;
+		/*		~dumpConnections = { 	| self |
+		var undefined = 0;
 
-			self.allNodes.keysDo { |key |
-				var nodeSym = key;
-				postf("node: %  :   ", key);
-				postf("\t : node:   %  connectionName:    % \n",  key, self.allNodes[nodeSym].at(\connectionName));
+		self.allNodes.keysDo { |key |
+		var nodeSym = key;
+		postf("node: %  :   ", key);
+		postf("\t : node:   %  connectionName:    % \n",  key, self.allNodes[nodeSym].at(\connectionName));
 
-			};
+		};
 		};*/
 
 		~dumpNodes = { 	| self |
@@ -1362,6 +1362,146 @@ for debugguing
 		~globalSet = { "globalSet  has been depricated".warn;};
 		~isFXuri = {"isFXuri has been depricated".warn;};
 
+
+		// ~updateBlobHandler
+		// receives OSC messages that look like:   /satie/source/upblob srcName blob_data1 .... blob_dataN
+		// blob data format:
+		// 12 unsigned bytes as follows
+		// aziDeg =   byte1  * 360 * 1/255
+		// elevDeg = byte2  * 360 * 1/255
+		// gainDB: (   0.00001 *  ( byte3 << 24 + byte4 << 16  + byte5 << 8  + byte6 ) ).ampdb
+		// delayMS:   0.1 *  ( byte7 << 8  + byte8  )     // input values < 6553 milliseconds are clipped to 6553
+		// lpHz:    byte9 << 8  + byte10       // input values < 65535 hz are clipped to 65535
+		// distanceMeters:   0.01 *  ( byte11 << 8  + byte12  )     // input values < 655 meters are clipped to 655
+
+		~updateBlobHandler = {
+			arg msg;
+			var srcName = msg[1];
+			postf("satie4Unity.updateBlobHandler:  msg: %, \n", msg);
+			postf("satie4Unity.updateBlobHandler:  msg LEN %, \n", msg.size);
+
+			if (msg.size != 3,
+				{
+					"satie4Unity.updateBlobHandler;  bad message format: expects  address nodeName blobArray".error;
+					postf("~testCallback:  MESS LEN: %", msg.size);
+
+				},
+				// else
+				{
+					var aziDeg, eleDeg, gainDB, delayMs, lpHz, distanceMeters;
+					var oscAddr = msg[0].asString;
+
+					var nodeName = msg[1];
+					var dataArray = msg[2];
+
+					var degScaler = 1.411764705882 ; // 360/255
+					var thisSynth = nil;
+
+					var nodeType = oscAddr.split($/)[2];
+
+					// postf("~satie4Unity.updateBlobHandler:  nodeName %,  noteType % \n", nodeName, nodeType);
+
+					if ( (dataArray.class != Int8Array ) ||  ( dataArray.size != 12),
+						{
+							error("satie4Unity.updateBlobHandler:  message bad data format, expecting array  of  12 bytes :")
+						},
+						// else data good, extract
+						{
+							aziDeg = degScaler *  e.sined2unsignedByte( dataArray[0] );
+							eleDeg = degScaler * e.sined2unsignedByte( dataArray[1] );
+
+							gainDB =  (e.sined2unsignedByte(  dataArray[2] ) << 24);
+							gainDB =  gainDB + (e.sined2unsignedByte(  dataArray[3]) << 16);
+							gainDB =  gainDB +   (e.sined2unsignedByte(  dataArray[4]) << 8);
+							gainDB =  gainDB +  e.sined2unsignedByte(  dataArray[5] );
+							gainDB = gainDB * 0.00001;
+							gainDB = gainDB.ampdb;
+
+							delayMs  = (e.sined2unsignedByte(  dataArray[6]) << 8);
+							delayMs =  delayMs +  e.sined2unsignedByte(  dataArray[7] );
+							delayMs = delayMs * 0.1;
+
+							lpHz  = (e.sined2unsignedByte(  dataArray[8]) << 8);
+							lpHz =  lpHz +  e.sined2unsignedByte(  dataArray[9] );
+
+							distanceMeters  = (e.sined2unsignedByte(  dataArray[10]) << 8);
+							distanceMeters =  distanceMeters +  e.sined2unsignedByte(  dataArray[11] );
+							distanceMeters = distanceMeters * 0.01;
+
+
+							switch(nodeType.asSymbol,
+								'source',
+								{
+									postf("~satie4Unity.updateBlobHandler:  nodeName LEN %,  noteType % ", nodeName, nodeType);
+									postf("----> aziDeg %  eleDeg % \n", aziDeg, eleDeg);
+
+									if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == false,
+										{
+											error("satie4Unity.updateBlobHandler:  source node: "++nodeName++"  is undefined \n");
+										},
+										// else all ok
+										{
+											thisSynth = e.allSourceNodes[nodeName.asSymbol].at(\synth);
+
+											if ( thisSynth == nil,
+												{
+													error("satie4Unity.updateBlobHandler:  source node: "++nodeName++"  BUG FOUND: undefined SYNTH  \n");
+												},
+												//else
+												{
+													// distance not used by source nodes
+													thisSynth.set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB, \delayMs, delayMs, \lpHz, lpHz);
+											});
+									});
+								},
+								'group',
+								{
+								},
+								'process',
+								{
+									// We know this is a sourceProcessingNode since this callback was chosen for this node
+									// so by default, we will update the source's group
+									var thisGroupName;
+									var thisGroup;
+									var myProcess;
+
+									thisGroupName = e.allSourceNodes[nodeName.asSymbol].at(\groupNameSym);  // process nodes have unique groups
+									thisGroup = e.allGroupNodes[thisGroupName].at(\group).group;
+									myProcess = e.allSourceNodes[nodeName.asSymbol].at(\process);
+									// thisSynth = e.allSourceNodes[nodeName.asSymbol].at(\synth);
+
+									if ( myProcess == nil,
+										{
+											error("satie4Unity.processUpdateHandler:  process node: "++nodeName++"  BUG FOUND: undefined process  \n");
+										},
+										// else all good
+
+									{
+									if (myProcess[\updateConnection] == nil,
+										{
+											//postf("~connectionProcessCallback:  setting update for nodes group %\n", connectionName);
+											// distance not used by standard spatializers
+											thisGroup.set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB, \delayMs, delayMs, \lpHz, lpHz);
+										},
+										// else use custom handler
+										{
+											// postf("~connectionProcessCallback:  calling custom update handler for %\n", connectionName);
+											// distance used by custom process functions
+											myProcess[\updateConnection].value(myProcess, aziDeg, eleDeg, gainDB, delayMs, lpHz, distanceMeters);
+									});
+									});
+
+							});
+					});
+			});
+		};
+
+		~sined2unsignedByte= { | self, val |
+			var outVal = val;
+			if (val < 0, { outVal = 256 + val});
+			outVal;
+		};
+
 	}); // Environment.make
 	"satie4unityprotol loaded".inform;
 	e.know = true;
@@ -1370,6 +1510,14 @@ for debugguing
 	// connect renderer oscMessage RX to handlers
 	osc.deleteOSC(\satieScene);  // disconnect any previous handlers
 	osc.newOSC(\satieScene, e['coreCallback'], "/satie/scene");   // connect handler
+
+	// general
+	osc.deleteOSC(\updateBlobHandlerSrc);  // disconnect any previous handlers
+	osc.newOSC(\updateBlobHandlerSrc, e['updateBlobHandler'],  "/satie/source/upblob");   // connect handler
+
+	osc.deleteOSC(\updateBlobHandlerProcess);  // disconnect any previous handlers
+	osc.newOSC(\updateBlobHandlerProcess, e['updateBlobHandler'],  "/satie/process/upblob");   // connect handler
+
 
 	// sources
 	osc.deleteOSC(\satieSrcProp);  // disconnect any previous handlers
@@ -1395,7 +1543,6 @@ for debugguing
 
 
 
-
 	// groups
 	osc.deleteOSC(\satieGroupProp);  // disconnect any previous handlers
 	osc.newOSC(\satieGroupProp, e['groupNodeCallback'], "/satie/group/prop");   // connect handler
@@ -1408,12 +1555,6 @@ for debugguing
 
 	osc.deleteOSC(\satieGroupDrop);  // disconnect any previous handlers
 	osc.newOSC(\satieGroupDrop, e['groupNodeCallback'], "/satie/group/drop");   // connect handler
-
-
-
-
-
-
 
 
 	// processes
@@ -1436,16 +1577,16 @@ for debugguing
 	osc.newOSC(\satieProcessHpHz, e['processHpHzHandler'], "/satie/process/hpHz");   // connect handler
 
 
-
-
-
-
-
 	e;
 };
 
 
-// uncomment only for debugging
-//~satie4unity = ~satie4unityprotocol.value(~oscInterface, ~scbr);
+/*
+for debugguing
+
+~satie4unity = ~satie4unityprotocol.value(~osc, ~scbr);
+~satie4unity.debugFlag = true;
+
+*/
 
 )
