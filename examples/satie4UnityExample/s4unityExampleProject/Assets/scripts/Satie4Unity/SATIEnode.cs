@@ -23,7 +23,6 @@ using System.Text;
 using OSC.NET;
 using System.Linq;
 
-
 //public abstract class oscMess
 //{
 //    string keyword { get;  set; }
@@ -804,46 +803,52 @@ public class SATIEnode : MonoBehaviour
     //  /satie/scene/prop keyword value 
     public void sendOSCprop(string keyword, string svalue)
     {
-        
-        List<object> items = new List<object>();
+
+
+        // List<object> items = new List<object>();
 
         int ivalue;
         float fvalue = 0;
-
+        OscMessage mess;
 
         string path;
-        SATIEsource src;
+        //SATIEsource src;
 
         if (isProcess)
             path = "/satie/process/prop";
         else
             path = "/satie/" + nodeType + "/prop";
 
-        items.Add(nodeName);
-        items.Add(keyword);
+        mess = new OscMessage(path);
 
 
-        
+        mess.Add(nodeName);
+        mess.Add(keyword);
+
+
+
         if (int.TryParse(svalue, out ivalue))
         {
             //Debug.Log("ITEM IS AN INTEGER = " + ivalue);
-            items.Add(ivalue);
+            mess.Add(ivalue);
         }
         else if (float.TryParse(svalue, out fvalue))
         {
             //Debug.Log("ITEM IS A FLOAT = " + fvalue);
-            items.Add(fvalue);
+            mess.Add(fvalue);
         }
         else
         {
             //Debug.Log("ITEM IS A STRING = " + svalue);
-            items.Add(svalue);
+            mess.Add(svalue);
         }
 
         //Debug.Log(transform.name + " : " + GetType() + " : " + "sendOSCprop: "+path+" : "+keyword+" : "+fvalue  );
 
-        SATIEsetup.OSCtx(path, items);
-        items.Clear();
+//        SATIEsetup.OSCtx(path, items);
+//        items.Clear();
+
+        SATIEsetup.sendOSC(mess);
     }
 
 

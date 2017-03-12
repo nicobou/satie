@@ -21,8 +21,12 @@ using System.Threading;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net;
+using OscSimpl;
 
-using OSC.NET;
+
+//using OSC.NET;
+
+
 
 public class SATIErendererCtl : MonoBehaviour
 {
@@ -61,31 +65,36 @@ public class SATIErendererCtl : MonoBehaviour
 
     private string _projectMessage;
 
-    private OSCTransmitter sender = null;
+    // private OSCTransmitter sharedOscOutNode = null;
     private bool connected = false;
     //private Thread thread;
 
     private SATIEsetup SATIEsetupCS;
 
-    public int port = 18032;
-    //MH faceShiftOSC default port
-    public string address = "localhost";
-    // defalut to localhost
-    
+//    public int port = 18032;
+//    //MH faceShiftOSC default port
+//    public string address = "localhost";
+//    // defalut to localhost
+
+    private OscOut sharedOscOutNode;
+
+    OscBundle objectBundle;
+
 
     public void UnityOSCTransmitter()
     {
     }
 
-    public int getPort()
-    {
-        return port;
-    }
-
-    public void Awake()
+//    public int getPort()
+//    {
+//        return port;
+//    }
+//
+    public void Start()
     {
         //Debug.Log(string.Format("{0}.Awake(): called", GetType()), transform);
 
+        objectBundle = new OscBundle();
 
         SATIEsetupCS = transform.GetComponent<SATIEsetup>();   // look for SATIEsetup component in this transform
         
@@ -95,32 +104,33 @@ public class SATIErendererCtl : MonoBehaviour
         }
         else
         {
-            port = SATIEsetupCS.RendererPort; //MH faceShiftOSC default port
-            address = SATIEsetupCS.RendererAddress;  // defalut to localhost
+//            port = SATIEsetupCS.RendererPort; //MH faceShiftOSC default port
+//            address = SATIEsetupCS.RendererAddress;  // defalut to localhost
+            sharedOscOutNode = SATIEsetupCS.getOscOut(); 
         }
         
-        try
-        {
-            Debug.Log(transform.name + " : " + GetType() +  " Awake():  sending to " + address + ":" + port);
-            connected = true;
-            sender = new OSCTransmitter(address, port);
-            //thread = new Thread(new ThreadStart(listen));
-            //thread.Start();
-        }
-        catch (Exception e)
-        {
-            Debug.LogError(transform.name + " : " + GetType() +  " Awake():  OSC failed to connect to " + address + ":" + port + " cannot initialize component");
-            Debug.LogError(e.Message);
-            connected = false;
-            sender = null;
-            return;
-        }
-        string localHostName = Dns.GetHostName();
-        IPHostEntry hostEntry = Dns.GetHostEntry(localHostName);
-        foreach (IPAddress ipAddr in hostEntry.AddressList)
-        {
-            Debug.Log(transform.name + " : " + GetType() +  " Awake():  MY IP:" + ipAddr.ToString());
-        }
+//        try
+//        {
+//            Debug.Log(transform.name + " : " + GetType() +  " Awake():  sending to " + address + ":" + port);
+//            connected = true;
+//            sharedOscOutNode = new OSCTransmitter(address, port);
+//            //thread = new Thread(new ThreadStart(listen));
+//            //thread.Start();
+//        }
+//        catch (Exception e)
+//        {
+//            Debug.LogError(transform.name + " : " + GetType() +  " Awake():  OSC failed to connect to " + address + ":" + port + " cannot initialize component");
+//            Debug.LogError(e.Message);
+//            connected = false;
+//            sharedOscOutNode = null;
+//            return;
+//        }
+//        string localHostName = Dns.GetHostName();
+//        IPHostEntry hostEntry = Dns.GetHostEntry(localHostName);
+//        foreach (IPAddress ipAddr in hostEntry.AddressList)
+//        {
+//            Debug.Log(transform.name + " : " + GetType() +  " Awake():  MY IP:" + ipAddr.ToString());
+//        }
 
         _dspState = dspState;
         _outputGainDB = outputGainDB;
@@ -138,45 +148,45 @@ public class SATIErendererCtl : MonoBehaviour
     }
 
 
-    private bool reconnet2renderer()
-    {
-        if (sender != null)
-            return true;
-        try
-        {
-            Debug.Log(transform.name + " : " + GetType() +  " reconnet2renderer(): sending to " + address + ":" + port);
-            connected = true;
-            sender = new OSCTransmitter(address, port);
-            //thread = new Thread(new ThreadStart(listen));
-            //thread.Start();
-        }
-        catch (Exception e)
-        {
-            Debug.LogError(transform.name + " : " + GetType() +  " reconnet2renderer(): OSC failed to connect to " + address + ":" + port + " cannot initialize component");
-            Debug.LogError(e.Message);
-            connected = false;
-            sender = null;
-            return false;
-        }
-        string localHostName = Dns.GetHostName();
-        IPHostEntry hostEntry = Dns.GetHostEntry(localHostName);
-        foreach (IPAddress ipAddr in hostEntry.AddressList)
-        {
-            Debug.Log(transform.name + " : " + GetType() +  " reconnet2renderer(): MY IP:" + ipAddr.ToString());
-        }
-        return true;
-    }
-
+//    private bool reconnet2renderer()
+//    {
+//        if ( sharedOscOutNode.isOpen)
+//            return true;
+//        try
+//        {
+//            Debug.Log(transform.name + " : " + GetType() +  " reconnet2renderer(): sending to " + address + ":" + port);
+//            connected = true;
+//            sharedOscOutNode = new OSCTransmitter(address, port);
+//            //thread = new Thread(new ThreadStart(listen));
+//            //thread.Start();
+//        }
+//        catch (Exception e)
+//        {
+//            Debug.LogError(transform.name + " : " + GetType() +  " reconnet2renderer(): OSC failed to connect to " + address + ":" + port + " cannot initialize component");
+//            Debug.LogError(e.Message);
+//            connected = false;
+//            sharedOscOutNode = null;
+//            return false;
+//        }
+//        string localHostName = Dns.GetHostName();
+//        IPHostEntry hostEntry = Dns.GetHostEntry(localHostName);
+//        foreach (IPAddress ipAddr in hostEntry.AddressList)
+//        {
+//            Debug.Log(transform.name + " : " + GetType() +  " reconnet2renderer(): MY IP:" + ipAddr.ToString());
+//        }
+//        return true;
+//    }
+//
 
 
  
     private void updateDSPstate()
     {
-        OSCMessage message = new OSCMessage(_renderCtlmess);
+        OscMessage message = new OscMessage(_renderCtlmess);
         float state = (dspState) ? 1f : 0f;
         
-        message.Append("setDSP");
-        message.Append(state);
+        message.Add("setDSP");
+        message.Add(state);
         sendOSC(message);
     }
 
@@ -252,10 +262,10 @@ public class SATIErendererCtl : MonoBehaviour
             path = Application.streamingAssetsPath + "/" + projectDir;
 
 
-        OSCMessage message = new OSCMessage(_projectMessage);
+        OscMessage message = new OscMessage(_projectMessage);
 		
-        message.Append("setProjectDir");
-        message.Append(path);
+        message.Add("setProjectDir");
+        message.Add(path);
         sendOSC(message);
     }
 
@@ -273,10 +283,10 @@ public class SATIErendererCtl : MonoBehaviour
 
     private void updateGainDB()
     {
-        OSCMessage message = new OSCMessage(_renderCtlmess);
+        OscMessage message = new OscMessage(_renderCtlmess);
         
-        message.Append("setOutputDB");
-        message.Append(outputGainDB);
+        message.Add("setOutputDB");
+        message.Add(outputGainDB);
         sendOSC(message);
     }
 
@@ -289,10 +299,10 @@ public class SATIErendererCtl : MonoBehaviour
 
     private void updateTrimDB()
     {
-        OSCMessage message = new OSCMessage(_renderCtlmess);
+        OscMessage message = new OscMessage(_renderCtlmess);
         
-        message.Append("setOutputTrimDB");
-        message.Append(outputTrimDB);
+        message.Add("setOutputTrimDB");
+        message.Add(outputTrimDB);
         sendOSC(message);
     }
 
@@ -304,11 +314,11 @@ public class SATIErendererCtl : MonoBehaviour
 
     private void updateMute()
     {
-        OSCMessage message = new OSCMessage(_renderCtlmess);
+        OscMessage message = new OscMessage(_renderCtlmess);
         float state = (mute) ? 1f : 0f;
         
-        message.Append("setOutputMute");
-        message.Append(state);
+        message.Add("setOutputMute");
+        message.Add(state);
         sendOSC(message);
     }
 
@@ -320,51 +330,51 @@ public class SATIErendererCtl : MonoBehaviour
 
     private void updateDim()
     {
-        OSCMessage message = new OSCMessage(_renderCtlmess);
+        OscMessage message = new OscMessage(_renderCtlmess);
         float state = (dim) ? 1f : 0f;
         
-        message.Append("setOutputDIM");
-        message.Append(state);
+        message.Add("setOutputDIM");
+        message.Add(state);
         sendOSC(message);
     }
 
     private void updateOutputFormat()
     {
-        OSCMessage message = new OSCMessage(_renderCtlmess);
-        message.Append("setOutputFormat");
-        message.Append(outputFormat);
+        OscMessage message = new OscMessage(_renderCtlmess);
+        message.Add("setOutputFormat");
+        message.Add(outputFormat);
         sendOSC(message);
     }
 
     // only three message value types
     public void projectMess(string key)
     {
-        OSCMessage message = new OSCMessage(_projectMessage);
+        OscMessage message = new OscMessage(_projectMessage);
  
         Debug.Log(transform.name + " " + GetType() + " projectMess()  sending projectMess:    project: " + message + "   key: " + key);
 
-        message.Append(key);
+        message.Add(key);
         sendOSC(message);
     }
 
 
     public void projectMess(string key, float val)
     {
-        OSCMessage message = new OSCMessage(_projectMessage);
+        OscMessage message = new OscMessage(_projectMessage);
 
         Debug.Log(transform.name + " " + GetType() + "projectMess() sending projectMess:    project: " + message + "   key: " + key);
-        message.Append(key);
-        message.Append(val);
+        message.Add(key);
+        message.Add(val);
         sendOSC(message);
     }
 
     public void projectMess(string key, string val)
     {
-        OSCMessage message = new OSCMessage(_projectMessage);
+        OscMessage message = new OscMessage(_projectMessage);
 
         Debug.Log(transform.name + " " + GetType() + " projectMess() sending projectMess:    project: " + message + "   key: " + key);
-        message.Append(key);
-        message.Append(val);
+        message.Add(key);
+        message.Add(val);
         sendOSC(message);
     }
 
@@ -377,9 +387,9 @@ public class SATIErendererCtl : MonoBehaviour
 
 //        if (Input.GetKeyDown ("d")) {
 //
-//            OSCMessage message = new OSCMessage ("/a.renderer/setOutputDB");
-//			//message.Append ("fuckme");
-//			message.Append (-12f);
+//            OscMessage message = new OscMessage ("/a.renderer/setOutputDB");
+//			//message.Add ("fuckme");
+//			message.Add (-12f);
 //			sendOSC (message);
 //			//Debug.Log("send mess");
 //		}
@@ -444,9 +454,9 @@ public class SATIErendererCtl : MonoBehaviour
     public void OnApplicationQuit()
     {
 
-//        OSCMessage message = new OSCMessage ("/spatosc/core");
-//        //message.Append ("fuckme");
-//        message.Append ("clear");
+//        OscMessage message = new OscMessage ("/spatosc/core");
+//        //message.Add ("fuckme");
+//        message.Add ("clear");
 //        sendOSC (message);
 //        Debug.Log("APP QUIT");
         disconnect();
@@ -454,12 +464,12 @@ public class SATIErendererCtl : MonoBehaviour
 
     public void disconnect()
     {
-        if (sender != null)
+        if (sharedOscOutNode.isOpen)
         {
-            sender.Close();
+            sharedOscOutNode.Close();
         }
       	
-        sender = null;
+        sharedOscOutNode = null;
         connected = false;
     }
 
@@ -470,21 +480,22 @@ public class SATIErendererCtl : MonoBehaviour
 
 
     // expand this to take multiple messages -- e.g.  mess[]
-    public int sendOSC(OSCMessage mess)
+    public bool sendOSC(OscMessage mess)
     {
-        int bytesSent = 0;
+        bool status;
 
-        if (sender != null)
+        if (sharedOscOutNode.isOpen)
         {
-            OSCBundle objectBundle = new OSCBundle();
-            objectBundle.Append(mess);
-            bytesSent = sender.Send(objectBundle);
-            return (bytesSent);
+            objectBundle.Add(mess);
+
+            status = sharedOscOutNode.Send(objectBundle);
+            objectBundle.Clear();
+            return status;
         }
         else
         {
             Debug.LogError(transform.name + " : " + GetType() +  " sendOSC(): OSC not initialized, can't send message");
-            return(bytesSent);
+            return false;
         }
     }
 
@@ -492,19 +503,20 @@ public class SATIErendererCtl : MonoBehaviour
 
     //	public static OSCMessage setMessage(int s, int i, float x, float y, float a, float xVec, float yVec, float A, float m, float r)
     //	{
-    //		OSCMessage message = new OSCMessage("/tuio/2Dobj");
-    //		message.Append("set");
-    //		message.Append(s);
-    //		message.Append(i);
-    //		message.Append(x);
-    //		message.Append(y);
-    //		message.Append(a);
-    //		message.Append(xVec);
-    //		message.Append(yVec);
-    //		message.Append(A);
-    //		message.Append(m);
-    //		message.Append(r);
+    //		OscMessage message = new OscMessage("/tuio/2Dobj");
+    //		message.Add("set");
+    //		message.Add(s);
+    //		message.Add(i);
+    //		message.Add(x);
+    //		message.Add(y);
+    //		message.Add(a);
+    //		message.Add(xVec);
+    //		message.Add(yVec);
+    //		message.Add(A);
+    //		message.Add(m);
+    //		message.Add(r);
     //		return message;
     //	}
 
 }
+

@@ -21,7 +21,8 @@ using System.Collections.Generic;
 
 
 // note:  this script must be in the transform that the SATIEsourceNode is in, and that node must have a "process" as a uri type
-public class SATIEprocess : MonoBehaviour {
+
+    public class SATIEprocess : MonoBehaviour {
 
 	public string processName = "default";
 

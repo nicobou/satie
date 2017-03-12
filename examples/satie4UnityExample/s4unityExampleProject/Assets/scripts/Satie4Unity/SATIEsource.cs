@@ -21,7 +21,6 @@ using System.IO;
 using UnityEngine;
 
 
-
 //SATIEsetup.setDopplerFactor (nodeName, s, dopplarEffect);
     
 //SATIEsetup.setDistanceFactor (nodeName, s, distanceEffect);
@@ -765,6 +764,7 @@ public class SATIEsource : SATIEnode {
         items.Add(distFq_);
         items.Add (distance);
 
+        // chnage this over to OSCsend 
 		SATIEsetup.OSCtx(path, items);   // send OSC connection update
 
 		items.Clear();
@@ -1293,3 +1293,4 @@ public class SATIEsource : SATIEnode {
         //Debug.Log("SETTING OMNI");
     }
  }
+
