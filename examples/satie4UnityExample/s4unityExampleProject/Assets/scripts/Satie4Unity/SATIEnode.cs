@@ -815,9 +815,9 @@ public class SATIEnode : MonoBehaviour
         //SATIEsource src;
 
         if (isProcess)
-            path = "/satie/process/prop";
+            path = "/satie/process/set";
         else
-            path = "/satie/" + nodeType + "/prop";
+            path = "/satie/" + nodeType + "/set";
 
         mess = new OscMessage(path);
 

@@ -148,7 +148,7 @@ for debugguing
 			//"coreCallback called".postln;
 		};
 
-		// accepts arbitrary key value pairs and applies them to the named source node
+/*		// accepts arbitrary key value pairs and applies them to the named source node
 		~setMessageHandler = { 	| args |
 			var nodeName  = args[1];
 			var props = args.copyRange(2, args.size - 1);
@@ -175,14 +175,15 @@ for debugguing
 								});
 							});
 					});
-			};
+			};*/
 
 		// accepts arbitrary key value pairs and applies them to the named group node
-		~nodeSetProps = { 	| args |
+		~setMessageHandler = { 	| args |
 			var type = args[0].asString.split[2].asSymbol;
 			var nodeName  = args[1];
 			var props = args.copyRange(2, args.size - 1);
-			var target;
+			var targetNode;
+
 
 			// verify data
 			if (  (  ( (props.size&1)==1) || (props.size == 0) ),
@@ -195,13 +196,13 @@ for debugguing
 						{
 							if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == true,
 								{
-									target = e.allSourceNodes[nodeName.asSymbol].at(\synth);
-									if ( target == nil,
+									targetNode = e.allSourceNodes[nodeName.asSymbol].at(\synth);
+									if ( targetNode == nil,
 										{
 											error("satie4Unity.setMessHandler:  source node: "++nodeName++"  BUG FOUND: undefined SYNTH  \n");
 										},   // else good to go
 										{
-											e.nodeSetProps( props, target);
+											e.nodeSetProps( props, targetNode);
 									});
 								},
 								{
@@ -212,8 +213,8 @@ for debugguing
 						{
 							if ( ~satie4unity.allGroupNodes.includesKey (\sheefa) == true,
 								{
-									target = e.allGroupNodes[nodeName.asSymbol].at(\group).group;
-									e.nodeSetProps( props, target);
+									targetNode = e.allGroupNodes[nodeName.asSymbol].at(\group).group;
+									e.nodeSetProps( props, targetNode);
 								},
 								{   // else no group
 									error("satie4Unity.setMessHandler:  group node: "++nodeName++"  is undefined \n");
@@ -221,14 +222,31 @@ for debugguing
 						},
 						'process',
 						{
+							if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == true,
+								{
+									var thisGroupName = e.allSourceNodes[nodeName.asSymbol].at(\groupNameSym);  // process nodes have unique groups
+									var thisGroup = e.allGroupNodes[thisGroupName].at(\group).group;
+									var myProcess = e.allSourceNodes[nodeName.asSymbol].at(\process);
 
+									if ( myProcess == nil,
+										{
+											error("satie4Unity.setMessHandler:  process node: "++nodeName++"  BUG FOUND: undefined process  \n");
 
+										},
+										{  // good to go
+											e.processSetProps( props, myProcess, thisGroup);
+									});
+
+								},
+								{  // else error
+									error("satie4Unity.setMessHandler:  process node: "++nodeName++"  is undefined \n");
+							});
 					});
 			});
 		};
 
-		// accepts arbitrary key value pairs and applies them to the named source node
-		~nodeSetProps = { | self, propsVec, target  |
+		// accepts arbitrary key value pairs and applies them to the named target node (source or group)
+		~nodeSetProps = { | self, propsVec, targetNode  |
 
 			// var group = self.allGroupNodes[groupName.asSymbol].at(\group).group;
 
@@ -239,32 +257,101 @@ for debugguing
 					{
 						var halfSrate = 0.5 * s.sampleRate;
 
-						target.set(\hpHz ,  clip(val, 1, halfSrate ));
-						postf("** instance: set  % to %\n", prop, val);
+						targetNode.set(\hpHz ,  clip(val, 1, halfSrate ));
+						//postf("** instance: set  % to %\n", prop, val);
 						defaultFlag=false;
 					},
 					'spread',
 					{
 						// invert and scale the spread value (usually an exp) to work with SATIE's VBAP-based spatializer (or others)
 						var spread = 100 *  ( 1 - (clip(val,0,1)));  //
-						target.set(\spread, spread);
-						postf("** instance: set  % to %\n", prop, val);
+						targetNode.set(\spread, spread);
+						//postf("** instance: set  % to %\n", prop, val);
 						defaultFlag=false;
 					},
 					'in',
 					{
-						target.set(prop, satie.aux[val.asInt]);
+						targetNode.set(prop, satie.aux[val.asInt]);
 						defaultFlag = false;
 				});
 				// else just set the prop val pair
 				if (defaultFlag,
 					{
-						postf("** instance: set  % to %\n", prop, val);
-						target.set(prop, val);
+						//postf("** instance: set  % to %\n", prop, val);
+						targetNode.set(prop, val);
 				});
 			});
 		};
 
+				// accepts arbitrary key value pairs and applies them to the named target node (source or group)
+		~processSetProps = { | self, propsVec, process,group  |
+			propsVec.pairsDo({ | prop, val |
+				var defaultFlag=true;
+				switch(prop,
+					'hpHz',
+					{
+								var halfSrate = 0.5 * s.sampleRate;
+
+								if (process[\set] == nil,
+								{
+									//postf("processHpHzHandler:  setting update for nodes group %\n", connectionName);
+									// distance not used by standard spatializers
+									group.set(\hpHz ,  clip(val, 1, halfSrate ));
+								},
+								// else use custom handler
+								{
+									// postf("processHpHzHandler:  calling custom update handler for %\n", connectionName);
+									// distance used by custom process functions
+									process[\set].value(process,  \hpHz, clip(val, 1, halfSrate ));
+							});
+
+						//postf("** process instance: set  % to %\n", prop, val);
+						defaultFlag=false;
+					},
+					'spread',
+					{
+						// invert and scale the spread value (usually an exp) to work with SATIE's VBAP-based spatializer (or others)
+						var spread = 100 *  ( 1 - (clip(val,0,1)));  //
+
+
+							if (process[\set] == nil,
+								{
+									//postf("~connectionProcessCallback:  setting spread for node's group  %\n", connectionName);
+									group.set(\spread, spread);
+								},
+								// else use a custom handler
+								{
+									//postf("~connectionProcessCallback:  calling custom spread handler for %\n", connectionName);
+									process[\set].value(process,  \spread, spread);
+
+							});
+
+						//postf("** process instance: set  % to %\n", prop, val);
+						defaultFlag=false;
+					},
+					'in',
+					{
+						// just pass this one along
+						group.set(prop, satie.aux[val.asInt]);
+						defaultFlag = false;
+				});
+				// else just set the prop val pair
+				if (defaultFlag,
+					{
+						//postf("** process instance: set  % to %\n", prop, val);
+							if (process[\set] == nil,
+								{
+									//postf("~connectionProcessCallback:  setting spread for node's group  %\n", connectionName);
+									group.set(prop.asSymbol, val);
+								},
+								// else use a custom handler
+								{
+									//postf("~connectionProcessCallback:  calling custom spread handler for %\n", connectionName);
+									process[\set].value(process, prop.asSymbol, val);
+						});
+				});
+			});
+		};
 
 		// osc rx   ARGS:  sourceName azimuthRADIANS elevationRADIANS gainDB delayMS  lpHZ  distanceMETERS
 		~sourceUpdateHandler = { 	| args |
@@ -312,8 +399,8 @@ for debugguing
 			var thisSynth;
 			var halfSrate = 0.5 * s.sampleRate;
 
-			// postf("sourceHpHzHandler:  nodeName: %  size: % args: %\n", nodeName, args.size, args);
-			if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == false,
+			error("sourceHpHzHandler:  nodeName: %  size: % args: %\n", nodeName, args.size, args);
+/*			if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == false,
 				{
 					error("satie4Unity.sourceHpHzHandler:  source node: "++nodeName++"  is undefined \n");
 				},
@@ -331,7 +418,7 @@ for debugguing
 							hpHz = args[2];   // get highpass cutoff value
 							thisSynth.set(\hpHz ,  clip(hpHz, 1, halfSrate ));
 					});
-			});
+			});*/
 		};
 
 		// osc rx   ARGS:  sourceName spread
@@ -341,7 +428,7 @@ for debugguing
 			var thisSynth;
 
 			// postf("sourceHpHzHandler:  nodeName: %  size: % args: %\n", nodeName, args.size, args);
-			if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == false,
+/*			if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == false,
 				{
 					error("satie4Unity.sourceHpHzHandler:  source node: %  is undefined \n", nodeName);
 				},
@@ -360,7 +447,7 @@ for debugguing
 							thisSynth.set(\spread, spread);
 							//postf("~connectionCallback:  SPREAD:  connectionName: %  spread: % \n", connectionName, spread);
 					});
-			});
+			});*/
 		};
 
 
@@ -422,8 +509,8 @@ for debugguing
 			var thisGroupName, thisGroup,  myProcess;
 			var halfSrate = 0.5 * s.sampleRate;
 
-			// postf("processHpHzHandler:  nodeName: %  size: % args: %\n", nodeName, args.size, args);
-			if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == false,
+			error("processHpHzHandler:  nodeName: %  size: % args: %\n", nodeName, args.size, args);
+/*			if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == false,
 				{
 					error("satie4Unity.processHpHzHandler:  process node: "++nodeName++"  is undefined \n");
 				},
@@ -456,7 +543,7 @@ for debugguing
 									myProcess[\updateHpHz].value(myProcess,  clip(hpHz, 1, halfSrate ));
 							});
 					});
-			});
+			});*/
 		};
 
 		// osc rx   ARGS:  sourceName spread
@@ -465,8 +552,8 @@ for debugguing
 			var spread;
 			var thisGroupName, thisGroup,  myProcess;
 
-			// postf("sourceHpHzHandler:  nodeName: %  size: % args: %\n", nodeName, args.size, args);
-			if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == false,
+			error("sourceHpHzHandler:  nodeName: %  size: % args: %\n", nodeName, args.size, args);
+/*			if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == false,
 				{
 					error("satie4Unity.processSpreadHandler:  process node: "++nodeName++"  is undefined \n");
 				},
@@ -499,7 +586,7 @@ for debugguing
 
 							});
 					});
-			});
+			});*/
 		};
 
 		// e.g  /satie/source/prop nodeName  key val
@@ -527,19 +614,20 @@ for debugguing
 					switch(type,
 						'prop',
 						{
-							if ( (args.size > 2) ,
+							error("~sourceNodeCallback:  PROP MESSAGE CALLED BY:  %\n", name);
+/*						if ( (args.size > 2) ,
 								{
 									e.setProperty(name, args[2], args[3]);
-									//postf("~sourceNodeCallback:  nodeName: %  setProp: %  key: % value: %\n", name, args[2], args[3]);
+									error("~sourceNodeCallback:  nodeName: %  setProp: %  key: % value: %\n", name, args[2], args[3]);
 								},
 								{
 									"sourceNodeCallback_prop:  osc message: missing values".warn;
 
-							}); // else
+							}); // else*/
 						},
 						'uri',
 						{
-							postf("~sourceNodeCallback:  IGNORING URI MESSAGE TO:  nodeName: %  mesageType: %  %\n", name, type);
+							error("~sourceNodeCallback:  IGNORING URI MESSAGE TO:  nodeName: %  mesageType: %  %\n", name, type);
 							//e.setUri(name, args[2]);
 						},
 						'event',
@@ -594,7 +682,8 @@ for debugguing
 			switch(type,
 				'prop',
 				{
-					if (myProcess[\prop] == nil,
+					error("~processCallback:  PROP MESSAGE CALLED BY:  %\n", name);
+/*					if (myProcess[\prop] == nil,
 						{
 							var groupName = e.allSourceNodes[name.asSymbol].at(\groupNameSym);
 
@@ -606,7 +695,7 @@ for debugguing
 						{
 							//postf("~~processCallback:  calling custom prop handler for %\n", name);
 							myProcess[\prop].value(myProcess,  args[2], args[3]);
-					});
+					});*/
 				},
 				'event',
 				{
@@ -661,13 +750,14 @@ for debugguing
 			switch(type,
 				'prop',
 				{
-					if ( (args.size < 4 ) ,
+					error("~groupNodeCallback:  PROP MESSAGE CALLED BY:  %\n", name);
+/*					if ( (args.size < 4 ) ,
 						{"~groupCallback.prop: message missing values".warn;},
 						// else
 						{
-							//postf("~groupCallback:  nodeName: %  setProp: %  key: % value: %\n", name, args[2], args[3]);
+							error("~groupCallback:  nodeName: %  setProp: %  key: % value: %\n", name, args[2], args[3]);
 							e.setGroupProperty(name, args[2], args[3]);
-					});
+					});*/
 
 				},
 				'uri',
@@ -988,21 +1078,21 @@ for debugguing
 		};
 
 
-		~setProperty = { | self, nodeName, property, value |
+/*		~setProperty = { | self, nodeName, property, value |
 			var thisSynth = self.allSourceNodes[nodeName.asSymbol].at(\synth);
 			//"setProperty called".inform;
 			//postf("~setProperty: seting % of % to %\n", property, nodeName, value);
 
 			thisSynth.set(property.asSymbol, value);
-		};
+		};*/
 
-		~setGroupProperty = { | self, groupName, property, value |
+/*		~setGroupProperty = { | self, groupName, property, value |
 			var group = self.allGroupNodes[groupName.asSymbol].at(\group).group;
 
 			//postf("~setGroupProperty: seting % of % to %\n", property, groupName, value);
 
 			group.set(property.asSymbol, value);
-		};
+		};*/
 
 
 		~setState = { | self, nodeName,  value |

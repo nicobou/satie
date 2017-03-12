@@ -112,9 +112,9 @@
 
 
 
-// if defined, will be called when node's "prop" message is received
-// otherwise satie4unity will send the  "prop" message to the node's group
-~sheefa.prop =  {| self, property, value |
+// if defined, will be called when node's "set" message is received
+// otherwise satie4unity will send the  "set" message to the node's group
+~sheefa.set =  {| self, property, value |
 	self.put(property.asSymbol, value);
 };
 

@@ -86,7 +86,7 @@ public class SATIEsource : SATIEnode {
     public float cardioidDirectivityExp = 1;  // used when "cardioid" type of source diffusity is selected
   
 
-    [Range(0f, 1f)]
+    [Range(0f, 100f)]
     public float sourceFocusPercent = 99f;   // this % value is used in the connection to the listener(s), and determines the "spread" of the source on the listener, 0 = widest (omni), 100 = narrowest 
 	private float _sourceFocusPercent;
 
