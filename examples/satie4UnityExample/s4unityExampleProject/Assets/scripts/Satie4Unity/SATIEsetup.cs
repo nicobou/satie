@@ -319,11 +319,14 @@ public class SATIEsetup : MonoBehaviour
 
     public void OnApplicationQuit()
     {
+
+        OscMessage message = new OscMessage("/satie/scene");
+
         Debug.Log("SATIEsetup.OnApplicationQuit:  APP QUIT");
         Debug.Log("SATIEsetup.OnDestroy");
-//            OSCMessage message = new OSCMessage("/satie/scene");
-//            message.Append("clear");
-//            sendOSC(message);
+
+        message.Add("clear");
+        sendOSC(message);
 
          disconnect();   
 

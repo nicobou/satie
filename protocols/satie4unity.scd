@@ -149,13 +149,11 @@ for debugguing
 		};
 
 		// accepts arbitrary key value pairs and applies them to the named source node
-		~sourceSetHandler = { 	| args |
+		~setMessageHandler = { 	| args |
 			var nodeName  = args[1];
 			var props = args.copyRange(2, args.size - 1);
 			var thisSynth;
 
-
-			//= e.allSourceNodes[nodeName.asSymbol].at(\synth);
 			if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == false,
 				{
 					error("satie4Unity.sourceSetHandler:  source node: "++nodeName++"  is undefined \n");
@@ -171,42 +169,99 @@ for debugguing
 								{
 									error("satie4Unity.sourceSetHandler:  source node: "++nodeName++"  BUG FOUND: undefined SYNTH  \n");
 
-								},   // else
+								},   // else good to go
 								{
-									props.pairsDo({ | prop, val |
-										var defaultFlag=true;
-										switch(prop,
-											'hpHz',
-											{
-												var halfSrate = 0.5 * s.sampleRate;
-
-												thisSynth.set(\hpHz ,  clip(val, 1, halfSrate ));
-												postf("** instance: set %'s % to %\n", nodeName, prop, val);
-												defaultFlag=false;
-											},
-											'spread',
-											{
-												// invert and scale the spread value (usually an exp) to work with SATIE's VBAP-based spatializer (or others)
-												var spread = 100 *  ( 1 - (clip(val,0,1)));  //
-												thisSynth.set(\spread, spread);
-												postf("** instance: set %'s % to %\n", nodeName, prop, val);
-												defaultFlag=false;
-											},
-											'in',
-											{
-												thisSynth.set(prop, satie.aux[val.asInt]);
-												defaultFlag = false;
-										});
-										// else just set the prop val pair
-										if (defaultFlag,
-											{
-												postf(" satie4Unity.sourceSetHandler Default  ** instance: set %'s % to %\n", nodeName, prop, val);
-												thisSynth.set(prop, val);
-										});
-
-									});
+									e.nodeSetProps( props, thisSynth);
+								});
 							});
 					});
+			};
+
+		// accepts arbitrary key value pairs and applies them to the named group node
+		~nodeSetProps = { 	| args |
+			var type = args[0].asString.split[2].asSymbol;
+			var nodeName  = args[1];
+			var props = args.copyRange(2, args.size - 1);
+			var target;
+
+			// verify data
+			if (  (  ( (props.size&1)==1) || (props.size == 0) ),
+				{
+					error("satie4Unity.setMessHandler: BAD ARGS: "++props);
+				}, // else args good
+				{
+					switch(type,
+						'source',
+						{
+							if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == true,
+								{
+									target = e.allSourceNodes[nodeName.asSymbol].at(\synth);
+									if ( target == nil,
+										{
+											error("satie4Unity.setMessHandler:  source node: "++nodeName++"  BUG FOUND: undefined SYNTH  \n");
+										},   // else good to go
+										{
+											e.nodeSetProps( props, target);
+									});
+								},
+								{
+									error("satie4Unity.setMessHandler:  source node: "++nodeName++"  is undefined \n");
+							}); // else node exists,  process event
+						},
+						'group',
+						{
+							if ( ~satie4unity.allGroupNodes.includesKey (\sheefa) == true,
+								{
+									target = e.allGroupNodes[nodeName.asSymbol].at(\group).group;
+									e.nodeSetProps( props, target);
+								},
+								{   // else no group
+									error("satie4Unity.setMessHandler:  group node: "++nodeName++"  is undefined \n");
+							});
+						},
+						'process',
+						{
+
+
+					});
+			});
+		};
+
+		// accepts arbitrary key value pairs and applies them to the named source node
+		~nodeSetProps = { | self, propsVec, target  |
+
+			// var group = self.allGroupNodes[groupName.asSymbol].at(\group).group;
+
+			propsVec.pairsDo({ | prop, val |
+				var defaultFlag=true;
+				switch(prop,
+					'hpHz',
+					{
+						var halfSrate = 0.5 * s.sampleRate;
+
+						target.set(\hpHz ,  clip(val, 1, halfSrate ));
+						postf("** instance: set  % to %\n", prop, val);
+						defaultFlag=false;
+					},
+					'spread',
+					{
+						// invert and scale the spread value (usually an exp) to work with SATIE's VBAP-based spatializer (or others)
+						var spread = 100 *  ( 1 - (clip(val,0,1)));  //
+						target.set(\spread, spread);
+						postf("** instance: set  % to %\n", prop, val);
+						defaultFlag=false;
+					},
+					'in',
+					{
+						target.set(prop, satie.aux[val.asInt]);
+						defaultFlag = false;
+				});
+				// else just set the prop val pair
+				if (defaultFlag,
+					{
+						postf("** instance: set  % to %\n", prop, val);
+						target.set(prop, val);
+				});
 			});
 		};
 
@@ -1519,6 +1574,16 @@ for debugguing
 	osc.newOSC(\updateBlobHandlerProcess, e['updateBlobHandler'],  "/satie/process/upblob");   // connect handler
 
 
+	osc.deleteOSC(\satieSrcSet);  // disconnect any previous handlers
+	osc.newOSC(\satieSrcSet, e['setMessageHandler'], "/satie/source/set");   // connect handler
+
+	osc.deleteOSC(\satieGroupSet);  // disconnect any previous handlers
+	osc.newOSC(\satieGroupSet, e['setMessageHandler'], "/satie/group/set");   // connect handler
+
+	osc.deleteOSC(\satieProcSet);  // disconnect any previous handlers
+	osc.newOSC(\satieProcSet, e['setMessageHandler'], "/satie/process/set");   // connect handler
+
+
 	// sources
 	osc.deleteOSC(\satieSrcProp);  // disconnect any previous handlers
 	osc.newOSC(\satieSrcProp, e['sourceNodeCallback'], "/satie/source/prop");   // connect handler
@@ -1538,8 +1603,6 @@ for debugguing
 	osc.deleteOSC(\satieSrcSpread);  // disconnect any previous handlers
 	osc.newOSC(\satieSrcSpread, e['sourceSpreadHandler'], "/satie/source/spread");   // connect handler
 
-	osc.deleteOSC(\satieSrcSet);  // disconnect any previous handlers
-	osc.newOSC(\satieSrcSet, e['sourceSetHandler'], "/satie/source/set");   // connect handler
 
 
 

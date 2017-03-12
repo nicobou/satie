@@ -21,6 +21,7 @@ using System.IO;
 using UnityEngine;
 
 
+
 //SATIEsetup.setDopplerFactor (nodeName, s, dopplarEffect);
     
 //SATIEsetup.setDistanceFactor (nodeName, s, distanceEffect);
@@ -85,6 +86,7 @@ public class SATIEsource : SATIEnode {
     public float cardioidDirectivityExp = 1;  // used when "cardioid" type of source diffusity is selected
   
 
+    [Range(0f, 1f)]
     public float sourceFocusPercent = 99f;   // this % value is used in the connection to the listener(s), and determines the "spread" of the source on the listener, 0 = widest (omni), 100 = narrowest 
 	private float _sourceFocusPercent;
 
@@ -516,8 +518,8 @@ public class SATIEsource : SATIEnode {
 
 
         string path, pathRoot;
-            
-        List<object> items = new List<object>();
+             
+        //List<object> items = new List<object>();
         
 		SATIElistener listener = conn.listener;
 
@@ -527,6 +529,8 @@ public class SATIEsource : SATIEnode {
             pathRoot = "/satie/process";
         else
             pathRoot = "/satie/source";
+
+        OscMessage mess = new OscMessage("/");
 
         Transform source = transform;
  
@@ -593,11 +597,14 @@ public class SATIEsource : SATIEnode {
             {
 				_underWaterHpHz = underWaterHpHz;
 
-                path = pathRoot+"/hpHz";
-                items.Add (source.name);             
-				items.Add (_underWaterHpHz);             
-				SATIEsetup.OSCtx (path, items);   // send spread message via OSC
-				items.Clear ();
+                path = pathRoot+"/set";
+
+                mess.address = path;
+                mess.Add (source.name);  
+                mess.Add("hpHz");
+				mess.Add (_underWaterHpHz);             
+				SATIEsetup.sendOSC (mess);   // send spread message via OSC
+				mess.Clear ();
 				//Debug.Log("_underWaterHpHz = " + _underWaterHpHz);
 			}
 		} else 
@@ -605,12 +612,14 @@ public class SATIEsource : SATIEnode {
 			if (_underWaterHpHz == underWaterHpHz) 
             {
 				_underWaterHpHz = 1f;		// reset the cutoff filter to normal
-                path = pathRoot+"/hpHz";
+                path = pathRoot+"/set";
 
-                items.Add (source.name);             
-				items.Add (_underWaterHpHz);             
-				SATIEsetup.OSCtx (path, items);   // send spread message via OSC
-				items.Clear ();
+                mess.address = path;
+                mess.Add (source.name);
+                mess.Add("hpHz");
+				mess.Add (_underWaterHpHz);             
+                SATIEsetup.sendOSC (mess);   // send spread message via OSC
+				mess.Clear ();
 				//Debug.Log("_underWaterHpHz = " + _underWaterHpHz);
 			}
 		}
@@ -633,15 +642,16 @@ public class SATIEsource : SATIEnode {
 
             if ( newSpread != conn.currentspread )   // changed ?
             {
-                // handle spread
-                path = pathRoot+"/spread";
-                items.Add (source.name);             
-
                 conn.currentspread = newSpread;
 
-                items.Add(newSpread);             
-                SATIEsetup.OSCtx(path, items);   // send spread message via OSC
-                items.Clear();
+                // send spread
+                path = pathRoot+"/set";
+                mess.address = path;
+                mess.Add (source.name);             
+                mess.Add("spread");
+                 mess.Add(newSpread);             
+                SATIEsetup.sendOSC(mess);   // send spread message via OSC
+                mess.Clear();
 
 				// SATIEsetup.OSCdebug("/debug/getSpreadIndex", getSpreadIndex(distance, myRadius, radiusTransitionDistance, conn.spread));
 
@@ -656,14 +666,16 @@ public class SATIEsource : SATIEnode {
 
 			if (conn.currentspread != newSpread)
 			{
-                // handle spread
-                path = pathRoot+"/spread";
-                items.Add (source.name);             
+                conn.currentspread = newSpread;
 
-				conn.currentspread = newSpread;
-				items.Add(newSpread);             
-				SATIEsetup.OSCtx(path, items);   // send spread message via OSC
-				items.Clear();
+                // send spread
+                path = pathRoot+"/set";
+                mess.address = path;
+                mess.Add (source.name);  
+                mess.Add("spread");
+				mess.Add(newSpread);             
+                SATIEsetup.sendOSC(mess);   // send spread message via OSC
+				mess.Clear();
 				//SATIEsetup.OSCdebug("/debug/getSpreadIndex", conn.spread);
 			}
 		}
@@ -746,7 +758,8 @@ public class SATIEsource : SATIEnode {
         // Debug.Log("  AZI: "+ azimuth*Mathf.Rad2Deg+"  Elev: "+elevation*Mathf.Rad2Deg); 
 
         path = pathRoot+"/update";
-        items.Add (source.name);             
+        mess.address = path;
+        mess.Add (source.name);             
 
 
 
@@ -757,17 +770,17 @@ public class SATIEsource : SATIEnode {
             _aboveWaterState = true;
         }
 
-        items.Add(azimuth);
-        items.Add(elevation);
-        items.Add(gainDB_);
-        items.Add(vdelMs_);
-        items.Add(distFq_);
-        items.Add (distance);
+        mess.Add(azimuth);
+        mess.Add(elevation);
+        mess.Add(gainDB_);
+        mess.Add(vdelMs_);
+        mess.Add(distFq_);
+        mess.Add (distance);
 
         // chnage this over to OSCsend 
-		SATIEsetup.OSCtx(path, items);   // send OSC connection update
+        SATIEsetup.sendOSC(mess);   // send OSC connection update
 
-		items.Clear();
+        mess.Clear();
 
 
         //Debug.Log("CONNECTION DISTANCE FROM LISTENER: " + distance);
