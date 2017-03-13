@@ -34,9 +34,11 @@ public class SATIErendererCtl : MonoBehaviour
     public bool dspState = true;
     private bool _dspState;
 
+    [Tooltip ("default == unity project file name")]
     public string projectName = "default";
 
-    public string projectDir;
+    [Tooltip ("default == dirPathToThisProject/Assets/StreamingAssets")]
+    public string projectDir = "default";
     // defaults to $PROJECT/StreamingAssets
     private string _projectDir;
 
@@ -66,7 +68,7 @@ public class SATIErendererCtl : MonoBehaviour
     private string _projectMessage;
 
     // private OSCTransmitter sharedOscOutNode = null;
-    private bool connected = false;
+    private bool _initialized = false;
     //private Thread thread;
 
     private SATIEsetup SATIEsetupCS;
@@ -76,9 +78,9 @@ public class SATIErendererCtl : MonoBehaviour
 //    public string address = "localhost";
 //    // defalut to localhost
 
-    private OscOut sharedOscOutNode;
+    //private OscOut sharedOscOutNode;
 
-    OscBundle objectBundle;
+    //OscBundle objectBundle;
 
 
     public void UnityOSCTransmitter()
@@ -94,44 +96,24 @@ public class SATIErendererCtl : MonoBehaviour
     {
         //Debug.Log(string.Format("{0}.Awake(): called", GetType()), transform);
 
-        objectBundle = new OscBundle();
+        //objectBundle = new OscBundle();
 
         SATIEsetupCS = transform.GetComponent<SATIEsetup>();   // look for SATIEsetup component in this transform
         
         if (!SATIEsetupCS)
         {
-            Debug.LogWarning(transform.name + " : " + GetType() +  " Awake(): SATIEsetup class component not found in transform :  Using local address and port");
+            Debug.LogError(transform.name + " : " + GetType() +  ".start(): SATIEsetup class component not found in transform : can't run, aborting");
+            Destroy(this);
         }
-        else
-        {
-//            port = SATIEsetupCS.RendererPort; //MH faceShiftOSC default port
-//            address = SATIEsetupCS.RendererAddress;  // defalut to localhost
-            sharedOscOutNode = SATIEsetupCS.getOscOut(); 
-        }
-        
-//        try
-//        {
-//            Debug.Log(transform.name + " : " + GetType() +  " Awake():  sending to " + address + ":" + port);
-//            connected = true;
-//            sharedOscOutNode = new OSCTransmitter(address, port);
-//            //thread = new Thread(new ThreadStart(listen));
-//            //thread.Start();
-//        }
-//        catch (Exception e)
-//        {
-//            Debug.LogError(transform.name + " : " + GetType() +  " Awake():  OSC failed to connect to " + address + ":" + port + " cannot initialize component");
-//            Debug.LogError(e.Message);
-//            connected = false;
-//            sharedOscOutNode = null;
-//            return;
-//        }
-//        string localHostName = Dns.GetHostName();
-//        IPHostEntry hostEntry = Dns.GetHostEntry(localHostName);
-//        foreach (IPAddress ipAddr in hostEntry.AddressList)
-//        {
-//            Debug.Log(transform.name + " : " + GetType() +  " Awake():  MY IP:" + ipAddr.ToString());
-//        }
 
+        if (projectName.Equals("default"))
+        {
+            string[] s = Application.dataPath.Split('/');
+            projectName = s[s.Length - 2];
+            Debug.Log("project = " + projectName);
+        }
+
+        _initialized = true;
         _dspState = dspState;
         _outputGainDB = outputGainDB;
         _dim = dim;
@@ -187,7 +169,7 @@ public class SATIErendererCtl : MonoBehaviour
         
         message.Add("setDSP");
         message.Add(state);
-        sendOSC(message);
+        SATIEsetup.sendOSC(message);
     }
 
     private void updateProjectDir()
@@ -203,6 +185,10 @@ public class SATIErendererCtl : MonoBehaviour
 //            _projectDir = projectDir = "../StreamingAssets";
 //            path = Application.streamingAssetsPath;
             // Debug.Log ("projectDir EMPTY,  path= "+ path);
+        }
+        else if (projectDir.Equals("default"))    // users can specify $DROPBOX, and assuming a standard filepath like  "C:\Users or /Users,  we replace /Users/name with "~"
+        {
+            _projectDir = projectDir = path = Application.streamingAssetsPath;
         }
         else if (projectDir.StartsWith("$DROPBOX"))    // users can specify $DROPBOX, and assuming a standard filepath like  "C:\Users or /Users,  we replace /Users/name with "~"
         {
@@ -224,7 +210,7 @@ public class SATIErendererCtl : MonoBehaviour
 
             if (!path.Contains("Dropbox") || (!path.Contains("Users") && !path.Contains("Utilisateurs")))
             {
-                Debug.LogWarning(transform.name + " : " + GetType() +  " updateProjectDir(): no DROPBOX and/or /Users directory found, setting project path to default");
+                Debug.LogWarning(transform.name + " : " + GetType() + " updateProjectDir(): no DROPBOX and/or /Users directory found, setting project path to default");
                 return;
             }
 
@@ -243,7 +229,7 @@ public class SATIErendererCtl : MonoBehaviour
 
             if (pathItems.Length < usersIndex + 3)   // /users/name/relativestuff.....
             {
-                Debug.LogError(transform.name + " : " + GetType() +  " updateProjectDir(): poorly formated directory path (BUG??), setting project path to default");
+                Debug.LogError(transform.name + " : " + GetType() + " updateProjectDir(): poorly formated directory path (BUG??), setting project path to default");
                 return;
             }
 
@@ -259,14 +245,14 @@ public class SATIErendererCtl : MonoBehaviour
         else if (projectDir.StartsWith("/"))
             path = projectDir;
         else
-            path = Application.streamingAssetsPath + "/" + projectDir;
+            _projectDir = projectDir = path = Application.streamingAssetsPath;
 
 
         OscMessage message = new OscMessage(_projectMessage);
 		
         message.Add("setProjectDir");
         message.Add(path);
-        sendOSC(message);
+        SATIEsetup.sendOSC(message);
     }
 
     public float getOutputDB()
@@ -287,7 +273,7 @@ public class SATIErendererCtl : MonoBehaviour
         
         message.Add("setOutputDB");
         message.Add(outputGainDB);
-        sendOSC(message);
+        SATIEsetup.sendOSC(message);
     }
 
  
@@ -303,7 +289,7 @@ public class SATIErendererCtl : MonoBehaviour
         
         message.Add("setOutputTrimDB");
         message.Add(outputTrimDB);
-        sendOSC(message);
+        SATIEsetup.sendOSC(message);
     }
 
     public void setOutputMute(float state)
@@ -319,7 +305,7 @@ public class SATIErendererCtl : MonoBehaviour
         
         message.Add("setOutputMute");
         message.Add(state);
-        sendOSC(message);
+        SATIEsetup.sendOSC(message);
     }
 
     public void setOutputDIM(float state)
@@ -335,7 +321,7 @@ public class SATIErendererCtl : MonoBehaviour
         
         message.Add("setOutputDIM");
         message.Add(state);
-        sendOSC(message);
+        SATIEsetup.sendOSC(message);
     }
 
     private void updateOutputFormat()
@@ -343,7 +329,7 @@ public class SATIErendererCtl : MonoBehaviour
         OscMessage message = new OscMessage(_renderCtlmess);
         message.Add("setOutputFormat");
         message.Add(outputFormat);
-        sendOSC(message);
+        SATIEsetup.sendOSC(message);
     }
 
     // only three message value types
@@ -354,7 +340,7 @@ public class SATIErendererCtl : MonoBehaviour
         Debug.Log(transform.name + " " + GetType() + " projectMess()  sending projectMess:    project: " + message + "   key: " + key);
 
         message.Add(key);
-        sendOSC(message);
+        SATIEsetup.sendOSC(message);
     }
 
 
@@ -365,7 +351,7 @@ public class SATIErendererCtl : MonoBehaviour
         Debug.Log(transform.name + " " + GetType() + "projectMess() sending projectMess:    project: " + message + "   key: " + key);
         message.Add(key);
         message.Add(val);
-        sendOSC(message);
+        SATIEsetup.sendOSC(message);
     }
 
     public void projectMess(string key, string val)
@@ -375,25 +361,7 @@ public class SATIErendererCtl : MonoBehaviour
         Debug.Log(transform.name + " " + GetType() + " projectMess() sending projectMess:    project: " + message + "   key: " + key);
         message.Add(key);
         message.Add(val);
-        sendOSC(message);
-    }
-
-    /**
-	 * Call update every frame in order to dispatch all messages that have come
-	 * in on the listener thread
-	 */
-    public void Update()
-    {
-
-//        if (Input.GetKeyDown ("d")) {
-//
-//            OscMessage message = new OscMessage ("/a.renderer/setOutputDB");
-//			//message.Add ("fuckme");
-//			message.Add (-12f);
-//			sendOSC (message);
-//			//Debug.Log("send mess");
-//		}
-
+        SATIEsetup.sendOSC(message);
     }
 
     // called when inspector's values are modified
@@ -402,7 +370,7 @@ public class SATIErendererCtl : MonoBehaviour
 //        if (!_start)
 //            return;
         
-        if (!connected)
+        if (!_initialized)
             return;
 		
         if (_projectDir != projectDir)
@@ -446,77 +414,6 @@ public class SATIErendererCtl : MonoBehaviour
             _dspState = dspState;
             updateDSPstate();
         }
-		
-		
     }
-
-
-    public void OnApplicationQuit()
-    {
-
-//        OscMessage message = new OscMessage ("/spatosc/core");
-//        //message.Add ("fuckme");
-//        message.Add ("clear");
-//        sendOSC (message);
-//        Debug.Log("APP QUIT");
-        disconnect();
-    }
-
-    public void disconnect()
-    {
-        if (sharedOscOutNode.isOpen)
-        {
-            sharedOscOutNode.Close();
-        }
-      	
-        sharedOscOutNode = null;
-        connected = false;
-    }
-
-    public bool isConnected()
-    {
-        return connected;
-    }
-
-
-    // expand this to take multiple messages -- e.g.  mess[]
-    public bool sendOSC(OscMessage mess)
-    {
-        bool status;
-
-        if (sharedOscOutNode.isOpen)
-        {
-            objectBundle.Add(mess);
-
-            status = sharedOscOutNode.Send(objectBundle);
-            objectBundle.Clear();
-            return status;
-        }
-        else
-        {
-            Debug.LogError(transform.name + " : " + GetType() +  " sendOSC(): OSC not initialized, can't send message");
-            return false;
-        }
-    }
-
-
-
-    //	public static OSCMessage setMessage(int s, int i, float x, float y, float a, float xVec, float yVec, float A, float m, float r)
-    //	{
-    //		OscMessage message = new OscMessage("/tuio/2Dobj");
-    //		message.Add("set");
-    //		message.Add(s);
-    //		message.Add(i);
-    //		message.Add(x);
-    //		message.Add(y);
-    //		message.Add(a);
-    //		message.Add(xVec);
-    //		message.Add(yVec);
-    //		message.Add(A);
-    //		message.Add(m);
-    //		message.Add(r);
-    //		return message;
-    //	}
-
 }
 

@@ -148,34 +148,34 @@ for debugguing
 			//"coreCallback called".postln;
 		};
 
-/*		// accepts arbitrary key value pairs and applies them to the named source node
+		/*		// accepts arbitrary key value pairs and applies them to the named source node
 		~setMessageHandler = { 	| args |
-			var nodeName  = args[1];
-			var props = args.copyRange(2, args.size - 1);
-			var thisSynth;
+		var nodeName  = args[1];
+		var props = args.copyRange(2, args.size - 1);
+		var thisSynth;
 
-			if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == false,
-				{
-					error("satie4Unity.sourceSetHandler:  source node: "++nodeName++"  is undefined \n");
-				}, // else node exists,  process event
-				{
-					if (  (  ( (props.size&1)==1) || (props.size == 0) ),
-						{
-							error("satie4Unity.sourceSetHandler: BAD ARGS: "++props);
-						}, // else args good
-						{
-							thisSynth = e.allSourceNodes[nodeName.asSymbol].at(\synth);
-							if ( thisSynth == nil,
-								{
-									error("satie4Unity.sourceSetHandler:  source node: "++nodeName++"  BUG FOUND: undefined SYNTH  \n");
+		if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == false,
+		{
+		error("satie4Unity.sourceSetHandler:  source node: "++nodeName++"  is undefined \n");
+		}, // else node exists,  process event
+		{
+		if (  (  ( (props.size&1)==1) || (props.size == 0) ),
+		{
+		error("satie4Unity.sourceSetHandler: BAD ARGS: "++props);
+		}, // else args good
+		{
+		thisSynth = e.allSourceNodes[nodeName.asSymbol].at(\synth);
+		if ( thisSynth == nil,
+		{
+		error("satie4Unity.sourceSetHandler:  source node: "++nodeName++"  BUG FOUND: undefined SYNTH  \n");
 
-								},   // else good to go
-								{
-									e.nodeSetProps( props, thisSynth);
-								});
-							});
-					});
-			};*/
+		},   // else good to go
+		{
+		e.nodeSetProps( props, thisSynth);
+		});
+		});
+		});
+		};*/
 
 		// accepts arbitrary key value pairs and applies them to the named group node
 		~setMessageHandler = { 	| args |
@@ -283,27 +283,27 @@ for debugguing
 			});
 		};
 
-				// accepts arbitrary key value pairs and applies them to the named target node (source or group)
+		// accepts arbitrary key value pairs and applies them to the named target node (source or group)
 		~processSetProps = { | self, propsVec, process,group  |
 			propsVec.pairsDo({ | prop, val |
 				var defaultFlag=true;
 				switch(prop,
 					'hpHz',
 					{
-								var halfSrate = 0.5 * s.sampleRate;
+						var halfSrate = 0.5 * s.sampleRate;
 
-								if (process[\set] == nil,
-								{
-									//postf("processHpHzHandler:  setting update for nodes group %\n", connectionName);
-									// distance not used by standard spatializers
-									group.set(\hpHz ,  clip(val, 1, halfSrate ));
-								},
-								// else use custom handler
-								{
-									// postf("processHpHzHandler:  calling custom update handler for %\n", connectionName);
-									// distance used by custom process functions
-									process[\set].value(process,  \hpHz, clip(val, 1, halfSrate ));
-							});
+						if (process[\set] == nil,
+							{
+								//postf("processHpHzHandler:  setting update for nodes group %\n", connectionName);
+								// distance not used by standard spatializers
+								group.set(\hpHz ,  clip(val, 1, halfSrate ));
+							},
+							// else use custom handler
+							{
+								// postf("processHpHzHandler:  calling custom update handler for %\n", connectionName);
+								// distance used by custom process functions
+								process[\set].value(process,  \hpHz, clip(val, 1, halfSrate ));
+						});
 
 						//postf("** process instance: set  % to %\n", prop, val);
 						defaultFlag=false;
@@ -314,17 +314,17 @@ for debugguing
 						var spread = 100 *  ( 1 - (clip(val,0,1)));  //
 
 
-							if (process[\set] == nil,
-								{
-									//postf("~connectionProcessCallback:  setting spread for node's group  %\n", connectionName);
-									group.set(\spread, spread);
-								},
-								// else use a custom handler
-								{
-									//postf("~connectionProcessCallback:  calling custom spread handler for %\n", connectionName);
-									process[\set].value(process,  \spread, spread);
+						if (process[\set] == nil,
+							{
+								//postf("~connectionProcessCallback:  setting spread for node's group  %\n", connectionName);
+								group.set(\spread, spread);
+							},
+							// else use a custom handler
+							{
+								//postf("~connectionProcessCallback:  calling custom spread handler for %\n", connectionName);
+								process[\set].value(process,  \spread, spread);
 
-							});
+						});
 
 						//postf("** process instance: set  % to %\n", prop, val);
 						defaultFlag=false;
@@ -339,15 +339,15 @@ for debugguing
 				if (defaultFlag,
 					{
 						//postf("** process instance: set  % to %\n", prop, val);
-							if (process[\set] == nil,
-								{
-									//postf("~connectionProcessCallback:  setting spread for node's group  %\n", connectionName);
-									group.set(prop.asSymbol, val);
-								},
-								// else use a custom handler
-								{
-									//postf("~connectionProcessCallback:  calling custom spread handler for %\n", connectionName);
-									process[\set].value(process, prop.asSymbol, val);
+						if (process[\set] == nil,
+							{
+								//postf("~connectionProcessCallback:  setting spread for node's group  %\n", connectionName);
+								group.set(prop.asSymbol, val);
+							},
+							// else use a custom handler
+							{
+								//postf("~connectionProcessCallback:  calling custom spread handler for %\n", connectionName);
+								process[\set].value(process, prop.asSymbol, val);
 						});
 				});
 			});
@@ -356,13 +356,9 @@ for debugguing
 		// osc rx   ARGS:  sourceName azimuthRADIANS elevationRADIANS gainDB delayMS  lpHZ  distanceMETERS
 		~sourceUpdateHandler = { 	| args |
 			var nodeName  = args[1];
-			var aziDeg, eleDeg, gainDB, delayMs, lpHz, hpHz, spread, distance;
+			var aziDeg, eleDeg, gainDB, delayMs, lpHz, distance;
 			var thisSynth;
 
-			if (e.debugFlag,
-				{
-					// postf("~sourceUpdateHandler:  nodeName: %  size: % args: %\n", nodeName, args.size, args);
-			});
 
 			if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == false,
 				{
@@ -388,6 +384,14 @@ for debugguing
 
 							thisSynth.set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB, \delayMs, delayMs, \lpHz, lpHz);
 							//postf("sourceUpdateHandler:  update: gain  % \n", gainDB);
+
+							if (e.debugFlag,
+								{
+									// postf("~sourceUpdateHandler:  nodeName: %  size: % args: %\n", nodeName, args.size, args);
+									postf("satie4Unity.sourceUpdateHandler:  aziDeg %  eleDeg %  gainDB %  delayMs %  lpHz %  distanceMeters % \n", aziDeg, eleDeg, gainDB, delayMs, lpHz, distance);
+							});
+
+
 					});
 			});
 		};
@@ -400,24 +404,24 @@ for debugguing
 			var halfSrate = 0.5 * s.sampleRate;
 
 			error("sourceHpHzHandler:  nodeName: %  size: % args: %\n", nodeName, args.size, args);
-/*			if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == false,
-				{
-					error("satie4Unity.sourceHpHzHandler:  source node: "++nodeName++"  is undefined \n");
-				},
-				// else all ok
-				{
-					thisSynth = e.allSourceNodes[nodeName.asSymbol].at(\synth);
+			/*			if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == false,
+			{
+			error("satie4Unity.sourceHpHzHandler:  source node: "++nodeName++"  is undefined \n");
+			},
+			// else all ok
+			{
+			thisSynth = e.allSourceNodes[nodeName.asSymbol].at(\synth);
 
-					if ( thisSynth == nil, {error("satie4Unity.sourceHpHzHandler:  source node: "++nodeName++"  BUG FOUND: undefined SYNTH  \n");});
+			if ( thisSynth == nil, {error("satie4Unity.sourceHpHzHandler:  source node: "++nodeName++"  BUG FOUND: undefined SYNTH  \n");});
 
-					if ( (args.size != 3 ) ,
-						{"satie4Unity.sourceHpHzHandler: bad arg count for hpHz message".warn;},
-						// else
-						{
-							// get value from vector, and write to connectionState
-							hpHz = args[2];   // get highpass cutoff value
-							thisSynth.set(\hpHz ,  clip(hpHz, 1, halfSrate ));
-					});
+			if ( (args.size != 3 ) ,
+			{"satie4Unity.sourceHpHzHandler: bad arg count for hpHz message".warn;},
+			// else
+			{
+			// get value from vector, and write to connectionState
+			hpHz = args[2];   // get highpass cutoff value
+			thisSynth.set(\hpHz ,  clip(hpHz, 1, halfSrate ));
+			});
 			});*/
 		};
 
@@ -428,25 +432,25 @@ for debugguing
 			var thisSynth;
 
 			// postf("sourceHpHzHandler:  nodeName: %  size: % args: %\n", nodeName, args.size, args);
-/*			if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == false,
-				{
-					error("satie4Unity.sourceHpHzHandler:  source node: %  is undefined \n", nodeName);
-				},
-				// else all ok
-				{
-					thisSynth = e.allSourceNodes[nodeName.asSymbol].at(\synth);
-					if ( thisSynth == nil, {error("satie4Unity.sourceHpHzHandler:  source node: "++nodeName++"  BUG FOUND: undefined SYNTH  \n");});
+			/*			if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == false,
+			{
+			error("satie4Unity.sourceHpHzHandler:  source node: %  is undefined \n", nodeName);
+			},
+			// else all ok
+			{
+			thisSynth = e.allSourceNodes[nodeName.asSymbol].at(\synth);
+			if ( thisSynth == nil, {error("satie4Unity.sourceHpHzHandler:  source node: "++nodeName++"  BUG FOUND: undefined SYNTH  \n");});
 
-					if ( (args.size != 3 ) ,
-						{"satie4Unity.sourceSpreadHandler: bad arg count for hpHz message".warn;},
+			if ( (args.size != 3 ) ,
+			{"satie4Unity.sourceSpreadHandler: bad arg count for hpHz message".warn;},
 
-						// else
-						{
-							// invert the spread value (usually an exp) to work with SATIE's VBAP-based spatializer (or others)
-							spread = 100 *  ( 1 - (clip(args[2],0,1)));  // get values from vector, and write to connectionState
-							thisSynth.set(\spread, spread);
-							//postf("~connectionCallback:  SPREAD:  connectionName: %  spread: % \n", connectionName, spread);
-					});
+			// else
+			{
+			// invert the spread value (usually an exp) to work with SATIE's VBAP-based spatializer (or others)
+			spread = 100 *  ( 1 - (clip(args[2],0,1)));  // get values from vector, and write to connectionState
+			thisSynth.set(\spread, spread);
+			//postf("~connectionCallback:  SPREAD:  connectionName: %  spread: % \n", connectionName, spread);
+			});
 			});*/
 		};
 
@@ -510,39 +514,39 @@ for debugguing
 			var halfSrate = 0.5 * s.sampleRate;
 
 			error("processHpHzHandler:  nodeName: %  size: % args: %\n", nodeName, args.size, args);
-/*			if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == false,
-				{
-					error("satie4Unity.processHpHzHandler:  process node: "++nodeName++"  is undefined \n");
-				},
-				// else all ok
-				{
-					thisGroupName = e.allSourceNodes[nodeName.asSymbol].at(\groupNameSym);  // process nodes have unique groups
-					thisGroup = e.allGroupNodes[thisGroupName].at(\group).group;
-					myProcess = e.allSourceNodes[nodeName.asSymbol].at(\process);
+			/*			if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == false,
+			{
+			error("satie4Unity.processHpHzHandler:  process node: "++nodeName++"  is undefined \n");
+			},
+			// else all ok
+			{
+			thisGroupName = e.allSourceNodes[nodeName.asSymbol].at(\groupNameSym);  // process nodes have unique groups
+			thisGroup = e.allGroupNodes[thisGroupName].at(\group).group;
+			myProcess = e.allSourceNodes[nodeName.asSymbol].at(\process);
 
-					if ( myProcess == nil, {error("satie4Unity.processHpHzHandler:  process node: "++nodeName++"  BUG FOUND: undefined process  \n");});
+			if ( myProcess == nil, {error("satie4Unity.processHpHzHandler:  process node: "++nodeName++"  BUG FOUND: undefined process  \n");});
 
 
-					if ( (args.size != 3 ) ,
-						{"satie4Unity.processHpHzHandler: bad arg count for hpHz message".warn;},
-						// else
-						{
-							// get value from vector, and write to connectionState
-							hpHz = args[2];   // get highpass cutoff value
+			if ( (args.size != 3 ) ,
+			{"satie4Unity.processHpHzHandler: bad arg count for hpHz message".warn;},
+			// else
+			{
+			// get value from vector, and write to connectionState
+			hpHz = args[2];   // get highpass cutoff value
 
-							if (myProcess[\updateHpHz] == nil,
-								{
-									//postf("processHpHzHandler:  setting update for nodes group %\n", connectionName);
-									// distance not used by standard spatializers
-									thisGroup.set(\hpHz ,  clip(hpHz, 1, halfSrate ));
-								},
-								// else use custom handler
-								{
-									// postf("processHpHzHandler:  calling custom update handler for %\n", connectionName);
-									// distance used by custom process functions
-									myProcess[\updateHpHz].value(myProcess,  clip(hpHz, 1, halfSrate ));
-							});
-					});
+			if (myProcess[\updateHpHz] == nil,
+			{
+			//postf("processHpHzHandler:  setting update for nodes group %\n", connectionName);
+			// distance not used by standard spatializers
+			thisGroup.set(\hpHz ,  clip(hpHz, 1, halfSrate ));
+			},
+			// else use custom handler
+			{
+			// postf("processHpHzHandler:  calling custom update handler for %\n", connectionName);
+			// distance used by custom process functions
+			myProcess[\updateHpHz].value(myProcess,  clip(hpHz, 1, halfSrate ));
+			});
+			});
 			});*/
 		};
 
@@ -553,39 +557,39 @@ for debugguing
 			var thisGroupName, thisGroup,  myProcess;
 
 			error("sourceHpHzHandler:  nodeName: %  size: % args: %\n", nodeName, args.size, args);
-/*			if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == false,
-				{
-					error("satie4Unity.processSpreadHandler:  process node: "++nodeName++"  is undefined \n");
-				},
-				// else all ok
-				{
-					thisGroupName = e.allSourceNodes[nodeName.asSymbol].at(\groupNameSym);  // process nodes have unique groups
-					thisGroup = e.allGroupNodes[thisGroupName].at(\group).group;
-					myProcess = e.allSourceNodes[nodeName.asSymbol].at(\process);
+			/*			if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == false,
+			{
+			error("satie4Unity.processSpreadHandler:  process node: "++nodeName++"  is undefined \n");
+			},
+			// else all ok
+			{
+			thisGroupName = e.allSourceNodes[nodeName.asSymbol].at(\groupNameSym);  // process nodes have unique groups
+			thisGroup = e.allGroupNodes[thisGroupName].at(\group).group;
+			myProcess = e.allSourceNodes[nodeName.asSymbol].at(\process);
 
-					if ( myProcess == nil, {error("satie4Unity.processSpreadHandler:  process node: "++nodeName++"  BUG FOUND: undefined process  \n");});
+			if ( myProcess == nil, {error("satie4Unity.processSpreadHandler:  process node: "++nodeName++"  BUG FOUND: undefined process  \n");});
 
-					if ( (args.size != 3 ) ,
-						{"satie4Unity.processSpreadHandler: bad arg count for hpHz message".warn;},
+			if ( (args.size != 3 ) ,
+			{"satie4Unity.processSpreadHandler: bad arg count for hpHz message".warn;},
 
-						// else
-						{
-							// invert the spread value (usually an exp) to work with SATIE's VBAP-based spatializer (or others)
-							spread = 100 *  ( 1 - (clip(args[2],0,1)));  // get values from vector, and write to connectionState
+			// else
+			{
+			// invert the spread value (usually an exp) to work with SATIE's VBAP-based spatializer (or others)
+			spread = 100 *  ( 1 - (clip(args[2],0,1)));  // get values from vector, and write to connectionState
 
 
-							if (myProcess[\spread] == nil,
-								{
-									//postf("~connectionProcessCallback:  setting spread for node's group  %\n", connectionName);
-									thisGroup.set(\spread, spread);
-								},
-								// else use a custom handler
-								{
-									//postf("~connectionProcessCallback:  calling custom spread handler for %\n", connectionName);
-									myProcess[\spread].value(myProcess, spread);
+			if (myProcess[\spread] == nil,
+			{
+			//postf("~connectionProcessCallback:  setting spread for node's group  %\n", connectionName);
+			thisGroup.set(\spread, spread);
+			},
+			// else use a custom handler
+			{
+			//postf("~connectionProcessCallback:  calling custom spread handler for %\n", connectionName);
+			myProcess[\spread].value(myProcess, spread);
 
-							});
-					});
+			});
+			});
 			});*/
 		};
 
@@ -615,13 +619,13 @@ for debugguing
 						'prop',
 						{
 							error("~sourceNodeCallback:  PROP MESSAGE CALLED BY:  %\n", name);
-/*						if ( (args.size > 2) ,
-								{
-									e.setProperty(name, args[2], args[3]);
-									error("~sourceNodeCallback:  nodeName: %  setProp: %  key: % value: %\n", name, args[2], args[3]);
-								},
-								{
-									"sourceNodeCallback_prop:  osc message: missing values".warn;
+							/*						if ( (args.size > 2) ,
+							{
+							e.setProperty(name, args[2], args[3]);
+							error("~sourceNodeCallback:  nodeName: %  setProp: %  key: % value: %\n", name, args[2], args[3]);
+							},
+							{
+							"sourceNodeCallback_prop:  osc message: missing values".warn;
 
 							}); // else*/
 						},
@@ -683,18 +687,18 @@ for debugguing
 				'prop',
 				{
 					error("~processCallback:  PROP MESSAGE CALLED BY:  %\n", name);
-/*					if (myProcess[\prop] == nil,
-						{
-							var groupName = e.allSourceNodes[name.asSymbol].at(\groupNameSym);
+					/*					if (myProcess[\prop] == nil,
+					{
+					var groupName = e.allSourceNodes[name.asSymbol].at(\groupNameSym);
 
-							//postf("~processCallback: send PROP to group:  nodeName: %  group: %   \n", name,groupName);
+					//postf("~processCallback: send PROP to group:  nodeName: %  group: %   \n", name,groupName);
 
-							e.setGroupProperty(groupName, args[2], args[3]);
-						},
-						// else use custom handler
-						{
-							//postf("~~processCallback:  calling custom prop handler for %\n", name);
-							myProcess[\prop].value(myProcess,  args[2], args[3]);
+					e.setGroupProperty(groupName, args[2], args[3]);
+					},
+					// else use custom handler
+					{
+					//postf("~~processCallback:  calling custom prop handler for %\n", name);
+					myProcess[\prop].value(myProcess,  args[2], args[3]);
 					});*/
 				},
 				'event',
@@ -751,12 +755,12 @@ for debugguing
 				'prop',
 				{
 					error("~groupNodeCallback:  PROP MESSAGE CALLED BY:  %\n", name);
-/*					if ( (args.size < 4 ) ,
-						{"~groupCallback.prop: message missing values".warn;},
-						// else
-						{
-							error("~groupCallback:  nodeName: %  setProp: %  key: % value: %\n", name, args[2], args[3]);
-							e.setGroupProperty(name, args[2], args[3]);
+					/*					if ( (args.size < 4 ) ,
+					{"~groupCallback.prop: message missing values".warn;},
+					// else
+					{
+					error("~groupCallback:  nodeName: %  setProp: %  key: % value: %\n", name, args[2], args[3]);
+					e.setGroupProperty(name, args[2], args[3]);
 					});*/
 
 				},
@@ -1078,20 +1082,20 @@ for debugguing
 		};
 
 
-/*		~setProperty = { | self, nodeName, property, value |
-			var thisSynth = self.allSourceNodes[nodeName.asSymbol].at(\synth);
-			//"setProperty called".inform;
-			//postf("~setProperty: seting % of % to %\n", property, nodeName, value);
+		/*		~setProperty = { | self, nodeName, property, value |
+		var thisSynth = self.allSourceNodes[nodeName.asSymbol].at(\synth);
+		//"setProperty called".inform;
+		//postf("~setProperty: seting % of % to %\n", property, nodeName, value);
 
-			thisSynth.set(property.asSymbol, value);
+		thisSynth.set(property.asSymbol, value);
 		};*/
 
-/*		~setGroupProperty = { | self, groupName, property, value |
-			var group = self.allGroupNodes[groupName.asSymbol].at(\group).group;
+		/*		~setGroupProperty = { | self, groupName, property, value |
+		var group = self.allGroupNodes[groupName.asSymbol].at(\group).group;
 
-			//postf("~setGroupProperty: seting % of % to %\n", property, groupName, value);
+		//postf("~setGroupProperty: seting % of % to %\n", property, groupName, value);
 
-			group.set(property.asSymbol, value);
+		group.set(property.asSymbol, value);
 		};*/
 
 
@@ -1512,22 +1516,22 @@ for debugguing
 		// receives OSC messages that look like:   /satie/source/upblob srcName blob_data1 .... blob_dataN
 		// blob data format:
 		// 12 unsigned bytes as follows
-		// aziDeg =   byte1  * 360 * 1/255
-		// elevDeg = byte2  * 360 * 1/255
+		// aziDeg =   byte1  * 360 * 1/255   , offset to range: -179 to 180
+		// elevDeg = byte2  * 360 * 1/255   , offset to range: -179 to 180
 		// gainDB: (   0.00001 *  ( byte3 << 24 + byte4 << 16  + byte5 << 8  + byte6 ) ).ampdb
 		// delayMS:   0.1 *  ( byte7 << 8  + byte8  )     // input values < 6553 milliseconds are clipped to 6553
 		// lpHz:    byte9 << 8  + byte10       // input values < 65535 hz are clipped to 65535
 		// distanceMeters:   0.01 *  ( byte11 << 8  + byte12  )     // input values < 655 meters are clipped to 655
 
-		~updateBlobHandler = {
+		~blobUpdateHandler = {
 			arg msg;
 			var srcName = msg[1];
-			postf("satie4Unity.updateBlobHandler:  msg: %, \n", msg);
-			postf("satie4Unity.updateBlobHandler:  msg LEN %, \n", msg.size);
+			// postf("satie4Unity.blobUpdateHandler:  msg: %, \n", msg);
+			// postf("satie4Unity.blobUpdateHandler:  msg LEN %, \n", msg.size);
 
 			if (msg.size != 3,
 				{
-					"satie4Unity.updateBlobHandler;  bad message format: expects  address nodeName blobArray".error;
+					"satie4Unity.blobUpdateHandler;  bad message format: expects  address nodeName blobArray".error;
 					postf("~testCallback:  MESS LEN: %", msg.size);
 
 				},
@@ -1544,16 +1548,19 @@ for debugguing
 
 					var nodeType = oscAddr.split($/)[2];
 
-					// postf("~satie4Unity.updateBlobHandler:  nodeName %,  noteType % \n", nodeName, nodeType);
+					// postf("~satie4Unity.blobUpdateHandler:  nodeName %,  noteType % \n", nodeName, nodeType);
 
 					if ( (dataArray.class != Int8Array ) ||  ( dataArray.size != 12),
 						{
-							error("satie4Unity.updateBlobHandler:  message bad data format, expecting array  of  12 bytes :")
+							error("satie4Unity.blobUpdateHandler:  message bad data format, expecting array  of  12 bytes :")
 						},
 						// else data good, extract
 						{
 							aziDeg = degScaler *  e.sined2unsignedByte( dataArray[0] );
+							if (aziDeg >179, { aziDeg = aziDeg - 360;});
+
 							eleDeg = degScaler * e.sined2unsignedByte( dataArray[1] );
+							if (eleDeg > 179, { eleDeg = eleDeg - 360;});
 
 							gainDB =  (e.sined2unsignedByte(  dataArray[2] ) << 24);
 							gainDB =  gainDB + (e.sined2unsignedByte(  dataArray[3]) << 16);
@@ -1573,16 +1580,17 @@ for debugguing
 							distanceMeters =  distanceMeters +  e.sined2unsignedByte(  dataArray[11] );
 							distanceMeters = distanceMeters * 0.01;
 
+							if (e.debugFlag,
+								{
+									postf("satie4Unity.blobUpdateHandler;     aziDeg %  eleDeg %  gainDB %  delayMs %  lpHz %  distanceMeters %        \n", aziDeg, eleDeg, gainDB, delayMs, lpHz, distanceMeters);
+							});
 
 							switch(nodeType.asSymbol,
 								'source',
 								{
-									postf("~satie4Unity.updateBlobHandler:  nodeName LEN %,  noteType % ", nodeName, nodeType);
-									postf("----> aziDeg %  eleDeg % \n", aziDeg, eleDeg);
-
 									if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == false,
 										{
-											error("satie4Unity.updateBlobHandler:  source node: "++nodeName++"  is undefined \n");
+											error("satie4Unity.blobUpdateHandler:  source node: "++nodeName++"  is undefined \n");
 										},
 										// else all ok
 										{
@@ -1590,7 +1598,7 @@ for debugguing
 
 											if ( thisSynth == nil,
 												{
-													error("satie4Unity.updateBlobHandler:  source node: "++nodeName++"  BUG FOUND: undefined SYNTH  \n");
+													error("satie4Unity.blobUpdateHandler:  source node: "++nodeName++"  BUG FOUND: undefined SYNTH  \n");
 												},
 												//else
 												{
@@ -1617,23 +1625,23 @@ for debugguing
 
 									if ( myProcess == nil,
 										{
-											error("satie4Unity.processUpdateHandler:  process node: "++nodeName++"  BUG FOUND: undefined process  \n");
+											error("satie4Unity.blobUpdateHandler:  process node: "++nodeName++"  BUG FOUND: undefined process  \n");
 										},
 										// else all good
 
-									{
-									if (myProcess[\updateConnection] == nil,
 										{
-											//postf("~connectionProcessCallback:  setting update for nodes group %\n", connectionName);
-											// distance not used by standard spatializers
-											thisGroup.set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB, \delayMs, delayMs, \lpHz, lpHz);
-										},
-										// else use custom handler
-										{
-											// postf("~connectionProcessCallback:  calling custom update handler for %\n", connectionName);
-											// distance used by custom process functions
-											myProcess[\updateConnection].value(myProcess, aziDeg, eleDeg, gainDB, delayMs, lpHz, distanceMeters);
-									});
+											if (myProcess[\updateConnection] == nil,
+												{
+													//postf("~connectionProcessCallback:  setting update for nodes group %\n", connectionName);
+													// distance not used by standard spatializers
+													thisGroup.set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB, \delayMs, delayMs, \lpHz, lpHz);
+												},
+												// else use custom handler
+												{
+													// postf("~connectionProcessCallback:  calling custom update handler for %\n", connectionName);
+													// distance used by custom process functions
+													myProcess[\updateConnection].value(myProcess, aziDeg, eleDeg, gainDB, delayMs, lpHz, distanceMeters);
+											});
 									});
 
 							});
@@ -1658,10 +1666,10 @@ for debugguing
 
 	// general
 	osc.deleteOSC(\updateBlobHandlerSrc);  // disconnect any previous handlers
-	osc.newOSC(\updateBlobHandlerSrc, e['updateBlobHandler'],  "/satie/source/upblob");   // connect handler
+	osc.newOSC(\updateBlobHandlerSrc, e['blobUpdateHandler'],  "/satie/source/ublob");   // connect handler
 
 	osc.deleteOSC(\updateBlobHandlerProcess);  // disconnect any previous handlers
-	osc.newOSC(\updateBlobHandlerProcess, e['updateBlobHandler'],  "/satie/process/upblob");   // connect handler
+	osc.newOSC(\updateBlobHandlerProcess, e['blobUpdateHandler'],  "/satie/process/ublob");   // connect handler
 
 
 	osc.deleteOSC(\satieSrcSet);  // disconnect any previous handlers
@@ -1739,7 +1747,7 @@ for debugguing
 
 ~satie4unity = ~satie4unityprotocol.value(~osc, ~scbr);
 ~satie4unity.debugFlag = true;
-
+~satie4unity.debugFlag = false;
 */
 
 )

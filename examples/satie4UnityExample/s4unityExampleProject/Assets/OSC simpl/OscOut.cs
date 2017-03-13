@@ -176,15 +176,21 @@ public class OscOut : MonoBehaviour
 
     public bool Open( int port)
     {
-        return Open( port, "");
+        return Open_( port, "");
     }
-        
+ 
+
+    public bool Open( int port, string ipAddress)
+    {
+        return Open_( port, ipAddress);
+
+    }
 	/// <summary>
 	/// Open to send messages to specified port and (optional) IP address.
 	/// If no IP address is given, messages will be send locally on this device.
 	/// Returns success status.
 	/// </summary>
-	public bool Open( int port, string ipAddress)
+	private bool Open_( int port, string ipAddress)
 	{
 		// Close and stop pinging
 		if( _udpClient != null ) Close();

@@ -73,6 +73,9 @@ public class SATIEsetup : MonoBehaviour
     public float updateRateMs = 30;
     private float _updateRateMs;
 
+    [Tooltip("sends node updates using osc blobs, with lower rez params") ]
+    public bool enableOscBlobTX = true;
+
     public bool invertAzimuth = false;
 
     public static bool invertAzi = false;
@@ -83,8 +86,8 @@ public class SATIEsetup : MonoBehaviour
     public bool debugMessTx = false;
 
 
-    const string uBlobSrcAddress = "/satie/source/ublob";
-    const string uBlobProcAddress = "/satie/process/ublob";
+//    const string uBlobSrcAddress = "/satie/source/ublob";
+//    const string uBlobProcAddress = "/satie/process/ublob";
 
     [HideInInspector] 
     public static float updateRateSecs = .02f;
@@ -100,6 +103,9 @@ public class SATIEsetup : MonoBehaviour
     private bool _enabled = false;
 
     public static bool OSCenabled { get { return _instance._enabled; } }
+
+
+    public static bool updateBlobEnabled { get { return _instance.enableOscBlobTX; } }
 
     //private static readonly SATIEsetup _instance = new SATIEsetup();
 
@@ -156,8 +162,8 @@ public class SATIEsetup : MonoBehaviour
 
 
         bundle = new OscBundle();
-        uBlobSrcMess = new OscMessage(uBlobSrcAddress, new byte[0]);
-        uBlobProcMess = new OscMessage(uBlobProcAddress, new byte[0]);
+//        uBlobSrcMess = new OscMessage(uBlobSrcAddress, new byte[0]);
+//        uBlobProcMess = new OscMessage(uBlobProcAddress, new byte[0]);
 
         // connected and ready to initialize object
 
@@ -502,3 +508,26 @@ public class SATIEsetup : MonoBehaviour
         sendOSC(message);
     }
 }
+
+
+
+/// the following code needs to be patched into OSCsimpl OscOut.cs
+///     void OnDestroy()
+/* 
+{
+    if( isOpen ) Close();
+}
+
+public bool Open( int port)
+{
+    return Open_( port, "");
+}
+
+
+public bool Open( int port, string ipAddress)
+{
+    return Open_( port, ipAddress);
+
+}
+
+*/

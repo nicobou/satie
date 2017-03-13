@@ -21,7 +21,6 @@ using System.IO;
 using UnityEngine;
 
 
-
 //SATIEsetup.setDopplerFactor (nodeName, s, dopplarEffect);
     
 //SATIEsetup.setDistanceFactor (nodeName, s, distanceEffect);
@@ -154,6 +153,7 @@ public class SATIEsource : SATIEnode {
 
     private float SPEED_OF_SOUND = 0.340f;
 
+    private OscMessage uBlobMess;
 
 
     //private bool _initialized = false;
@@ -281,6 +281,10 @@ public class SATIEsource : SATIEnode {
     {
  
         _initialized = true;
+
+        uBlobMess = new OscMessage( "/empty");
+        uBlobMess.Add("nodeName");
+        uBlobMess.Add(new byte[0]);
 
         //bool result = false;
 		nodeType = "source";
@@ -770,19 +774,23 @@ public class SATIEsource : SATIEnode {
             _aboveWaterState = true;
         }
 
-        mess.Add(azimuth);
-        mess.Add(elevation);
-        mess.Add(gainDB_);
-        mess.Add(vdelMs_);
-        mess.Add(distFq_);
-        mess.Add (distance);
-
-        // chnage this over to OSCsend 
-        SATIEsetup.sendOSC(mess);   // send OSC connection update
+        if (!SATIEsetup.updateBlobEnabled)
+        {
+            mess.Add(azimuth);
+            mess.Add(elevation);
+            mess.Add(gainDB_);
+            mess.Add(vdelMs_);
+            mess.Add(distFq_);
+            mess.Add(distance);
+            SATIEsetup.sendOSC(mess);   // TX renderer update message out using blob
+        }
+        else   //  TX  renderer update message using blob
+        {
+             path = pathRoot+"/ublob";
+            sendUpdateOSCblob(path, source.name, azimuth, elevation, gainDB_, vdelMs_,   distFq_, distance);
+        }
 
         mess.Clear();
-
-
         //Debug.Log("CONNECTION DISTANCE FROM LISTENER: " + distance);
 
 		// node has entered into culling muting,  set state accordingly
@@ -805,6 +813,76 @@ public class SATIEsource : SATIEnode {
 
     // NOTES TO SELF ABOUT THIS
     //  SPREAD seems to be mishandled... an additional connection param should be added for that
+
+
+    const float angleScale = 0.00277777777778f;   // 1 / 360
+    //  12 byte BLOB STRUCtURE
+    // byte order and format
+    // azi (1 byte:  unsigned 8bits: posivite wrapped angles 0 : 179 --> 0 : 127,  and -180 : -1 -->  128 : 255
+    // elev  ( same as above 
+    // gain (4 bytes:  unsigned 32bits:  amplitude * 100000)
+    // delay (2 bytes : unsigned 16bits:  delayMs * 10 )
+    // lpHz (2 bytes) : unsigned 16bits: 
+    // distanceM (2 bytes : unsigned 16bits:  distanceMeters *100 )
+    void sendUpdateOSCblob(string path, string nodeName, float azimuthRad, float elevationRad,  float gainDB,  float vdelMs,  float lpHz,  float distance) 
+    {
+        float azimuth = azimuthRad * Mathf.Rad2Deg;
+        float elevation = elevationRad * Mathf.Rad2Deg;
+
+        byte[] blobArray = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+
+        float azi_;
+        float elev_;
+        Int32 gain_;
+        Int32 vdel_;
+        Int32 lpHz_;
+        Int32 distance_;
+
+        azi_ = azimuth  % 360;
+        if (azi_ < 0) azi_ += 360;
+        azi_ = 255f * azi_ * angleScale;
+        blobArray[0] = (byte) Mathf.FloorToInt(.5f + azi_);
+
+
+        elev_ = elevation  % 360;
+        if (elev_ < 0) elev_ += 360;
+        elev_ = 255f * elev_ * angleScale;
+        blobArray[1] = (byte) Mathf.FloorToInt(.5f + elev_);
+
+        gain_ = Mathf.FloorToInt(.5f + 100000f * Mathf.Pow(10f, gainDB / 20f));        
+        blobArray[2] = (byte)(255 & (gain_ >> 24)); 
+        blobArray[3] = (byte)(255 & (gain_ >> 16)); 
+        blobArray[4] = (byte)(255 & (gain_ >> 8)); 
+        blobArray[5] = (byte)(255 & gain_ ); 
+
+
+        vdel_ = Mathf.FloorToInt(.5f + Mathf.Clamp(10f * vdelMs, 0f, 65535f));
+        blobArray[6] = (byte)(255 & (vdel_ >> 8)); 
+        blobArray[7] = (byte)(255 & vdel_ ); 
+
+ 
+        lpHz_ = Mathf.FloorToInt(.5f + Mathf.Clamp(lpHz, 0f, 65535f));
+        blobArray[8] = (byte)(255 & (lpHz_ >> 8)); 
+        blobArray[9] = (byte)(255 & lpHz_ ); 
+
+
+        distance_ = Mathf.FloorToInt(.5f + Mathf.Clamp(100f * distance, 0f, 65535f));
+        blobArray[10] = (byte)(255 & (distance_ >> 8)); 
+        blobArray[11] = (byte)(255 & distance_ ); 
+
+        uBlobMess.address = path;
+        uBlobMess.args[0] = nodeName;
+        uBlobMess.args[1] = blobArray;
+        // uBlobMess.Add(blobArray);
+
+        //string intArrayString = "";
+        //foreach( int i in blobArray ) intArrayString += i + " "; 
+        //Debug.Log("***********************  blob: " + intArrayString);
+
+        SATIEsetup.sendOSC(uBlobMess);
+    
+    }
+
 
 
     // returns list with 8 elements:    asimuth elevation gainDB vdelMs distFq HpHz distance spread

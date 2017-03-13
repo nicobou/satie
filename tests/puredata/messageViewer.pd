@@ -26,8 +26,8 @@
 #X msg 899 480 srcNode_14 trimDB 30;
 #X msg 912 523 srcNode_14 spread 50;
 #X obj 112 187 OSCparse /satie/process/set;
-#X obj 121 286 p;
-#X obj 113 108 OSCrx 18033;
+#X obj 65 254 p;
+#X obj 113 108 OSCrx 18032;
 #X connect 1 0 2 0;
 #X connect 2 0 10 0;
 #X connect 4 0 3 0;
@@ -53,5 +53,5 @@
 #X connect 22 0 15 0;
 #X connect 23 0 22 0;
 #X connect 24 0 22 0;
-#X connect 25 0 26 0;
 #X connect 27 0 25 0;
+#X connect 27 0 26 0;
