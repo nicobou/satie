@@ -14,46 +14,9 @@
 
 //  ~satieRendererCtl    psudo class to manage the SATIE audio renderer state, connecting to the server's globals for output level control, etc.
 
-//
-// for debugguing
-// ~thisDir = thisProcess.nowExecutingPath.dirname ;
-//
-//
-//
-// ~rootSrcPath = ~thisDir++ "/..";
-//
-// (~rootSrcPath ++ "/src/*.scd").pathMatch.do({arg item; item.loadPaths});
-//
-//
-//
-// s.waitForBoot{
-//
-// 	// create and initialize a sc-basic-renderer, and set environment variable
-// 	if (~scbr == nil,{
-// 		postln("loading SATIE kernal...");
-// 		~scbr = ~scbrMaker.value(numAudioAux: 1, satieSrcPath: ~rootSrcPath);
-// 	});
-//
-// 	if ( ~osc ==nil, {
-// 		~osc = ~satieOSCMaker.value("/satie", 18032);
-//
-// 	});
-//
-//
-// 	s.sync;
-//
-//
-//
-// };
-
-// create instance to receive control messages via OSC on the rxPort
-//          ~src = ~satieRendererCtl.value(~scbr, ~osc);
-
-
-
 
 (
-// psudo class to control  basic-renderer above
+// psudo class to control  satie's basic-renderer
 // Creates instance to receive control messages via OSC on the rxPort
 // note: any OSC bindings of previous instances are destoyed before creation of a new instance
 // so it is safe to call repeatedly
@@ -91,20 +54,6 @@
 				{
 
 					switch (command,
-						'setProjectDir',
-						{
-							if ( (msg.size != 3 ) ,
-								{"~basicRendererCallback: setProjectDir bad arg count: expecting 'setProjectDir projectDirPath' ".warn;},
-								// else
-								{
-									e.projectDirectory = msg[2];
-
-									//e.projectDirectory.postln;
-									postf("~basicRendererCallback: setProjectDir: % \n", e.projectDirectory);
-
-								}
-							)
-						},
 						'setOutputTrimDB',
 						{
 							if ( (msg.size < 3 ) ,

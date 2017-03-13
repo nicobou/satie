@@ -17,7 +17,7 @@
 
 
 //  REQUIRED project file name declaration
-~myProjectFIleName = "satie4UnityExample.scd";
+~myProjectFIleName = "satie4Unity.scd";
 
 // defaults to stereo
 ~listeningFormat = \stereoListener;    // you can also set this to  \domeVBAP  or  \labodomeVBAP  or   \octoVBAP
@@ -184,7 +184,7 @@ if (~meter == nil,  { ~plotTree=s.meter;});
 // specify files to be loaded:
 // note;  project file must be first
 
-~startupfiles = [~rootSrcPath++"/protocols/satie4unity.scd", ~thisDir++"/"++~myProjectFIleName];
+~startupfiles = [~rootSrcPath++"/protocols/satie4unityProtocol.scd", ~thisDir++"/"++~myProjectFIleName];
 
 // add additional files here
 ~startupfiles.add(~rootSrcPath++"/utils/dacTest.scd");
