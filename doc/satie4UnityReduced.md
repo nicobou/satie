@@ -30,7 +30,7 @@
 /satie/source/ublob sourceName byte1 ... byte12     // for update blob: packed encoded update message  (some loss)
 // byte order
 // azi (1 byte:  unsigned 8bits: posivite wrapped angles 0 : 179 --> 0 : 127,  and -180 : -1 -->  128 : 255
-// elev (1 byte:  unsigned 8bits: posivite wrapped angles 0 : 179 --> 0 : 127,  and -180 : -1 -->  128 : 255
+// elev ( same as above )
 // gain (4 bytes:  unsigned 32bits:  amplitude * 100000)
 // delay (2 bytes : unsigned 16bits:  delayMs * 10 )
 // lpHz (2 bytes) : unsigned 16bits: 
