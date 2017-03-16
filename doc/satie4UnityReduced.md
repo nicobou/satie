@@ -35,8 +35,8 @@
 /satie/<nodeType>/set nodeName key1 val1 key2 val2 .... keyN valN
 
 // only for nodeTypes: source and process
-/satie/<nodeType>/update processName azimuthRADIANS elevationRADIANS gainDB delayMS  lpHZ  distanceMETERS
-/satie/<nodeType>/ublob sourceName byte1 ... byte12     // for update blob: packed encoded update message  (some loss)
+/satie/<nodeType>/update nodeName azimuthRADIANS elevationRADIANS gainDB delayMS  lpHZ  distanceMETERS
+/satie/<nodeType>/ublob nodeName byte1 ... byte12     // for update blob: packed encoded update message  (some loss)
 
 // only for nodeType: groups
 /satie/group/add groupName sourceName    
