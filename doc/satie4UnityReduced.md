@@ -5,7 +5,7 @@
 
 ```javascript
 
-/satie/scene createSource  nodeName  synthDefName<uriPath>   groupName<opt>   // default group name is 'default'
+/satie/scene createSource  nodeName  synthDefName<uriPath and optional args>   groupName<opt>   // default group name is 'default'
 /satie/scene createGroup nodeName
 /satie/scene createProcess nodeName
 /satie/scene deleteNode nodeName
@@ -26,8 +26,8 @@
 
 ```javascript
 
-// /satie/source/uri sourceName type://name  (e.g.  plugin://synthDefName )
-// eliminated  /satie/source/prop sourceName keyword value (string, float or int)     
+// elininated:  /satie/source/uri sourceName type://name  (e.g.  plugin://synthDefName )
+// eliminated:   /satie/source/prop sourceName keyword value (string, float or int)     
 /satie/source/state sourceName value  // 1=DSP_active 0=DSP_inactive
 /satie/source/event sourceName eventName <opt> atom1 atom2...atomN    
 /satie/source/set sourceName key1 val1 key2 val2 .... keyN valN
@@ -53,7 +53,8 @@
 
 
 // /satie/process/uri processName type://name  (e.g.  process://processType )
-// eliminated   /satie/process/prop processName keyword value ( string, float or int )     
+// eliminated   /satie/process/prop processName keyword value ( string, float or int )   
+/satie/process/property processName  key value    // sets named proocess environment variables
 /satie/process/state processName value  // 1=active 0=inactive
 /satie/process/event processName eventName <opt> atom1 atom2...atomN    
 /satie/process/set processName key1 val1 key2 val2 .... keyN valN
