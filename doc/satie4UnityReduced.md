@@ -40,7 +40,7 @@
 /satie/group/drop groupName sourceName   
 
 // only for noteType: process
-/satie/process/event processName eventName <opt> atom1 atom2...atomN       
+/satie/process/property processName key value   // to update a process environment property       
 
 
 
