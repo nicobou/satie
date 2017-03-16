@@ -26,9 +26,6 @@
 
 ```javascript
 
-
-// node messages
-
 // for nodeTypes:  source, group, or process
 /satie/<nodeType>/state nodeName value  // 1=active 0=inactive
 /satie/<nodeType>/event nodeName eventName <opt> atom1 atom2...atomN    
