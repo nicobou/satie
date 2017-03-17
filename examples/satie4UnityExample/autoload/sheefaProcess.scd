@@ -108,13 +108,33 @@
 // end of required class functions
 
 // the functions below are not requied
-// however if defined, they will be called by satie4unity, otherwise the messages will get forwarded to the node's group
+// however if defined, a given function will be called by satie4unity's   "set" message handler using the following scheme:
+//  FIX THIS   set key value  becomes a function call:     process[key]  process[functionName].value(process, prop.asSymbol, value);
 
 
 
-// if defined, will be called when node's "set" message is received
-// otherwise satie4unity will send the  "set" message to the node's group
+// if defined, the function below will be called when node's "set" message is received
+//     otherwise satie4unity will send the  "set" message to the node's group
+// n.b   this method is called for each key value paire in a "set" message recived by satie4Unity
 ~sheefa.set =  {| self, property, value |
+	// add conditional processing of key value pairs here
+	// write key value pair to synth
+			self.cloneCount.do( { arg item;
+				var nodename=(self.nodeName++"_"++item).asSymbol;
+
+				// this is where we can calculate clone-specific parameters
+				// value = value *  item;
+
+				~procMan.satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(property.asSymbol,value);
+	});
+};
+
+
+// if defined,this method will be called when node's "property" message is received
+// n.b   this method is called for each key value paire in a "property" message recived by satie4Unity
+~sheefa.setProperty =  {| self, property, value |
+	// add conditional processing of key value pairs here
+	// write key value pair to process instance's environment
 	self.put(property.asSymbol, value);
 };
 

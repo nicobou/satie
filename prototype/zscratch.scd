@@ -5,6 +5,51 @@
 //~dumpNodes.value();
 
 
+
+
+~myNodeName = \srcNode_0;
+~myNode = ~s4u.allSourceNodes[~myNodeName.asSymbol];
+
+
+~myProcess = ~myNode.at(\process);
+
+~myProcess[\cunt]
+
+~setFn = ~myProcess[\set];
+
+~myProcess.at(\hpHz).class
+
+~myProcess.at(\spread).class == Function
+
+~myProcess.at(\set).class == Function
+
+~mySetFunction = ~myProcess.at(\set);
+
+~setFn == ~mySetFunction
+
+
+~myProcess.at(\spread).value(~myProcess, \spread, 0);
+
+
+~myProcess.at(\nodeGroupName)
+
+f.value(p, \spread, 0)
+x.dump
+
+x = p.at(\set)
+y = p[\set]
+
+x == y
+
+x.value(p, \spread, 0)
+
+f == y
+
+
+p == ~myProcess
+
+p[\hpHz].class
+
 //gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1
 
 ~bell = ~scbr.satieGroupInstances[\oceanScene][\bellSnd_6];

@@ -170,7 +170,7 @@ for debugguing
 
 		},   // else good to go
 		{
-		e.nodeSetProps( props, thisSynth);
+		e.nodeSet( props, thisSynth);
 		});
 		});
 		});
@@ -183,6 +183,7 @@ for debugguing
 			var props = args.copyRange(2, args.size - 1);
 			var targetNode;
 
+			//postf("satie4UnityProtocol.setMessHandler:  source node: %,  mess: %\n", nodeName, args);
 
 			// verify data
 			if (  (  ( (props.size&1)==1) || (props.size == 0) ),
@@ -201,7 +202,7 @@ for debugguing
 											error("satie4UnityProtocol.setMessHandler:  source node: "++nodeName++"  BUG FOUND: undefined SYNTH  \n");
 										},   // else good to go
 										{
-											e.nodeSetProps( props, targetNode);
+											e.nodeSet( props, targetNode);
 									});
 								},
 								{
@@ -213,7 +214,7 @@ for debugguing
 							if ( ~satie4unity.allGroupNodes.includesKey (\sheefa) == true,
 								{
 									targetNode = e.allGroupNodes[nodeName.asSymbol].at(\group).group;
-									e.nodeSetProps( props, targetNode);
+									e.nodeSet( props, targetNode);
 								},
 								{   // else no group
 									error("satie4UnityProtocol.setMessHandler:  group node: "++nodeName++"  is undefined \n");
@@ -233,7 +234,7 @@ for debugguing
 
 										},
 										{  // good to go
-											e.processSetProps( props, myProcess, thisGroup);
+											e.processSet( props, myProcess, thisGroup);
 									});
 
 								},
@@ -245,7 +246,7 @@ for debugguing
 		};
 
 		// accepts arbitrary key value pairs and applies them to the named target node (source or group)
-		~nodeSetProps = { | self, propsVec, targetNode  |
+		~nodeSet = { | self, propsVec, targetNode  |
 
 			// var group = self.allGroupNodes[groupName.asSymbol].at(\group).group;
 
@@ -283,74 +284,114 @@ for debugguing
 		};
 
 		// accepts arbitrary key value pairs and applies them to the named target node (source or group)
-		~processSetProps = { | self, propsVec, process,group  |
+		~processSet = { | self, propsVec, process, group  |
+			var value;
+			var functionName = nil;
+
 			propsVec.pairsDo({ | prop, val |
 				var defaultFlag=true;
 				switch(prop,
 					'hpHz',
 					{
 						var halfSrate = 0.5 * s.sampleRate;
-
-						if (process[\set] == nil,
-							{
-								//postf("processHpHzHandler:  setting update for nodes group %\n", connectionName);
-								// distance not used by standard spatializers
-								group.set(\hpHz ,  clip(val, 1, halfSrate ));
-							},
-							// else use custom handler
-							{
-								// postf("processHpHzHandler:  calling custom update handler for %\n", connectionName);
-								// distance used by custom process functions
-								process[\set].value(process,  \hpHz, clip(val, 1, halfSrate ));
-						});
-
-						//postf("** process instance: set  % to %\n", prop, val);
+						value = clip(val, 1, halfSrate );
 						defaultFlag=false;
 					},
 					'spread',
 					{
 						// invert and scale the spread value (usually an exp) to work with SATIE's VBAP-based spatializer (or others)
-						var spread = 100 *  ( 1 - (clip(val,0,1)));  //
-
-
-						if (process[\set] == nil,
-							{
-								//postf("~connectionProcessCallback:  setting spread for node's group  %\n", connectionName);
-								group.set(\spread, spread);
-							},
-							// else use a custom handler
-							{
-								//postf("~connectionProcessCallback:  calling custom spread handler for %\n", connectionName);
-								process[\set].value(process,  \spread, spread);
-
-						});
-
-						//postf("** process instance: set  % to %\n", prop, val);
+						value = 100 *  ( 1 - (clip(val,0,1)));  //
 						defaultFlag=false;
 					},
 					'in',
 					{
-						// just pass this one along
-						group.set(prop, satie.aux[val.asInt]);
+						value = satie.aux[val.asInt];  // set the aux bus for the synthdef
 						defaultFlag = false;
 				});
 				// else just set the prop val pair
 				if (defaultFlag,
 					{
-						//postf("** process instance: set  % to %\n", prop, val);
-						if (process[\set] == nil,
-							{
-								//postf("~connectionProcessCallback:  setting spread for node's group  %\n", connectionName);
-								group.set(prop.asSymbol, val);
-							},
-							// else use a custom handler
-							{
-								//postf("~connectionProcessCallback:  calling custom spread handler for %\n", connectionName);
-								process[\set].value(process, prop.asSymbol, val);
-						});
+						value = val;
+				});
+
+				// Now handle the keyword value pair
+				// Check to see if there is a custom handler defined in the process's environment
+
+				if ( process[prop.asSymbol].class == Function,   // let's see if a function named prop.asSymbol is defined.
+					{
+						functionName = process[prop.asSymbol];   // yes, get the function
+					},
+					{
+						// else  nope:  no function with that name exists.  Check to see if there's a set message handler
+						if ( process[\set].class == Function,
+							{ functionName = process[\set]; });    // yes, use the process's set  function
+				});
+
+				// if the process has no defined function with the name prop,   set the  prop value  pair in the group's synth
+				if ( functionName == nil,
+					{
+						//postf("~processSet:  setting keyword value pair for node's synth group  %\n", process.nodeGroupName);
+						group.set(prop.asSymbol, value);
+					},
+					// else call a custom handler with args: prop value
+					{
+						//postf("~processSet:  calling process[%]  (or process[\set] )  with  keyword:%   value:% pair for node  %\n", prop, prop, value, process.nodeName);
+
+						functionName.value(process, prop.asSymbol, value);
 				});
 			});
 		};
+
+		// accepts arbitrary key value pairs and applies them to the named process node
+		~processProperty = { | args  |
+			var type = args[0].asString.split[2].asSymbol;
+			var nodeName  = args[1];
+			var propsVec = args.copyRange(2, args.size - 1);
+
+			// verify data
+			if (  (  ( (propsVec.size&1)==1) || (propsVec.size == 0) ),
+				{
+					error("satie4UnityProtocol.processProperty: BAD ARGS: "++propsVec);
+				}, // else args good
+				{  // verify node
+					if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == true,
+						{
+							var thisGroupName = e.allSourceNodes[nodeName.asSymbol].at(\groupNameSym);  // process nodes have unique groups
+							var thisGroup = e.allGroupNodes[thisGroupName].at(\group).group;
+							var myProcess = e.allSourceNodes[nodeName.asSymbol].at(\process);
+
+							if ( myProcess == nil,     // verify process
+								{
+									error("satie4UnityProtocol.setMessHandler:  process node: "++nodeName++"  BUG FOUND: undefined process  \n");
+
+								},
+								{  // good to go:  write key val pairs to process environment instance
+
+									var function= nil;
+
+									if (myProcess[\setProperty].class == Function,
+										{
+											function = myProcess[\setProperty];
+									});
+
+									propsVec.pairsDo({ | prop, val |
+
+										if (function != nil,
+										{
+											function.value(myProcess, prop, val);
+										}, // else set the process's environment variable directly
+										{
+											myProcess[prop.asSymbol] = val;
+									});
+									});
+							});
+						},
+						{  // else error
+							error("satie4UnityProtocol.setMessHandler:  process node: "++nodeName++"  is undefined \n");
+					});
+			});
+		};
+
 
 		// osc rx   ARGS:  sourceName azimuthRADIANS elevationRADIANS gainDB delayMS  lpHZ  distanceMETERS
 		~sourceUpdateHandler = { 	| args |
@@ -1524,125 +1565,141 @@ for debugguing
 
 		~blobUpdateHandler = {
 			arg msg;
-			var srcName = msg[1];
-			// postf("satie4UnityProtocol.blobUpdateHandler:  msg: %, \n", msg);
-			// postf("satie4UnityProtocol.blobUpdateHandler:  msg LEN %, \n", msg.size);
 
-			if (msg.size != 3,
+			if (msg.class != Array,
 				{
-					"satie4UnityProtocol.blobUpdateHandler;  bad message format: expects  address nodeName blobArray".error;
-					postf("~testCallback:  MESS LEN: %", msg.size);
-
+					error("satie4UnityProtocol.blobUpdateHandler;  BUG FOUND: received message: %  not an ARRAY \n", msg);
+					~sickMsg=msg;
 				},
-				// else
 				{
-					var aziDeg, eleDeg, gainDB, delayMs, lpHz, distanceMeters;
-					var oscAddr = msg[0].asString;
-
-					var nodeName = msg[1];
-					var dataArray = msg[2];
-
-					var degScaler = 1.411764705882 ; // 360/255
-					var thisSynth = nil;
-
-					var nodeType = oscAddr.split($/)[2];
-
-					// postf("~satie4Unity.blobUpdateHandler:  nodeName %,  noteType % \n", nodeName, nodeType);
-
-					if ( (dataArray.class != Int8Array ) ||  ( dataArray.size != 12),
+					if (msg.size != 3,
 						{
-							error("satie4UnityProtocol.blobUpdateHandler:  message bad data format, expecting array  of  12 bytes :")
+							"satie4UnityProtocol.blobUpdateHandler;  bad message format: expects  address nodeName blobArray".error;
+							postf("\t blobUpdateHandler: bad message: %\n", msg);
+
 						},
-						// else data good, extract
+						// else
 						{
-							aziDeg = degScaler *  e.sined2unsignedByte( dataArray[0] );
-							if (aziDeg >179, { aziDeg = aziDeg - 360;});
+							var aziDeg, eleDeg, gainDB, delayMs, lpHz, distanceMeters;
+							var oscAddr = msg[0].asString;
 
-							eleDeg = degScaler * e.sined2unsignedByte( dataArray[1] );
-							if (eleDeg > 179, { eleDeg = eleDeg - 360;});
+							var degScaler = 1.411764705882 ; // 360/255
+							var thisSynth = nil;
 
-							gainDB =  (e.sined2unsignedByte(  dataArray[2] ) << 24);
-							gainDB =  gainDB + (e.sined2unsignedByte(  dataArray[3]) << 16);
-							gainDB =  gainDB +   (e.sined2unsignedByte(  dataArray[4]) << 8);
-							gainDB =  gainDB +  e.sined2unsignedByte(  dataArray[5] );
-							gainDB = gainDB * 0.00001;
-							gainDB = gainDB.ampdb;
+							var nodeType = oscAddr.split($/)[2];
 
-							delayMs  = (e.sined2unsignedByte(  dataArray[6]) << 8);
-							delayMs =  delayMs +  e.sined2unsignedByte(  dataArray[7] );
-							delayMs = delayMs * 0.1;
 
-							lpHz  = (e.sined2unsignedByte(  dataArray[8]) << 8);
-							lpHz =  lpHz +  e.sined2unsignedByte(  dataArray[9] );
-
-							distanceMeters  = (e.sined2unsignedByte(  dataArray[10]) << 8);
-							distanceMeters =  distanceMeters +  e.sined2unsignedByte(  dataArray[11] );
-							distanceMeters = distanceMeters * 0.01;
-
-							if (e.debugFlag,
+							//postf("~satie4Unity.blobUpdateHandler:  nodeName %,  noteType % \n", nodeName, nodeType);
+							if (msg.size == 0,
 								{
-									postf("satie4UnityProtocol.blobUpdateHandler;     aziDeg %  eleDeg %  gainDB %  delayMs %  lpHz %  distanceMeters %        \n", aziDeg, eleDeg, gainDB, delayMs, lpHz, distanceMeters);
+									~sickMsg=msg;
+
+									postf("~satie4Unity.blobUpdateHandler: mess: %    length %\n", msg, msg.size);
+									~sickMsg.dump.class
+
 							});
 
-							switch(nodeType.asSymbol,
-								'source',
-								{
-									if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == false,
-										{
-											error("satie4UnityProtocol.blobUpdateHandler:  source node: "++nodeName++"  is undefined \n");
-										},
-										// else all ok
-										{
-											thisSynth = e.allSourceNodes[nodeName.asSymbol].at(\synth);
 
-											if ( thisSynth == nil,
-												{
-													error("satie4UnityProtocol.blobUpdateHandler:  source node: "++nodeName++"  BUG FOUND: undefined SYNTH  \n");
-												},
-												//else
-												{
-													// distance not used by source nodes
-													thisSynth.set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB, \delayMs, delayMs, \lpHz, lpHz);
-											});
-									});
+							if (  (msg[1].class != Symbol ) || (msg[2].class != Int8Array ) ||  ( msg[2].size != 12),
+								{
+									error("satie4UnityProtocol.blobUpdateHandler:  message bad data format, expecting array  of  12 bytes :");
+									error("\t satie4UnityProtocol.blobUpdateHandler:  message % \n", msg);
+
 								},
-								'group',
+								// else data good, extract
 								{
-								},
-								'process',
-								{
-									// We know this is a sourceProcessingNode since this callback was chosen for this node
-									// so by default, we will update the source's group
-									var thisGroupName;
-									var thisGroup;
-									var myProcess;
+									var nodeName = msg[1];
+									var dataArray = msg[2];
 
-									thisGroupName = e.allSourceNodes[nodeName.asSymbol].at(\groupNameSym);  // process nodes have unique groups
-									thisGroup = e.allGroupNodes[thisGroupName].at(\group).group;
-									myProcess = e.allSourceNodes[nodeName.asSymbol].at(\process);
-									// thisSynth = e.allSourceNodes[nodeName.asSymbol].at(\synth);
+									aziDeg = degScaler *  e.sined2unsignedByte( dataArray[0] );
+									if (aziDeg >179, { aziDeg = aziDeg - 360;});
 
-									if ( myProcess == nil,
+									eleDeg = degScaler * e.sined2unsignedByte( dataArray[1] );
+									if (eleDeg > 179, { eleDeg = eleDeg - 360;});
+
+									gainDB =  (e.sined2unsignedByte(  dataArray[2] ) << 24);
+									gainDB =  gainDB + (e.sined2unsignedByte(  dataArray[3]) << 16);
+									gainDB =  gainDB +   (e.sined2unsignedByte(  dataArray[4]) << 8);
+									gainDB =  gainDB +  e.sined2unsignedByte(  dataArray[5] );
+									gainDB = gainDB * 0.00001;
+									gainDB = gainDB.ampdb;
+
+									delayMs  = (e.sined2unsignedByte(  dataArray[6]) << 8);
+									delayMs =  delayMs +  e.sined2unsignedByte(  dataArray[7] );
+									delayMs = delayMs * 0.1;
+
+									lpHz  = (e.sined2unsignedByte(  dataArray[8]) << 8);
+									lpHz =  lpHz +  e.sined2unsignedByte(  dataArray[9] );
+
+									distanceMeters  = (e.sined2unsignedByte(  dataArray[10]) << 8);
+									distanceMeters =  distanceMeters +  e.sined2unsignedByte(  dataArray[11] );
+									distanceMeters = distanceMeters * 0.01;
+
+									if (e.debugFlag,
 										{
-											error("satie4UnityProtocol.blobUpdateHandler:  process node: "++nodeName++"  BUG FOUND: undefined process  \n");
-										},
-										// else all good
-
-										{
-											if (myProcess[\updateConnection] == nil,
-												{
-													//postf("~connectionProcessCallback:  setting update for nodes group %\n", connectionName);
-													// distance not used by standard spatializers
-													thisGroup.set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB, \delayMs, delayMs, \lpHz, lpHz);
-												},
-												// else use custom handler
-												{
-													// postf("~connectionProcessCallback:  calling custom update handler for %\n", connectionName);
-													// distance used by custom process functions
-													myProcess[\updateConnection].value(myProcess, aziDeg, eleDeg, gainDB, delayMs, lpHz, distanceMeters);
-											});
+											postf("satie4UnityProtocol.blobUpdateHandler;     aziDeg %  eleDeg %  gainDB %  delayMs %  lpHz %  distanceMeters %        \n", aziDeg, eleDeg, gainDB, delayMs, lpHz, distanceMeters);
 									});
 
+									switch(nodeType.asSymbol,
+										'source',
+										{
+											if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == false,
+												{
+													error("satie4UnityProtocol.blobUpdateHandler:  source node: "++nodeName++"  is undefined \n");
+												},
+												// else all ok
+												{
+													thisSynth = e.allSourceNodes[nodeName.asSymbol].at(\synth);
+
+													if ( thisSynth == nil,
+														{
+															error("satie4UnityProtocol.blobUpdateHandler:  source node: "++nodeName++"  BUG FOUND: undefined SYNTH  \n");
+														},
+														//else
+														{
+															// distance not used by source nodes
+															thisSynth.set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB, \delayMs, delayMs, \lpHz, lpHz);
+													});
+											});
+										},
+										'group',
+										{
+										},
+										'process',
+										{
+											// We know this is a sourceProcessingNode since this callback was chosen for this node
+											// so by default, we will update the source's group
+											var thisGroupName;
+											var thisGroup;
+											var myProcess;
+
+											thisGroupName = e.allSourceNodes[nodeName.asSymbol].at(\groupNameSym);  // process nodes have unique groups
+											thisGroup = e.allGroupNodes[thisGroupName].at(\group).group;
+											myProcess = e.allSourceNodes[nodeName.asSymbol].at(\process);
+											// thisSynth = e.allSourceNodes[nodeName.asSymbol].at(\synth);
+
+											if ( myProcess == nil,
+												{
+													error("satie4UnityProtocol.blobUpdateHandler:  process node: "++nodeName++"  BUG FOUND: undefined process  \n");
+												},
+												// else all good
+
+												{
+													if (myProcess[\updateConnection] == nil,
+														{
+															//postf("~connectionProcessCallback:  setting update for nodes group %\n", connectionName);
+															// distance not used by standard spatializers
+															thisGroup.set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB, \delayMs, delayMs, \lpHz, lpHz);
+														},
+														// else use custom handler
+														{
+															// postf("~connectionProcessCallback:  calling custom update handler for %\n", connectionName);
+															// distance used by custom process functions
+															myProcess[\updateConnection].value(myProcess, aziDeg, eleDeg, gainDB, delayMs, lpHz, distanceMeters);
+													});
+											});
+
+									});
 							});
 					});
 			});
@@ -1736,6 +1793,8 @@ for debugguing
 	osc.deleteOSC(\satieProcessHpHz);  // disconnect any previous handlers
 	osc.newOSC(\satieProcessHpHz, e['processHpHzHandler'], "/satie/process/hpHz");   // connect handler
 
+	osc.deleteOSC(\satieProcessProperty);  // disconnect any previous handlers
+	osc.newOSC(\satieProcessProperty, e['processProperty'], "/satie/process/property");   // connect handler
 
 	e;
 };

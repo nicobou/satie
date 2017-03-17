@@ -124,16 +124,41 @@ if (~particule1_pitchSequences == nil,
 
 // end of required class functions
 
-// the functions below are not requied
-// however if defined, they will be called by satie4unity
+// the functions below are not requied, since satie4Unity, by default, forwards most received messages to the process's synth group.
+// However if a given function IS defined,  that function will be called when satie4Unity receives a corresponding message
 
 
-// if defined, will be called when node's "prop" message is received
-// otherwise satie4unity will send the  "prop" message to the node's group
-~particule1.prop =  {| self, property, value |
-	//'particule1.property called'.postln;
+// for example, on the reception of the message:  "set" key value
+// if the  process[key] is defined as a function,  that particular function will be called with the arguments:  key, value
+
+~particule1.set =  {| self, property, value |
+	// add conditional processing of key value pairs here
+	// write key value pair to synth
+
+	postf("~particule1.set:  node:%  key:%  val:%\n", self.nodeName, property, value);
+			self.cloneCount.do( { arg item;
+				var nodename=(self.nodeName++"_"++item).asSymbol;
+
+				// this is where we can calculate clone-specific parameters
+				// e.g:  value = value *  item;
+
+				~procMan.satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(property.asSymbol,value);
+	});
+};
+
+
+
+
+// if the function below is defined,  satie4Unity will call it when redeiving the message:  property key value,  passing the key and value args
+// otherwise, satie4Unity  will write the key value to this process's environment
+
+~particule1.setProperty =  {| self, property, value |
+	// add conditional processing of key value pairs here
+	// write key value pair to process instance's environment
 	self.put(property.asSymbol, value);
 };
+
+
 
 
 // if defined, will be called when node's "update" message is received
@@ -145,6 +170,8 @@ if (~particule1_pitchSequences == nil,
 	var yDist = distance * eleDeg.degrad.sin;  // get (vertical) distance of node to listener projected on Y axis
 	var aziScaler;
 	var elevScaler;
+
+
 
 	xzDist = xzDist.clip(0, 100)*0.01;   // anything over 100 meters away will generate no azimuth offset its clones. Normalize
 
@@ -165,21 +192,23 @@ if (~particule1_pitchSequences == nil,
 	self.lpHz = lpHz;
 	self.hpHz = 0.5;  // to be added
 
-	//postf("particule1.updateConnection: called for node: %    delayMS: %  \n", self.nodeName, delayMs);
 
 	// updating the connection of all this node's clones (via group message)
 	thisGroup.set(\aziDeg, self.aziDeg, \eleDeg, self.elevDeg, \gainDB, self.gainDB , \delayMs, self.delayMs, \lpHz, self.lpHz,  \cloudAziScale, aziScaler, \cloudElevScale, elevScaler ); //  \hpHz, self.hpHz);
 };
 
 
-// if defined, will be called when node's "spread" message is received
+
+// The following functions can be defined to handle setting the synthDef's Keyword Pairs via the "set" message
+// if defined,  "spread" will be called when node's "spread" message is received
 // otherwise the "spread" message will be applided to the node's group
-~particule1.spread = { | self, spreadVal |
+~particule1.spread = { | self, key, value |
 
 	var 	thisGroup = self.nodeGroup;
 	// updating the spread param of all this node's clones (via group message)
+	postf("~particule1.spread:  node:%  key:%  val:%\n", self.nodeName, key, value);
 
-	thisGroup.set(\spread, spreadVal);
+	thisGroup.set(\spread, value);
 };
 
 
