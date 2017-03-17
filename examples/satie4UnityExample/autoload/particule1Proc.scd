@@ -121,49 +121,76 @@ if (~particule1_pitchSequences == nil,
 
 };
 
-
 // end of required class functions
 
-// the functions below are not requied, since satie4Unity, by default, forwards most received messages to the process's synth group.
-// However if a given function IS defined,  that function will be called when satie4Unity receives a corresponding message
+
+// Below are optionally defined message handlers that can be called by satie4Unity, to override satie4Unity's corresponding generic handlers.
+// Satie4Unity provides the override mechanism for the following  messages, which are handled by the corresponding process functions as shown:
+
+//   /satie/process/update      -->  handled by process[\update]
+//   /satie/process/set      -->  handled by process[\set]
+//   /satie/process/property      -->  handled by process[\property]
 
 
+
+// Custom message handlers can also be defiend for any event messages, as shown below
+//  /satie/process/event  myEvent atom1 .... atomN      -->   process[\myEvent]
+
+
+
+
+
+
+
+
+
+
+// overrides satie4Unity's set function
 // for example, on the reception of the message:  "set" key value
 // if the  process[key] is defined as a function,  that particular function will be called with the arguments:  key, value
 
-~particule1.set =  {| self, property, value |
+~particule1.set =  {| self, key, value |
 	// add conditional processing of key value pairs here
-	// write key value pair to synth
+	// write key value pair to synths
 
-	postf("~particule1.set:  node:%  key:%  val:%\n", self.nodeName, property, value);
+				// this is where we can operate on key specific values
+				// e.g:  key == \spread   etc..
+
+	//postf("~particule1.set:  node:%  key:%  val:%\n", self.nodeName, property, value);
+
+	// set key val pair  to each synth of the clones
 			self.cloneCount.do( { arg item;
 				var nodename=(self.nodeName++"_"++item).asSymbol;
 
 				// this is where we can calculate clone-specific parameters
-				// e.g:  value = value *  item;
+				// e.g:  if  key == \centerFq,  value = value +  item;
 
-				~procMan.satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(property.asSymbol,value);
+				~procMan.satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(key.asSymbol,value);
 	});
 };
 
 
-
-
+// overrides satie4Unity's property function
 // if the function below is defined,  satie4Unity will call it when redeiving the message:  property key value,  passing the key and value args
 // otherwise, satie4Unity  will write the key value to this process's environment
 
-~particule1.setProperty =  {| self, property, value |
+~particule1.property =  {| self, property, value |
 	// add conditional processing of key value pairs here
 	// write key value pair to process instance's environment
+
+	//postf("~particule1.setProperty:  node:%  key:%  val:%\n", self.nodeName, property, value);
+
+	// this is where we can calculate key word specific actions
+	// e.g:  if (property == "sheefa", {value = value *  10;});
+
 	self.put(property.asSymbol, value);
 };
 
 
-
-
+// overrides satie4Unity's update function
 // if defined, will be called when node's "update" message is received
 // otherwise satie4unity will send the  "update" message to the node's group
-~particule1.updateConnection = { | self, aziDeg, eleDeg, gainDB, delayMs, lpHz, distance |
+~particule1.uodate = { | self, aziDeg, eleDeg, gainDB, delayMs, lpHz, distance |
 
 	var 	thisGroup = self.nodeGroup; // ~allSourceNodes[self.nodeName.asSymbol].at(\proxy);
 	var xzDist = distance * eleDeg.degrad.cos;  // get (horizontal) distance of node to listener on XZ plane
@@ -198,18 +225,6 @@ if (~particule1_pitchSequences == nil,
 };
 
 
-
-// The following functions can be defined to handle setting the synthDef's Keyword Pairs via the "set" message
-// if defined,  "spread" will be called when node's "spread" message is received
-// otherwise the "spread" message will be applided to the node's group
-~particule1.spread = { | self, key, value |
-
-	var 	thisGroup = self.nodeGroup;
-	// updating the spread param of all this node's clones (via group message)
-	postf("~particule1.spread:  node:%  key:%  val:%\n", self.nodeName, key, value);
-
-	thisGroup.set(\spread, value);
-};
 
 
 // totally custom functions.  Calls to these functions result from OSC events received by satie4unity from Unity, and then applied to these functions,  if they exist

@@ -13,7 +13,9 @@
 
 ~myProcess = ~myNode.at(\process);
 
-~myProcess[\cunt]
+~myProcess[\setProperty].class == Function
+
+~myProcess.at(\sheefa);
 
 ~setFn = ~myProcess[\set];
 
@@ -32,6 +34,11 @@
 
 
 ~myProcess.at(\nodeGroupName)
+
+
+
+
+
 
 f.value(p, \spread, 0)
 x.dump

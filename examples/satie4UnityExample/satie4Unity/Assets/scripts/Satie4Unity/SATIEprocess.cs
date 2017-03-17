@@ -256,7 +256,8 @@ using System.Collections.Generic;
 				_parameters[i] = parameters[i] = keyword + " " + svalue;
 
 				//Debug.Log("MODIFIED PROPERTY: "+keyword+" : "+svalue);
-				sendEvents (parameters, true);
+				sendProperties();
+                 
 			}
 		}
 	}
@@ -318,6 +319,7 @@ using System.Collections.Generic;
 		}
 	}
 
+
 	public void setParameter(string keyword, object value)
 	{
 		string newParam = "";
@@ -346,7 +348,62 @@ using System.Collections.Generic;
 			newParam = keyword + " " + valueStr;
 			parameters.Add ( newParam );
 		}
-		sendEvents (parameters, true); 
+        sendProperties (); 
 	}
 
+
+    // outputs all the properties using the following format
+    //  /satie/process/property nodeName key value
+    void sendProperties()
+    {
+        OscMessage mess;
+        string path = "/satie/process/property";
+
+        if (!_start)
+            return;
+
+
+        mess = new OscMessage(path);
+        mess.Add(SATIEsourceCS.nodeName);  // build message
+        mess.Add("");   // build message
+        mess.Add(0);    // /satie/process/property nodeName key value
+
+
+        foreach (string s in parameters)
+        {
+            if (s.Equals("") ) continue;
+ 
+
+            List<string> items = new List<string>(s.Split(' '));
+
+            if (items.Count != 2) 
+            {
+                Debug.LogError(GetType()+".sendProperties(): " + transform.name + ":   atom count of property message not == 3, ignoring propery:"+s+"  argCount: "+items.Count);
+                continue; // incomplete or too long..  ignore
+            }
+
+             int ivalue;
+             float fvalue;
+
+             mess.args[1] = items[0];  // get key word
+
+            // get value
+            if (int.TryParse(items[1], out ivalue))
+            {
+                //Debug.Log("ITEM IS AN INTEGER = " + ivalue);
+                mess.args[2] = ivalue;
+            }
+            else if (float.TryParse(items[1], out fvalue))
+            {
+                //Debug.Log("ITEM IS A FLOAT = " + fvalue);
+                mess.args[2] = fvalue;
+            } else
+            {
+                //Debug.Log("ITEM IS A STRING = " + svalue);
+                mess.args[2] = items[1];
+            }
+            // output osc message
+            SATIEsetup.sendOSC(mess);
+        }
+    }
 }

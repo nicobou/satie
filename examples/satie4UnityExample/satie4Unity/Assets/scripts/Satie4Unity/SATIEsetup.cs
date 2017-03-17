@@ -134,7 +134,7 @@ public class SATIEsetup : MonoBehaviour
     {
         if (_instance != null)
         {
-            Debug.LogError("SATIEsetup.Awake: multiple instances of SATIEsetup not allowed, duplicate instance found in:" + transform.name);
+            Debug.LogError(GetType()+".Awake(): multiple instances of SATIEsetup not allowed, duplicate instance found in:" + transform.name);
             return;
         }
 	
@@ -144,7 +144,7 @@ public class SATIEsetup : MonoBehaviour
 //            }
 //            catch (Exception e)
 //            {
-//                Debug.LogError("SATIEsetup.Awake: OSC TX:  failed to connect to " + RendererAddress + ":" + RendererPort + "can't initialize SATIE");
+//                Debug.LogError(GetType()+".Awake: OSC TX:  failed to connect to " + RendererAddress + ":" + RendererPort + "can't initialize SATIE");
 //                Debug.LogWarning(e.Message);
 //                return;
 //
@@ -175,9 +175,9 @@ public class SATIEsetup : MonoBehaviour
         IPHostEntry hostEntry = Dns.GetHostEntry(localHostName);
         foreach (IPAddress ipAddr in hostEntry.AddressList)
         {
-            Debug.Log("SATIEsetup.Awake: MY IP:" + ipAddr.ToString());
+            Debug.Log(GetType()+".Awake: MY IP:" + ipAddr.ToString());
         }
-        Debug.Log("SATIEsetup.Awake: OSC TX to:  " + RendererAddress + ":" + RendererPort);
+        Debug.Log(GetType()+".Awake: OSC TX to:  " + RendererAddress + ":" + RendererPort);
 
         setUpdateRate(updateRateMs);
     }
@@ -328,8 +328,8 @@ public class SATIEsetup : MonoBehaviour
 
         OscMessage message = new OscMessage("/satie/scene");
 
-        Debug.Log("SATIEsetup.OnApplicationQuit:  APP QUIT");
-        Debug.Log("SATIEsetup.OnDestroy");
+        Debug.Log(GetType()+".OnApplicationQuit:  APP QUIT");
+        Debug.Log(GetType()+".OnDestroy");
 
         message.Add("clear");
         sendOSC(message);
@@ -356,13 +356,13 @@ public class SATIEsetup : MonoBehaviour
 
         if (oscOutNode == null)
         {
-            Debug.LogWarning("SATIEsetup.sendOSC():  OSC sender not defined, skipping message: " + mess.address);
+            Debug.LogWarning(_instance.GetType()+".sendOSC():  OSCout object not found, skipping message: " + mess.address);
             return false;
         }
 
         if (!oscOutNode.isOpen)
         {
-            Debug.LogError("SATIEsetup.sendOSC():  OSC sender not defined, skipping message: " + mess.address);
+            Debug.LogError(_instance.GetType()+".sendOSC():  OSCout object not available, skipping message: " + mess.address);
             return false;
         }
 

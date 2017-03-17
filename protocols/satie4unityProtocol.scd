@@ -348,6 +348,8 @@ for debugguing
 			var nodeName  = args[1];
 			var propsVec = args.copyRange(2, args.size - 1);
 
+			//postf("satie4UnityProtocol.processProperty:  RX    \n", args);
+
 			// verify data
 			if (  (  ( (propsVec.size&1)==1) || (propsVec.size == 0) ),
 				{
@@ -362,16 +364,19 @@ for debugguing
 
 							if ( myProcess == nil,     // verify process
 								{
-									error("satie4UnityProtocol.setMessHandler:  process node: "++nodeName++"  BUG FOUND: undefined process  \n");
+									error("satie4UnityProtocol.processProperty:  process node: "++nodeName++"  BUG FOUND: undefined process  \n");
 
 								},
 								{  // good to go:  write key val pairs to process environment instance
 
 									var function= nil;
 
-									if (myProcess[\setProperty].class == Function,
+									// postf("satie4UnityProtocol.processProperty:  process node: "++nodeName++" process: % \n", myProcess.class);
+
+
+									if (myProcess[\property].class == Function,
 										{
-											function = myProcess[\setProperty];
+											function = myProcess[\property];
 									});
 
 									propsVec.pairsDo({ | prop, val |
@@ -530,7 +535,7 @@ for debugguing
 							lpHz = args[6];
 							distance = args[7];  // not used by basic spatializers
 
-							if (myProcess[\updateConnection] == nil,
+							if (myProcess[\update] == nil,
 								{
 									//postf("~connectionProcessCallback:  setting update for nodes group %\n", connectionName);
 									// distance not used by standard spatializers
@@ -760,7 +765,7 @@ for debugguing
 							// allOtherNames (to call a function with an arg vec)
 							if (( eventName == \setParam)&& (values.size == 2),
 								{
-									// postf("processCallback event_setParam: %  % \n", values[0].asSymbol, values[1]);
+									//postf("processCallback event_setParam: %  % \n", values[0].asSymbol, values[1]);
 									myProcess[values[0].asSymbol] = values[1] ;
 
 								},
