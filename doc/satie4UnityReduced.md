@@ -30,6 +30,7 @@
 /satie/<nodeType>/state nodeName value  // 1=active 0=inactive
 /satie/<nodeType>/event nodeName eventName <opt> atom1 atom2...atomN    
 /satie/<nodeType>/set nodeName key1 val1 key2 val2 .... keyN valN
+/satie/<nodeType>/setvec nodeName key val1 .....  valN
 
 // only for nodeTypes: source and process
 /satie/<nodeType>/update nodeName azimuthRADIANS elevationRADIANS gainDB delayMS  lpHZ  distanceMETERS
