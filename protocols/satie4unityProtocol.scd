@@ -211,7 +211,7 @@ for debugguing
 						},
 						'group',
 						{
-							if ( ~satie4unity.allGroupNodes.includesKey (\sheefa) == true,
+							if ( e.allGroupNodes.includesKey (nodeName.asSymbol) == true,
 								{
 									targetNode = e.allGroupNodes[nodeName.asSymbol].at(\group).group;
 									e.nodeSet( props, targetNode);
@@ -240,6 +240,84 @@ for debugguing
 								},
 								{  // else error
 									error("satie4UnityProtocol.setMessHandler:  process node: "++nodeName++"  is undefined \n");
+							});
+					});
+			});
+		};
+
+		// accepts arbitrary key vector messages
+		~setVecHandler = { 	| args |
+			var type = args[0].asString.split[2].asSymbol;
+
+
+			if (e.debugFlag, { postf("satie4UnityProtocol.setMessHandler:  mess: %\n", args); });
+
+			// verify data
+			if (  ( args.size < 3)  ,
+				{
+					error("satie4UnityProtocol.setVecHandler: bad messafe length: expects oscAddress key data1 or more \n"++args);
+				}, // else args good
+				{
+					var nodeName  = args[1];
+					var key = args[2];
+					var vector = args.copyRange(3, args.size - 1);
+					var targetNode = nil;
+
+					switch(type,
+						'source',
+						{
+							if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == true,
+								{
+									targetNode = e.allSourceNodes[nodeName.asSymbol].at(\synth);
+									if ( targetNode == nil,
+										{
+											error("satie4UnityProtocol.setVecHandler:  source node: "++nodeName++"  BUG FOUND: undefined SYNTH  \n");
+										}, // else good to go
+										{
+											targetNode.set(key, vector);
+									});
+								},
+								{
+									error("satie4UnityProtocol.setVecHandler:  source node: "++nodeName++"  is undefined \n");
+							}); // else node exists,  process event
+						},
+						'group',
+						{
+							if (  e.allGroupNodes.includesKey (nodeName.asSymbol) == true,
+								{
+									targetNode = e.allGroupNodes[nodeName.asSymbol].at(\group).group;
+									targetNode.set(key, vector);
+								},
+								{   // else no group
+									error("satie4UnityProtocol.setVecHandler:  group node: "++nodeName++"  is undefined \n");
+							});
+						},
+						'process',
+						{
+							if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == true,
+								{
+									var thisGroupName = e.allSourceNodes[nodeName.asSymbol].at(\groupNameSym);  // process nodes have unique groups
+									var thisGroup = e.allGroupNodes[thisGroupName].at(\group).group;
+									var myProcess = e.allSourceNodes[nodeName.asSymbol].at(\process);
+
+									if ( myProcess == nil,
+										{
+											error("satie4UnityProtocol.setVecHandler:  process node: "++nodeName++"  BUG FOUND: undefined process  \n");
+
+										},
+										{  // good to go
+											if ( myProcess[key.asSymbol].class == Function,
+												{
+													myProcess[key.asSymbol].value(myProcess, vector);   // use process's defined message handler for this key
+												},
+												{
+													// or just update the process's group
+													thisGroup.set(key,vector);
+											});
+									});
+								},
+								{  // else error
+									error("satie4UnityProtocol.setVecHandler:  process node: "++nodeName++"  is undefined \n");
 							});
 					});
 			});
@@ -282,6 +360,7 @@ for debugguing
 				});
 			});
 		};
+
 
 		// accepts arbitrary key value pairs and applies them to the named target node (source or group)
 		~processSet = { | self, propsVec, process, group  |
@@ -382,12 +461,12 @@ for debugguing
 									propsVec.pairsDo({ | prop, val |
 
 										if (function != nil,
-										{
-											function.value(myProcess, prop, val);
-										}, // else set the process's environment variable directly
-										{
-											myProcess[prop.asSymbol] = val;
-									});
+											{
+												function.value(myProcess, prop, val);
+											}, // else set the process's environment variable directly
+											{
+												myProcess[prop.asSymbol] = val;
+										});
 									});
 							});
 						},
@@ -545,7 +624,7 @@ for debugguing
 								{
 									// postf("~connectionProcessCallback:  calling custom update handler for %\n", connectionName);
 									// distance used by custom process functions
-									myProcess[\updateConnection].value(myProcess, aziDeg, eleDeg, gainDB, delayMs, lpHz, distance);
+									myProcess[\update].value(myProcess, aziDeg, eleDeg, gainDB, delayMs, lpHz, distance);
 							});
 					});
 			});
@@ -645,8 +724,9 @@ for debugguing
 
 			name = args[1];
 			type = args[0].asString.split[3].asSymbol;
+			error("satie4Unity.sourceNodeCallback:  BUG FOUND. DEPRECIATED METHOD CALLED"++args);
 
-			'~sourceNodeCallback'.postln;
+		/*	'~sourceNodeCallback'.postln;
 
 			if ( e.allSourceNodes.includesKey(name.asSymbol) == false,
 				{
@@ -706,6 +786,7 @@ for debugguing
 						{postf("~sourceNodeCallback:  UNMATCHED:  nodeName: %  mesageType: %  size: % args: %\n", name, type, args.size, args)};
 					);
 			});
+			*/
 		};
 
 		// ~processCallback = { "processCallback called".warn; };
@@ -716,7 +797,9 @@ for debugguing
 			name = args[1];
 			type = args[0].asString.split[3].asSymbol;
 
-			if ( e.allSourceNodes.includesKey(name.asSymbol) == false,
+			error("satie4Unity.~processCallback:  BUG FOUND. DEPRECIATED METHOD CALLED"++args);
+
+			/*if ( e.allSourceNodes.includesKey(name.asSymbol) == false,
 				{
 					error("satie4UnityProtocol.processCallback:  process node: "++name++" is undefined \n");
 			});
@@ -777,7 +860,7 @@ for debugguing
 					});
 				},
 				{postf("~processCallback:  UNMATCHED:  nodeName: %  mesageType: %  size: % args: %\n", name, type, args.size, args)};
-			);
+			);*/
 		};
 
 
@@ -791,7 +874,9 @@ for debugguing
 			name = args[1];
 			type = args[0].asString.split[3].asSymbol;
 
-			if ( e.debugFlag,
+			error("~groupNodeCallback:  DEPRICIATED CALLBACK  %\n", args);
+
+			/*if ( e.debugFlag,
 				{
 					postf("~groupCallback:  arg1nodeName: %  type : %    argCount: %   args: %  \n", name, type, args.size,  args);
 			});
@@ -854,6 +939,99 @@ for debugguing
 				},
 				{
 					postf("~groupCallback:  UNMATCHED:  nodeName: %  mesageType: %  size: % args: %\n", name, type, args.size, args);
+			});*/
+		};
+
+
+
+		// ~setState = { | self, nodeName,  value |
+		// 	var thisSynth = self.allSourceNodes[nodeName.asSymbol].at(\synth);
+		// 	var state;
+		//
+		// 	if ( value == 0 , { state = false}, {state = true});
+		//
+		// 	thisSynth.run(state);
+		//
+		// 	if (self.debugFlag, {postf("~setState: seting state of % to %\n", nodeName, state)});
+		// };
+
+		// handles /satie/nodetype/state  nodeName flag
+		~setStateHandler = { 	| args |
+			var type = args[0].asString.split[2].asSymbol;
+
+			if ( e.debugFlag,
+				{
+					postf("satie4Unity.setStateHandler: % \n", args);
+			});
+
+			// verify message
+			if (  ( args.size != 3)  ,
+				{
+					error("satie4UnityProtocol.setStateHandler: bad messafe length: expects oscAddress nodeName val % \n", args);
+				}, // else args good
+				{
+					var nodeName  = args[1];
+					var value = args[2];
+					var targetNode = nil;
+					var state;
+
+					if ( value == 0 , { state = false}, {state = true});
+
+					switch(type,
+						'source',
+						{
+							if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == true,
+								{
+									targetNode = e.allSourceNodes[nodeName.asSymbol].at(\synth);
+									if ( targetNode == nil,
+										{
+											error("satie4UnityProtocol.setStateHandler:  source node: "++nodeName++"  BUG FOUND: undefined SYNTH  \n");
+										}, // else good to go
+										{
+											targetNode.run(state);
+									});
+								},
+								{
+									error("satie4UnityProtocol.setStateHandler:  source node: "++nodeName++"  is undefined \n");
+							}); // else node exists,  process event
+						},
+						'group',
+						{
+							if (  e.allGroupNodes.includesKey (nodeName.asSymbol) == true,
+								{
+									targetNode = e.allGroupNodes[nodeName.asSymbol].at(\group).group;
+									targetNode.run(state);
+								},
+								{   // else no group
+									error("satie4UnityProtocol.setStateHandler:  group node: "++nodeName++"  is undefined \n");
+							});
+						},
+						'process',
+						{
+							if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == true,
+								{
+									var thisGroupName = e.allSourceNodes[nodeName.asSymbol].at(\groupNameSym);  // process nodes have unique groups
+									var thisGroup = e.allGroupNodes[thisGroupName].at(\group).group;
+									var myProcess = e.allSourceNodes[nodeName.asSymbol].at(\process);
+
+									if ( myProcess == nil,
+										{
+											error("satie4UnityProtocol.setStateHandler:  process node: "++nodeName++"  BUG FOUND: undefined process  \n");
+										},
+										{  // good to go
+											if ( myProcess[\state].class == Function,     // does the process implement the \state handler
+												{
+													myProcess[\state].value(myProcess, state);   // yes, call it
+												},
+												{
+													thisGroup.run(state);   // or just update the process's group
+											});
+									});
+								},
+								{  // else error
+									error("satie4UnityProtocol.setStateHandler:  process node: "++nodeName++"  is undefined \n");
+							});
+					});
 			});
 		};
 
@@ -1144,17 +1322,6 @@ for debugguing
 		};*/
 
 
-		~setState = { | self, nodeName,  value |
-			var thisSynth = self.allSourceNodes[nodeName.asSymbol].at(\synth);
-			var state;
-
-			if ( value == 0 , { state = false}, {state = true});
-
-			thisSynth.run(state);
-
-
-			if (self.debugFlag, {postf("~setState: seting state of % to %\n", nodeName, state)});
-		};
 
 		// events RX:   /spatosc/core/source/nodename/event eventName v1...vN
 		~setGroupEvent = { | self, groupName, eventName,  args |
@@ -1181,6 +1348,7 @@ for debugguing
 			});
 		};
 
+		//  applys args using synth.set() -  can set any number of args
 		~setEvent = { | self, nodeName, eventName,  args |
 			var valueCount = args.size;
 			var thisSynth = self.allSourceNodes[nodeName.asSymbol].at(\synth);
@@ -1690,7 +1858,7 @@ for debugguing
 												// else all good
 
 												{
-													if (myProcess[\updateConnection] == nil,
+													if (myProcess[\update] == nil,
 														{
 															//postf("~connectionProcessCallback:  setting update for nodes group %\n", connectionName);
 															// distance not used by standard spatializers
@@ -1700,7 +1868,7 @@ for debugguing
 														{
 															// postf("~connectionProcessCallback:  calling custom update handler for %\n", connectionName);
 															// distance used by custom process functions
-															myProcess[\updateConnection].value(myProcess, aziDeg, eleDeg, gainDB, delayMs, lpHz, distanceMeters);
+															myProcess[\update].value(myProcess, aziDeg, eleDeg, gainDB, delayMs, lpHz, distanceMeters);
 													});
 											});
 
@@ -1722,17 +1890,13 @@ for debugguing
 	// postf("passed osc env: %\n", osc);
 
 	// connect renderer oscMessage RX to handlers
+
+	// scene
 	osc.deleteOSC(\satieScene);  // disconnect any previous handlers
 	osc.newOSC(\satieScene, e['coreCallback'], "/satie/scene");   // connect handler
 
-	// general
-	osc.deleteOSC(\updateBlobHandlerSrc);  // disconnect any previous handlers
-	osc.newOSC(\updateBlobHandlerSrc, e['blobUpdateHandler'],  "/satie/source/ublob");   // connect handler
 
-	osc.deleteOSC(\updateBlobHandlerProcess);  // disconnect any previous handlers
-	osc.newOSC(\updateBlobHandlerProcess, e['blobUpdateHandler'],  "/satie/process/ublob");   // connect handler
-
-
+// all nodes
 	osc.deleteOSC(\satieSrcSet);  // disconnect any previous handlers
 	osc.newOSC(\satieSrcSet, e['setMessageHandler'], "/satie/source/set");   // connect handler
 
@@ -1743,26 +1907,67 @@ for debugguing
 	osc.newOSC(\satieProcSet, e['setMessageHandler'], "/satie/process/set");   // connect handler
 
 
+    osc.deleteOSC(\satieSrcSetVec);  // disconnect any previous handlers
+	osc.newOSC(\satieSrcSetVec, e['setVecHandler'], "/satie/source/setvec");   // connect handler
+
+	osc.deleteOSC(\satieGroupSetVec);  // disconnect any previous handlers
+	osc.newOSC(\satieGroupSetVec, e['setVecHandler'], "/satie/group/setvec");   // connect handler
+
+	osc.deleteOSC(\satieProcSetVec);  // disconnect any previous handlers
+	osc.newOSC(\satieProcSetVec, e['setVecHandler'], "/satie/process/setvec");   // connect handler
+
+	osc.deleteOSC(\satieSrcState);  // disconnect any previous handlers
+	osc.newOSC(\satieSrcState, e['setStateHandler'], "/satie/source/state");   // connect handler
+
+	osc.deleteOSC(\satieGroupState);  // disconnect any previous handlers
+	osc.newOSC(\satieGroupState, e['setStateHandler'], "/satie/group/state");   // connect handler
+
+	osc.deleteOSC(\satieProcessState);  // disconnect any previous handlers
+	osc.newOSC(\satieProcessState, e['setStateHandler'], "/satie/process/state");   // connect handler
+
+	// sources and processes
+	osc.deleteOSC(\satieSrcUpdate);  // disconnect any previous handlers
+	osc.newOSC(\satieSrcUpdate, e['sourceUpdateHandler'], "/satie/source/update");   // connect handler
+
+	osc.deleteOSC(\satieProcessUpdate);  // disconnect any previous handlers
+	osc.newOSC(\satieProcessUpdate, e['processUpdateHandler'], "/satie/process/update");   // connect handler
+
+	osc.deleteOSC(\updateBlobHandlerSrc);  // disconnect any previous handlers
+	osc.newOSC(\updateBlobHandlerSrc, e['blobUpdateHandler'],  "/satie/source/ublob");   // connect handler
+
+	osc.deleteOSC(\updateBlobHandlerProcess);  // disconnect any previous handlers
+	osc.newOSC(\updateBlobHandlerProcess, e['blobUpdateHandler'],  "/satie/process/ublob");   // connect handler
+
+	// groups
+	osc.deleteOSC(\satieGroupAdd);  // disconnect any previous handlers
+	osc.newOSC(\satieGroupAdd, e['groupNodeCallback'], "/satie/group/add");   // connect handler
+
+	osc.deleteOSC(\satieGroupDrop);  // disconnect any previous handlers
+	osc.newOSC(\satieGroupDrop, e['groupNodeCallback'], "/satie/group/drop");   // connect handler
+
+	// processes
+	osc.deleteOSC(\satieProcessProperty);  // disconnect any previous handlers
+	osc.newOSC(\satieProcessProperty, e['processProperty'], "/satie/process/property");   // connect handler
+
+
+
+
+
+	// DEPRECIATED
+
 	// sources
 	osc.deleteOSC(\satieSrcProp);  // disconnect any previous handlers
 	osc.newOSC(\satieSrcProp, e['sourceNodeCallback'], "/satie/source/prop");   // connect handler
 
-	osc.deleteOSC(\satieSrcState);  // disconnect any previous handlers
-	osc.newOSC(\satieSrcState, e['sourceNodeCallback'], "/satie/source/state");   // connect handler
 
 	osc.deleteOSC(\satieSrcEvent);  // disconnect any previous handlers
 	osc.newOSC(\satieSrcEvent, e['sourceNodeCallback'], "/satie/source/event");   // connect handler
-
-	osc.deleteOSC(\satieSrcUpdate);  // disconnect any previous handlers
-	osc.newOSC(\satieSrcUpdate, e['sourceUpdateHandler'], "/satie/source/update");   // connect handler
 
 	osc.deleteOSC(\satieSrcHpHz);  // disconnect any previous handlers
 	osc.newOSC(\satieSrcHpHz, e['sourceHpHzHandler'], "/satie/source/hpHz");   // connect handler
 
 	osc.deleteOSC(\satieSrcSpread);  // disconnect any previous handlers
 	osc.newOSC(\satieSrcSpread, e['sourceSpreadHandler'], "/satie/source/spread");   // connect handler
-
-
 
 
 	// groups
@@ -1772,25 +1977,13 @@ for debugguing
 	osc.deleteOSC(\satieGroupEvent);  // disconnect any previous handlers
 	osc.newOSC(\satieGroupEvent, e['groupNodeCallback'], "/satie/group/event");   // connect handler
 
-	osc.deleteOSC(\satieGroupAdd);  // disconnect any previous handlers
-	osc.newOSC(\satieGroupAdd, e['groupNodeCallback'], "/satie/group/add");   // connect handler
-
-	osc.deleteOSC(\satieGroupDrop);  // disconnect any previous handlers
-	osc.newOSC(\satieGroupDrop, e['groupNodeCallback'], "/satie/group/drop");   // connect handler
-
 
 	// processes
 	osc.deleteOSC(\satieProcessProp);  // disconnect any previous handlers
 	osc.newOSC(\satieProcessProp, e['processCallback'], "/satie/process/prop");   // connect handler
 
-	osc.deleteOSC(\satieProcessState);  // disconnect any previous handlers
-	osc.newOSC(\satieProcessState, e['processCallback'], "/satie/process/state");   // connect handler
-
 	osc.deleteOSC(\satieProcessEvent);  // disconnect any previous handlers
 	osc.newOSC(\satieProcessEvent, e['processCallback'], "/satie/process/event");   // connect handler
-
-	osc.deleteOSC(\satieProcessUpdate);  // disconnect any previous handlers
-	osc.newOSC(\satieProcessUpdate, e['processUpdateHandler'], "/satie/process/update");   // connect handler
 
 	osc.deleteOSC(\satieProcessSpread);  // disconnect any previous handlers
 	osc.newOSC(\satieProcessSpread, e['processSpreadHandler'], "/satie/process/spread");   // connect handler
@@ -1798,8 +1991,6 @@ for debugguing
 	osc.deleteOSC(\satieProcessHpHz);  // disconnect any previous handlers
 	osc.newOSC(\satieProcessHpHz, e['processHpHzHandler'], "/satie/process/hpHz");   // connect handler
 
-	osc.deleteOSC(\satieProcessProperty);  // disconnect any previous handlers
-	osc.newOSC(\satieProcessProperty, e['processProperty'], "/satie/process/property");   // connect handler
 
 	e;
 };

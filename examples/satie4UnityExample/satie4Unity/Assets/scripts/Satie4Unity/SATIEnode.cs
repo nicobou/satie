@@ -417,9 +417,9 @@ public class SATIEnode : MonoBehaviour
         List<object> items = new List<object>();
 
         if (isProcess)
-            path = "/satie/process/event";
+            path = "/satie/process/setvec";
         else 
-            path = "/satie/" + nodeType + "/event";
+            path = "/satie/" + nodeType + "/setvec";
         
  
         items.Add(nodeName);
@@ -459,9 +459,9 @@ public class SATIEnode : MonoBehaviour
         outList.Insert(0, nodeName);
 
         if (isProcess)
-            path = "/satie/process/event";
+            path = "/satie/process/setvec";
         else 
-            path = "/satie/" + nodeType + "/event";
+            path = "/satie/" + nodeType + "/setvec";
   
 		
         if (debug)

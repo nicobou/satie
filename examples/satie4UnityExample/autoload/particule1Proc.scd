@@ -87,6 +87,8 @@ if (~particule1_pitchSequences == nil,
 	self.nodeName = nodeName;
 	self.nodeGroupName = nodeGroupName;
 	self.nodeGroup = thisGroup;
+	~particule1_instances.put(self.nodeName.asSymbol, self);
+
 	//'particule1,setup'.postln;
 
 	// project-specific parsing of args string (coming from setUri OSC message string)
@@ -117,7 +119,6 @@ if (~particule1_pitchSequences == nil,
 	});
 	postf("~particule1.setup:  generating % synthVoices for group %\n",  self.cloneCount, self.nodeGroupName);
 
-	~particule1_instances.put(self.nodeName.asSymbol, self);
 
 };
 
@@ -130,11 +131,12 @@ if (~particule1_pitchSequences == nil,
 //   /satie/process/update      -->  handled by process[\update]
 //   /satie/process/set      -->  handled by process[\set]
 //   /satie/process/property      -->  handled by process[\property]
+//   /satie/process/state        -->   hadled by  process[\state]
 
 
 
-// Custom message handlers can also be defiend for any event messages, as shown below
-//  /satie/process/event  myEvent atom1 .... atomN      -->   process[\myEvent]
+// Custom message handlers can also be defiend for any setvec messages, as shown below
+//  /satie/process/setvec  myHandlerName  atom1 .... atomN      -->   process[\myEvent]
 
 
 
@@ -170,6 +172,20 @@ if (~particule1_pitchSequences == nil,
 };
 
 
+// overrides satie4Unity's state function
+
+~particule1.state =  {| self, state |
+
+	// set the state of each of the processe's  clones
+			self.cloneCount.do( { arg item;
+				var nodename=(self.nodeName++"_"++item).asSymbol;
+
+				// this is where we can calculate clone-specific actions before changing state
+				self.nodeGroup.run(state);
+	});
+};
+
+
 // overrides satie4Unity's property function
 // if the function below is defined,  satie4Unity will call it when redeiving the message:  property key value,  passing the key and value args
 // otherwise, satie4Unity  will write the key value to this process's environment
@@ -178,7 +194,7 @@ if (~particule1_pitchSequences == nil,
 	// add conditional processing of key value pairs here
 	// write key value pair to process instance's environment
 
-	//postf("~particule1.setProperty:  node:%  key:%  val:%\n", self.nodeName, property, value);
+	postf("~particule1.setProperty:  node:%  key:%  val:%\n", self.nodeName, property, value);
 
 	// this is where we can calculate key word specific actions
 	// e.g:  if (property == "sheefa", {value = value *  10;});
@@ -190,14 +206,13 @@ if (~particule1_pitchSequences == nil,
 // overrides satie4Unity's update function
 // if defined, will be called when node's "update" message is received
 // otherwise satie4unity will send the  "update" message to the node's group
-~particule1.uodate = { | self, aziDeg, eleDeg, gainDB, delayMs, lpHz, distance |
+~particule1.update = { | self, aziDeg, eleDeg, gainDB, delayMs, lpHz, distance |
 
 	var 	thisGroup = self.nodeGroup; // ~allSourceNodes[self.nodeName.asSymbol].at(\proxy);
 	var xzDist = distance * eleDeg.degrad.cos;  // get (horizontal) distance of node to listener on XZ plane
 	var yDist = distance * eleDeg.degrad.sin;  // get (vertical) distance of node to listener projected on Y axis
 	var aziScaler;
 	var elevScaler;
-
 
 
 	xzDist = xzDist.clip(0, 100)*0.01;   // anything over 100 meters away will generate no azimuth offset its clones. Normalize
@@ -233,7 +248,7 @@ if (~particule1_pitchSequences == nil,
 
 	if ( items.size != 1,
 		{
-			warn("~particule1.setIncrement:  bad item count,  takes one float arg, received: % items\n",items.size);
+			warn("~particule1.setIncrement:  bad item count,  takes one float arg, received: "++items.size++" items\n");
 		},
 		//else
 		{
@@ -259,7 +274,7 @@ if (~particule1_pitchSequences == nil,
 
 	if ( items.size != 3,
 		{
-			postf("~particule1.trigger:  bad item count, expecing '[ pitch vel incidence]' , received: % items\n",items.size);
+			warn("~particule1.trigger:  bad item count, expecing '[ pitch vel incidence]' , received: "++items++" \n");
 		},
 		{ // else
 
@@ -334,7 +349,7 @@ if (~particule1_pitchSequences == nil,
 
 	if ( items.size != 1,
 		{
-			warn("~particule1.readPitches:  bad item count, expecting one filePath arg, received: % items\n",items.size);
+			warn("~particule1.readPitches:  bad item count, expecting one filePath arg, received: "++items++" \n");
 		},
 		//else
 		{

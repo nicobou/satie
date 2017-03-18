@@ -104,8 +104,8 @@ using System.Collections.Generic;
 
 	void sendState ()
 	{
-		sendEvents (events, false);
-		sendEvents (parameters, true);  
+		sendEvents ();
+        sendProperties();
 	}
 
 
@@ -182,7 +182,7 @@ using System.Collections.Generic;
 				//events[i] = keyword + " " + svalue;
 
 				_events [i] = events [i] = keyword + svalues;
-				sendEvents (events, false);
+				sendEvents ();
 
 
 				Debug.Log("MODIFIED EVENT: "+keyword+" : "+svalues);
@@ -263,13 +263,13 @@ using System.Collections.Generic;
 	}
 
 
-	void sendEvents(List <string> messages, bool setParamFlag)
+	void sendEvents()
 	{
 
         if (!_start)
             return;
         
-        foreach (string s in messages)
+        foreach (string s in events)
 		{
 			if (s.Equals("") ) continue;
 			
@@ -312,7 +312,7 @@ using System.Collections.Generic;
 			}
 			else   // message good. Send it now
 			{
-				if (setParamFlag) atoms.Insert(0, "setParam");
+				// if (setParamFlag) atoms.Insert(0, "setParam");
                 //Debug.Log("***********  "+atoms);
 				SATIEsourceCS.sendEvent(atoms);
 			}
