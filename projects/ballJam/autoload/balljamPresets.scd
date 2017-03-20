@@ -123,28 +123,43 @@ m.action_({ |ez| (  ~setPreset.value( (ez.value)))});
 };
 
 
-~presetCallback = {
-	arg msg;
-	var presetNo = msg[1];
+	// set up PROJECT SPECIFIC OSC MESSAGE RX
+	~balljamProjectCallback = {   	// receives OSC messages that look like:   /satie/project/myProjectname data1 .... dataN
+		arg msg;
+		var command = msg[1];
+		//postf(~myProjectName++" Project:  command: %, msg: %, \n", command, msg);
 
-	postf("~basicRendererCallback: command: %, msg: %, \n", presetNo, msg);
+		if (msg.size < 2,
+			{~myProjectName++" Project:  empty message".warn;
+				postf(~myProjectName++" Project:  MESS LEN: %", msg.size);
 
-	if (msg.size < 2,
-		{
-			"~presetCallback: empty message".warn;
-			postf("~presetCallback MESS LEN: %", msg.size);
+			},
+			// else
+			{
+				// parse out project messages here
+				switch (command,
+					'preset',
+					{
+						if ( (msg.size != 3 ) ,
+							{"Balljam project:  preset: bad message format, expecting oscAddr preset presetNumber".error;},
+							// else
+							{
+							~setPreset.value(msg[2].asInt);
 
-		},
-		// else
-		{
-			~setPreset.value(presetNo);
-	});
-};
+							}
+						)
+				})
+		});
+	};
 
 
-OSCdef(\presetCallback ).clear.free;
 
-OSCdef(\presetCallback, ~presetCallback, "/a.renderer/preset", recvPort: 18032);
+
+
+
+OSCdef(\balljamCallback ).clear.free;
+
+OSCdef(\balljamCallback, ~balljamProjectCallback, "/balljam", recvPort: 18032);
 
 
 
