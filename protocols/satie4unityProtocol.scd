@@ -42,10 +42,13 @@ for debugguing
 
 		~satieAuxBusCount = satie.aux.size;
 
-		// make sure this effcts group is defined since all  uri types "effect://name" are assigned to it
+
+
+/*		// make sure this effcts group is defined since all  uri types "effect://name" are assigned to it
 		if ( satie.satieGroups[\effect] == nil,
-			{~effectProx = satie.makeSatieGroup(\effect, \addToTail);}
-		);
+			{
+				satie.makeSatieGroup(\effect, \addToTail);}
+		);*/
 
 		~coreCallback = { arg msg;
 			var command;
@@ -90,7 +93,16 @@ for debugguing
 						// else
 						{
 							var groupName = msg[2];
-							e.createGroup(groupName);
+							var position = \addToHead;
+							var type;
+
+							if (msg.size == 4,
+								{
+									type = e.getUriType(msg[3].asString);
+									if (type == \effect, { position = \addToTail;});
+							});
+
+							e.createGroup(groupName, position);
 						}
 					)
 				},
@@ -1049,7 +1061,7 @@ for debugguing
 
 					postf("~createSource:   NAME: %   type :%  \n", sourceName, type);
 
-					if (  (type=="plugin")  ||  (type=="effect"),
+					if (  (type == \plugin)  ||  (type== \effect),
 						{
 							self.createSourceNode(sourceName.asSymbol, uriPath,groupName );
 						},
@@ -1171,15 +1183,53 @@ for debugguing
 
 			type = self.getUriType(uriString);
 
-			if (groupName == "", { groupName = \default; });   // make sure group name is ok
+			if (groupName == "", { groupName = \default; });   // play it safe: make sure group name is defined
 
-			// check to see if group  exists (even if the corresponding groupNode has not yet been instntiated),  if  not, create it
-			if ( satie.satieGroups[groupName.asSymbol] == nil,
+
+			if ( (type == \effect) &&  (groupName == \default), { groupName = \defalutFx;});
+
+
+			// check to see if group  exists,  if  not, create it
+			if (  e.allGroupNodes[groupName] == nil,
+				// satie.satieGroups[groupName.asSymbol] == nil,
 				{
 					postf("~createSource_groupcheck:   source:%    group:  % undefined,  CREATING GROUP NOW \n", sourceName, groupName);
-					self.createGroup(groupName.asSymbol);
-				}
-			);
+					if (type == \effect,
+						{
+							self.createGroup(groupName.asSymbol, \addToTail);
+						},
+						{
+							self.createGroup(groupName.asSymbol);
+					});
+			});
+
+			postf("~createSource_groupcheck:   source:%    type: % group:  %  \n", sourceName, type, groupName);
+
+
+			// check to make sure group type is kosher for effects
+				if (  self.allGroupNodes[groupName.asSymbol] != nil,
+				{
+					if (type == \effect,
+						{
+							if (  self.allGroupNodes[groupName.asSymbol].at(\position) != \tail,
+								{
+									error("createSourceNode: node "++sourceName++"'s group: "++groupName++" is not an effects group. Setting group to defaultFx group");
+									groupName = \defaultFx;
+							});
+					});
+						// else  fix it if its a plugin with an effects group
+					if (type == \plugin,
+						{
+							if (  self.allGroupNodes[groupName.asSymbol].at(\position) == \tail,
+								{
+									error("createSourceNode: node "++sourceName++"'s group: "++groupName++" is an effects group. Setting group to default group");
+									groupName = \default;
+							});
+					});
+
+
+			});
+
 
 			postf("~createSourceNode: %:  uri: %  group: %\n", sourceName, uriString, groupName);
 			self.allSourceNodes[sourceName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
@@ -1192,9 +1242,9 @@ for debugguing
 			// call  setSynth to complete instance creation
 			// note:  setSynth acts on URI
 
-			if ( ( (type != "plugin") &&  (type != "effect") ),
+			if ( ( (type != \plugin) &&  (type != \effect) ),
 				{
-					error("~createSourceNode: BUG FOUND IN CODE:   URL SHOULD BE OK" );
+					error("~createSourceNode: BUG FOUND IN CODE:   BAD URI  " );
 					self.setSynth(sourceName.asSymbol, \dummyPlugin);
 				},
 				// else  // path format ok, proceed
@@ -1206,7 +1256,15 @@ for debugguing
 
 		//~createGroup = { "createGroup called".warn;};
 		// returns group
-		~createGroup = { |self,  groupName |
+		~createGroup = { |self,  groupName, position=\addToHead|
+
+			var groupPos = \head;
+
+			if (position != \addToHead,
+				{
+					 groupPos = \tail;
+					position = \addToTail;
+				});
 
 			if (self.allGroupNodes.includesKey(groupName),
 				{
@@ -1223,19 +1281,20 @@ for debugguing
 						},
 						// else  group does not exist in SATIE,  create it
 						{
-							group = satie.makeSatieGroup(groupName.asSymbol);
+							group = satie.makeSatieGroup(groupName.asSymbol, position);
 							if ( groupName.asSymbol == \default,
 								{
 									postf("~createGroup:  BUG FOUND-- SHOULD NOT HAVE TO INSTANITATE DEFAULT GROUP !!!!");
 							});
 					});
 
-					postf("~createGroupNode:   % \n", groupName);
+					postf("~createGroupNode:   %   groupType: %\n", groupName, groupPos);
 					self.allGroupNodes[groupName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
 					self.allGroupNodes[groupName.asSymbol].put(\group , group);  // save group
 					self.allGroupNodes[groupName.asSymbol].put(\groupSym , groupName.asSymbol);  // save group name symbol
 					self.allGroupNodes[groupName.asSymbol].put(\members, List() );  // create dict for members
 					self.allGroupNodes[groupName.asSymbol].put(\plugin, \nil);
+					self.allGroupNodes[groupName.asSymbol].put(\position, groupPos);  //  indicates group DSP chain evaluation order  (head or tail)
 
 					//  set group
 					self.allGroupNodes[groupName.asSymbol].put(\group, group );
@@ -1259,7 +1318,7 @@ for debugguing
 			type = self.getUriType( uriPath );
 
 
-			//postf("~setSynth: node: %   uriStr: %  type: % \n",  nodeName, uriPath,   type);
+			postf("~setSynth: node: %   uriStr: %  group: %  type: % \n",  nodeName, uriPath,  groupName,  type);
 
 			//postf("~setSynth: node: %    NEW: %  CURRENT: % \n", nodeName, pluginName.asSymbol, self.allSourceNodes[nodeName.asSymbol].at(\plugin).asSymbol);
 
@@ -1282,11 +1341,12 @@ for debugguing
 					sourceNode.put(\plugin, validPluginName.asSymbol);
 
 
-					if ( ( (type == "effect") || (groupName == \effect) ),
+//					if ( ( (type == "effect") || (groupName == \effect) ),
+					if ( ( type == \effect) ,
 						{
 							inBus = self.getFxInBus(uriPath);
 							postf("~setSynth: assigning inBus: % to effects node % \n", satie.aux[inBus] , nodeName);
-							synth = satie.makeInstance(nodeName.asSymbol, validPluginName.asSymbol, \effect, [\in, satie.aux[inBus] ]);
+							synth = satie.makeInstance(nodeName.asSymbol, validPluginName.asSymbol, groupName.asSymbol, [\in, satie.aux[inBus] ]);
 						},
 						// else
 						{
@@ -1300,7 +1360,7 @@ for debugguing
 					//postf("~setSynth: ignoring set plugin % for node % : plugin already set \n", pluginName, nodeName);
 				}
 			);
-			//"setSynth called".inform;
+		//  "setSynth called".inform;
 
 		};
 
@@ -1578,7 +1638,7 @@ for debugguing
 
 			if (uriPath.asString.contains("://") == false,
 				{
-					if (uriPath.size > 0, {warn("~getUriType:  uri type format error: % ", uriPath);});
+					if (uriPath.size > 0, {warn("~getUriType:  uri type format error: "++uriPath++" \n");});
 				},
 
 				// else  // path ok, proceed
@@ -1589,7 +1649,7 @@ for debugguing
 					type = uriPath.asString.subStr(0, charIndex-1);
 					uriName = temp.asString.replace("://", "");
 			});
-			type;
+			type.asSymbol;
 		};
 
 		~getUriArgs = { |self, uriPath  |
@@ -1666,7 +1726,7 @@ for debugguing
 			var type = self.getUriType(uriString);
 
 			//uriString.postln;
-			if ( (type != "plugin") && (type != "effect"),
+			if ( (type != \plugin) && (type != \effect),
 				{
 					error("~checkUri:  node: %  bad URI: % , using default: plugin://dummyPlugin \n", nodeName, uriString);
 
@@ -1891,6 +1951,12 @@ for debugguing
 
 	// connect renderer oscMessage RX to handlers
 
+
+		e.createGroup(\default);   // creates satie4Unity group entry, instantiates group in satie if not already defined
+		e.createGroup(\defaultFx, \addToTail); // creates satie4Unity group entry, instantiates group in satie if not already defined
+
+
+
 	// scene
 	osc.deleteOSC(\satieScene);  // disconnect any previous handlers
 	osc.newOSC(\satieScene, e['coreCallback'], "/satie/scene");   // connect handler
@@ -1994,6 +2060,7 @@ for debugguing
 
 	e;
 };
+
 
 
 /*
