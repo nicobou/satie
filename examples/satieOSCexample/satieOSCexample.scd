@@ -22,9 +22,7 @@ o.numOutputBusChannels = 32;
 o.memSize = 2**20;
 o.blockSize = 2048;
 //s.reboot;
-s.makeGui;
-s.meter;
-s.plotTree;
+
 s.waitForBoot {
 	~rootSrcPath = thisProcess.nowExecutingPath.dirname ++ "/../..";
 	(~rootSrcPath ++ "/src/*.scd").pathMatch.do({arg item; item.loadPaths});
@@ -40,33 +38,31 @@ s.waitForBoot {
 	// here a PinkSin source spatialized by
 	//   - a stereo panner (starting channel 0)
 	//   - a monoSpat (starting channel 2)
-	~scbr.makeSynthDef(\fool, \PinkSin, [\octoVBAP, \monoSpat], [0, 2]);
+	~scbr.makeSynthDef(\fool, \PinkSin, [], [], [\octoVBAP, \monoSpat], [0, 2], \defaultMapper, []);
 
-	//~scbr.makeSynthDef(\string, \zkarpluck1, [\stereoPanner, \monoSpat], [0, 2]);
-	~scbr.makeSynthDef(\string, \zkarpluck1, [\stereoPanner], [0]);
-	~scbr.makeSynthDef(\pinksin, \PinkSin, [\quadVBAP], [0]);
+	~scbr.makeSynthDef(\string, \zkarpluck1, [], [], [\stereoVBAP_P], [0], \defaultMapper, []);
+	~scbr.makeSynthDef(\pinksin, \PinkSin, [], [], [\quadVBAP], [0], \defaultMapper, []);
 	// generate a synth and change its defaults
-	~scbr.makeSynthDef(\pink400, \PinkSin, [\stereoPanner], [0], [], [800]);
+	~scbr.makeSynthDef(\pink400, \PinkSin, [], [], [\stereoPanner], [0], \defaultMapper, [800]);
 
-	~scbr.makeSynthDef(\testtone, \testtone, [\domeVBAP], [0]);
+	~scbr.makeSynthDef(\testtone, \testtone, [], [], [\stereoPanner], [0], \defaultMapper, []);
 	// writing to all aux busses (first is starting a 0):
-	~scbr.makeSynthDef(\string_all_aux, \zkarpluck1, [\stereoPanner], [0], ~scbr.aux);
+	~scbr.makeSynthDef(\string_all_aux, \zkarpluck1, ~scbr.aux, [], [\stereoPanner], [0], \defaultMapper, []);
 	// writing to only to the third audio bus
-	~scbr.makeSynthDef(\string_third_aux, \zkarpluck1, [\stereoPanner], [0], [~scbr.aux[2]]);
+	~scbr.makeSynthDef(\string_third_aux, \zkarpluck1, [], [~scbr.aux[2]], [\stereoPanner], [0], \defaultMapper, []);
 	// spatilized reverb effect (input will be set at creation):
-	~scbr.makeSynthDef(\busreverb, \freeverb, [\stereoPanner], [0]);
+	~scbr.makeSynthDef(\busreverb, \freeverb, [], [], [\stereoVBAP_P], [0], \defaultMapper, []);
 	// mono input
-	~scbr.makeSynthDef(\monoIn, \MonoIn, [\stereoPanner], [0]);
-	~scbr.makeSynthDef(\tastee, \testee, [\domeVBAP, \stereoPanner], [0]);
-	~scbr.makeSynthDef(\drone, \misDrone, [\domeVBAP, \stereoPanner], [0]);
+	~scbr.makeSynthDef(\monoIn, \MonoIn, [], [], [\quadVBAP], [0], \defaultMapper, []);
+	~scbr.makeSynthDef(\tastee, \testee, [], [], [\quadVBAP], [0], \defaultMapper, []);
 	// streaming a soundfile from disk
 	// - load soundfiles
 	~playBuffers = Dictionary();
 	~playBuffers.add(\bleh -> Buffer.cueSoundFile(s, Platform.resourceDir +/+ "sounds/a11wlk01.wav", 0, 1));
 	~playBuffers.add(\alsaTest -> Buffer.cueSoundFile(s, "/usr/share/sounds/alsa/Front_Center.wav", 0, 1));
 	// create players
-	~scbr.makeSynthDef(\snd1, \sndFile, [\stereoPanner], [0], [], [~playBuffers[\bleh].bufnum]);
-	~scbr.makeSynthDef(\snd2, \sndFile, [\stereoPanner], [0], [], [~playBuffers[\alsaTest].bufnum]);
+	~scbr.makeSynthDef(\snd1, \sndFile, [], [], [\stereoPanner], [0], \defaultMapper, [~playBuffers[\bleh].bufnum]);
+	~scbr.makeSynthDef(\snd2, \sndFile, [], [], [\stereoPanner], [0], \defaultMapper, [~playBuffers[\alsaTest].bufnum]);
 	// be sure the synthDef is compiled on the server
 	~osc = ~satieOSCMaker.value(port: 18032);
 	~newOsc = ~satieOSCMaker.value(port: 18034);
@@ -76,7 +72,8 @@ s.waitForBoot {
 	~oscOne = ~satieOSCprotocol.value(~osc, ~scbr, oscID: \satieStandard);
 	~osc2 = ~satieOSCprotocol.value(~newOsc, ~scbr);
 	s.sync;
+	s.makeGui;
+	s.meter;
+	s.plotTree;
 };
 )
-
-~osc2.createSoundSource(\boo);
