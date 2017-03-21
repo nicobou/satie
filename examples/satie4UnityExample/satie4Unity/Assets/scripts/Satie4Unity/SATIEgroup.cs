@@ -51,12 +51,12 @@ public class SATIEgroup : SATIEnode {
 			//return false;
 		}
 
-		result = SATIEsetup.createGroup(nodeName);
-		if (!result)
-		{ 
-			Debug.LogError("SATIEgroup.start: failed to create group node, duplicate node tag (node name) ?");
-			return;
-		}
+//		result = SATIEsetup.createGroup(nodeName);
+//		if (!result)
+//		{ 
+//			Debug.LogError("SATIEgroup.start: failed to create group node, duplicate node tag (node name) ?");
+//			return;
+//		}
 
 		//nodeName = nodeName + "_sourceGroup";
 		

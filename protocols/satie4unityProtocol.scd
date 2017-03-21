@@ -878,64 +878,28 @@ for debugguing
 
 		//~groupCallback = { "groupCallback called".warn;};
 
-		// e.g  /satie/source/prop nodeName  key val
-		~groupNodeCallback = {
+		// e.g  /satie/source/add  nodeName  memberName
+		~groupAddDrop = {
 			| args |
 			var name, type, values, eventName, state;
 
 			name = args[1];
 			type = args[0].asString.split[3].asSymbol;
 
-			error("~groupNodeCallback:  DEPRICIATED CALLBACK  %\n", args);
+			error("satie4Unity.groupAddDrop: "++ args++"\n");
 
-			/*if ( e.debugFlag,
+			if ( e.debugFlag,
 				{
-					postf("~groupCallback:  arg1nodeName: %  type : %    argCount: %   args: %  \n", name, type, args.size,  args);
+					postf("satie4Unity.groupAddDrop::  arg1nodeName: %  type : %    argCount: %   args: %  \n", name, type, args.size,  args);
 			});
 
 			switch(type,
-				'prop',
-				{
-					error("~groupNodeCallback:  PROP MESSAGE CALLED BY:  %\n", name);
-					/*					if ( (args.size < 4 ) ,
-					{"~groupCallback.prop: message missing values".warn;},
-					// else
-					{
-					error("~groupCallback:  nodeName: %  setProp: %  key: % value: %\n", name, args[2], args[3]);
-					e.setGroupProperty(name, args[2], args[3]);
-					});*/
-
-				},
-				'uri',
-				{
-					//not implemented
-					// ~setUri.value(name, args[1])
-				},
-				'event',
-				{
-					//postf("~groupCallback:  nodeName: %  mesageType: %  size: % args: %\n", name, type, args.size, args);
-					if ( (args.size < 3 ) ,
-						{"groupCallback.event: osc message: missing values".warn; },
-						{  // else
-							values = args;
-							eventName = args[2];
-							values.removeAt(0);   // trim off oscAddr nodeName eventName
-							values.removeAt(0);
-							values.removeAt(0);
-							e.setGroupEvent(name, eventName, values);
-					});
-				},
-				'state',
-				{
-					// not implemented
-				},
 				'add',
 				{
 					if ( (args.size < 3 ) ,
-						{"groupCallback.add:  osc message: missing values".warn; },
+						{"satie4Unity.groupAddDrop.add:  osc message: missing values".warn; },
 						{
-							postf("~groupCallback.add:  nodeName: %  add member: %  \n", name, args[2]);
-
+							postf("~satie4Unity.groupAddDrop.add:  nodeName: %  add member: %  \n", name, args[2]);
 							e.addMember(name, args[2]);
 					});
 				},
@@ -944,28 +908,13 @@ for debugguing
 					if ( (args.size < 3 ) ,
 						{"groupCallback.drop:  osc message: missing values".warn; },
 						{
-							postf("~groupCallback.drop:  nodeName: %  add member: %  \n", name, args[2]);
-
+							postf("satie4Unity.groupAddDrop.drop:  nodeName: %  add member: %  \n", name, args[2]);
 							e.dropMember(name, args[2]);
 					});
-				},
-				{
-					postf("~groupCallback:  UNMATCHED:  nodeName: %  mesageType: %  size: % args: %\n", name, type, args.size, args);
-			});*/
+			});
 		};
 
 
-
-		// ~setState = { | self, nodeName,  value |
-		// 	var thisSynth = self.allSourceNodes[nodeName.asSymbol].at(\synth);
-		// 	var state;
-		//
-		// 	if ( value == 0 , { state = false}, {state = true});
-		//
-		// 	thisSynth.run(state);
-		//
-		// 	if (self.debugFlag, {postf("~setState: seting state of % to %\n", nodeName, state)});
-		// };
 
 		// handles /satie/nodetype/state  nodeName flag
 		~setStateHandler = { 	| args |

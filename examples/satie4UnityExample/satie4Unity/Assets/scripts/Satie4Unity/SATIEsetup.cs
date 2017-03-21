@@ -414,16 +414,15 @@ public class SATIEsetup : MonoBehaviour
         return result;
     }
 
-    public static bool createGroup(string nodeName)
+    public static bool createGroup(SATIEgroup group)
     {
         
         bool result;
         const string path = "/satie/scene";
-        //OSCMessage message = new OSCMessage(path);
         OscMessage creationMess = new OscMessage(path);
         creationMess.Add("createGroup");
-        creationMess.Add(nodeName);
-
+        creationMess.Add(group.nodeName);
+        creationMess.Add(group.uri);
         result = sendOSC(creationMess);
 
         return result;

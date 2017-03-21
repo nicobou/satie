@@ -1,3 +1,4 @@
+
 // called from project's  main.scd file
 
 //~s4u=nil;     // uncomment for debug
@@ -65,7 +66,7 @@ s.waitForBoot{
 	postf("generating example project synthdefs for % format \n", ~listeningFormat);
 	~scbr.makeSynthDef(\zparticle1, \zparticle1, [], [], [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\pink, \PinkSin, [], [],  [~listeningFormat], [0]);
-	~scbr.makeSynthDef(\dust, \DustDust,  [], [], [~listeningFormat], [0]);
+	~scbr.makeSynthDef(\dust, \DustDust,   [], [~scbr.aux[~inBus0]], [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\default, \default,  [], [], [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\zkarpluck0, \zkarpluck0,  [], [], [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\test, \testtone,   [], [], [~listeningFormat], [0]);

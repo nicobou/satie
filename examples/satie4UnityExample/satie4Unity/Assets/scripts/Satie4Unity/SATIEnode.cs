@@ -363,7 +363,7 @@ public class SATIEnode : MonoBehaviour
         }
         else if (nodeType == "group")
         {
-            // do nothing, this is done in the group class
+            result = SATIEsetup.createGroup((SATIEgroup)this);
         }
         else
         {
