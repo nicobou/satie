@@ -1,4 +1,4 @@
-#N canvas 624 105 1347 1057 16;
+#N canvas 1072 361 1347 1057 16;
 #X obj 17 10 cnv 15 800 500 empty empty display_RX_renderer_messages
 20 12 0 18 -262130 -66577 0;
 #X obj 650 813 OSCtx;

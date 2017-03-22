@@ -4,9 +4,7 @@
 // you can define any number of these process clases, each one, corresponding to a particular type of processing  behavoir you define
 
 
-
 // required:  set up class struct
-
 ~sheefa = Environment[
 	// required fields
 	'nodeName' -> \nil,
@@ -20,66 +18,45 @@
 	'elevDeg' -> 10,
 	'gainDB' -> -99,
 	'delayMs' -> 0,
-	'lpHz' -> 0.5,
-	'hpHz' -> 22040,
+	'lpHz' -> 15000,
+	'hpHz' -> 5,
+	'dist' -> 10,
 
 	// other stuff
 	// this project
 	'synth' -> \zparticle1,    // used for clones
 	'cloneCount' -> 20,
 	'triggerIntervalMs' -> 500,   // time interval, during which the clones will randomly trigger
+	'debugFlag' -> 1,
 ];
 
-// required: set these variables to the process name;
+
+
+// required: set these variables to the process name, and register process
 ~processName = \sheefa;
 ~process = ~sheefa;
-
-// regester this process with satie
+~process.know=true;
 ~procMan.registerProcessEnv(~processName, ~process);
 
 
-// define any custom "class"  variables, referenced by all "instants"  of "sheefa" class
+// optional custom global variables, that can be referenced by all "instants"  of "sheefa" class
 ~sheefa_pitchRoot = 60;
 
 
+// required functions
 
-
-// required
-~process.know=true;
-
-// required functions and state
-
-~sheefa.property =  {| self, property, value |
-	self.put(property.asSymbol, value);
-};
-
-// frees all clone synths
-~sheefa.freeClones = { | self |
-	//self.nodeGroup = nodeGroup;
-	//thisGroup = self.nodeGroup.group;
-
-	//postf("~sheefa.free:  freeing % synthVoices for group %\n",  self.cloneCount, self.nodeGroupName);
-
-	self.cloneCount.do( { arg item;
-		var nodename=(self.nodeName++"_"++item).asSymbol;
-		~procMan.satie.cleanInstance(nodename, self.nodeGroupName );
-	});
-};
-
-
-// required function,  but modified to suit project needs
-// generates N synths
+// required  setup function,  can be extended to suit particular needs of process
 ~sheefa.setup = { | self, nodeName, nodeGroupName |
 	var thisGroup = ~procMan.satie.satieGroups[nodeGroupName.asSymbol] ;
 
-	// generic
+	// required
 	self.nodeName = nodeName;
 	self.nodeGroupName = nodeGroupName;
 	self.nodeGroup = thisGroup;
-
-
 	// project-specific code after here
-	postf("~sheefa.setup:  generating % synthVoices for group %\n",  self.cloneCount, self.nodeGroupName);
+
+
+	if (self.debugFlag != 0, { postf("••sheefa.setup:  generating % synthVoices for group %\n",  self.cloneCount, self.nodeGroupName);});
 
 	// generate N  self.cloneCount  synths
 	self.cloneCount.do( { arg item;
@@ -88,16 +65,16 @@
 
 		synth = ~procMan.satie.makeInstance(nodename.asSymbol, self.synth.asSymbol, self.nodeGroupName);
 		// synth now created, so we can set its state
-		synth.set(\gainDB, -99);  // initialise to full attenuatuion
+		synth.set(\aziDeg, self.aziDeg, \eleDeg, self.elevDeg, \gainDB, self.gainDB , \delayMs, self.delayMs, \lpHz, self.lpHz, \hpHz, self.hpHz);
 		synth.set(\randTrigMaxMs, self.triggerIntervalMs);
 	});
 };
 
-
+// required  cleanup function,
 ~sheefa.cleanup = { | self |
 
 	// add code here to manage project-specific stuff
-	postf("~sheefa.clearSynths: clearing synths in node: % group \n", self.nodeName);
+	if (self.debugFlag != 0, {  postf("••sheefa.cleanup: clearing synths in node: % group \n", self.nodeName);});
 
 	self.cloneCount.do( { arg item;
 		var nodename=(self.nodeName++"_"++item).asSymbol;
@@ -107,16 +84,27 @@
 
 // end of required class functions
 
-// the functions below are not requied
-// however if defined, a given function will be called by satie4unity's   "set" message handler using the following scheme:
-//  FIX THIS   set key value  becomes a function call:     process[key]  process[functionName].value(process, prop.asSymbol, value);
+
+// Optional Override handlers
+
+// Below are optionally defined message handlers that, if defined, will be called by satie4Unity.
+// They override satie4Unity's corresponding generic handlers, that apply these messages to the processNodes group (or environment, in the case of the  'property' message
+// Satie4Unity provides an override mechanism for the following  messages, which are handled by the corresponding process functions as shown:
+
+//   /satie/process/update   processName   azi ele gdb del lpf dst    -->  handled by process[\update]
+//   /satie/process/property processName  key value  -->  handled by process[\property]
+//   /satie/process/state      processName  state      -->   hadled by  process[\state]
+//   /satie/process/set         processName  key value  -->  handled by process[key]
+//   /satie/process/set         processName  key value  -->  handled by process[\set]   (unless process[key] is defined)
+//  /satie/process/setvec     processName  key  val1 .... valN      -->   handled by process[key]
 
 
+// overrides satie4Unity's 'set' handler
+// called on the reception of the message:  'set' key value
+// NOTE:  if this process defines a handler for a particular key (e.g.  process[key] ), satie4Unity will instead call that particular handler with the value arg. - see  spread handler example  below
 
-// if defined, the function below will be called when node's "set" message is received
-//     otherwise satie4unity will send the  "set" message to the node's group
-// n.b   this method is called for each key value paire in a "set" message recived by satie4Unity
 ~sheefa.set =  {| self, property, value |
+	if (self.debugFlag != 0, { "••sheefa.setup".inform;});
 	// add conditional processing of key value pairs here
 	// write key value pair to synth
 			self.cloneCount.do( { arg item;
@@ -129,21 +117,40 @@
 	});
 };
 
+// overrides satie4Unity's property handler
+// called on the reception of the message:  'property' key value
+// otherwise, satie4Unity  will write the key value to this process's environment
 
-// if defined,this method will be called when node's "property" message is received
-// n.b   this method is called for each key value paire in a "property" message recived by satie4Unity
-~sheefa.setProperty =  {| self, property, value |
+~sheefa.property =  {| self, key, value |
+//	if (self.debugFlag != 0, {  postf("••sheefa.setProperty:  setting key vaue pair:  %:%   to process node's environment \n", key, value,  self.nodeName);});
+
 	// add conditional processing of key value pairs here
-	// write key value pair to process instance's environment
-	self.put(property.asSymbol, value);
+
+	if (key == \cloneCount,     // need to do some conditional processing for this particular key
+		{
+			if (self.debugFlag != 0, {  postf("••sheefa.setProperty:  processing key vaue pair:  %:%   to process node's environment \n", key, value,  self.nodeName);});
+
+			value = value.clip(0, 500);  // safety
+			if (self.cloneCount != value,
+			{
+				self.setCloneCount(value);
+			});
+	},
+	// else just write key value pair to process instance's environment
+	{
+			if (self.debugFlag != 0, {  postf("••sheefa.setProperty:  setting key vaue pair:  %:%   to process node's environment \n", key, value,  self.nodeName);});
+			self.put(key.asSymbol, value);
+	});
 };
 
 
-// If defined, the funciton below will be called when the node's "udate" message is received
-// otherwise satie4unity will send the  "update" message to the node's group
-~sheefa.updateConnection = { | self, aziDeg, eleDeg, gainDB, delayMs, lpHz |
+// overrides satie4Unity's update handler
+// called on the reception of the message:  'update' azi ele gain del lp dist
+// otherwise satie4unity will send the   'update'  message to the node's group
 
+~sheefa.setUpdate = { | self, aziDeg, eleDeg, gainDB, delayMs, lpHz, dist |
 	var 	thisGroup = self.nodeGroup; // ~allSourceNodes[self.nodeName.asSymbol].at(\proxy);
+	if (self.debugFlag != 0, {  postf("••sheefa.setUpdate: for process node \n", self.nodeName);});
 
 	// saving the connection state in case its needed
 	self.aziDeg = aziDeg;
@@ -152,33 +159,59 @@
 	self.delayMs = delayMs;
 	self.lpHz = lpHz;
 	self.hpHz = 0.5;  // to be added
+	self.dist = 0.5;  // to be added
 
-	//postf("sheefa.updateConnection: called for node: %    azi: %  \n", self.nodeName, aziDeg);
+	//postf("sheefa.update: called for node: %    azi: %  \n", self.nodeName, aziDeg);
 
 	// updating the connection of all this node's clones (via group message)
 	thisGroup.set(\aziDeg, self.aziDeg, \eleDeg, self.elevDeg, \gainDB, self.gainDB , \delayMs, self.delayMs, \lpHz, self.lpHz, \hpHz, self.hpHz);
 };
 
+// overrides satie4Unity's state function
+// called on the reception of the message:  'state'  value
+// otherwise satie4unity will send the  'state' message to the node's group
 
-// if defined, will be called when node's "spread" message is received
-// otherwise the "spread" message will be applided to the node's group
+~sheefa.state =  {| self, value |
+	if (self.debugFlag != 0, {  postf("••sheefa.state: setting state of process node %  clones to % \n", self.nodeName, value);});
+
+			self.cloneCount.do( { arg item;
+				var nodename=(self.nodeName++"_"++item).asSymbol;
+
+				// this is where we can calculate clone-specific actions before changing state
+	});
+	self.nodeGroup.run(value);   // change state for all synths in process's group
+};
+
+
+
+
+
+// Custom key-specific message handlers  can be defiend for  'set'  and 'setvec'  OSC messages
+//   If defined, satie4unity will call these handlers according to the 'key'  with corresponding arguments as shown:
+//   /satie/process/set nodeName key val    -->  hadled by  process[\key]   val
+//  /satie/process/setvec  nodeName key  val1 ... valN    -->   -->  hadled by  process[\key]  val1 ... valN
+//  for example:
+
+// called when the  'set' message is received with the key:  'spread'
 ~sheefa.spread = { | self, spreadVal |
 
 	var 	thisGroup = self.nodeGroup;
+
+		if (self.debugFlag != 0, {  postf("••sheefa.spread:  setting spread for each synth in node: % group \n", self.nodeName);});
+
 	// updating the spread param of all this node's clones (via group message)
 
 	thisGroup.set(\spread, spreadVal);
 };
 
-// totally custom functions.  Calls to these functions result from OSC events received by satie4unity from Unity, and then applied to these functions,  if they exist
-// this message is called via the following osc message:   /satie/process/event processName trigger pitch  vel incidence
 
-
+// handler that is called when the node's 'setvec' message is received with the key:  'trigger'
 ~sheefa.trigger = { arg self, items = #[1,2,3] ;
 	var thisGroup = self.nodeGroup;
 	var gain = self.gainDB;
 	var pitch,  vel, incidence;
 
+	if (self.debugFlag != 0, {  postf("••sheefa.trigger: clearing synths in node: % group \n", self.nodeName);});
 
 	if ( items.size != 3,
 		{
@@ -205,5 +238,29 @@
 			});
 	});
 };
+
+
+// Utility function that changes instance's  clone count
+ ~sheefa.setCloneCount = { | self, newCount |
+
+	// free existing
+	self.cloneCount.do( { arg item;
+		var nodename=(self.nodeName++"_"++item).asSymbol;
+		~procMan.satie.cleanInstance(nodename, self.nodeGroupName );
+	});
+
+	self.cloneCount = newCount;
+
+	// generate N  self.cloneCount  synths
+	self.cloneCount.do( { arg item;
+		var nodename=(self.nodeName++"_"++item).asSymbol;
+		var synth;
+
+		synth = ~procMan.satie.makeInstance(nodename.asSymbol, self.synth.asSymbol, self.nodeGroupName);
+		// synth now created, so we can set its state
+		synth.set(\aziDeg, self.aziDeg, \eleDeg, self.elevDeg, \gainDB, self.gainDB , \delayMs, self.delayMs, \lpHz, self.lpHz, \hpHz, self.hpHz);
+		synth.set(\randTrigMaxMs, self.triggerIntervalMs);
+	});
+ };
 
 

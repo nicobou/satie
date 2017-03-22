@@ -65,19 +65,6 @@ if (~particule1_pitchSequences == nil,
 
 // required functions
 
-~particule1.cleanup = { | self |
-
-	// add code here to manage project-specific stuff
-	postf("~particule1.clearSynths: clearing synths in node: % group \n", self.nodeName);
-
-	self.cloneCount.do( { arg item;
-		var nodename=(self.nodeName++"_"++item).asSymbol;
-		~procMan.satie.cleanInstance(nodename.asSymbol, self.nodeGroupName);
-	});
-	~particule1_instances.removeAt(self.nodeName);
-
-};
-
 
 // required function but adaptable to project specifics
 // generates N synths
@@ -108,6 +95,20 @@ if (~particule1_pitchSequences == nil,
 			});
 	});
 
+
+~particule1.cleanup = { | self |
+
+	// add code here to manage project-specific stuff
+	postf("~particule1.clearSynths: clearing synths in node: % group \n", self.nodeName);
+
+	self.cloneCount.do( { arg item;
+		var nodename=(self.nodeName++"_"++item).asSymbol;
+		~procMan.satie.cleanInstance(nodename.asSymbol, self.nodeGroupName);
+	});
+	~particule1_instances.removeAt(self.nodeName);
+
+};
+
 	// now generate   self.cloneCount  synths in advance
 	//  when the state problem is fixed, this can be done in the context of trigger, and synths can destroy  themselves after sounding
 	self.cloneCount.do( { arg item;
@@ -125,7 +126,7 @@ if (~particule1_pitchSequences == nil,
 // end of required class functions
 
 
-// Below are optionally defined message handlers that can be called by satie4Unity, to override satie4Unity's corresponding generic handlers.
+// Below are optionally defined message handlers that, if defined, will be called by satie4Unity. They override satie4Unity's corresponding generic handlers.
 // Satie4Unity provides the override mechanism for the following  messages, which are handled by the corresponding process functions as shown:
 
 //   /satie/process/update      -->  handled by process[\update]
@@ -134,15 +135,8 @@ if (~particule1_pitchSequences == nil,
 //   /satie/process/state        -->   hadled by  process[\state]
 
 
-
 // Custom message handlers can also be defiend for any setvec messages, as shown below
 //  /satie/process/setvec  myHandlerName  atom1 .... atomN      -->   process[\myEvent]
-
-
-
-
-
-
 
 
 
@@ -206,7 +200,7 @@ if (~particule1_pitchSequences == nil,
 // overrides satie4Unity's update function
 // if defined, will be called when node's "update" message is received
 // otherwise satie4unity will send the  "update" message to the node's group
-~particule1.update = { | self, aziDeg, eleDeg, gainDB, delayMs, lpHz, distance |
+~particule1.setUpdate = { | self, aziDeg, eleDeg, gainDB, delayMs, lpHz, distance |
 
 	var 	thisGroup = self.nodeGroup; // ~allSourceNodes[self.nodeName.asSymbol].at(\proxy);
 	var xzDist = distance * eleDeg.degrad.cos;  // get (horizontal) distance of node to listener on XZ plane

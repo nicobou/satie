@@ -39,16 +39,8 @@ for debugguing
 		//		~projectDirectory = nil;
 
 		~debugFlag=false;
-
 		~satieAuxBusCount = satie.aux.size;
 
-
-
-/*		// make sure this effcts group is defined since all  uri types "effect://name" are assigned to it
-		if ( satie.satieGroups[\effect] == nil,
-			{
-				satie.makeSatieGroup(\effect, \addToTail);}
-		);*/
 
 		~coreCallback = { arg msg;
 			var command;
@@ -158,35 +150,6 @@ for debugguing
 			);
 			//"coreCallback called".postln;
 		};
-
-		/*		// accepts arbitrary key value pairs and applies them to the named source node
-		~setMessageHandler = { 	| args |
-		var nodeName  = args[1];
-		var props = args.copyRange(2, args.size - 1);
-		var thisSynth;
-
-		if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == false,
-		{
-		error("satie4UnityProtocol.sourceSetHandler:  source node: "++nodeName++"  is undefined \n");
-		}, // else node exists,  process event
-		{
-		if (  (  ( (props.size&1)==1) || (props.size == 0) ),
-		{
-		error("satie4UnityProtocol.sourceSetHandler: BAD ARGS: "++props);
-		}, // else args good
-		{
-		thisSynth = e.allSourceNodes[nodeName.asSymbol].at(\synth);
-		if ( thisSynth == nil,
-		{
-		error("satie4UnityProtocol.sourceSetHandler:  source node: "++nodeName++"  BUG FOUND: undefined SYNTH  \n");
-
-		},   // else good to go
-		{
-		e.nodeSet( props, thisSynth);
-		});
-		});
-		});
-		};*/
 
 		// accepts arbitrary key value pairs and applies them to the named group node
 		~setMessageHandler = { 	| args |
@@ -377,11 +340,12 @@ for debugguing
 		// accepts arbitrary key value pairs and applies them to the named target node (source or group)
 		~processSet = { | self, propsVec, process, group  |
 			var value;
-			var functionName = nil;
+			var keyHandler = nil;
+			var setHandler = nil;
 
-			propsVec.pairsDo({ | prop, val |
+			propsVec.pairsDo({ | key, val |
 				var defaultFlag=true;
-				switch(prop,
+				switch(key,
 					'hpHz',
 					{
 						var halfSrate = 0.5 * s.sampleRate;
@@ -399,7 +363,7 @@ for debugguing
 						value = satie.aux[val.asInt];  // set the aux bus for the synthdef
 						defaultFlag = false;
 				});
-				// else just set the prop val pair
+				// else just set the key val pair
 				if (defaultFlag,
 					{
 						value = val;
@@ -408,27 +372,28 @@ for debugguing
 				// Now handle the keyword value pair
 				// Check to see if there is a custom handler defined in the process's environment
 
-				if ( process[prop.asSymbol].class == Function,   // let's see if a function named prop.asSymbol is defined.
+				if ( process[key.asSymbol].class == Function,   // check  if a handler named key.asSymbol is defined.
 					{
-						functionName = process[prop.asSymbol];   // yes, get the function
+						keyHandler = process[key.asSymbol];   // yes, get the function
 					},
 					{
-						// else  nope:  no function with that name exists.  Check to see if there's a set message handler
+						// else  nope:  no handler with that name exists.  Check  if a handler named key.asSymbol is defined.
 						if ( process[\set].class == Function,
-							{ functionName = process[\set]; });    // yes, use the process's set  function
+							{ setHandler = process[\set]; });    // yes, use the process's 'set'  handler
 				});
 
-				// if the process has no defined function with the name prop,   set the  prop value  pair in the group's synth
-				if ( functionName == nil,
+				// if the process has no defined handler for the key or for 'set',   set the  key value  pair in the group's synth
+				if (  (setHandler == nil) && (keyHandler == nil),
 					{
 						//postf("~processSet:  setting keyword value pair for node's synth group  %\n", process.nodeGroupName);
-						group.set(prop.asSymbol, value);
+						group.set(key.asSymbol, value);
 					},
-					// else call a custom handler with args: prop value
+					// else call the custom handler
 					{
-						//postf("~processSet:  calling process[%]  (or process[\set] )  with  keyword:%   value:% pair for node  %\n", prop, prop, value, process.nodeName);
+						//postf("~processSet:  calling process[%]  (or process[\set] )  with  keyword:%   value:% pair for node  %\n", key, key, value, process.nodeName);
 
-						functionName.value(process, prop.asSymbol, value);
+						if ( setHandler != nil, { setHandler.value(process, key.asSymbol, value);});    // call 'set' handler with args: key value
+						if ( keyHandler != nil, { keyHandler.value(process, value);});  // call  key handler with arg:   value
 				});
 			});
 		};
@@ -460,21 +425,21 @@ for debugguing
 								},
 								{  // good to go:  write key val pairs to process environment instance
 
-									var function= nil;
+									var handler= nil;
 
 									// postf("satie4UnityProtocol.processProperty:  process node: "++nodeName++" process: % \n", myProcess.class);
 
 
 									if (myProcess[\property].class == Function,
 										{
-											function = myProcess[\property];
+											handler = myProcess[\property];
 									});
 
 									propsVec.pairsDo({ | prop, val |
 
-										if (function != nil,
+										if (handler != nil,
 											{
-												function.value(myProcess, prop, val);
+												handler.value(myProcess, prop, val);
 											}, // else set the process's environment variable directly
 											{
 												myProcess[prop.asSymbol] = val;
@@ -489,7 +454,7 @@ for debugguing
 		};
 
 
-		// osc rx   ARGS:  sourceName azimuthRADIANS elevationRADIANS gainDB delayMS  lpHZ  distanceMETERS
+		// osc rx   ARGS:  sourceName azimuthDegrees elevationDegrees gainDB delayMS  lpHZ  distanceMETERS
 		~sourceUpdateHandler = { 	| args |
 			var nodeName  = args[1];
 			var aziDeg, eleDeg, gainDB, delayMs, lpHz, distance;
@@ -511,8 +476,8 @@ for debugguing
 						// else
 						{
 							// get values from vector, and write to connectionState
-							aziDeg = args[2].raddeg;
-							eleDeg= args[3].raddeg;
+							aziDeg = args[2];
+							eleDeg= args[3];
 							gainDB = args[4];
 							delayMs = args[5];
 							lpHz = args[6];
@@ -591,7 +556,7 @@ for debugguing
 		};
 
 
-		// osc rx   ARGS:  processName azimuthRADIANS elevationRADIANS gainDB delayMS  lpHZ  distanceMETERS
+		// osc rx   ARGS:  sourceName azimuthDegrees elevationDegrees gainDB delayMS  lpHZ  distanceMETERS
 		~processUpdateHandler = { 	| args |
 			var nodeName  = args[1];
 			var aziDeg, eleDeg, gainDB, delayMs, lpHz, hpHz, spread, distance;
@@ -619,14 +584,14 @@ for debugguing
 						// else
 						{
 							// get values from vector, and write to connectionState
-							aziDeg = args[2].raddeg;
-							eleDeg= args[3].raddeg;
+							aziDeg = args[2];
+							eleDeg= args[3];
 							gainDB = args[4];
 							delayMs = args[5];
 							lpHz = args[6];
 							distance = args[7];  // not used by basic spatializers
 
-							if (myProcess[\update] == nil,
+							if (myProcess[\setUpdate] == nil,
 								{
 									//postf("~connectionProcessCallback:  setting update for nodes group %\n", connectionName);
 									// distance not used by standard spatializers
@@ -636,7 +601,7 @@ for debugguing
 								{
 									// postf("~connectionProcessCallback:  calling custom update handler for %\n", connectionName);
 									// distance used by custom process functions
-									myProcess[\update].value(myProcess, aziDeg, eleDeg, gainDB, delayMs, lpHz, distance);
+									myProcess[\setUpdate].value(myProcess, aziDeg, eleDeg, gainDB, delayMs, lpHz, distance);
 							});
 					});
 			});
@@ -879,7 +844,7 @@ for debugguing
 		//~groupCallback = { "groupCallback called".warn;};
 
 		// e.g  /satie/source/add  nodeName  memberName
-		~groupAddDrop = {
+/*		~groupAddDrop = {
 			| args |
 			var name, type, values, eventName, state;
 
@@ -912,7 +877,7 @@ for debugguing
 							e.dropMember(name, args[2]);
 					});
 			});
-		};
+		};*/
 
 
 
@@ -1034,7 +999,7 @@ for debugguing
 					var type;
 					type = self.getUriType(uriPath);
 
-					if ( type == "process",  {
+					if ( type == \process,  {
 						self.createSourceProcess(sourceName.asSymbol, uriPath,groupName );
 					},
 					// else
@@ -1241,7 +1206,7 @@ for debugguing
 					self.allGroupNodes[groupName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
 					self.allGroupNodes[groupName.asSymbol].put(\group , group);  // save group
 					self.allGroupNodes[groupName.asSymbol].put(\groupSym , groupName.asSymbol);  // save group name symbol
-					self.allGroupNodes[groupName.asSymbol].put(\members, List() );  // create dict for members
+					//self.allGroupNodes[groupName.asSymbol].put(\members, List() );  // create dict for members
 					self.allGroupNodes[groupName.asSymbol].put(\plugin, \nil);
 					self.allGroupNodes[groupName.asSymbol].put(\position, groupPos);  //  indicates group DSP chain evaluation order  (head or tail)
 
@@ -1393,49 +1358,49 @@ for debugguing
 			});
 		};
 
-		//~addMember = { "addMember called".warn;};
-		~addMember = { | self,  groupName, nodeName |
-			var memberList = self.allGroupNodes[groupName].at(\members);
-			var group = self.allGroupNodes[groupName].at(\group).group;
-			//
-
-
-			// check to see if member is already in group
-
-			// if not add it
-			// satie.changeGroup(groupName, nodeName);   // assign source node to group's proxySpace
-			//  self.allSourceNodes[nodeName.asSymbol].put(\group, groupProxy);
-			memberList.add(nodeName.asSymbol);
-
-
-			postf("~addMember: group % adding member %\n", groupName, nodeName);
-			// ~groupCopyState(groupName, nodeName);
-		};
-
-
-		//~dropMember = { "dropMember called".warn;};
-
-		~dropMember = { |self  groupName, memberName |
-			var memberList = self.allGroupNodes[groupName].at(\members);
-			var memberNameSym = memberName.asSymbol;
-			var index = -1 ;
-
-			memberList.do({ arg item, i;
-				if ( item == memberNameSym,
-					{ index = i });
-
-			});
-			if (index > -1,
-				{
-					memberList.removeAt(index);
-					memberList.postln;
-					postf("~~dropMember: group % dropping member %\n", groupName, memberName);
-				},
-				// else
-				{
-					postf("~dropMember: group % member % not found \n", groupName, memberName);
-			});
-		};
+		// //~addMember = { "addMember called".warn;};
+		// ~addMember = { | self,  groupName, nodeName |
+		// 	var memberList = self.allGroupNodes[groupName].at(\members);
+		// 	var group = self.allGroupNodes[groupName].at(\group).group;
+		// 	//
+		//
+		//
+		// 	// check to see if member is already in group
+		//
+		// 	// if not add it
+		// 	// satie.changeGroup(groupName, nodeName);   // assign source node to group's proxySpace
+		// 	//  self.allSourceNodes[nodeName.asSymbol].put(\group, groupProxy);
+		// 	memberList.add(nodeName.asSymbol);
+		//
+		//
+		// 	postf("~addMember: group % adding member %\n", groupName, nodeName);
+		// 	// ~groupCopyState(groupName, nodeName);
+		// };
+		//
+		//
+		// //~dropMember = { "dropMember called".warn;};
+		//
+		// ~dropMember = { |self  groupName, memberName |
+		// 	var memberList = self.allGroupNodes[groupName].at(\members);
+		// 	var memberNameSym = memberName.asSymbol;
+		// 	var index = -1 ;
+		//
+		// 	memberList.do({ arg item, i;
+		// 		if ( item == memberNameSym,
+		// 		{ index = i });
+		//
+		// 	});
+		// 	if (index > -1,
+		// 		{
+		// 			memberList.removeAt(index);
+		// 			memberList.postln;
+		// 			postf("~~dropMember: group % dropping member %\n", groupName, memberName);
+		// 		},
+		// 		// else
+		// 		{
+		// 			postf("~dropMember: group % member % not found \n", groupName, memberName);
+		// 	});
+		// };
 
 		~clearScene = {  | self |
 			var nodelist = self.allSourceNodes.keys;
@@ -1484,7 +1449,7 @@ for debugguing
 					self.allGroupNodes.removeAt(groupName.asSymbol);     // remove node from global dictionary
 			});
 		};
-		~clearGroupeNode = { | self, nameSym |
+/*		~clearGroupeNode = { | self, nameSym |
 			var node = self.allGroupNodes[nameSym];
 			//var connectionName = node.at(\connectionName);
 			var nodeKeys = node.keys;
@@ -1509,7 +1474,7 @@ for debugguing
 				postf("removing node keys:  node: %   key %  \n",  nameSym, key);
 				node.removeAt(key);
 			};
-		};
+		};*/
 
 		~clearSourceNode = {  | self, nameSym |
 			var node = self.allSourceNodes[nameSym];
@@ -1709,24 +1674,24 @@ for debugguing
 			};
 		};
 
-		~dumpGroups = { 	| self |
-
-			postf("~dumpGroups: %  groups defined via OSCrx: \n", self.allGroupNodes.size);
-			self.allGroupNodes.keysDo { |key |
-				var nodeSym = key;
-				var memberList = self.allGroupNodes[nodeSym].at(\members);
-
-				postf("Group node: %  members: \n", nodeSym);
-				memberList.do { | key |
-					postf("\t : %  \n",  key);
-				};
-
-				postf("node: %  \n", key);
-				self.allGroupNodes[nodeSym].keysDo { | key |
-					postf("\t : %  =  % \n",  key, self.allGroupNodes[nodeSym].at(key));
-				};
-			};
-		};
+		// ~dumpGroups = { 	| self |
+		//
+		// 	postf("~dumpGroups: %  groups defined via OSCrx: \n", self.allGroupNodes.size);
+		// 	self.allGroupNodes.keysDo { |key |
+		// 		var nodeSym = key;
+		// 		var memberList = self.allGroupNodes[nodeSym].at(\members);
+		//
+		// 		postf("Group node: %  members: \n", nodeSym);
+		// 		memberList.do { | key |
+		// 			postf("\t : %  \n",  key);
+		// 		};
+		//
+		// 		postf("node: %  \n", key);
+		// 		self.allGroupNodes[nodeSym].keysDo { | key |
+		// 			postf("\t : %  =  % \n",  key, self.allGroupNodes[nodeSym].at(key));
+		// 		};
+		// 	};
+		// };
 
 		// DEPRICATED
 		~globalSetState = { "globalSetState has been depricated".warn;};
@@ -1953,12 +1918,7 @@ for debugguing
 	osc.deleteOSC(\updateBlobHandlerProcess);  // disconnect any previous handlers
 	osc.newOSC(\updateBlobHandlerProcess, e['blobUpdateHandler'],  "/satie/process/ublob");   // connect handler
 
-	// groups
-	osc.deleteOSC(\satieGroupAdd);  // disconnect any previous handlers
-	osc.newOSC(\satieGroupAdd, e['groupNodeCallback'], "/satie/group/add");   // connect handler
 
-	osc.deleteOSC(\satieGroupDrop);  // disconnect any previous handlers
-	osc.newOSC(\satieGroupDrop, e['groupNodeCallback'], "/satie/group/drop");   // connect handler
 
 	// processes
 	osc.deleteOSC(\satieProcessProperty);  // disconnect any previous handlers
@@ -1986,12 +1946,18 @@ for debugguing
 
 
 	// groups
-	osc.deleteOSC(\satieGroupProp);  // disconnect any previous handlers
+/*	osc.deleteOSC(\satieGroupProp);  // disconnect any previous handlers
 	osc.newOSC(\satieGroupProp, e['groupNodeCallback'], "/satie/group/prop");   // connect handler
 
 	osc.deleteOSC(\satieGroupEvent);  // disconnect any previous handlers
 	osc.newOSC(\satieGroupEvent, e['groupNodeCallback'], "/satie/group/event");   // connect handler
 
+	osc.deleteOSC(\satieGroupAdd);  // disconnect any previous handlers
+	osc.newOSC(\satieGroupAdd, e['groupNodeCallback'], "/satie/group/add");   // connect handler
+
+	osc.deleteOSC(\satieGroupDrop);  // disconnect any previous handlers
+	osc.newOSC(\satieGroupDrop, e['groupNodeCallback'], "/satie/group/drop");   // connect handler
+	*/
 
 	// processes
 	osc.deleteOSC(\satieProcessProp);  // disconnect any previous handlers

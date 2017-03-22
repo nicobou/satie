@@ -97,29 +97,33 @@ public class SATIEgroup : SATIEnode {
 	
     public void dropMember (SATIEsource source)
 	{
-        string path = "/satie/group/drop";
-
-        List<object> items = new List<object>();
+//        string path = "/satie/group/drop";
+//
+//        List<object> items = new List<object>();
 
         members.Remove(source.name);
 
-        items.Add(source.name);                
-        SATIEsetup.OSCtx(path, items);
-        items.Clear();
+        // no more group messages to server
+//        items.Add(source.name);                
+//        SATIEsetup.OSCtx(path, items);
+//        items.Clear();
 	}
 
 
 	public void addMember (SATIEsource source )
 	{
-        string path = "/satie/group/add";
-        List<object> items = new List<object>();
-
-        source.group = name;
+//        string path = "/satie/group/add";
+//        List<object> items = new List<object>();
+//
+//        source.group = name;
 		members.Add (source.name);
-        items.Add(source.name);   
 
-        SATIEsetup.OSCtx(path, items);
-        items.Clear(); 
+
+        // no more group messages to server
+//        items.Add(source.name);   
+//
+//        SATIEsetup.OSCtx(path, items);
+//        items.Clear(); 
 	}
 
     public override void  setNodeActive(string nodeName, bool nodeEnabled)

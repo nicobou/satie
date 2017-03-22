@@ -550,8 +550,8 @@ public class SATIEsource : SATIEnode {
 
         // get distance and angles of source relative to listener
         listenerAED = getAedFromSink(source.position, listener);
-        azimuth = listenerAED.x;
-        elevation = listenerAED.y;
+        azimuth = Mathf.Rad2Deg * listenerAED.x;
+        elevation = Mathf.Rad2Deg * listenerAED.y;
         distance = listenerAED.z;
         //dist2Dxz = getDist2Dxz(source,listener);   // not used
 
@@ -826,8 +826,8 @@ public class SATIEsource : SATIEnode {
     // distanceM (2 bytes : unsigned 16bits:  distanceMeters *100 )
     void sendUpdateOSCblob(string path, string nodeName, float azimuthRad, float elevationRad,  float gainDB,  float vdelMs,  float lpHz,  float distance) 
     {
-        float azimuth = azimuthRad * Mathf.Rad2Deg;
-        float elevation = elevationRad * Mathf.Rad2Deg;
+        float azimuth = azimuthRad;
+        float elevation = elevationRad;
 
         byte[] blobArray = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
 
@@ -936,8 +936,8 @@ public class SATIEsource : SATIEnode {
 
         // get distance and angles of source relative to listener
         listenerAED = getAedFromSink(particleXYZ, listener);
-        azimuth = listenerAED.x;
-        elevation = listenerAED.y;
+        azimuth = Mathf.Rad2Deg * listenerAED.x;
+        elevation = Mathf.Rad2Deg * listenerAED.y;
         distance = listenerAED.z;
 
         //For the gain and vdel calculation, we want the distance to the radius:
