@@ -36,9 +36,6 @@
 /satie/<nodeType>/update nodeName azimuthDegrees elevationDegrees gainDB delayMS  lpHZ  distanceMETERS
 /satie/<nodeType>/ublob nodeName byte1 ... byte12     // for update blob: packed encoded update message  (some loss)
 
-// only for nodeType: groups
-/satie/group/add groupName sourceName    
-/satie/group/drop groupName sourceName   
 
 // only for noteType: process
 /satie/process/property processName key value   // to update a process environment property       
