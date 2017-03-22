@@ -6,6 +6,24 @@
 
 
 
+[(50+30.rand), (0.5+0.5.rand), (0.5+0.5.rand)]
+
+
+x = ~s4u.allSourceNodes.at(\sheefaProcess).at(\process);
+x.debug
+
+
+x.trigger( [(50+30.rand), (0.5+0.5.rand), (0.5+0.5.rand)]);
+
+x.routine.reset;
+x.routine.value(x);
+x.routine.play;
+x.routine.stop;
+x.routine.next
+x.routine.class.dumpMethodList
+
+
+
 
 ~myNodeName = \srcNode_0;
 ~myNode = ~s4u.allSourceNodes[~myNodeName.asSymbol];

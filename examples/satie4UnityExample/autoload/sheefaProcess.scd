@@ -55,6 +55,7 @@
 	self.nodeGroup = thisGroup;
 	// project-specific code after here
 
+	//	~sheefa.routine.value(self);
 
 	if (self.debugFlag != 0, { postf("••sheefa.setup:  generating % synthVoices for group %\n",  self.cloneCount, self.nodeGroupName);});
 
@@ -75,6 +76,8 @@
 
 	// add code here to manage project-specific stuff
 	if (self.debugFlag != 0, {  postf("••sheefa.cleanup: clearing synths in node: % group \n", self.nodeName);});
+
+	self.routine.stop;
 
 	self.cloneCount.do( { arg item;
 		var nodename=(self.nodeName++"_"++item).asSymbol;
@@ -107,13 +110,13 @@
 	if (self.debugFlag != 0, { "••sheefa.setup".inform;});
 	// add conditional processing of key value pairs here
 	// write key value pair to synth
-			self.cloneCount.do( { arg item;
-				var nodename=(self.nodeName++"_"++item).asSymbol;
+	self.cloneCount.do( { arg item;
+		var nodename=(self.nodeName++"_"++item).asSymbol;
 
-				// this is where we can calculate clone-specific parameters
-				// value = value *  item;
+		// this is where we can calculate clone-specific parameters
+		// value = value *  item;
 
-				~procMan.satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(property.asSymbol,value);
+		~procMan.satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(property.asSymbol,value);
 	});
 };
 
@@ -122,9 +125,15 @@
 // otherwise, satie4Unity  will write the key value to this process's environment
 
 ~sheefa.property =  {| self, key, value |
-//	if (self.debugFlag != 0, {  postf("••sheefa.setProperty:  setting key vaue pair:  %:%   to process node's environment \n", key, value,  self.nodeName);});
+	//	if (self.debugFlag != 0, {  postf("••sheefa.setProperty:  setting key vaue pair:  %:%   to process node's environment \n", key, value,  self.nodeName);});
 
 	// add conditional processing of key value pairs here
+
+
+	if (key == \triggerIntervalMs,  // safety
+		{
+			value = value.clip(100, 100000);
+	});
 
 	if (key == \cloneCount,     // need to do some conditional processing for this particular key
 		{
@@ -132,12 +141,12 @@
 
 			value = value.clip(0, 500);  // safety
 			if (self.cloneCount != value,
-			{
-				self.setCloneCount(value);
+				{
+					self.setCloneCount(value);
 			});
-	},
-	// else just write key value pair to process instance's environment
-	{
+		},
+		// else just write key value pair to process instance's environment
+		{
 			if (self.debugFlag != 0, {  postf("••sheefa.setProperty:  setting key vaue pair:  %:%   to process node's environment \n", key, value,  self.nodeName);});
 			self.put(key.asSymbol, value);
 	});
@@ -174,16 +183,13 @@
 ~sheefa.state =  {| self, value |
 	if (self.debugFlag != 0, {  postf("••sheefa.state: setting state of process node %  clones to % \n", self.nodeName, value);});
 
-			self.cloneCount.do( { arg item;
-				var nodename=(self.nodeName++"_"++item).asSymbol;
+	self.cloneCount.do( { arg item;
+		var nodename=(self.nodeName++"_"++item).asSymbol;
 
-				// this is where we can calculate clone-specific actions before changing state
+		// this is where we can calculate clone-specific actions before changing state
 	});
 	self.nodeGroup.run(value);   // change state for all synths in process's group
 };
-
-
-
 
 
 // Custom key-specific message handlers  can be defiend for  'set'  and 'setvec'  OSC messages
@@ -197,7 +203,7 @@
 
 	var 	thisGroup = self.nodeGroup;
 
-		if (self.debugFlag != 0, {  postf("••sheefa.spread:  setting spread for each synth in node: % group \n", self.nodeName);});
+	if (self.debugFlag != 0, {  postf("••sheefa.spread:  setting spread for each synth in node: % group \n", self.nodeName);});
 
 	// updating the spread param of all this node's clones (via group message)
 
@@ -211,7 +217,7 @@
 	var gain = self.gainDB;
 	var pitch,  vel, incidence;
 
-	if (self.debugFlag != 0, {  postf("••sheefa.trigger: clearing synths in node: % group \n", self.nodeName);});
+	if (self.debugFlag != 0, {  postf("••sheefa.trigger: triggering % clones of node: %  \n", self.cloneCount, self.nodeName);});
 
 	if ( items.size != 3,
 		{
@@ -231,17 +237,40 @@
 
 				// this is where we cn calculate clone-specific parameters
 				var clone_pitch = pitch + item;
-
-				~procMan.satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(\note, [ pitch, vel, incidence ] );
-
-				~procMan.satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(\t_trig, 1);
+				var synth =  ~procMan.satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ];
+				synth.set(\aziDeg, 360.rand, \eleDeg, 360.rand);
+				synth.set(\note, [ pitch, vel, incidence ] );
+				synth.set(\t_trig, 1);
 			});
+	});
+};
+
+// this routine
+~sheefa.routine = Routine { arg self;
+	    loop {
+		if (self.debugFlag != 0, {   postf("••sheefa.routine triggering %  clones \n",  self.cloneCount ); });
+		self.trigger( [(50+30.rand), (0.5+0.5.rand), (0.5+0.5.rand)]);
+		        ( self.triggerIntervalMs * 0.001 ).yield;  // loop time
+	    }
+};
+
+// called by  /satie/process/set nodeName 'player' value
+~sheefa.player = { | self, state |
+	if (state == 0,
+		{
+			self.routine.stop;
+		},
+		// else
+		{
+			self.routine.reset;
+			self.routine.value(self);
+			self.routine.play;
 	});
 };
 
 
 // Utility function that changes instance's  clone count
- ~sheefa.setCloneCount = { | self, newCount |
+~sheefa.setCloneCount = { | self, newCount |
 
 	// free existing
 	self.cloneCount.do( { arg item;
@@ -261,6 +290,6 @@
 		synth.set(\aziDeg, self.aziDeg, \eleDeg, self.elevDeg, \gainDB, self.gainDB , \delayMs, self.delayMs, \lpHz, self.lpHz, \hpHz, self.hpHz);
 		synth.set(\randTrigMaxMs, self.triggerIntervalMs);
 	});
- };
+};
 
 
