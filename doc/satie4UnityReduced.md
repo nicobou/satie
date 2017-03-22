@@ -33,7 +33,7 @@
 /satie/<nodeType>/setvec nodeName key val1 .....  valN
 
 // only for nodeTypes: source and process
-/satie/<nodeType>/update nodeName azimuthRADIANS elevationRADIANS gainDB delayMS  lpHZ  distanceMETERS
+/satie/<nodeType>/update nodeName azimuthDegrees elevationDegrees gainDB delayMS  lpHZ  distanceMETERS
 /satie/<nodeType>/ublob nodeName byte1 ... byte12     // for update blob: packed encoded update message  (some loss)
 
 // only for nodeType: groups
@@ -47,8 +47,8 @@
 
 // ublob message structure 
 // byte order
-// azi (1 byte:  unsigned 8bits: posivite wrapped angles 0 : 179 --> 0 : 127,  and -180 : -1 -->  128 : 255
-// elev ( same as above )
+// aziDeg (1 byte:  unsigned 8bits: posivite wrapped angles 0 : 179 --> 0 : 127,  and -180 : -1 -->  128 : 255
+// elevDeg ( same as above )
 // gain (4 bytes:  unsigned 32bits:  amplitude * 100000)
 // delay (2 bytes : unsigned 16bits:  delayMs * 10 )
 // lpHz (2 bytes) : unsigned 16bits: 
