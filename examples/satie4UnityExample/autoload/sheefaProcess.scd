@@ -1,7 +1,16 @@
-// USES GLOBAL VARIABLES:   ~procMan and  ~thisProjectResourcePath
+// USES GLOBAL VARIABLES:   ~procMan <required> and  ~thisProjectResourcePath <optional>
 
 // this file defines  a process class, which is ONLY used by source nodes that have that have a URI of type:   "process" , e.g:      uri://process  "sheefa"
 // you can define any number of these process clases, each one, corresponding to a particular type of processing  behavoir you define
+// any number of instances of a given process class can be created
+
+// About this example
+// This process generates N cloned synthes, that differ only  spatialization, pitch, and delay-until-tiggered-time
+// The clones are triggered via this message:     /satie/process/setvec  processNodeName 'trigger'  pitch,  unitAmp, unitVel
+// There is also a "player" function, that periodically triggers the clones.
+// The player function is accessed by this message:      /satie/process/set processNodeName 'player' value
+//  The cloneCount can be changed by this message:  /satie/process/property  processNodeName 'cloneCount' value
+//  The player function speed can be changed by this message:  /satie/process/property  processNodeName 'triggerIntervalMs'  value
 
 
 // required:  set up class struct
@@ -11,7 +20,7 @@
 	'nodeGroupName' -> \nil,
 	'nodeGroup' -> \nil,
 
-	// project specific
+	// project specific below
 
 	// connection state register for this project
 	'g' -> -10,
@@ -23,21 +32,17 @@
 	'dist' -> 10,
 
 	// other stuff
-	// this project
 	'synth' -> \zparticle1,    // used for clones
 	'cloneCount' -> 20,
 	'triggerIntervalMs' -> 500,   // time interval, during which the clones will randomly trigger
-	'debugFlag' -> 1,
+	'debugFlag' -> 0,
 ];
-
-
 
 // required: set these variables to the process name, and register process
 ~processName = \sheefa;
 ~process = ~sheefa;
 ~process.know=true;
 ~procMan.registerProcessEnv(~processName, ~process);
-
 
 // optional custom global variables, that can be referenced by all "instants"  of "sheefa" class
 ~sheefa_pitchRoot = 60;
@@ -46,18 +51,37 @@
 // required functions
 
 // required  setup function,  can be extended to suit particular needs of process
-~sheefa.setup = { | self, nodeName, nodeGroupName |
+~sheefa.setup = { | self, nodeName, nodeGroupName, args |
 	var thisGroup = ~procMan.satie.satieGroups[nodeGroupName.asSymbol] ;
 
 	// required
 	self.nodeName = nodeName;
 	self.nodeGroupName = nodeGroupName;
 	self.nodeGroup = thisGroup;
-	// project-specific code after here
 
-	//	~sheefa.routine.value(self);
+	// IF there are args, try to parse them and set corresponding environment key value pairs
+	if (  args.size > 0,
+		{
+			if (  (args.size&1)==1,    // odd length,  bad key value format
+				{
+					warning("sheefa.setup:  node: %   ignoring args:  expecting key value pair(s)  % \n",  self.nodeName, args);
+				},
+				// else arg list good to parse
+				{
+					args.pairsDo({ | key, val |
+						self[key.asSymbol] = val;
+						postf("••sheefa.setup: setting key value pair:  % : %  \n", key, val);
+					});
+			});
+	});
 
-	if (self.debugFlag != 0, { postf("••sheefa.setup:  generating % synthVoices for group %\n",  self.cloneCount, self.nodeGroupName);});
+	// add project-specific code below
+
+	self.cloneCount = args[1].asInt.clip(0,200);  // safety
+
+	if (self.debugFlag != 0, { postf("••sheefa.setup:  node: %  group: %    args % \n",  self.nodeName, self.nodeGroupName, args);});
+
+	if (self.debugFlag != 0, { postf("•• \t generating % synthVoices for group %\n",  self.cloneCount, self.nodeGroupName);});
 
 	// generate N  self.cloneCount  synths
 	self.cloneCount.do( { arg item;
@@ -74,7 +98,7 @@
 // required  cleanup function,
 ~sheefa.cleanup = { | self |
 
-	// add code here to manage project-specific stuff
+	// add project-specific code below
 	if (self.debugFlag != 0, {  postf("••sheefa.cleanup: clearing synths in node: % group \n", self.nodeName);});
 
 	self.routine.stop;
@@ -247,11 +271,11 @@
 
 // this routine
 ~sheefa.routine = Routine { arg self;
-	    loop {
+	loop {
 		if (self.debugFlag != 0, {   postf("••sheefa.routine triggering %  clones \n",  self.cloneCount ); });
 		self.trigger( [(50+30.rand), (0.5+0.5.rand), (0.5+0.5.rand)]);
-		        ( self.triggerIntervalMs * 0.001 ).yield;  // loop time
-	    }
+		( self.triggerIntervalMs * 0.001 ).yield;  // loop time
+	}
 };
 
 // called by  /satie/process/set nodeName 'player' value
@@ -272,10 +296,12 @@
 // Utility function that changes instance's  clone count
 ~sheefa.setCloneCount = { | self, newCount |
 
-	// free existing
+
 	self.cloneCount.do( { arg item;
 		var nodename=(self.nodeName++"_"++item).asSymbol;
+		var synth =  ~procMan.satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ];
 		~procMan.satie.cleanInstance(nodename, self.nodeGroupName );
+		synth.free;    // KLUGE:  to make sure it gets cleaned from the node tree
 	});
 
 	self.cloneCount = newCount;

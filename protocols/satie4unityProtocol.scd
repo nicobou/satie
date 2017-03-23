@@ -45,15 +45,14 @@ for debugguing
 		~coreCallback = { arg msg;
 			var command;
 			command = msg[1];
-			// postf("~coreCallback: command: %, msg: %, \n", command, msg);
 
 			switch (command,
 				'createSource',  // required args:  name uri    <optional>  group
 				{
-					//postf("~coreCallback: command: %, messLen: %   msg: %, \n", command, msg.size, msg);
+					if (e.debugFlag, {postf("•satie4Unity.coreCallback: command: %, messLen: %   msg: %, \n", command, msg.size, msg);});
 
 					if ( (msg.size < 3 ) ,
-						{"~coreCallback: OSCrx createSource message missing values".warn;
+						{"satie4Unity.coreCallback:  createSource message missing values".warn;
 							postf("createSource MESS LEN: %", msg.size);
 
 						},
@@ -78,7 +77,7 @@ for debugguing
 				'createGroup',
 				{
 					if ( (msg.size < 3 ) ,
-						{"~coreCallback: OSCrx createGroup message missing values".warn;
+						{"satie4Unity.coreCallback:  createGroup message missing values".warn;
 							postf("createGroup MESS LEN: %", msg.size);
 
 						},
@@ -100,10 +99,11 @@ for debugguing
 				},
 				'createProcess',
 				{
-					postf("~coreCallback: createProcess:  command: %, messLen: %   msg: %, \n", command, msg.size, msg);
+					if (e.debugFlag, {postf("•satie4Unity.coreCallback: createProcess:  command: %, messLen: %   msg: %, \n", command, msg.size, msg);});
+
 
 					if ( (msg.size < 3 ) ,
-						{"~coreCallback: OSCrx createProcess message missing values".warn;
+						{"satie4Unity.coreCallback:  createProcess message missing values".warn;
 							postf("createProcess MESS LEN: %", msg.size);
 
 						},
@@ -128,7 +128,7 @@ for debugguing
 				'deleteNode',
 				{
 					if ( (msg.size < 3 ) ,
-						{"~coreCallback: OSCrx deleteNode message missing values".warn;},
+						{"satie4Unity.coreCallback:  deleteNode message missing values".warn;},
 						// else
 						{
 							var nodeName = msg[2];
@@ -141,6 +141,16 @@ for debugguing
 									e.deleteSource(nodeName);   });
 						}
 					)
+				},
+				'debugFlag',
+				{
+					if ( (msg.size < 3 ) ,
+						{"satie4Unity.coreCallback:  debugFlag message missing value".warn;},
+						// else
+						{
+							e.debugFlag= msg[2].asInt.asBoolean;
+							postf("•satie4Unity.debug state = % \n", e.debugFlag);
+					});
 				},
 				'clear',
 				{
@@ -225,7 +235,7 @@ for debugguing
 			var type = args[0].asString.split[2].asSymbol;
 
 
-			if (e.debugFlag, { postf("satie4UnityProtocol.setMessHandler:  mess: %\n", args); });
+			if (e.debugFlag, { postf("•satie4UnityProtocol.setMessHandler:  mess: %\n", args); });
 
 			// verify data
 			if (  ( args.size < 3)  ,
@@ -488,7 +498,7 @@ for debugguing
 							if (e.debugFlag,
 								{
 									// postf("~sourceUpdateHandler:  nodeName: %  size: % args: %\n", nodeName, args.size, args);
-									postf("satie4UnityProtocol.sourceUpdateHandler:  aziDeg %  eleDeg %  gainDB %  delayMs %  lpHz %  distanceMeters % \n", aziDeg, eleDeg, gainDB, delayMs, lpHz, distance);
+									postf("•satie4UnityProtocol.sourceUpdateHandler:  aziDeg %  eleDeg %  gainDB %  delayMs %  lpHz %  distanceMeters % \n", aziDeg, eleDeg, gainDB, delayMs, lpHz, distance);
 							});
 
 
@@ -631,7 +641,7 @@ for debugguing
 
 									if (e.debugFlag,
 										{
-											postf("satie4UnityProtocol.blobUpdateHandler;     aziDeg %  eleDeg %  gainDB %  delayMs %  lpHz %  distanceMeters %        \n", aziDeg, eleDeg, gainDB, delayMs, lpHz, distanceMeters);
+											postf("•satie4UnityProtocol.blobUpdateHandler;     aziDeg %  eleDeg %  gainDB %  delayMs %  lpHz %  distanceMeters %        \n", aziDeg, eleDeg, gainDB, delayMs, lpHz, distanceMeters);
 									});
 
 									switch(nodeType.asSymbol,
@@ -705,7 +715,7 @@ for debugguing
 
 			if ( e.debugFlag,
 				{
-					postf("satie4Unity.setStateHandler: % \n", args);
+					postf("•satie4Unity.setStateHandler: % \n", args);
 			});
 
 			// verify message
@@ -781,10 +791,9 @@ for debugguing
 
 
 		~createProcess = {| self, sourceName, uriPath , groupName = \default |
-			"~createProcess called".inform;
 			if (self.allSourceNodes.includesKey(sourceName),
 				{
-					postf("~createSource:   % exists, no action \n", sourceName);
+					postf("satie4Unity.createSource:   % exists, no action \n", sourceName);
 				},
 				// else create new node
 				{
@@ -796,7 +805,7 @@ for debugguing
 					},
 					// else
 					{
-						postf("~createProcess: node  %  URI: %,  wrong type,  no action \n", sourceName, type);
+						postf("satie4Unity.createProcess: node  %  URI: %,  wrong type,  no action \n", sourceName, type);
 					});
 				}
 			);
@@ -817,10 +826,7 @@ for debugguing
 			var rawArgVec = nil;
 			var argList = List[];
 
-			if ( e.debugFlag,
-				{
-					("satie4Unity.createProcessNode:  URI"++uriPath).postln;
-			});
+			if ( e.debugFlag,  { postf("•satie4Unity.createProcessNode:   %   URI  % \n", sourceName, uriPath);});
 
 			stringArray = uriPath.asString.split($ );
 			charIndex = stringArray[0].asString.find("://");
@@ -836,6 +842,7 @@ for debugguing
 				});
 			});
 
+
 			if (self.allSourceNodes[sourceName.asSymbol]  != nil,
 				{
 					error("satie4Unity.createProcessNode source Process node: %,   ALREAYD EXISTS, aborting \n", sourceName);
@@ -848,8 +855,7 @@ for debugguing
 							error("satie4Unity.createProcessNode: undefined process name:"++processName++"   ,  node not created \n");
 						},						// else node good to go
 						{
-							postf("satie4Unity.createProcessNode nodeName: %,   process name: %  URI: % \n", sourceName, processName, uriPath);
-							//postf("satie4Unity.createProcessNode: %:  uri: %  group: %\n", sourceName, uriPath, groupName);
+							postf("satie4Unity.createProcessNode nodeName: %,   process name: %  URI: % \n", sourceName, processName, argList);
 
 							self.allSourceNodes[sourceName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
 							self.allSourceNodes[sourceName.asSymbol].put(\plugin, \nil);
@@ -871,10 +877,7 @@ for debugguing
 							myProcess[\setup].value(myProcess, sourceName.asSymbol, cloneGroupName.asSymbol, argList );   // set the state of the process
 							self.setSynth(sourceName.asSymbol, "");  // sets dummy plugin as placeholder
 
-							if ( true,
-								{
-									postf("•satie4Unity.createProcessNode: created node: %,  with  process:  % \n", sourceName, processName);
-							});
+							postf(">>satie4Unity.createProcessNode: creating: %,  with  process:  %   and arglist: \n", sourceName, processName, argList);
 
 					});
 			});
@@ -885,14 +888,12 @@ for debugguing
 			//"createSource called".inform;
 			if (self.allSourceNodes.includesKey(sourceName),
 				{
-					postf("~createSource:   % exists, no action \n", sourceName);
+					postf("satie4Unity.createSource:   % exists, no action \n", sourceName);
 				},
 				// else create new node
 				{
 					var type;
 					type = self.getUriType(uriPath);
-
-					postf("~createSource:   NAME: %   type :%  \n", sourceName, type);
 
 					if (  (type == \plugin)  ||  (type== \effect),
 						{
@@ -900,7 +901,7 @@ for debugguing
 						},
 						// else
 						{
-							postf("~createSource: node  %  URI: %,  wrong type,  no action \n", sourceName, type);
+							postf("satie4Unity.createSource: node  %  URI: %,  wrong type,  no action \n", sourceName, type);
 					});
 
 				}
@@ -969,7 +970,7 @@ for debugguing
 
 			if ( ( (type != \plugin) &&  (type != \effect) ),
 				{
-					error("~createSourceNode: BUG FOUND IN CODE:   BAD URI  " );
+					error("satie4Unity.createSourceNode: BUG FOUND IN CODE:   BAD URI  " );
 					self.setSynth(sourceName.asSymbol, \dummyPlugin);
 				},
 				// else  // path format ok, proceed
@@ -978,10 +979,7 @@ for debugguing
 					self.setSynth(sourceName.asSymbol, synthName);
 			});
 
-			if ( true,
-			{
-					postf("•satie4Unity.createSourceNode: %:  uri: %  group: %\n", sourceName, uriString, groupName);
-			});
+				postf(">>satie4Unity.createSourceNode:  creating %:  uri: %  group: %\n", sourceName, uriString, groupName);
 
 		};
 
@@ -998,7 +996,7 @@ for debugguing
 
 			if (self.allGroupNodes.includesKey(groupName),
 				{
-					postf("createGroup:  GroupNode % exists, no action \n", groupName);
+					postf("satie4Unity.createGroup:  GroupNode % exists, no action \n", groupName);
 					self.allGroupNodes[groupName.asSymbol].at(\group);  // return group
 				},
 				// else create new group node
@@ -1014,11 +1012,10 @@ for debugguing
 							group = satie.makeSatieGroup(groupName.asSymbol, position);
 							if ( groupName.asSymbol == \default,
 								{
-									postf("~createGroup:  BUG FOUND-- SHOULD NOT HAVE TO INSTANITATE DEFAULT GROUP !!!!");
+									postf("satie4Unity.createGroup:  BUG FOUND-- SHOULD NOT HAVE TO INSTANITATE DEFAULT GROUP !!!!");
 							});
 					});
 
-					postf("~createGroupNode:   %   groupType: %\n", groupName, groupPos);
 					self.allGroupNodes[groupName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
 					self.allGroupNodes[groupName.asSymbol].put(\group , group);  // save group
 					self.allGroupNodes[groupName.asSymbol].put(\groupSym , groupName.asSymbol);  // save group name symbol
@@ -1030,6 +1027,8 @@ for debugguing
 					self.allGroupNodes[groupName.asSymbol].put(\group, group );
 
 					//osc.sourceOSC(groupName.asSymbol, e.['groupCallback']);   // NO NEED TO create OSC callback
+
+						postf(">>satie4Unity.createGroup:  creating   %   groupType: %\n", groupName, groupPos);
 
 					group;  // returns groups
 				}
@@ -1048,7 +1047,7 @@ for debugguing
 			type = self.getUriType( uriPath );
 
 
-			postf("~setSynth: node: %   uriStr: %  group: %  type: % \n",  nodeName, uriPath,  groupName,  type);
+				if (e.debugFlag, {postf("•satie4Unity.setSynth: node: %   uriStr: %  group: %  type: % \n",  nodeName, uriPath,  groupName,  type);});
 
 			//postf("~setSynth: node: %    NEW: %  CURRENT: % \n", nodeName, pluginName.asSymbol, self.allSourceNodes[nodeName.asSymbol].at(\plugin).asSymbol);
 
@@ -1065,7 +1064,7 @@ for debugguing
 					// check to see if a synth has already been allocacted, if so, kill it
 					if  ( self.allSourceNodes[nodeName.asSymbol].at(\synth) != nil,
 						{
-							'~setSynth: REPLACE EXISTING SYNTH'.postln;
+							'satie4Unity.setSynth: REPLACE EXISTING SYNTH'.postln;
 							satie.cleanInstance(nodeName.asSymbol,groupName.asSymbol );
 					});
 
@@ -1075,7 +1074,7 @@ for debugguing
 					if ( ( type == \effect) ,
 						{
 							inBus = self.getFxInBus(uriPath);
-							// postf("~setSynth: assigning inBus: % to effects node % \n", satie.aux[inBus] , nodeName);
+							// postf("satie4Unity.setSynth: assigning inBus: % to effects node % \n", satie.aux[inBus] , nodeName);
 							synth = satie.makeInstance(nodeName.asSymbol, validPluginName.asSymbol, groupName.asSymbol, [\in, satie.aux[inBus] ]);
 						},
 						// else
@@ -1114,11 +1113,10 @@ for debugguing
 		};
 
 		~removeGroup = { | self, groupName |
-			"removeGroup called".inform;
 			if ( self.allGroupNodes.includesKey(groupName.asSymbol) ,
 				{
 					//  No OP  ~clearGroupNode.value(groupName.asSymbol);
-					postf("~removeGroup:  group node: % \n",  groupName);
+					if (self.debugFlag, {postf("•satie4Unity.removeGroup:  group node: % \n",  groupName);});
 					self.allGroupNodes.removeAt(groupName.asSymbol);     // remove node from global dictionary
 			});
 		};
@@ -1150,7 +1148,7 @@ for debugguing
 					var synth = satie.satieGroupInstances[thisGroupName][nameSym];
 					satie.cleanInstance(nameSym,thisGroupName );
 					synth.free;    // to make sure it gets cleaned from the node tree
-					if (self.debugFlag, {postf("clearSourceNode: delete  node  % in group %\n", nameSym, thisGroupName);});
+					if (self.debugFlag, {postf("•satie4Unity.clearSourceNode: delete  node  % in group %\n", nameSym, thisGroupName);});
 
 			});
 
