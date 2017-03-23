@@ -122,6 +122,7 @@ fi
 if [ $GROUP_TEST ] ; then
 
 clear
+oscsend localhost $OSCPORT /satie/scene s clear
 echo TESTING GROUP
 echo creating group node and three source nodes
 
@@ -130,18 +131,22 @@ oscsend localhost $OSCPORT /satie/scene ssss createSource source1 "plugin://zkar
 oscsend localhost $OSCPORT /satie/scene ssss createSource source2 "plugin://zkarpluck1" pluckGroup
 oscsend localhost $OSCPORT /satie/scene ssss createSource source3 "plugin://zkarpluck1" pluckGroup
 sleep .5
-oscsend localhost $OSCPORT /satie/group/set ssf pluckGroup gainDB 0
-echo setting group gainDB to 0
+oscsend localhost $OSCPORT /satie/group/set ssf pluckGroup gainDB -18
+echo setting group gainDB to -10
 sleep .5
 echo triggering notes
 
 oscsend localhost $OSCPORT /satie/source/setvec ssff source1 note 65 1 1
+oscsend localhost $OSCPORT /satie/source/set ssf source1 t_trig 1
+
 sleep .3
 
 oscsend localhost $OSCPORT /satie/source/setvec ssff source2 note 69 1 1
+oscsend localhost $OSCPORT /satie/source/set ssf source1 t_trig 1
 sleep .3
 
 oscsend localhost $OSCPORT /satie/source/setvec ssff source3 note 72 1
+oscsend localhost $OSCPORT /satie/source/set ssf source1 t_trig 1
 sleep 3
 
 
@@ -155,29 +160,27 @@ fi
 if [ $PROCESSING_TEST ] ; then
 
 clear
-echo TESTING PROCESSING_NODE
 oscsend localhost $OSCPORT /satie/scene s clear
-sleep 2
-
-oscsend localhost $OSCPORT /satie/scene sss createSource pNode1 "process://sheefa"
-oscsend localhost $OSCPORT /satie/scene sss connect pNode1 ear
-oscsend localhost $OSCPORT /satie/source/pNode1/event sffff setup 10 20 10 1    #cloneCount randAzi randElev randDist
+echo TESTING PROCESSING_NODE
+oscsend localhost $OSCPORT /satie/scene sf debugFlag 1
 sleep 1
-oscsend localhost $OSCPORT "/spatosc/core/connection/pNode1->ear/update" fffff -1.57 0 -12 0 22050  # azi ele  gainDB del lpf
-echo PAN LEFT
-sleep .5
-oscsend localhost $OSCPORT "/spatosc/core/connection/pNode1->ear/spread" f 10  # spread value
-sleep .5
-oscsend localhost $OSCPORT /satie/source/pNode1/event ssf setParam cloneCount 33    #set a value in the process
-echo SET PROCESS PROPERTY
-sleep .5
-oscsend localhost $OSCPORT /satie/source/pNode1/prop sf hpfq 4000
-sleep .5
-echo SET SYNTH NAME
-oscsend localhost $OSCPORT /satie/source/pNode1/event sss setParam synthName zkarpluck1
-sleep .5
-echo TRIGGER
-oscsend localhost $OSCPORT /satie/source/pNode1/event s trigger
+
+oscsend localhost $OSCPORT /satie/scene sss createProcess pNode1 "process://sheefa"
+oscsend localhost $OSCPORT /satie/process/update sffffff pNode1 0 0 -10 0 22050  10 # azi ele  gainDB del lpf distance
+oscsend localhost $OSCPORT /satie/process/set ssf pNode1 player 1
+echo create and launch process
+sleep 4
+oscsend localhost $OSCPORT /satie/process/property ssf pNode1 cloneCount 1
+echo setting clone count property to 1
+sleep 3
+oscsend localhost $OSCPORT /satie/process/property ssf pNode1 cloneCount 50
+echo setting clone count property to 50
+sleep 2
+oscsend localhost $OSCPORT /satie/scene s clear
+
+echo done
+
+
 
 
 

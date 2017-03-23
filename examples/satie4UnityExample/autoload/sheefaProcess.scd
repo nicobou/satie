@@ -60,11 +60,11 @@
 	self.nodeGroup = thisGroup;
 
 	// IF there are args, try to parse them and set corresponding environment key value pairs
-	if (  args.size > 0,
+	if (  args.size > 1,
 		{
 			if (  (args.size&1)==1,    // odd length,  bad key value format
 				{
-					warning("sheefa.setup:  node: %   ignoring args:  expecting key value pair(s)  % \n",  self.nodeName, args);
+					warn("sheefa.setup:  node: %   ignoring args:  expecting key value pair(s)  % \n",  self.nodeName, args);
 				},
 				// else arg list good to parse
 				{
@@ -77,7 +77,7 @@
 
 	// add project-specific code below
 
-	self.cloneCount = args[1].asInt.clip(0,200);  // safety
+	self.cloneCount = self.cloneCount.asInt.clip(0,200);  // safety
 
 	if (self.debugFlag != 0, { postf("••sheefa.setup:  node: %  group: %    args % \n",  self.nodeName, self.nodeGroupName, args);});
 
