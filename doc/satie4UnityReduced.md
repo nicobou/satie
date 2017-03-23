@@ -12,7 +12,7 @@
 /satie/scene deleteNode nodeName
 /satie/scene clear
 
-/satie/scene/set keyword value   // to set scene parameters like 'listenerFormat'
+/satie/scene/set keyword value   // to set scene parameters like 'debugFlag 1'
 ```
 ## Project Messages
 
