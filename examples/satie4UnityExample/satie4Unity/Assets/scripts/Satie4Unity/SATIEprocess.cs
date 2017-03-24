@@ -78,7 +78,6 @@ using System.Collections.Generic;
 			return;
 		}
 		// else
-        _start = true;
       	StartCoroutine( afterStart() );
 	
 
@@ -97,21 +96,24 @@ using System.Collections.Generic;
 	IEnumerator afterStart() // now that litener(s) have been conection related parameters.
 	{
 		yield return new WaitForFixedUpdate ();
-		sendState ();  // by this time, all the start and initialization routines have been evaluated and we can assume that updates to this node will be received on the renderer.
+        _start = true;
+        sendState ();  // by this time, all the start and initialization routines have been evaluated and we can assume that updates to this node will be received on the renderer.
 
 
 	}
 
 	void sendState ()
 	{
-		sendEvents ();
-        sendProperties();
+        sendProperties();   // see the properties and then the events
+        sendEvents ();
+
 	}
 
 
 	// called when inspector's values are modified
 	public virtual void OnValidate()
 	{
+        if (!_start) return;
 		validateEvents ();
 		validateParams ();
 
@@ -122,8 +124,7 @@ using System.Collections.Generic;
 
 	void validateEvents()
 	{
-        if (!_start) return;
-        
+         
 		if (_events.Count != events.Count)
 		{
 			// Debug.Log("_events.Count != events.Count");
@@ -304,11 +305,11 @@ using System.Collections.Generic;
 			}
 			if (atoms.Count < 2)
 			{
-				Debug.LogWarning("SATIEprocess.sendState(): " + transform.name + ":  incomplete message");
+                Debug.LogWarning("SATIEprocess.sendEvents(): " + transform.name + ":  incomplete message");
 			}
 			else if (atoms[0].GetType() !=  typeof(string))
 			{
-				Debug.LogWarning("SATIEprocess.sendState(): " + transform.name + ":  first item in message must be a string");
+                Debug.LogWarning("SATIEprocess.sendEvents(): " + transform.name + ":  first item in message must be a string");
 			}
 			else   // message good. Send it now
 			{

@@ -33,6 +33,7 @@
 	'pitchSeqLen' -> 1,   // not used
 	'pitchSeqIncr' -> 1,   // used, but only to set global sequencer state
 	'pitchSeqPos' -> 0,     // not used
+	'debugFlag' -> 0,
 
 ];
 
@@ -40,9 +41,7 @@
 ~processName = \particule1;
 ~process = ~particule1;
 ~process.know=true;
-
-// regester this process with satie
-~procMan.registerProcessEnv(~processName, ~process);
+~procMan.registerProcessEnv(~processName, ~process);  // regester this process with satie
 
 
 // set up class instance dictionary
@@ -76,124 +75,113 @@ if (~particule1_pitchSequences == nil,
 	self.nodeGroup = thisGroup;
 	~particule1_instances.put(self.nodeName.asSymbol, self);
 
-	//'particule1,setup'.postln;
-
-	// project-specific parsing of args string (coming from setUri OSC message string)
-	if ( argsList.size >= 2,
+	// IF there are args, try to parse them and set corresponding environment key value pairs
+	if (  argsList.size > 1,
 		{
-			//~sheefaVec = argvec;
-
-			//postf(" particule1.setup: node: %    args:   %    size:  %\n", nodeName, argsList, argsList.size);
-			if ( argsList[0].asString == "cloneCount",
+			if (  (argsList.size&1)==1,    // odd length,  bad key value format
 				{
-					self.cloneCount = argsList[1].asInt.clip(1, 1000);   // clip to 1000 to avoid meltdown caused by error
-					postf(" particule1.setup: node: %   setting up for % kamakazi clones \n", nodeName, self.cloneCount);
+					warn("particule1.setup:  node: %   ignoring args:  expecting key value pair(s)  % \n",  self.nodeName, argsList);
 				},
-				// else bad arg
+				// else arg list good to parse
 				{
-					error("particule1.setup: unrecognized key, expecting 'cloneCount' ");
+					argsList.pairsDo({ | key, val |
+						self[key.asSymbol] = val;
+						if (self.debugFlag != 0, { postf("••particule1.setup: setting key value pair:  % : %  \n", key, val); });
+					});
 			});
 	});
 
+	// add project-specific code below
 
-~particule1.cleanup = { | self |
+	self.cloneCount = self.cloneCount.asInt.clip(0,1000);  // safety
 
-	// add code here to manage project-specific stuff
-	postf("~particule1.clearSynths: clearing synths in node: % group \n", self.nodeName);
+	if (self.debugFlag != 0, { postf("••particule1.setup:  generating % synthVoices for group %\n",  self.cloneCount, self.nodeGroupName);});
 
-	self.cloneCount.do( { arg item;
-		var nodename=(self.nodeName++"_"++item).asSymbol;
-		~procMan.satie.cleanInstance(nodename.asSymbol, self.nodeGroupName);
-	});
-	~particule1_instances.removeAt(self.nodeName);
-
-};
-
-	// now generate   self.cloneCount  synths in advance
-	//  when the state problem is fixed, this can be done in the context of trigger, and synths can destroy  themselves after sounding
-	self.cloneCount.do( { arg item;
+	// generate N  self.cloneCount  synths
+	(self.cloneCount - 1).do( { arg item;
 		var nodename=(self.nodeName++"_"++item).asSymbol;
 		var synth;
 
 		synth = ~procMan.satie.makeInstance(nodename.asSymbol, self.synth.asSymbol, self.nodeGroupName);
-		synth.set(\gainDB, -99);  // instantiate full attenuated
+		// synth now created, so we can set its state
+		synth.set(\aziDeg, self.aziDeg, \eleDeg, self.elevDeg, \gainDB, self.gainDB , \delayMs, self.delayMs, \lpHz, self.lpHz, \hpHz, self.hpHz);
+		synth.set(\randTrigMaxMs, self.triggerIntervalMs);
 	});
-	postf("~particule1.setup:  generating % synthVoices for group %\n",  self.cloneCount, self.nodeGroupName);
-
-
 };
 
-// end of required class functions
 
+~particule1.cleanup = { | self |
 
-// Below are optionally defined message handlers that, if defined, will be called by satie4Unity. They override satie4Unity's corresponding generic handlers.
-// Satie4Unity provides the override mechanism for the following  messages, which are handled by the corresponding process functions as shown:
+	// add project-specific code below
+	if (self.debugFlag != 0, {  postf("••particule1.cleanup: clearing synths in node: % group \n", self.nodeName);});
 
-//   /satie/process/update      -->  handled by process[\update]
-//   /satie/process/set      -->  handled by process[\set]
-//   /satie/process/property      -->  handled by process[\property]
-//   /satie/process/state        -->   hadled by  process[\state]
+	(self.cloneCount - 1).do( { arg item;
+		var nodename=(self.nodeName++"_"++item).asSymbol;
+		~procMan.satie.cleanInstance(nodename.asSymbol, self.nodeGroupName);
+	});
 
+	~particule1_instances.removeAt(self.nodeName);
+};
 
-// Custom message handlers can also be defiend for any setvec messages, as shown below
-//  /satie/process/setvec  myHandlerName  atom1 .... atomN      -->   process[\myEvent]
-
-
-
-
-// overrides satie4Unity's set function
-// for example, on the reception of the message:  "set" key value
-// if the  process[key] is defined as a function,  that particular function will be called with the arguments:  key, value
 
 ~particule1.set =  {| self, key, value |
+	if (self.debugFlag != 0, { postf("••particle1.set: key %  value % \n", key, value);});
 	// add conditional processing of key value pairs here
-	// write key value pair to synths
+	// write key value pair to synth
+	(self.cloneCount - 1).do( { arg item;
+		var nodename=(self.nodeName++"_"++item).asSymbol;
 
-				// this is where we can operate on key specific values
-				// e.g:  key == \spread   etc..
+		// this is where we can calculate clone-specific parameters
+		// value = value *  item;
 
-	//postf("~particule1.set:  node:%  key:%  val:%\n", self.nodeName, property, value);
-
-	// set key val pair  to each synth of the clones
-			self.cloneCount.do( { arg item;
-				var nodename=(self.nodeName++"_"++item).asSymbol;
-
-				// this is where we can calculate clone-specific parameters
-				// e.g:  if  key == \centerFq,  value = value +  item;
-
-				~procMan.satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(key.asSymbol,value);
+		~procMan.satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(key.asSymbol,value);
 	});
+
+
 };
 
 
 // overrides satie4Unity's state function
 
-~particule1.state =  {| self, state |
+~particule1.state =  {| self, value |
+	if (self.debugFlag != 0, {  postf("••particle1.state: setting state of process node %  clones to % \n", self.nodeName, value);});
 
-	// set the state of each of the processe's  clones
-			self.cloneCount.do( { arg item;
-				var nodename=(self.nodeName++"_"++item).asSymbol;
+	(self.cloneCount - 1).do( { arg item;
+		var nodename=(self.nodeName++"_"++item).asSymbol;
 
-				// this is where we can calculate clone-specific actions before changing state
-				self.nodeGroup.run(state);
+		// this is where we can calculate clone-specific actions before changing state
 	});
+	self.nodeGroup.run(value);   // change state for all synths in process's group
 };
 
 
-// overrides satie4Unity's property function
-// if the function below is defined,  satie4Unity will call it when redeiving the message:  property key value,  passing the key and value args
-// otherwise, satie4Unity  will write the key value to this process's environment
-
-~particule1.property =  {| self, property, value |
+~particule1.property =  {| self, key, value |
 	// add conditional processing of key value pairs here
-	// write key value pair to process instance's environment
+	if (self.debugFlag != 0, {  postf("••particule1.setProperty:  processing key vaue pair:  %:%   to process node's environment \n", key, value,  self.nodeName);});
 
-	postf("~particule1.setProperty:  node:%  key:%  val:%\n", self.nodeName, property, value);
+	switch (key.asSymbol,
+		\triggerIntervalMs,
+		{
+			value = value.clip(100, 100000);
+			self.put(key.asSymbol, value);
+		},
+		\cloneCount,     // need to do some conditional processing for this particular key
+		{
+			value = value.clip(0, 500);  // safety
+			if (self.cloneCount != value,
+				{
+					self.setCloneCount(value);   // updates property as well
+			});
+		},
+		\increment,     // need to do some conditional processing for this particular key
+		{
+			self.setIncrement(value.asFloat);   // updates property as well
 
-	// this is where we can calculate key word specific actions
-	// e.g:  if (property == "sheefa", {value = value *  10;});
+		},		// else just write key value pair to process instance's environment
+		{
+			self.put(key.asSymbol, value);
+	});
 
-	self.put(property.asSymbol, value);
 };
 
 
@@ -234,32 +222,7 @@ if (~particule1_pitchSequences == nil,
 };
 
 
-
-
-// totally custom functions.  Calls to these functions result from OSC events received by satie4unity from Unity, and then applied to these functions,  if they exist
-
-~particule1.setIncrement = { arg self, items = #[1] ;
-
-	if ( items.size != 1,
-		{
-			warn("~particule1.setIncrement:  bad item count,  takes one float arg, received: "++items.size++" items\n");
-		},
-		//else
-		{
-			postf("particule1.setIncrement:  increment = % \n", items[0].asFloat);
-
-			if (self.pitchSeqGlobalMode != 0,
-				{
-					~particule1_pitchSequences.at(self.pitchSeqSym).put(\incr, items[0].asFloat);
-				},
-				// else
-				{
-					self.pitchSeqIncr = items[0].asFloat;
-			});
-	});
-};
-
-
+// called on /satie/process/setvec nodeName 'trigger' midiPitch unitAmp unitVel
 // custom method
 ~particule1.trigger = { arg self, items = #[1,2,3] ;
 	var thisGroup = self.nodeGroup;
@@ -289,7 +252,7 @@ if (~particule1_pitchSequences == nil,
 			thisGroup.set(\randTrigMaxMs, self.triggerIntervalMs);
 
 			// assign pitches  for each particle
-			self.cloneCount.do( { arg item;
+			(self.cloneCount - 1).do( { arg item;
 				var nodename=(self.nodeName++"_"++item).asSymbol;
 
 				// this is where we could calculate the exact position of each clone, with respect to this node
@@ -343,7 +306,7 @@ if (~particule1_pitchSequences == nil,
 
 	if ( items.size != 1,
 		{
-			warn("~particule1.readPitches:  bad item count, expecting one filePath arg, received: "++items++" \n");
+			error("~particule1.readPitches:  bad item count, expecting one filePath arg, received: "++items++" \n");
 		},
 		//else
 		{
@@ -354,7 +317,7 @@ if (~particule1_pitchSequences == nil,
 					csvmidifilePath = ~thisProjectResourcePath++"/"++csvmidifilePath;
 			});
 
-			csvmidifilePath.postln;
+			if (self.debugFlag != 0, { "••process1.readPitches file path"++csvmidifilePath.postln; });
 
 			pitchList = List.new();
 			seqName = csvmidifilePath.split.last;
@@ -365,7 +328,7 @@ if (~particule1_pitchSequences == nil,
 				{
 
 					//  file already loaded, just set instance  specific state
-					postf("particule1.readPitches:  sequence % already loaded, skipping file load\n", seqName);
+					if (self.debugFlag != 0, { postf("particule1.readPitches:  sequence % already loaded, skipping file load\n", seqName);});
 					self.pitchSeqSym = seqName.asSymbol;
 					self.pitchSeqLen = ~particule1_pitchSequences.at(seqName.asSymbol).at(\size);
 					self.pitchSeqPos = 0;
@@ -396,7 +359,7 @@ if (~particule1_pitchSequences == nil,
 
 					if (pitchList.size > 0,
 						{
-							postf("% pitches read from file %\n", pitchList.size,  csvmidifilePath);
+							if (self.debugFlag != 0, { postf("••process1.readPitches:  % pitches read from file %\n", pitchList.size,  csvmidifilePath);});
 							// add sequence to dictionary
 
 							~particule1_pitchSequences.removeAt(seqName.asSymbol);   // overwrite previous
@@ -424,6 +387,47 @@ if (~particule1_pitchSequences == nil,
 			});
 	});
 };
+
+// utility function to change pitch increment
+~particule1.setIncrement = { | self, value |
+
+	if (self.debugFlag != 0, { postf("particule1.setIncrement:  increment = % \n", value);});
+
+	if (self.pitchSeqGlobalMode != 0,
+		{
+			~particule1_pitchSequences.at(self.pitchSeqSym).put(\incr, value);
+		},
+		// else
+		{
+			self.pitchSeqIncr = value;
+	});
+};
+
+
+// Utility function that changes instance's  clone count
+~particule1.setCloneCount = { | self, newCount |
+
+	(self.cloneCount - 1).do( { arg item;
+		var nodename=(self.nodeName++"_"++item).asSymbol;
+		var synth =  ~procMan.satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ];
+		~procMan.satie.cleanInstance(nodename, self.nodeGroupName );
+		synth.free;    // KLUGE:  to make sure it gets cleaned from the node tree
+	});
+
+	self.cloneCount = newCount;
+
+	// generate N  self.cloneCount  synths
+	(self.cloneCount - 1).do( { arg item;
+		var nodename=(self.nodeName++"_"++item).asSymbol;
+		var synth;
+
+		synth = ~procMan.satie.makeInstance(nodename.asSymbol, self.synth.asSymbol, self.nodeGroupName);
+		// synth now created, so we can set its state
+		synth.set(\aziDeg, self.aziDeg, \eleDeg, self.elevDeg, \gainDB, self.gainDB , \delayMs, self.delayMs, \lpHz, self.lpHz, \hpHz, self.hpHz);
+		synth.set(\randTrigMaxMs, self.triggerIntervalMs);
+	});
+};
+
 
 /*
 testing

@@ -130,8 +130,8 @@
 // called on the reception of the message:  'set' key value
 // NOTE:  if this process defines a handler for a particular key (e.g.  process[key] ), satie4Unity will instead call that particular handler with the value arg. - see  spread handler example  below
 
-~sheefa.set =  {| self, property, value |
-	if (self.debugFlag != 0, { "••sheefa.setup".inform;});
+~sheefa.set =  {| self, key, value |
+	if (self.debugFlag != 0, { postf("••sheefa.set: key %  value % \n", key, value);});
 	// add conditional processing of key value pairs here
 	// write key value pair to synth
 	self.cloneCount.do( { arg item;
@@ -140,7 +140,7 @@
 		// this is where we can calculate clone-specific parameters
 		// value = value *  item;
 
-		~procMan.satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(property.asSymbol,value);
+		~procMan.satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(key.asSymbol,value);
 	});
 };
 
@@ -149,29 +149,25 @@
 // otherwise, satie4Unity  will write the key value to this process's environment
 
 ~sheefa.property =  {| self, key, value |
-	//	if (self.debugFlag != 0, {  postf("••sheefa.setProperty:  setting key vaue pair:  %:%   to process node's environment \n", key, value,  self.nodeName);});
-
 	// add conditional processing of key value pairs here
+	if (self.debugFlag != 0, {  postf("••sheefa.setProperty:  processing key vaue pair:  %:%   to process node's environment \n", key, value,  self.nodeName);});
 
-
-	if (key == \triggerIntervalMs,  // safety
+	switch (key.asSymbol,
+		\triggerIntervalMs,
 		{
 			value = value.clip(100, 100000);
-	});
-
-	if (key == \cloneCount,     // need to do some conditional processing for this particular key
+			self.put(key.asSymbol, value);
+		},
+	    \cloneCount,     // need to do some conditional processing for this particular key
 		{
-			if (self.debugFlag != 0, {  postf("••sheefa.setProperty:  processing key vaue pair:  %:%   to process node's environment \n", key, value,  self.nodeName);});
-
 			value = value.clip(0, 500);  // safety
 			if (self.cloneCount != value,
-				{
-					self.setCloneCount(value);
+			{
+				self.setCloneCount(value);   // updates property as well
 			});
 		},
-		// else just write key value pair to process instance's environment
+ 		// else just write key value pair to process instance's environment
 		{
-			if (self.debugFlag != 0, {  postf("••sheefa.setProperty:  setting key vaue pair:  %:%   to process node's environment \n", key, value,  self.nodeName);});
 			self.put(key.asSymbol, value);
 	});
 };
@@ -295,7 +291,6 @@
 
 // Utility function that changes instance's  clone count
 ~sheefa.setCloneCount = { | self, newCount |
-
 
 	self.cloneCount.do( { arg item;
 		var nodename=(self.nodeName++"_"++item).asSymbol;

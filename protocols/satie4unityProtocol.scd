@@ -168,7 +168,7 @@ for debugguing
 			var props = args.copyRange(2, args.size - 1);
 			var targetNode;
 
-			//postf("satie4UnityProtocol.setMessHandler:  source node: %,  mess: %\n", nodeName, args);
+			if (e.debugFlag, { postf("•satie4UnityProtocol.setMessHandler:  mess: %\n", args); });
 
 			// verify data
 			if (  (  ( (props.size&1)==1) || (props.size == 0) ),
@@ -235,7 +235,7 @@ for debugguing
 			var type = args[0].asString.split[2].asSymbol;
 
 
-			if (e.debugFlag, { postf("•satie4UnityProtocol.setMessHandler:  mess: %\n", args); });
+			if (e.debugFlag, { postf("•satie4UnityProtocol.setvecMessHandler:  mess: %\n", args); });
 
 			// verify data
 			if (  ( args.size < 3)  ,
@@ -311,7 +311,7 @@ for debugguing
 		// accepts arbitrary key value pairs and applies them to the named target node (source or group)
 		~nodeSet = { | self, propsVec, targetNode  |
 
-			// var group = self.allGroupNodes[groupName.asSymbol].at(\group).group;
+			if ( e.debugFlag, { postf("•satie4Unity.nodeSet: % \n", propsVec); });
 
 			propsVec.pairsDo({ | prop, val |
 				var defaultFlag=true;
@@ -352,6 +352,11 @@ for debugguing
 			var value;
 			var keyHandler = nil;
 			var setHandler = nil;
+
+			if ( e.debugFlag,
+				{
+					postf("•satie4Unity.processSet: % \n", propsVec);
+			});
 
 			propsVec.pairsDo({ | key, val |
 				var defaultFlag=true;
@@ -413,7 +418,10 @@ for debugguing
 			var nodeName  = args[1];
 			var propsVec = args.copyRange(2, args.size - 1);
 
-			//postf("satie4UnityProtocol.processProperty:  RX    \n", args);
+			if ( e.debugFlag,
+				{
+					postf("•satie4Unity.processProperty: % \n", args);
+			});
 
 			// verify data
 			if (  (  ( (propsVec.size&1)==1) || (propsVec.size == 0) ),
@@ -855,8 +863,6 @@ for debugguing
 							error("satie4Unity.createProcessNode: undefined process name:"++processName++"   ,  node not created \n");
 						},						// else node good to go
 						{
-							postf("satie4Unity.createProcessNode nodeName: %,   process name: %  URI: % \n", sourceName, processName, argList);
-
 							self.allSourceNodes[sourceName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
 							self.allSourceNodes[sourceName.asSymbol].put(\plugin, \nil);
 
@@ -877,7 +883,7 @@ for debugguing
 							myProcess[\setup].value(myProcess, sourceName.asSymbol, cloneGroupName.asSymbol, argList );   // set the state of the process
 							self.setSynth(sourceName.asSymbol, "");  // sets dummy plugin as placeholder
 
-							postf(">>satie4Unity.createProcessNode: creating: %,  with  process:  %   and arglist: \n", sourceName, processName, argList);
+							postf(">>satie4Unity.createProcessNode: creating: %,  with  process:  %   and arglist: % \n", sourceName, processName, argList);
 
 					});
 			});
