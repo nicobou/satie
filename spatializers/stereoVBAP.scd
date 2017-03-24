@@ -53,7 +53,7 @@
 		spread: spread );
 	//SendTrig.kr(Impulse.kr(0.5), 0,  offsetAzi   );  //  Enable for debugging
 	outsig * Lag.kr(panWeights, 0.030);
-	Out.ar(0,outsig);
+	// Out.ar(0,outsig);
 };
 
 /*

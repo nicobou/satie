@@ -17,50 +17,53 @@ from . import satie_synth as ss
 
 def instanceHandler():
     synths = [obj.id for obj in props.synths]
-    # print("############## synths #########", synths)
     visibleObjs = bpy.context.visible_objects 
     if len(visibleObjs) > 0:
         for o in visibleObjs:
             if o.useSatie:
-                if len(o.satieID) > 0:
-                    if o.satieID in synths:
-                        # print("-- {} in synths, passing.........".format(o.satieID))
+                if len(o.name) > 0:
+                    if o.name in synths:
                         pass
                     else:
-                        # print("acting on ", o.name)
-                        props.synths.append(ss.SatieSynth(o, o.satieID, o.satieSynth))
-                        # print("current synths", props.synths)
+                        print("acting on ", o.name, o.satieSynth)
+                        props.synths.append(ss.SatieSynth(o, o.name, o.satieSynth))
                 else:
                     print("{}'s satie ID cannot be empty", o.name)
             else:
-                if o.satieID in synths:
-                    print(">>>>>> removing {} from {}".format(o.satieID, o.name) )
-                    toRemove = [x for x in props.synths if x.id == o.satieID]
+                if o.name in synths:
+                    print(">>>>>> removing {} ".format(o.name) )
+                    toRemove = [x for x in props.synths if x.id == o.name]
                     for i in toRemove:
                         i.deleteNode()
                         props.synths.remove(i)
 
-#    print("<<<<<< synths ", props.synths)
-
-def instanceCb(scene):
+def satieInstanceCb(scene):
     instanceHandler()
     [synth.updateAED() for synth in props.synths]
     
 def cleanCallbackQueue():
-    if instanceCb in bpy.app.handlers.scene_update_post:
-        bpy.app.handlers.scene_update_post.remove(instanceCb)
+    if satieInstanceCb in bpy.app.handlers.scene_update_post:
+        bpy.app.handlers.scene_update_post.remove(satieInstanceCb)
 
 def getSatieSendCtl(self):
-    # print(props.active)
     return props.active
 
-def setSatieSendCtl(self, value):
+def setSatieSendCtl(value):
     props.active = value
-    # print(props.active)
+    print(props.active)
 
 def setSatieHP(self, value):
-    print("HighPass ", self.satieID, value)
+    print("HighPass ", self.name, value)
 
+def setInputBus(self, value):
+    print("setInputBus called", self.name, self.bus)
+    synths = [obj.id for obj in props.synths]
+    print("we got the following synths: ", synths)
+    if self.name in synths:
+        toSet = [s for s in props.synths if s.id == self.name]
+        for s in toSet:
+            s.set('bus', int(self.bus))
+        
 def setOSCdestination(self, context):
     print ("setting host to ", context.scene.OSCdestination)
     destination = context.scene.OSCdestination

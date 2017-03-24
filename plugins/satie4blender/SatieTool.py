@@ -15,15 +15,13 @@ import bpy
 from . import control
 from . import properties
 
-# print("Panel loaded")
-
 class ToolsPanel(bpy.types.Panel):
     bl_label = "SATIE tool"
     bl_context = "objectmode"
     bl_category = "SATIE"
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
-    bl_options = {'DEFAULT_CLOSED'}
+    # bl_options = {'DEFAULT_CLOSED'}
 
     def draw_header(self, context):
         layout = self.layout
@@ -34,8 +32,6 @@ class ToolsPanel(bpy.types.Panel):
         layout.label("SATIE connection")
         
         row = layout.row()
-        # row.prop(context.object, "useSatie")
-        # row.prop(context.scene, "active")
 
         row = layout.row()
         row.prop(context.scene, "SatieSources")
@@ -44,47 +40,48 @@ class ToolsPanel(bpy.types.Panel):
         row = layout.row()
         row.prop(context.scene, "OSCport")
         row = layout.row()
-        row.operator("mesh.satie_sound").active = True
+        row.prop(context.scene, "Active")
 
 
-class SatieObject(bpy.types.Operator):
+class SatieObject(bpy.types.BoolProperty):
     bl_idname = "mesh.satie_sound"
     bl_label = "SATIE sound source"
     bl_options = {"REGISTER", "UNDO"}
     fcount = 0
     active = bpy.props.BoolProperty()
 
-    # def __init__(self):
-    #     print("init in SatieObject")
-    
     def execute(self, context):
-        # print("Satie synth interface instantiated")
         if self.active:
-            if control.instanceCb not in bpy.app.handlers.scene_update_post:
-                bpy.app.handlers.scene_update_post.append(control.instanceCb)
+            if control.satieInstanceCb not in bpy.app.handlers.scene_update_post:
+                bpy.app.handlers.scene_update_post.append(control.satieInstanceCb)
         else:
-            if control.instanceCb in bpy.app.handlers.scene_update_post:
+            if control.satieInstanceCb in bpy.app.handlers.scene_update_post:
                 control.cleanCallbackQueue()
-        # else:
-        #     bpy.app.handlers.scene_update_post.remove(instanceCb)
-        # if exeCallback not in bpy.app.handlers.scene_update_post:
-        #     bpy.app.handlers.scene_update_post.append(exeCallback)
-        # else:
-        #     bpy.app.handlers.scene_update_post.remove(exeCallback)
         return {'FINISHED'}
                 
     def getSatieID(self):
-        print(bpy.context.object.satieID)
+        print(bpy.context.object.name)
 
 
+
+def useSatie(self, context):
+    active = context.scene.Active
+    control.setSatieSendCtl(active)
+    if active:
+        if control.satieInstanceCb not in bpy.app.handlers.scene_update_post:
+            bpy.app.handlers.scene_update_post.append(control.satieInstanceCb)
+    else:
+        if control.satieInstanceCb in bpy.app.handlers.scene_update_post:
+            control.cleanCallbackQueue()
+
+    
 
 def initToolsProperties():
-    bpy.types.Scene.active = bpy.props.BoolProperty(
+    bpy.types.Scene.Active = bpy.props.BoolProperty(
         name = "Use Satie",
         description = "Activate SATIE communication",
         default = False,
-        set = control.setSatieSendCtl,
-        get = control.getSatieSendCtl
+        update = useSatie
     )
 
     bpy.types.Scene.SatieSources = bpy.props.EnumProperty(

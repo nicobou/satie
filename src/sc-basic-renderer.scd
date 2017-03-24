@@ -89,7 +89,7 @@
 		};
 
 		~cleanInstance = { | self, name, group = \default |
-			// self.satieGroupInstances[group][name].release();
+			self.satieGroupInstances[group][name].release();
 			// fadeTime must be higher than SATIE internal fadeTime:
 			// self.satieGroupInstances[group][name].clear(0.03);
 			// FIXME: the above method applied to NodeProxy handling. For now we will be a little more violent

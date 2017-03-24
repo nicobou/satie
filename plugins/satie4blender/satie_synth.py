@@ -27,11 +27,10 @@ class SatieSynth():
     """
     def __init__(self, parent, id, plugin):
         """
-        Parems:
+        Params:
         parent - bpy_types.Object
-        id - parent's satieID
+        id - parent's name
         """
-        # print("instantiated a synth object")
         self.id = id
         self.synth = plugin
         self.group = "default"
@@ -43,7 +42,6 @@ class SatieSynth():
         self.playing = False
         self.setURI()
         self.createSource()
-        # self.setURIplugin(plugin)
         self.play()
 
     def setURI(self):
@@ -66,16 +64,8 @@ class SatieSynth():
 
     def play(self):
         oscURI = os.path.join(self.oscbaseurl, self.group, self.id)
-        # print("play", self)
         liblo.send(self.oscaddress, oscURI, "set", "t_trig", 1)
         print("sent play")
-        
-        # uri = os.path.join(self.sourceOSCuri, "state")
-        # liblo.send(self.oscaddress, uri, 1)
-        # if "zkarpluck" in self.synth:
-        #     print("using plugin: {}".format(self.synth))
-        #     uri = os.path.join(self.sourceOSCuri, "event")
-        #     liblo.send(self.oscaddress, uri, "t_trig", 1)
                 
     def updateAED(self):
         oscURI = os.path.join(self.oscbaseurl, self.group, self.id)
@@ -85,30 +75,20 @@ class SatieSynth():
         
     def _getLocation(self):
         cam_world_matrix = bpy.data.objects['Camera'].matrix_world
-        cam_world_matrix.inverted()
-        
-        # world_matrix of cam
-        # world_matrix of prent
-        # multiply
-        # 
-
         parent = self._getParent()
         parent_world_matrix = parent.matrix_world
-        transf = cam_world_matrix * parent_world_matrix
+        transf = cam_world_matrix - parent_world_matrix
         location = transf.translation
         return location
 
     def _getParent(self):
-        listener = [o for o in bpy.context.visible_objects if o.satieID == self.id]
-        # print("parent of {} is {}".format(self.id, listener))
+        listener = [o for o in bpy.context.visible_objects if o.name == self.id]
         return listener[0]
 
 
     def _getAED(self):
         distance = self._getLocation()
-        # print("----> distance {}".format(distance))
         aed = utils.xyz_to_aed(distance)
-        # print("---------> aed {}".format(aed))
         gain = math.log(utils.distance_to_attenuation(aed[2])) * 20
         aed[2] = gain
         return aed

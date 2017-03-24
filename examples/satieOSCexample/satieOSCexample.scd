@@ -18,9 +18,9 @@
 (
 Server.supernova;
 o = Server.local.options;
-o.numOutputBusChannels = 32;
+o.numOutputBusChannels = 2;
 o.memSize = 2**20;
-o.blockSize = 2048;
+o.blockSize = 512;
 //s.reboot;
 
 s.waitForBoot {
@@ -53,8 +53,8 @@ s.waitForBoot {
 	// spatilized reverb effect (input will be set at creation):
 	~scbr.makeSynthDef(\busreverb, \freeverb, [], [], [\stereoVBAP_P], [0], \defaultMapper, []);
 	// mono input
-	~scbr.makeSynthDef(\monoIn, \MonoIn, [], [], [\quadVBAP], [0], \defaultMapper, []);
-	~scbr.makeSynthDef(\tastee, \testee, [], [], [\quadVBAP], [0], \defaultMapper, []);
+	~scbr.makeSynthDef(\monoIn, \MonoIn, [], [], [\stereoVBAP_P], [0], \defaultMapper, []);
+	~scbr.makeSynthDef(\tastee, \testee, [], [], [\stereoVBAP_P], [0], \defaultMapper, []);
 	// streaming a soundfile from disk
 	// - load soundfiles
 	~playBuffers = Dictionary();
@@ -76,4 +76,6 @@ s.waitForBoot {
 	s.meter;
 	s.plotTree;
 };
+
 )
+

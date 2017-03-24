@@ -38,15 +38,14 @@ def xyz_to_aed(xyz):
     y = xyz[1]
     z = xyz[2]
     distance = math.sqrt((x*x) + (y*y) + (z*z))
-    azimuth = math.atan2(y,x)
-    # print("----> azimuth {}".format(azimuth))
+    azimuth = math.atan2(y,x) 
     # put in range of [-pi, pi]
     if azimuth > math.pi:
         azimuth -= 2 * math.pi
     elif azimuth < -math.pi:
         azimuth += 2 * math.pi
-    if distance > 0.00001:
-        elevation = math.acos(z/distance)
+    if distance > 0.0000001:
+        elevation = math.pi/2.
     else:
         elevation = 0.0
 
