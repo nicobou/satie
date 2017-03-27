@@ -1,8 +1,18 @@
-//  Evaluate this FIRST !!
-b = NetAddr.new("127.0.0.1", 18032);    // connect to satie's RX port
-//b.disconnect;
+// Tester for satie4Unity protocol
 
-b.sendMsg("/satie/scene", "debugFlag", 1);    // scene key value pair
+
+(
+
+// EVALUATE THIS BLOCK FIRST
+
+(thisProcess.nowExecutingPath.dirname++"/main.scd").load;   // load the satie4Unity and example project resources, such as processes, synthdefs, etc
+b = NetAddr.new("127.0.0.1", 18032);    // connect to satie's RX port
+b.sendMsg("/satie/scene", "debugFlag", 1);    // activate  debugging printing to console
+
+)
+
+b.sendMsg("/satie/scene", "debugFlag", 0);    // optionally deactivate debugging printing to console
+
 
 
 //  1. single node example  -----------------------------------
@@ -11,6 +21,10 @@ b.sendMsg("/satie/source/update", "sheefa", 0,0,-3,0,15000,20);   //update spati
 // OR  use the set method to update the same spatialization parameters using several key value pairs
 b.sendMsg("/satie/source/set", "sheefa", "aziDeg", 0, "eleDeg", 0, "gainDB", -6, "delayMs", 0, "lpHz", 15000);
 b.sendMsg("/satie/source/set", "sheefa", "lfoHz", 20.1.rand);    // set a key value pair of the synth
+
+b.sendMsg("/satie/source/state", "sheefa", 0);    // set node state to 0  (pauses synth)
+b.sendMsg("/satie/source/state", "sheefa", 1);    // set node state to 1
+
 
 b.sendMsg("/satie/scene", "deleteNode",  "sheefa");  // delete node
 
