@@ -224,24 +224,26 @@ if (~particule1_pitchSequences == nil,
 
 // called on /satie/process/setvec nodeName 'trigger' midiPitch unitAmp unitVel
 // custom method
-~particule1.trigger = { arg self, items = #[1,2,3] ;
+~particule1.trigger = { arg self, args = #[1,2,3] ;
 	var thisGroup = self.nodeGroup;
 	var gain = self.gainDB;
 	var seqName, pitch, position, incr, size, vel, incidence;
 
-	if ( items.size != 3,
+	if (self.debugFlag != 0, {  postf("••particule1.trigger: triggering % clones of node: %   argVec: %  \n", self.cloneCount, self.nodeName, args);});
+
+	if ( args.size != 3,
 		{
-			warn("~particule1.trigger:  bad item count, expecing '[ pitch vel incidence]' , received: "++items++" \n");
+			warn("~particule1.trigger:  bad item count, expecing '[ pitch vel incidence]' , received: "++args++" \n");
 		},
 		{ // else
 
 			seqName = self.pitchSeqSym;
-			vel =  items[1].asFloat;
+			vel =  args[1].asFloat;
 
 			// find out why incidence fucks the dog
-			// incidence = 1; items[2].asFloat;
+			// incidence = 1; args[2].asFloat;
 
-			incidence = items[2].asFloat.abs;   // not using negative values
+			incidence = args[2].asFloat.abs;   // not using negative values
 
 			//("incidence"++incidence).postln;
 
@@ -280,20 +282,9 @@ if (~particule1_pitchSequences == nil,
 						pitch =  self.transposition + ~particule1_pitchSequences.at(seqName.asSymbol).at(\pitches)[position];
 						self.pitchSeqPos = ((position + incr) % size);
 				});
-
-
 				~procMan.satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(\note, [ pitch, vel, incidence ] );
-
 				~procMan.satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(\t_trig, 1);
 			});
-
-			// calculate azimuths for each particle
-			// finally  update and trigger all cloned synths (particles)
-			/*				thisGroup.set(\gainDB, gain);
-			thisGroup.set(\randTrigMaxMs, self.triggerIntervalMs);*/
-			//thisGroup.set(\t_trig, 1);
-			//postf("~particule1.trigger: triggering synths in node: % group \n",self.nodeName);
-			//~particule1_pitchSequences.at(seqName.asSymbol).at(\pos).postln;
 	});
 };
 

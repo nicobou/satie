@@ -9,9 +9,12 @@
 [(50+30.rand), (0.5+0.5.rand), (0.5+0.5.rand)]
 
 
-x = ~s4u.allSourceNodes.at(\sheefaProcess).at(\process);
-x.debug
+x = ~s4u.allSourceNodes.at(\srcNodeSP).at(\process);
+x.debugFlag
 
+
+
+x.nodeGroupName
 
 x.trigger( [(50+30.rand), (0.5+0.5.rand), (0.5+0.5.rand)]);
 
@@ -22,6 +25,33 @@ x.routine.stop;
 x.routine.next
 x.routine.class.dumpMethodList
 
+
+~particule2_pitchSequences.at("bjGroove.mid.mid.txt".asSymbol).put(\incr, 1.0);
+
+
+~particule2_pitchSequences.at("bjGroove.mid.mid.txt".asSymbol).put(\pos, 1.0);
+
+~particule2_pitchSequences.at("bjGroove.mid.mid.txt".asSymbol).at(\pos);
+~particule2_pitchSequences.at("bjGroove.mid.mid.txt".asSymbol).at(\incr);
+
+~particule2_pitchSequences.at("bjGroove.mid.mid.txt".asSymbol).at(\pitches)
+
+((0 + 1) % 55)
+
+
+
+
+10.do( {|item|
+	var nodename=("srcNodeSP"++"_"++item);
+~synth = ~scbr.satieGroupInstances[\srcNodeSP_group][nodename];
+	~synth.set(\note, [ 60, 1, 1 ] );
+});
+
+~synth = ~scbr.satieGroupInstances[\srcNodeSP_group][\srcNodeSP_1]
+
+
+~synth.set(\note, [ 60, 1, 1 ] );
+~synth.set(\t_trig, 1);
 
 
 

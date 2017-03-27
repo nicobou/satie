@@ -12,5 +12,5 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ~name = \DustDust;
-~function = {| density1 = 1, density2 = 10|
-	Dust.ar(density1) + (0.5 * Dust2.ar(density2))};
+~function = {| density1 = 1, density2 = 10, trimDB = 0 |
+	trimDB.dbamp * (Dust.ar(density1) + (0.5 * Dust2.ar(density2)))};

@@ -12,11 +12,11 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ~name = \default;
-~function = { arg amp=1, lfoHz=10, t_gate=0, note=#[60,1];
+~function = { arg amp=1, lfoHz=10, trimDB = 0, t_gate=0, note=#[60,1];
 	var signal, env;
 	env = EnvGen.ar(Env.perc(0.01, 0.3, 0.5), gate: t_gate, doneAction:0);
 	//amp*(PinkNoise.ar(1)* LFPulse.ar(lfoHz) + (env*FSinOsc.ar((note[0]).midicps)));
-	amp*(PinkNoise.ar(1)* LFPulse.ar(lfoHz));
+	trimDB.dbamp*amp*(PinkNoise.ar(1)* LFPulse.ar(lfoHz));
 };
 
 /*  for test of "prop" and "event" messages

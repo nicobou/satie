@@ -23,7 +23,7 @@ namespace OscSimpl.Examples{
     /// Moves a GameObject in normalized coordinates (ScreenToWorldPoint)
     /// </summary>
     // [AddComponentMenu("UniOSC/MoveGameObject")]
-    public class zkOSCsimplapplyMess :  MonoBehaviour {
+    public class zkOSCsimplApplyMess :  MonoBehaviour {
 
         private string _oscMatchAddr = "";
         private bool _start = false;

@@ -63,15 +63,27 @@ public class SATIErendererCtl : MonoBehaviour
     // builtin choices:  stereo quad five.one seven.one octo dome mono labodome
     private string _outputFormat;
 
+
+    [Tooltip ("enables debug mode on renderer")]
+    public bool rendererDebugFlag = false;
+    private bool _rendererDebugFlag;
+
+
     private string _renderCtlmess = "/satie/rendererCtl";
 
     private string _projectMessage;
+
+    private string _satieSceneAddr = "/satie/scene"; 
 
     // private OSCTransmitter sharedOscOutNode = null;
     private bool _initialized = false;
     //private Thread thread;
 
     private SATIEsetup SATIEsetupCS;
+
+
+    private bool _start = false;
+
 
 //    public int port = 18032;
 //    //MH faceShiftOSC default port
@@ -87,7 +99,8 @@ public class SATIErendererCtl : MonoBehaviour
     {
     }
 
-//    public int getPort()
+
+ //    public int getPort()
 //    {
 //        return port;
 //    }
@@ -121,12 +134,17 @@ public class SATIErendererCtl : MonoBehaviour
         _mute = mute;
         _outputFormat = outputFormat;
         _projectMessage = "/satie/project/" + projectName;
+        _rendererDebugFlag = rendererDebugFlag;
+ 
 
         updateProjectDir();
         updateGainDB();
         updateTrimDB();
         updateMute();
         updateOutputFormat();
+        updateSatieDebugMode();
+
+
     }
 
 
@@ -255,6 +273,22 @@ public class SATIErendererCtl : MonoBehaviour
         SATIEsetup.sendOSC(message);
     }
 
+    public void setSatieDebugMode(float state)
+    {
+        
+        _rendererDebugFlag = rendererDebugFlag = (state == 0) ? false : true;
+        updateSatieDebugMode();
+    }
+
+    public void updateSatieDebugMode()
+    {
+        OscMessage message = new OscMessage(_satieSceneAddr);
+
+        message.Add("debugFlag");
+        message.Add(rendererDebugFlag);
+        SATIEsetup.sendOSC(message);
+    }
+
     public float getOutputDB()
     {
         return outputGainDB;
@@ -373,6 +407,12 @@ public class SATIErendererCtl : MonoBehaviour
         if (!_initialized)
             return;
 		
+        if (_rendererDebugFlag != rendererDebugFlag)
+        {
+            _rendererDebugFlag = rendererDebugFlag;
+            updateSatieDebugMode();
+        }
+
         if (_projectDir != projectDir)
         {
             _projectDir = projectDir;

@@ -15,6 +15,7 @@ namespace OscSimpl.Examples
 
     public class zkOSCsimplRotateGameObj :  MonoBehaviour
     {
+        public enum quatOrder { XYZW, YXZW }
 
         public string OSCaddress;
 
@@ -69,6 +70,12 @@ namespace OscSimpl.Examples
         public float OSCpollIntervalMs = 30f;
         // polling interval ms for current OSC values
         private float _lastPollTime;
+
+
+        [Header("")]
+        [Tooltip("use YXZW for use with Gyrosc")]
+               public quatOrder quatAxisOrder = quatOrder.XYZW;
+
 
         private void OnValidate()
         {
@@ -232,14 +239,24 @@ namespace OscSimpl.Examples
                 _oscCurValue.Set(q.x, q.y, q.z, q.w);
 
             }
-            else
+            else    // its a quat
             {
 
                 if (message.args[3] is float)
                     w = (float)message.args[3];
 
                 // store current value
-                _oscCurValue.Set(x, y, z, w);
+
+                switch (quatAxisOrder)
+                {
+                    case quatOrder.YXZW:
+                        _oscCurValue.Set(y, x, z, w);
+                        break;
+                    case quatOrder.XYZW:
+                    default:    
+                        _oscCurValue.Set(x, y, z, w);
+                        break;   
+                }
             }
 
             if (!OSCpollingEnable)
