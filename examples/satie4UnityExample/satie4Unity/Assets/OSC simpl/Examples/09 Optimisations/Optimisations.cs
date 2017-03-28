@@ -38,8 +38,8 @@ namespace OscSimpl.Examples
             oscIn = gameObject.AddComponent<OscIn>(); 
             oscOut.Open( 18032, "192.168.0.255");
             oscIn.Open( 7000 );
-            oscIn.Map( floatAddress, OnCachedReceived );
-            oscIn.Map( blobAddress, OnBlobReceived );
+            //oscIn.Map( floatAddress, OnCachedReceived );
+            //oscIn.Map( blobAddress, OnBlobReceived );
 
             bundle = new OscBundle();
 

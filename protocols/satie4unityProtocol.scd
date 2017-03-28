@@ -1153,7 +1153,7 @@ for debugguing
 				{
 					var synth = satie.satieGroupInstances[thisGroupName][nameSym];
 					satie.cleanInstance(nameSym,thisGroupName );
-					synth.free;    // to make sure it gets cleaned from the node tree
+					//synth.free;    // to make sure it gets cleaned from the node tree
 					if (self.debugFlag, {postf("•satie4Unity.clearSourceNode: delete  node  % in group %\n", nameSym, thisGroupName);});
 
 			});

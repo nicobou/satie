@@ -296,7 +296,7 @@
 		var nodename=(self.nodeName++"_"++item).asSymbol;
 		var synth =  ~procMan.satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ];
 		~procMan.satie.cleanInstance(nodename, self.nodeGroupName );
-		synth.free;    // KLUGE:  to make sure it gets cleaned from the node tree
+		//synth.free;    // KLUGE:  to make sure it gets cleaned from the node tree
 	});
 
 	self.cloneCount = newCount;

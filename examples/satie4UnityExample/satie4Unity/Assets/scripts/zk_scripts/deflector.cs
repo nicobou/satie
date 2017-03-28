@@ -349,7 +349,7 @@ public class deflector : MonoBehaviour {
 
 	}
 
-    private float ClampAngle(this float angle) {
+    private float ClampAngle(float angle) {
         if(angle < 0f)
             return angle + (360f * (int) ((angle / 360f) + 1));
         else if(angle > 360f)
