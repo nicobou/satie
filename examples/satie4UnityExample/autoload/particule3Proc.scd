@@ -35,7 +35,8 @@
 	'clonePtr' -> 0,    // modulus voice playing pointer
 	'transposition' -> 0,
 	'synthCountMax' ->  150,    //to be safe,  this value should be half of the number that breaks the server
-	'synthCountLimitThresh' ->  0.9;   // 90 %  of maxium -  the factor when limiting of  synth triggering (instance generation) begins. A variable threshold is used to thin out triggers (see below)
+	'synthCountLimitThresh' ->  0.9,   // 90 %  of maxium -  the factor when limiting of  synth triggering (instance generation) begins. A variable threshold is used to thin out triggers (see below)
+	'debugFlag' -> 0 ;
 
 ];
 
@@ -43,10 +44,7 @@
 ~processName = \particule3;
 ~process = ~particule3;
 ~process.know=true;
-
-
-// regester this process with satie
-~procMan.registerProcessEnv(~processName, ~process);
+~procMan.registerProcessEnv(~processName, ~process); // regester this process with satie
 
 
 // set up class instance dictionary
@@ -67,6 +65,43 @@ if (~particule3_pitchSequences == nil,
 
 // required functions
 
+// required function but adaptable to project specifics
+// generates N synths
+~particule3.setup = { | self, nodeName, nodeGroupName, argsList  |
+	var thisGroup = ~procMan.satie.satieGroups[nodeGroupName.asSymbol] ;
+
+	self.nodeName = nodeName;
+	self.nodeGroupName = nodeGroupName;
+	self.nodeGroup = thisGroup;
+	//'particule3,setup'.postln;
+
+	// IF there are args, try to parse them and set corresponding environment key value pairs
+	if (  argsList.size > 1,
+		{
+			if (  (argsList.size&1)==1,    // odd length,  bad key value format
+				{
+					warn("particule3.setup:  node: %   ignoring args:  expecting key value pair(s)  % \n",  self.nodeName, argsList);
+				},
+				// else arg list good to parse
+				{
+					argsList.pairsDo({ | key, val |
+						self[key.asSymbol] = val;
+						if (self.debugFlag != 0, { postf("••particule3.setup: setting key value pair:  % : %  \n", key, val); });
+					});
+			});
+	});
+
+		postf("••particule3.setup:   self.cloneCount: %  \n", self.cloneCount );
+
+	self.cloneCount  = self.cloneCount.asInt.clip(0, 1000);
+
+
+
+	self[\synthParams] =  Dictionary.new();  // set up state register for synthfef properties
+
+	~particule3_instances.put(self.nodeName.asSymbol, self);
+};
+
 ~particule3.cleanup = { | self |
 
 	var synth;
@@ -80,95 +115,57 @@ if (~particule3_pitchSequences == nil,
 };
 
 
-// required function but adaptable to project specifics
-// generates N synths
-~particule3.setup = { | self, nodeName, nodeGroupName, argsList  |
-	var thisGroup = ~procMan.satie.satieGroups[nodeGroupName.asSymbol] ;
-
-	self.nodeName = nodeName;
-	self.nodeGroupName = nodeGroupName;
-	self.nodeGroup = thisGroup;
-	//'particule3,setup'.postln;
-
-	// project-specific parsing of args string (coming from setUri OSC message string)
-	if ( argsList.size >= 2,
-		{
-			//~sheefaVec = argvec;
-
-			// postf(" particule3.setup: node: %    args:   %    size:  %\n", nodeName, argsList, argsList.size);
-			if ( argsList[0].asString == "cloneCount",
-				{
-					self.cloneCount = argsList[1].asInt.clip(1, 1000);   // clip to 1000 to avoid meltdown caused by error
-					postf(" particule3.setup: node: %   setting up for % kamakazi clones \n", nodeName, self.cloneCount);
-				},
-				// else bad arg
-				{
-					error("particule3.setup: unrecognized key, expecting 'cloneCount' ");
-			});
-	});
-
-
-	self[\properties] =  Dictionary.new();  // set up state register for synthfef properties
-
-	~particule3_instances.put(self.nodeName.asSymbol, self);
-};
 
 
 // end of required class functions
 
-// end of required class functions
+// overrides satie4Unity's 'state' message handler
+~particule3.state =  {| self, value |
 
+	// kamikazes only ,  do nothing here
 
-// the functions below are not requied
-// however if defined, they will be called by satie4unity
-
-
-// if defined, will be called when node's "update" message is received
-// otherwise satie4unity will send the  "update" message to the node's group
-~particule3.updateConnection = { | self, aziDeg, eleDeg, gainDB, delayMs, lpHz, distance |
-
-	// do nothing for this node, since spatialization is done using the trigger method
 };
 
-// if defined, will be called when node's "spread" message is received
-// otherwise the "spread" message will be applided to the node's group
+// this is defined so the 'update' message will not be applied to the processes' group by satie4Unity
+~particule3.setUpdate = { | self, aziDeg, eleDeg, gainDB, delayMs, lpHz, distance |
+
+	// kamikazes only.  do nothing for this node, since spatialization is done using the trigger method
+};
+
+// this is defined so the 'set processName spread' message will not be applied to the processes' group by satie4Unity
 ~particule3.spread = { | self, spreadVal |
 
-	// do nothing for this node, since spatialization is only done using the trigger method
+	//  kamikazes only. do nothing for this node, since spatialization is only done using the trigger method
 };
 
 
-// if defined, will be called when node's "prop" message is received
-// otherwise the "prop" message will be applided to the node's group
-~particule3.prop = { | self, key, value |
+// overrides satie4Unity's 'set' message handler
+~particule3.set =  {| self, key, value |
+	if (self.debugFlag != 0, { postf("••particle3.set: key %  value % \n", key, value);});
 
-	self[\properties].put(key, value);  // keep property state for initializing synthdefs
+	self[\synthParams].put(key.asSymbol, value);
 
-	// postf("prop message: key: %    val:% \n", key, value);
 };
 
 
-// totally custom functions.  Calls to these functions result from OSC events received by satie4unity from Unity, and then applied to these functions,  if they exist
+~particule3.property =  {| self, key, value |
+	// add conditional processing of key value pairs here
+	if (self.debugFlag != 0, {  postf("••particule3.setProperty:  processing key vaue pair:  %:%   to process node's environment \n", key, value,  self.nodeName);});
 
-~particule3.setIncrement = { arg self, items = #[1] ;
-
-	if ( items.size != 1,
+	switch (key.asSymbol,
+		\cloneCount,     // need to do some conditional processing for this particular key
 		{
-			warn("~particule3.setIncrement:  bad item count,  takes one float arg, received: % items\n",items.size);
+			self.cloneCount = value.asInt.clip(0, 1000);  // safety
 		},
-		//else
+		\increment,     // need to do some conditional processing for this particular key
 		{
-			postf("particule3.setIncrement:  increment = % \n", items[0].asFloat);
+			self.setIncrement(value.asFloat);   // updates property as well
 
-			if (self.pitchSeqGlobalMode != 0,
-				{
-					~particule3_pitchSequences.at(self.pitchSeqSym).put(\incr, items[0].asFloat);
-				},
-				// else
-				{
-					self.pitchSeqIncr = items[0].asFloat;
-			});
+		},		// else just write key value pair to process instance's environment
+		{
+			self.put(key.asSymbol, value);
 	});
+
 };
 
 
@@ -268,7 +265,7 @@ if (~particule3_pitchSequences == nil,
 				\delayMs, delayMs, \lpHz , lpHz, \hpHz, hpHz, \cloudAziScale,  aziScaler, \cloudElevScale, elevScaler, \spread, spread
 			];
 
-			if ( self[\properties] != nil, { synthParams = params++ self[\properties].getPairs;}); // combine param arrays
+			if ( self[\synthParams] != nil, { synthParams = params++ self[\synthParams].getPairs;}); // combine param arrays
 
 			// assign pitches  for each particle
 			self.cloneCount.do( { arg item;
@@ -411,6 +408,24 @@ if (~particule3_pitchSequences == nil,
 			});
 	});
 };
+
+// utility function to change pitch increment
+~particule3.setIncrement = { | self, value |
+
+	if (self.debugFlag != 0, { postf("particule3.setIncrement:  increment = % \n", value);});
+
+	if (self.pitchSeqGlobalMode != 0,
+		{
+			~particule3_pitchSequences.at(self.pitchSeqSym).put(\incr, value);
+		},
+		// else
+		{
+			self.pitchSeqIncr = value;
+	});
+};
+
+
+
 
 /*
 testing

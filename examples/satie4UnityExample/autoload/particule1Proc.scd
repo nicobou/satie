@@ -93,7 +93,7 @@ if (~particule1_pitchSequences == nil,
 
 	// add project-specific code below
 
-	self.cloneCount = self.cloneCount.asInt.clip(0,1000);  // safety
+	self.put(\cloneCount, self.cloneCount.asInt.clip(0,1000));  // safety
 
 	if (self.debugFlag != 0, { postf("••particule1.setup:  generating % synthVoices for group %\n",  self.cloneCount, self.nodeGroupName);});
 
@@ -124,6 +124,8 @@ if (~particule1_pitchSequences == nil,
 };
 
 
+// overrides satie4Unity's 'set' message handler
+
 ~particule1.set =  {| self, key, value |
 	if (self.debugFlag != 0, { postf("••particle1.set: key %  value % \n", key, value);});
 	// add conditional processing of key value pairs here
@@ -141,7 +143,7 @@ if (~particule1_pitchSequences == nil,
 };
 
 
-// overrides satie4Unity's state function
+// overrides satie4Unity's 'state' message handler
 
 ~particule1.state =  {| self, value |
 	if (self.debugFlag != 0, {  postf("••particle1.state: setting state of process node %  clones to % \n", self.nodeName, value);});
@@ -162,12 +164,12 @@ if (~particule1_pitchSequences == nil,
 	switch (key.asSymbol,
 		\triggerIntervalMs,
 		{
-			value = value.clip(100, 100000);
+			value = value.asFloat.clip(100, 100000);
 			self.put(key.asSymbol, value);
 		},
 		\cloneCount,     // need to do some conditional processing for this particular key
 		{
-			value = value.clip(0, 500);  // safety
+			value = value.asInt.clip(0, 500);  // safety
 			if (self.cloneCount != value,
 				{
 					self.setCloneCount(value);   // updates property as well
@@ -405,7 +407,7 @@ if (~particule1_pitchSequences == nil,
 		//synth.free;    // KLUGE:  to make sure it gets cleaned from the node tree
 	});
 
-	self.cloneCount = newCount;
+	self.cloneCount = newCount.asInt;
 
 	// generate N  self.cloneCount  synths
 	(self.cloneCount - 1).do( { arg item;

@@ -13,6 +13,11 @@ x = ~s4u.allSourceNodes.at(\srcNodeSP).at(\process);
 x.debugFlag
 
 
+x[\synthParams]
+
+b = x.cloneCount.asFloat
+
+if  ( b > 1000,  { "wewewe".postln });
 
 x.nodeGroupName
 

@@ -484,7 +484,11 @@ public class SATIEnode : MonoBehaviour
     //  /satie/source/state sourceName value 
     public virtual void  setNodeActive(string nodeName, bool state)
     {
-        string path = "/satie/" + nodeType + "/state";
+        string path; 
+       if (isProcess)
+            path = "/satie/process/state";
+        else 
+            path = "/satie/" + nodeType + "/state";
         // string path = "/spatosc/core/" + nodeType + "/" + nodeName + "/state";
 
         List<object> items = new List<object>();

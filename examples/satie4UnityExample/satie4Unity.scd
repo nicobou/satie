@@ -72,7 +72,7 @@ s.waitForBoot{
 	~scbr.makeSynthDef(\test, \testtone,   [], [], [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\pbell1, \pbell1, [], [],  [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\zkarpluck1P, \zkarpluck1P,   [~scbr.aux[~inBus0]], [], [~listeningFormat], [0] );   // sends to effects bus, pre-spatializer
-	~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1,  [], [~scbr.aux[~inBus0]], [~listeningFormat], [0] );   // sends to effects bus, post-spatializer
+   ~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1,  [], [~scbr.aux[~inBus0]], [~listeningFormat], [0] );   // sends to effects bus, post-spatializer
 	~scbr.makeSynthDef(\busreverb, \freeverb,  [], [], [~listeningFormat], [0]);
 	~scbr.makeSynthDef(\busgverb, \gverb,  [], [], [~listeningFormat], [0]);
 

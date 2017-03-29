@@ -77,7 +77,7 @@
 
 	// add project-specific code below
 
-	self.cloneCount = self.cloneCount.asInt.clip(0,200);  // safety
+	self.cloneCount = self.cloneCount.asInt.clip(0,200);  // safety  - note that type forcing is needed
 
 	if (self.debugFlag != 0, { postf("••sheefa.setup:  node: %  group: %    args % \n",  self.nodeName, self.nodeGroupName, args);});
 
@@ -155,12 +155,12 @@
 	switch (key.asSymbol,
 		\triggerIntervalMs,
 		{
-			value = value.clip(100, 100000);
+			value = value.asFloat.clip(100, 100000);   	// note that type forcing is necessary
 			self.put(key.asSymbol, value);
 		},
 	    \cloneCount,     // need to do some conditional processing for this particular key
 		{
-			value = value.clip(0, 500);  // safety
+			value = value.asInt.clip(0, 500);  // safety
 			if (self.cloneCount != value,
 			{
 				self.setCloneCount(value);   // updates property as well
