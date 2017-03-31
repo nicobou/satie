@@ -1,81 +1,126 @@
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-// This file is loaded by main.scd in the same directory
+// called from project's  main.scd file
 
-// finding source directory
+//~satieOsc=nil;     // uncomment for debug
+/*
+~satieOsc.debugFlag = true;
+*/
 
-(
-Server.supernova;
-o = Server.local.options;
-o.numOutputBusChannels = 2;
-o.memSize = 2**20;
-o.blockSize = 512;
-//s.reboot;
 
-s.waitForBoot {
-	~rootSrcPath = thisProcess.nowExecutingPath.dirname ++ "/../..";
-	(~rootSrcPath ++ "/src/*.scd").pathMatch.do({arg item; item.loadPaths});
+// Optional Definition:   value of this variable can be overwritten via OSC messages from Project
 
-	~num_aux_bus = 5;
-	// creating a sc-basic-renderer
-	~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus, satieSrcPath: ~rootSrcPath);
-	// printing internal aux array with bus indexes
-	// ~scbr.aux;
-	// ~scbr.auxbus.scope;
+~thisProjectResourcePath = thisProcess.nowExecutingPath.dirname++"/satieOSCunity/Assets/StreamingAssets";
 
-	// generating SynthDef that are going to be used,
-	// here a PinkSin source spatialized by
-	//   - a stereo panner (starting channel 0)
-	//   - a monoSpat (starting channel 2)
-	~scbr.makeSynthDef(\fool, \PinkSin, [], [], [\octoVBAP, \monoSpat], [0, 2], \defaultMapper, []);
+//Note:  the Project Name is generated  using the name of  the Project FIle (defined in main.scd)
+~myProjectName = ~myProjectFIleName.splitext(".scd")[0];
 
-	~scbr.makeSynthDef(\string, \zkarpluck1, [], [], [\stereoVBAP_P], [0], \defaultMapper, []);
-	~scbr.makeSynthDef(\pinksin, \PinkSin, [], [], [\quadVBAP], [0], \defaultMapper, []);
-	// generate a synth and change its defaults
-	~scbr.makeSynthDef(\pink400, \PinkSin, [], [], [\stereoPanner], [0], \defaultMapper, [800]);
 
-	~scbr.makeSynthDef(\testtone, \testtone, [], [], [\stereoPanner], [0], \defaultMapper, []);
-	// writing to all aux busses (first is starting a 0):
-	~scbr.makeSynthDef(\string_all_aux, \zkarpluck1, ~scbr.aux, [], [\stereoPanner], [0], \defaultMapper, []);
-	// writing to only to the third audio bus
-	~scbr.makeSynthDef(\string_third_aux, \zkarpluck1, [], [~scbr.aux[2]], [\stereoPanner], [0], \defaultMapper, []);
-	// spatilized reverb effect (input will be set at creation):
-	~scbr.makeSynthDef(\busreverb, \freeverb, [], [], [\stereoVBAP_P], [0], \defaultMapper, []);
-	// mono input
-	~scbr.makeSynthDef(\monoIn, \MonoIn, [], [], [\stereoVBAP_P], [0], \defaultMapper, []);
-	~scbr.makeSynthDef(\tastee, \testee, [], [], [\stereoVBAP_P], [0], \defaultMapper, []);
-	// streaming a soundfile from disk
-	// - load soundfiles
-	~playBuffers = Dictionary();
-	~playBuffers.add(\bleh -> Buffer.cueSoundFile(s, Platform.resourceDir +/+ "sounds/a11wlk01.wav", 0, 1));
-	~playBuffers.add(\alsaTest -> Buffer.cueSoundFile(s, "/usr/share/sounds/alsa/Front_Center.wav", 0, 1));
-	// create players
-	~scbr.makeSynthDef(\snd1, \sndFile, [], [], [\stereoPanner], [0], \defaultMapper, [~playBuffers[\bleh].bufnum]);
-	~scbr.makeSynthDef(\snd2, \sndFile, [], [], [\stereoPanner], [0], \defaultMapper, [~playBuffers[\alsaTest].bufnum]);
+s.waitForBoot{
+
+	// we define the following busses,  and set the falue of ~num_aux_bus accordingly
+	~inBus0 = 0;  // relative aux bus number that satie will use for this project's synthdef sends to fx synthdefs
+	~inBus1 = 1;  // relative aux bus number that satie will use for this project's synthdef sends to fx synthdefs
+
+	~num_aux_bus = 2;
+
+
+
+	// create and initialize an instance of SATIE, and set environment variable
+	if (~scbr == nil,{
+		postln("loading SATIE kernal...");
+		~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus, satieSrcPath: ~rootSrcPath);
+	});
+
+	// instantiate the OSC interface, and set environment variable
+	if (~osc == nil,{
+		~osc = ~satieOSCMaker.value();   // create an OSC RX message mapper object receiveing on port 18032 by default
+	});
+
+	// instantiate a renderer OSC control object, and set environment variable
+	if (~srCtl == nil,{
+		~srCtl = ~satieRendererCtlMaker.value(~scbr);
+		~osc.removeRendererCtlOSC.value();  // to be safe,  remove any previous OSC  callbacks  (if any)
+
+		// create OSC callbacks to control audio renderer
+		~osc.makeRendererCtlOSC( ~srCtl['satieRendererCallback'] );  // e.g.  /satie/rendererCtl/setOutputDB -12
+	});
+
+	// instantiate a process manager , and set environment variable
+	if (~procMan == nil,{
+		~procMan = ~pmMaker.value(~scbr);
+	});
+
+	// instiante the satieOSC protocol, and set environment variable
+	if (~satieOsc == nil,{
+		~satieOsc = ~satieOSCProtocol.value(~osc, ~scbr, ~procMan);
+		//~satieOsc.debugFlag = true;
+	});
+
+
+	s.sync;
+
+	//  declare all the project's needed synthDefs here
+	// makeSynthDef args:    name, synthName, fxBusPre, fxBisPost, spatializerName, outBusNo, mapName, optArgs
+
+
+	postf("generating example project synthdefs for % format \n", ~listeningFormat);
+	~scbr.makeSynthDef(\zparticle1, \zparticle1, [], [], [~listeningFormat], [0]);
+	~scbr.makeSynthDef(\pink, \PinkSin, [], [],  [~listeningFormat], [0]);
+	~scbr.makeSynthDef(\dust, \DustDust,   [], [~scbr.aux[~inBus0]], [~listeningFormat], [0]);
+	~scbr.makeSynthDef(\default, \default,  [], [], [~listeningFormat], [0]);
+	~scbr.makeSynthDef(\zkarpluck0, \zkarpluck0,  [], [], [~listeningFormat], [0]);
+	~scbr.makeSynthDef(\test, \testtone,   [], [], [~listeningFormat], [0]);
+	~scbr.makeSynthDef(\pbell1, \pbell1, [], [],  [~listeningFormat], [0]);
+	~scbr.makeSynthDef(\zkarpluck1P, \zkarpluck1P,   [~scbr.aux[~inBus0]], [], [~listeningFormat], [0] );   // sends to effects bus, pre-spatializer
+   ~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1,  [], [~scbr.aux[~inBus0]], [~listeningFormat], [0] );   // sends to effects bus, post-spatializer
+	~scbr.makeSynthDef(\busreverb, \freeverb,  [], [], [~listeningFormat], [0]);
+	~scbr.makeSynthDef(\busgverb, \gverb,  [], [], [~listeningFormat], [0]);
+
+	~scbr.makeSynthDef(\zkarpluck2P, \zkarpluck2P,   [~scbr.aux[~inBus0]],  [],[~listeningFormat],  [0], \randOffsets1);  // for resonant updated klones
+
+	// dummy
+	~scbr.makeSynthDef(\dummyPlugin, \emptySource,  [], [], [\emptySpat], [0]);    // dummy synthdef, used for new nodes
 	// be sure the synthDef is compiled on the server
-	~osc = ~satieOSCMaker.value(port: 18032);
-	~newOsc = ~satieOSCMaker.value(port: 18034);
 	s.sync;
-	(~rootSrcPath ++ "/protocols/satieOSC.scd").load;
-	s.sync;
-	~oscOne = ~satieOSCprotocol.value(~osc, ~scbr, oscID: \satieStandard);
-	~osc2 = ~satieOSCprotocol.value(~newOsc, ~scbr);
-	s.sync;
-	s.makeGui;
-	s.meter;
-	s.plotTree;
-};
 
-)
 
+
+	// set up PROJECT SPECIFIC OSC MESSAGE RX
+	~myProjectCallback = {   	// receives OSC messages that look like:   /satie/project/myProjectname data1 .... dataN
+		arg msg;
+		var command = msg[1];
+		//postf(~myProjectName++" Project:  command: %, msg: %, \n", command, msg);
+
+		if (msg.size < 2,
+			{~myProjectName++" Project:  empty message".warn;
+				postf(~myProjectName++" Project:  MESS LEN: %", msg.size);
+
+			},
+			// else
+			{
+				// parse out project messages here
+				switch (command,
+					'setProjectDir',
+					{
+						if ( (msg.size != 3 ) ,
+							{~myProjectName++" Project: setProjectDir bad arg count: expecting 'setProjectDir projectDirPath' ".warn;},
+							// else
+							{
+								~thisProjectResourcePath = msg[2];     // optionally referenced by certain processes
+
+								//e.projectDirectory.postln;
+								postf(~myProjectName++" Project: setting project directory to: % \n", ~thisProjectResourcePath);
+							}
+						)
+				})
+		});
+	};
+
+
+	// set up to receive OSC project messages: e.g.  /satie/project/myProjectname data1 .... dataN
+	~osc.removeProjectOSC(~myProjectName.asSymbol);   // just in case
+	~osc.makeProjectOSC(~myProjectName.asSymbol, ~myProjectCallback);   // now create osc callback for project
+
+	s.sync;    // maks sure satue4Unity is fully instantiated before moving on
+
+};  // end of  waitforboot

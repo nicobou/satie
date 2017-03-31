@@ -9,7 +9,7 @@
 [(50+30.rand), (0.5+0.5.rand), (0.5+0.5.rand)]
 
 
-x = ~s4u.allSourceNodes.at(\srcNodeSP).at(\process);
+x = ~satieOsc.allSourceNodes.at(\srcNodeSP).at(\process);
 x.debugFlag
 
 
@@ -61,7 +61,7 @@ x.routine.class.dumpMethodList
 
 
 ~myNodeName = \srcNode_0;
-~myNode = ~s4u.allSourceNodes[~myNodeName.asSymbol];
+~myNode = ~satieOsc.allSourceNodes[~myNodeName.asSymbol];
 
 
 ~myProcess = ~myNode.at(\process);

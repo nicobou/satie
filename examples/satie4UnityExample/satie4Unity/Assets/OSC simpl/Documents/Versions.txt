@@ -1,9 +1,0 @@
-1.1 (2016/02/04)
-
-- Updated Manual.pdf.
-- Fixed draw order problem in OscIn inspector causing mappings to be occluded on some systems.
-
-
-1.0 (2016/01/26)
-
-- First release.

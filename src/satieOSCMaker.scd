@@ -29,18 +29,6 @@
 			OSCdef(id.asSymbol ).free;
 		};
 
-		// make a synth instance and create its group if needed
-		~createSourceOSC = {|self, sourceName, cb, groupName|
-			//self.newOSC(sourceName, cb,  rootURI +/+ groupName);
-			postf("----> createSource callback passed : %\n", cb);
- 			self.newOSC(groupName ++ sourceName, cb,  rootURI +/+ groupName +/+ sourceName);
-			if(OSCdef.all.includesKey(groupName) == false,
-				{
-					postf("IdentityDictionary does not include %, creating it\n", groupName);
-					self.makeGroupOSC(groupName, cb);
-				}
-			);
-		};
 
 	   // create  OSC callback for satieRendererCtl
 		~makeRendererCtlOSC = {|self, cb|
@@ -62,20 +50,6 @@
 			self.deleteOSC(projectName.asSymbol);
 		};
 
-		// create a group
-		~makeGroupOSC = {|self, groupName, cb|
-			self.newOSC(groupName, cb,  rootURI +/+ groupName);
-		};
-
-		// try to remove the OSC definitions.
-		~removeSourceOSC = {|self, sourceName|
-			self.deleteOSC(sourceName);
-		};
-
-		// try to remove the OSC definitions.
-		~removeGroup = {|self, groupName|
-			self.deleteOSC(groupName);
-		};
 
 	});
 	e.know = true;
