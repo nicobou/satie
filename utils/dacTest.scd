@@ -45,10 +45,13 @@ SynthDef(\speakerMapTest, { |out, gate=1|
 ~usingServer = "Built-in Output";
 
 ~rebootServerUsing = {
-	var deviceName = ~usingServer;
-	o.device = deviceName;
+	Platform.case(
+		\osx, {
+			var deviceName = ~usingServer;
+			o.device = deviceName;
+			("booting with: "++deviceName).postln;
+	});
 	s.reboot;
-    ("booting with: "++deviceName).postln;
     ("THE SERVER IS :  "++s).postln;
     Server.allRunningServers.postln;
 
@@ -115,16 +118,17 @@ Button.new(~dacTestWindow,Rect(10,10,120,30)).states_([["reboot server"]]).actio
 
 
 
-
-z=0;
-ServerOptions.outDevices.do({ arg key ;
-var index = z;
-	//postf("dev: "++z++"  "++key.asSymbol++"\n");
-	g.addItem(key.asSymbol, { |a| ( ~usingServer= ServerOptions.outDevices[index] ) });
-	z=z+1;
-});
-
-
+Platform.case (
+	\osx, {
+		z=0;
+		ServerOptions.outDevices.do({ arg key ;
+			var index = z;
+			//postf("dev: "++z++"  "++key.asSymbol++"\n");
+			g.addItem(key.asSymbol, { |a| ( ~usingServer= ServerOptions.outDevices[index] ) });
+			z=z+1;
+		});
+	}
+);
 
 // *****************************   speaker test window stuff
 

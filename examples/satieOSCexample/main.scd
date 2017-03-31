@@ -20,7 +20,7 @@
 ~myProjectFIleName = "satieOSCexample.scd";
 
 // defaults to stereo
-~listeningFormat = \stereoListener;    // you can also set this to  \domeVBAP  or  \labodomeVBAP  or   \octoVBAP
+~listeningFormat = \octoVBAP;    // you can also set this to  \domeVBAP  or  \labodomeVBAP  or   \octoVBAP
 
 //~listeningFormat = \labodomeVBAP;    // you can also set this to  \domeVBAP  or  \labodomeVBAP  or   \octoVBAP
 
@@ -91,41 +91,45 @@ o.threads = 8;
 
 // ~listeningFormat = \five1VBAP;    for debugging testing
 
-if (  ( ( ~listeningFormat == \domeVBAP)  ||   ( ~listeningFormat == \labodomeVBAP)  || ( ~listeningFormat == \octoVBAP)  ),
-	{
+Platform.case (
+	\osx, {
+		if (  ( ( ~listeningFormat == \domeVBAP)  ||   ( ~listeningFormat == \labodomeVBAP)  || ( ~listeningFormat == \octoVBAP)  ),
+			{
 
-		if (  ServerOptions.outDevices.indexOfEqual("HDSPe MADI (23453676)") != nil,
-		{
-				postln("AudioOutDev: HDSPe MADI");
-				~outAudioDev = "HDSPe MADI (23453676)";
-		});
+				if (  ServerOptions.outDevices.indexOfEqual("HDSPe MADI (23453676)") != nil,
+					{
+						postln("AudioOutDev: HDSPe MADI");
+						~outAudioDev = "HDSPe MADI (23453676)";
+				});
 
-		if (  ServerOptions.outDevices.indexOfEqual("MADIface USB (23635751)") != nil,
-		{
-				postln("AudioOutDev:  MADIface USB");
-				~outAudioDev = "MADIface USB (23635751)";
-		});
+				if (  ServerOptions.outDevices.indexOfEqual("MADIface USB (23635751)") != nil,
+					{
+						postln("AudioOutDev:  MADIface USB");
+						~outAudioDev = "MADIface USB (23635751)";
+				});
 
-     });
-    //  OR iF
-	if ( ( ( ~listeningFormat == \quadVBAP)  ||   ( ~listeningFormat == \five1VBAP)  ),
-	{
+		});
+		//  OR iF
+		if ( ( ( ~listeningFormat == \quadVBAP)  ||   ( ~listeningFormat == \five1VBAP)  ),
+			{
 
-		if (  ServerOptions.outDevices.indexOfEqual("MOTU UltraLite mk3 Hybrid") != nil,
-		{
-				postln("AudioOutDev: MOTU UltraLite mk3 Hybrid");
-				~outAudioDev = "MOTU UltraLite mk3 Hybrid";
+				if (  ServerOptions.outDevices.indexOfEqual("MOTU UltraLite mk3 Hybrid") != nil,
+					{
+						postln("AudioOutDev: MOTU UltraLite mk3 Hybrid");
+						~outAudioDev = "MOTU UltraLite mk3 Hybrid";
+				});
+			}, // else
+			{
+				if ( ~listeningFormat == \stereoListener,
+					{
+						// better letting the system set the default device
+						//postln("AudioOutDev: Built-in Output");
+						//~outAudioDev = "Built-in Output";
+						// o.dump;
+				});
 		});
-}, // else
-	{
-		if ( ~listeningFormat == \stereoListener,
-		{
-				// better letting the system set the default device
-				//postln("AudioOutDev: Built-in Output");
-				//~outAudioDev = "Built-in Output";
-		// o.dump;
-		});
-});
+	}
+);
 
 switch (~listeningFormat,
 	\domeVBAP,
@@ -154,12 +158,18 @@ switch (~listeningFormat,
 	}
 );
 
-
-if ( ~outAudioDev != nil ,
-	{
-		o.device = ~outAudioDev;
-});
-
+Platform.case(
+	\osx, {
+		if ( ~outAudioDev != nil ,
+			{
+				o.device = ~outAudioDev;
+		});
+	},
+	\linux, {
+		postln("We're in linux, o.device nil means default: " ++ o.device);
+	},
+	\windows, {"We're on windows... good luck"}
+);
 
 postf("AUDIO CONFIGURATION: ");
 postf("\t LISTENING FORMAT:  %   ,    ", ~listeningFormat);
@@ -229,4 +239,4 @@ s.waitForBoot {
 	~files.do { |f|  f.split.last.postln;  f.load; s.sync;};
 	s.sync;
 }; // waitForBoot
-);
+)
