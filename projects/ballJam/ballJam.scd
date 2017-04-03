@@ -5,6 +5,7 @@ s.waitForBoot{
 	~num_aux_bus = 5;
 	~fxInputBus = 0;  // relative aux bus number that satie will use for this project's synthdef sends to fx synthdefs
 
+
 	// create and initialize an instance of SATIE, and set environment variable
 	if (~scbr == nil,{
 		postln("loading SATIE kernal...");
@@ -13,18 +14,27 @@ s.waitForBoot{
 
 	// instantiate the OSC interface, and set environment variable
 	if (~osc == nil,{
-		~osc = ~spatOSCMaker.value();   // create an OSC RX message mapper object receiveing on port 18032 by default
+		~osc = ~satieOSCMaker.value();   // create an OSC RX message mapper object receiveing on port 18032 by default
 	});
 
-
-	// instantiate a renderer control object, and set environment variable
-		if (~srCtl == nil,{
+	// instantiate a renderer OSC control object, and set environment variable
+	if (~srCtl == nil,{
 		~srCtl = ~satieRendererCtlMaker.value(~scbr);
+		~osc.removeRendererCtlOSC.value();  // to be safe,  remove any previous OSC  callbacks  (if any)
+
+		// create OSC callbacks to control audio renderer
+		~osc.makeRendererCtlOSC( ~srCtl['satieRendererCallback'] );  // e.g.  /satie/rendererCtl/setOutputDB -12
 	});
 
-	// instiante the satie4Unity protocol, and set environment variable
-	if (~satie4unity == nil,{
-		~satie4unity = ~satie4unityprotocol.value(~osc, ~scbr);
+	// instantiate a process manager , and set environment variable
+	if (~procMan == nil,{
+		~procMan = ~pmMaker.value(~scbr);
+	});
+
+	// instiante the satieOSC protocol, and set environment variable
+	if (~satieOsc == nil,{
+		~satieOsc = ~satieOSCProtocol.value(~osc, ~scbr, ~procMan);
+		//~satieOsc.debugFlag = true;
 	});
 
 	s.sync;
@@ -60,15 +70,8 @@ s.waitForBoot{
 	~scbr.makeSynthDef(\dummyPlugin, \emptySource,  [], [], [\emptySpat], [0]);    // dummy synthdef, used for new nodes
 	// be sure the synthDef is compiled on the server
 
-	s.sync;
 
-	// now connect OSC RX message callbacks for rendererControl object
-	// to be safe,  remove any previous OSC  callbacks  (if any)
-	~osc.removeRendererCtlOSC.value();
 
-	// create OSC callbacks to control audio renderer
-	// e.g.  /satie/rendererCtl/setOutputDB -12
-	~osc.makeRendererCtlOSC( ~srCtl['satieRendererCallback'] );
 
 	s.sync;
 };  // end of  waitforboot

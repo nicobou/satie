@@ -222,10 +222,9 @@ if (~meter == nil,  { ~plotTree=s.meter;});
 
 
 // specify files to be loaded:
-// note;  satie4unity file must be first
 
 
-~startupfiles = [~rootSrcPath++"/protocols/satie4unity.scd", ~thisDir++"/"++~myProjectFIleName];
+~startupfiles = [~thisDir++"/"++~myProjectFIleName];
 
 // add additional files here
 ~startupfiles.add(~rootSrcPath++"/utils/dacTest.scd");
@@ -257,7 +256,7 @@ while (  { ~done != true} ,
 // load everything
 s.waitForBoot {
 
-	// load project file, Satie4Unity, and any other utility files
+	// load project file, and any  utility files
 	postf("main.scd:  loading needed files for % project \n", ~myProjectFIleName.splitext[0]);
 	~startupfiles.do { |f|  f.postln;  f.load ; s.sync;};
 	s.sync;

@@ -33,7 +33,7 @@ fi
 // user specified project file
 if [  -z $PROJECT_NAME ] ; then
     #default loads example with stereo listener
-    LAUNCH_FILE=examples/satie4UnityExample/main.scd
+    LAUNCH_FILE=examples/satieOSCexample/main.scd
 else
     LAUNCH_FILE=projects/$PROJECT_NAME/main.scd
 fi

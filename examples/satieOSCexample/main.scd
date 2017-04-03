@@ -20,7 +20,7 @@
 ~myProjectFIleName = "satieOSCexample.scd";
 
 // defaults to stereo
-~listeningFormat = \octoVBAP;    // you can also set this to  \domeVBAP  or  \labodomeVBAP  or   \octoVBAP
+~listeningFormat = \stereoListener;    // you can also set this to  \domeVBAP  or  \labodomeVBAP  or   \octoVBAP
 
 //~listeningFormat = \labodomeVBAP;    // you can also set this to  \domeVBAP  or  \labodomeVBAP  or   \octoVBAP
 
