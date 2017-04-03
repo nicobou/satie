@@ -1,74 +1,80 @@
-# Address space
+# Inbound OSC Messages
+## Scene Messages
 
--   **/satie:** the root address space. At this level we can create and delete synth instances and groups.
-    -   **/default:** group level, only methods affecting a group of synths should be used. The group and synths must already be created. A group `default` is already created on the server and synth instances are placed in the `default` group automatically, unless a different group is specified.
 
-# OSC messages
 
-## Handling sound sources
+```javascript
 
-### create
+/satie/scene createSource  nodeName  URI<plugin://synthdefName groupName<opt>   // default groupName = 'default'
+/satie/scene createSource  nodeName  URI<effect://synthdefName  optionalArgs: inbus N >   groupName<opt>   // defaults:  groupName = 'defaultFx',  inbus = 0
+/satie/scene createGroup nodeName   optionalURI<effect://>   // uri determines the DSP position of group (head or tail)   -defaults to head
+/satie/scene createProcess nodeName URI<uriPath process://processName optargs >   // unique group is automatically generated for each created process node
+/satie/scene deleteNode nodeName
+/satie/scene clear
 
-Create synth group:
+/satie/scene/set keyword value   // to set scene parameters like 'debugFlag 1'
+```
+## Project Messages
 
-`/satie create name`
+```javascript
 
-Create effect group:
+/satie/projectName setProjectDir   // full path to supercollider resources, such as soundfiles or midi files
 
-`/satie createFX name`
+```
 
-Create a group member:
+## Node Messages
 
-`/satie/group create name synthType`
 
-creates an instance of a SATIE synthDef. it also creates a group if the group does not exist.
+```javascript
 
--   Arguments:
-    -   **name:** unique identifier for the created object
-    -   **synthType:** the reference name of the synth or effect being used. The synth must have been compiled on the server with `~scbr.makeSynthDef` method before instantiating
+// for nodeTypes:  source, group, or process
+/satie/<nodeType>/state nodeName value  // 1=active 0=inactive
+/satie/<nodeType>/event nodeName eventName <opt> atom1 atom2...atomN    
+/satie/<nodeType>/set nodeName key1 val1 key2 val2 .... keyN valN
+/satie/<nodeType>/setvec nodeName key val1 .....  valN
 
-### delete
+// only for nodeTypes: source and process
+/satie/<nodeType>/update nodeName azimuthDegrees elevationDegrees gainDB delayMS  lpHZ  distanceMETERS
+/satie/<nodeType>/ublob nodeName byte1 ... byte12     // for update blob: packed encoded update message  (some loss)
 
-`/satie/group delete`
-`/satie/group/instance delete`
-delete a named instance from the SATIE server. *name* is the uniquely identified synth instance.
 
--   **Receiver:** `/satie`
+// only for noteType: process
+/satie/process/property processName key value   // to update a process environment property       
 
--   Arguments:
-    -   **name:** the named instance of the synth to remove
 
-### set
+```
+#### ublob message structure 
+```
+byte order
+aziDeg (1 byte:  unsigned 8bits: posivite wrapped angles 0 : 179 --> 0 : 127,  and -180 : -1 -->  128 : 255
+elevDeg ( same as above )
+gain (4 bytes:  unsigned 32bits:  amplitude * 100000)
+delay (2 bytes : unsigned 16bits:  delayMs * 10 )
+lpHz (2 bytes) : unsigned 16bits: 
+distanceM (2 bytes : unsigned 16bits:  distanceMeters *100 )
 
-`/satie/group set param value [param, value, ...]`
 
-`/satie/group/instance set param value [param, value, ...]`
+```
+## Processes message handling and method invocation
+```javascript
 
-sets parameter values to a SATIE instance. Any number of `param / value` pairs may be provided
+Optional Override handlers
 
--   Arguments
- -   **param:** parameter to affect, dependent on the instrument. The common parameters are:
-        
-| Parameter  | Unit     | Description                                     |
-|------------|----------|-------------------------------------------------|
-| `gainDB`   | decibels | gain                                            |
-| `aziDeg`   | degrees  | azimuth +/- 180                                 |
-| `elevDeg`  | degrees  | elevation +/- 90                                |
-| `delaySec` | seconds  | delay time for doppler effect                   |
-| `lpHz`     | hertz    | low pass filter for for doppler                 |
-| `spread`   | int      | panning spread, 0 - 100. 0 = narrow, 100 = omni |
-    
- -   **value:** parameter's value
+Message handelers can be defined in a processs environment. If defined, the handles will be called by satieOSC.
+They override satieOSCs corresponding generic handlers, that apply these messages to the processNodes group (or environment, in the case of the  'property' message
+satieOSC provides an override mechanism for the following  messages, which are handled by the corresponding process functions as shown:
 
-### clear
+/satie/process/update    processName  azi ele gdb del lpf dst    -->  handled by process[\update]
+/satie/process/property  processName  key value  -->  handled by process[\property]
+/satie/process/state     processName  state      -->   hadled by  process[\state]
+/satie/process/set       processName  key value  -->  handled by process[key]
+/satie/process/set       processName  key value  -->  handled by process[\set]   (unless process[key] is defined)
+/satie/process/setvec    processName  key  val1 .... valN      -->   handled by process[key]
 
-`/satie clear`
 
-remove all SATIE groups, their synths/effects and associated OSC addresses and reset to default.
+Custom key-specific message handlers  can be defiend for  'set'  and 'setvec'  messages
+If defined, satie4unity will call these handlers according to the 'key'  with corresponding arguments as shown:
+/satie/process/set nodeName key val    -->  hadled by  process[\key]   val
+/satie/process/setvec  nodeName key  val1 ... valN    -->   -->  hadled by  process[\key]  val1 ... valN
 
-# Workflow
-
-Basic workflow:
-
--   create groups for desired synths/effects
--   instantiate synths and effects in their groups
+```
