@@ -11,8 +11,12 @@
 /satie/scene createProcess nodeName URI<uriPath process://processName optargs >   // unique group is automatically generated for each created process node
 /satie/scene deleteNode nodeName
 /satie/scene clear
-
 /satie/scene/set keyword value   // to set scene parameters like 'debugFlag 1'
+
+// experimental
+/satie/scene/load filename    // loads and evaluates file in supercollider.  Filename must be a full file path to a file located on the audiorendering machine
+
+
 ```
 ## Project Messages
 
