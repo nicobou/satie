@@ -63,7 +63,7 @@ namespace OscSimpl
 			oscOut = target as OscOut;
 			if( messageBuffer == null ) messageBuffer = new Queue<OscMessage>( messageBufferCapacity );
 
-			// Get serialized properties
+			// Get serialized properties.
 			_openOnAwake = serializedObject.FindProperty("_openOnAwake");
 			_ipAddress = serializedObject.FindProperty("_ipAddress");
 			_port = serializedObject.FindProperty("_port");
@@ -72,7 +72,7 @@ namespace OscSimpl
 			_settingsFoldout = serializedObject.FindProperty("_settingsFoldout");
 			_messagesFoldout = serializedObject.FindProperty("_messagesFoldout");
 			
-			// Store socket info for change check workaround
+			// Store socket info for change check workaround.
 			tempIPAddress = _ipAddress.stringValue;
 			tempPort = _port.intValue;
 			
@@ -80,7 +80,7 @@ namespace OscSimpl
 			MonoScript script = MonoScript.FromMonoBehaviour( target as MonoBehaviour );
 			if( MonoImporter.GetExecutionOrder( script ) != executionOrderNum ) MonoImporter.SetExecutionOrder( script, executionOrderNum );
 			
-			// When object is selected in Edit Mode then we start listening
+			// When object is selected in Edit Mode then we start listening.
 			if( oscOut.enabled && !Application.isPlaying && !oscOut.isOpen ){
 				oscOut.Open( oscOut.port, oscOut.ipAddress );
 				statusInEditMode = oscOut.mode == OscSendMode.UnicastToSelf ? OscRemoteStatus.Connected : OscRemoteStatus.Unknown;
@@ -98,10 +98,10 @@ namespace OscSimpl
 		
 		void OnDisable()
 		{
-			// When object is deselected in Edit Mode then we stop listening
+			// When object is deselected in Edit Mode then we stop listening.
 			if( !Application.isPlaying && oscOut.isOpen ) oscOut.Close();
 			
-			// Unsubscribe from messsages
+			// Unsubscribe from messsages.
 			oscOut.onAnyMessage.RemoveListener( OnOSCMessage );
 		}
 		
@@ -114,10 +114,10 @@ namespace OscSimpl
 			// Check for key down before drawing any fields because they might consume the event.
 			bool enterKeyDown = Event.current.type == EventType.keyDown && Event.current.keyCode == KeyCode.Return;
 			
-			// Load serialized object
+			// Load serialized object.
 			serializedObject.Update();
 
-			// Port field
+			// Port field.
 			EditorGUI.BeginChangeCheck();
 			GUI.SetNextControlName( portControlName );
 			int newPort = EditorGUILayout.IntField( _portLabel, oscOut.port );
@@ -133,12 +133,12 @@ namespace OscSimpl
 				if( oscOut.Open( _port.intValue, _ipAddress.stringValue ) ){
 					tempPort = _port.intValue;
 				} else {
-					_port.intValue = tempPort; // undo
+					_port.intValue = tempPort; // Undo
 					oscOut.Open( _port.intValue, _ipAddress.stringValue );
 				}
 			}
 
-			// Mode field
+			// Mode field.
 			EditorGUI.BeginChangeCheck();
 			OscSendMode newMode = (OscSendMode) EditorGUILayout.EnumPopup( _modeLabel, oscOut.mode );
 			if( EditorGUI.EndChangeCheck() && newMode != oscOut.mode ){
@@ -151,7 +151,7 @@ namespace OscSimpl
 				UpdateStatusInEditMode();
 			}
 
-			// IP Address field
+			// IP Address field.
 			EditorGUI.BeginChangeCheck();
 			GUI.SetNextControlName( ipAddressControlName );
 			EditorGUILayout.BeginHorizontal();
@@ -185,16 +185,16 @@ namespace OscSimpl
 					tempIPAddress = _ipAddress.stringValue;
 					UpdateStatusInEditMode();
 				} else {
-					_ipAddress.stringValue = tempIPAddress; // undo
+					_ipAddress.stringValue = tempIPAddress; // Undo
 				}
 			}
 			
-			// Is Open field
+			// Is Open field.
 			EditorGUI.BeginDisabledGroup( true );
 			EditorGUILayout.Toggle( _isOpenLabel, oscOut.isOpen );
 			EditorGUI.EndDisabledGroup();
 
-			// Open On Awake field
+			// Open On Awake field.
 			EditorGUI.BeginDisabledGroup( Application.isPlaying );
 			EditorGUILayout.PropertyField( _openOnAwake, _openOnAwakeLabel );
 			EditorGUI.EndDisabledGroup();
@@ -205,19 +205,16 @@ namespace OscSimpl
 			_settingsFoldout.boolValue = EditorGUILayout.Foldout( _settingsFoldout.boolValue, _settingsFoldLabel );
 			if( _settingsFoldout.boolValue )
 			{
-				// Multicast loopback field
+				// Multicast loopback field.
 				EditorGUILayout.BeginHorizontal();
 				EditorGUILayout.LabelField( _multicastLoopbackLabel, GUILayout.Width( 150 ) );
 				GUILayout.FlexibleSpace();
 				EditorGUI.BeginChangeCheck();
 				_multicastLoopback.boolValue = EditorGUILayout.Toggle( _multicastLoopback.boolValue, GUILayout.Width( 30 ) );
-				if( EditorGUI.EndChangeCheck() && oscOut.mode == OscSendMode.Multicast ){
-					oscOut.multicastLoopback = _multicastLoopback.boolValue;
-					oscOut.Open( oscOut.port, oscOut.ipAddress );
-				}
+				if( EditorGUI.EndChangeCheck() && oscOut.mode == OscSendMode.Multicast ) oscOut.multicastLoopback = _multicastLoopback.boolValue;
 				EditorGUILayout.EndHorizontal();
 
-				// Bundle Messages On End Of Frame field
+				// Bundle Messages On End Of Frame field.
 				BoolSettingsField( _bundleMessagesOnEndOfFrame, _bundleMessagesOnEndOfFrameLabel );
 			}
 

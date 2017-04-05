@@ -6,13 +6,10 @@
 */
 
 using UnityEngine;
-using UnityEngine.Events;
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
 using System.Text.RegularExpressions;
 using OscSimpl;
 
@@ -84,7 +81,7 @@ public class OscOut : MonoBehaviour
 		get { return _multicastLoopback; }
 		set {
 			_multicastLoopback = value;
-			// Re-open
+			// Re-open.
 			if( isOpen && _mode == OscSendMode.Multicast ) Open( _port, _ipAddress );
 		}
 	}
@@ -116,7 +113,7 @@ public class OscOut : MonoBehaviour
 	[SerializeField] bool _settingsFoldout;
 	[SerializeField] bool _messagesFoldout;
 
-	// For keeping track of the ping coroutine
+	// For keeping track of the ping coroutine.
 	IEnumerator _pingCoroutine;
 
 	const float _pingInterval = 1f; // Seconds
@@ -131,7 +128,7 @@ public class OscOut : MonoBehaviour
 	}
 
 
-	// OnEnable is only called when Application.isPlaying
+	// OnEnable is only called when Application.isPlaying.
 	void OnEnable()
 	{
 		if( !isOpen && wasClosedOnDisable ) Open( _port, _ipAddress );
@@ -143,7 +140,7 @@ public class OscOut : MonoBehaviour
 		// Reset message count.
 		_messageCount = 0;
 
-		// Coroutines only work at runtime
+		// Coroutines only work at runtime.
 		if( Application.isPlaying && _bundleMessagesOnEndOfFrame ) StartCoroutine( SendBundleOnEndOfFrame() );
 	}
 
@@ -158,7 +155,7 @@ public class OscOut : MonoBehaviour
 	}
 
 
-	// OnEnable is only called when Application.isPlaying
+	// OnEnable is only called when Application.isPlaying.
 	void OnDisable()
 	{
 		if( isOpen ){
@@ -174,40 +171,29 @@ public class OscOut : MonoBehaviour
 		if( isOpen ) Close();
 	}
 
-    public bool Open( int port)
-    {
-        return Open_( port, "");
-    }
- 
-
-    public bool Open( int port, string ipAddress)
-    {
-        return Open_( port, ipAddress);
-
-    }
 	/// <summary>
 	/// Open to send messages to specified port and (optional) IP address.
 	/// If no IP address is given, messages will be send locally on this device.
 	/// Returns success status.
 	/// </summary>
-	private bool Open_( int port, string ipAddress)
+	public bool Open( int port, string ipAddress = "" )
 	{
-		// Close and stop pinging
+		// Close and stop pinging.
 		if( _udpClient != null ) Close();
 
-		// Validate IP
+		// Validate IP.
 		IPAddress ip;
 		if( string.IsNullOrEmpty( ipAddress ) ) ipAddress = IPAddress.Loopback.ToString();
 		if( ipAddress == IPAddress.Any.ToString() || !IPAddress.TryParse( ipAddress, out ip ) ){
-			Debug.LogWarning( "[OscOut] Open failed. Invalid IP address " + ipAddress + "." + Environment.NewLine );
+			Debug.LogWarning( "<b>[OscOut]</b> Open failed. Invalid IP address " + ipAddress + "." + Environment.NewLine );
 			return false;
 		} else if( ip.AddressFamily != AddressFamily.InterNetwork ){
-			Debug.LogWarning( "[OscOut] Open failed. Only IPv4 addresses are supported. " + ipAddress + " is " + ip.AddressFamily + "." + Environment.NewLine );
+			Debug.LogWarning( "<b>[OscOut]</b> Open failed. Only IPv4 addresses are supported. " + ipAddress + " is " + ip.AddressFamily + "." + Environment.NewLine );
 			return false;
 		}
 		_ipAddress = ipAddress;
 
-		// Detect and set transmission mode
+		// Detect and set transmission mode.
 		if( _ipAddress == IPAddress.Loopback.ToString() ){
 			_mode = OscSendMode.UnicastToSelf;
 		} else if( _ipAddress == IPAddress.Broadcast.ToString() ){
@@ -220,12 +206,12 @@ public class OscOut : MonoBehaviour
 
 		// Validate port number range
 		if( port < OscHelper.portMin || port > OscHelper.portMax ){
-			Debug.LogWarning( "[OscOut] Open failed. Port " + port + " is out of range." + Environment.NewLine );
+			Debug.LogWarning( "<b>[OscOut]</b> Open failed. Port " + port + " is out of range." + Environment.NewLine );
 			return false;
 		}
 		_port = port;
 
-		// Create new client and end point
+		// Create new client and end point.
 		_udpClient = new UdpClient();
 		_endPoint = new IPEndPoint( ip, _port );
 
@@ -235,7 +221,7 @@ public class OscOut : MonoBehaviour
 			 // Set a time to live, indicating how many routers the messages is allowed to be forwarded by.
 			_udpClient.Client.SetSocketOption( SocketOptionLevel.IP, SocketOptionName.MulticastTimeToLive, OscHelper.timeToLiveMax );
 
-			// Apply out multicastLoopback field
+			// Apply out multicastLoopback field.
 			_udpClient.MulticastLoopback = _multicastLoopback;
 		}
 
@@ -246,7 +232,7 @@ public class OscOut : MonoBehaviour
 		_udpClient.DontFragment = true;
 
 		// Set buffer size to windows limit since we can't tell the actual limit.
-		_udpClient.Client.SendBufferSize = OscHelper.udpPacketSizeMaxOnWindows;
+		//_udpClient.Client.SendBufferSize = OscHelper.udpPacketSizeMaxOnWindows;
 
 		// Note to self about buffer size:
 		// We can't get the MTU when Unity is using scripting backend ".NET 2.0 Subset" (in Unity 5.3).
@@ -284,7 +270,7 @@ public class OscOut : MonoBehaviour
 			case OscSendMode.UnicastToSelf: addressTypeString = "local"; break;
 			}
 			Debug.Log(
-				"[OscOut] Ready to send to " + addressTypeString + " address " + ipAddress + " on port " + port + "." + Environment.NewLine// + 
+				"<b>[OscOut]</b> Ready to send to " + addressTypeString + " address " + ipAddress + " on port " + port + "." + Environment.NewLine// + 
 				//"Buffer size: " + _udpClient.Client.SendBufferSize + " bytes."
 			);
 		}
@@ -335,7 +321,6 @@ public class OscOut : MonoBehaviour
 		// try to pack the message
 		byte[] data;
 		if( !packet.ToBytes( out data ) ) return false;
-		//Debug.Log( "Packet size: " + data.Length + " bytes" + Environment.NewLine );
 
 		try {
 			 // Send!!
@@ -353,15 +338,18 @@ public class OscOut : MonoBehaviour
 			} else if( ex.ErrorCode == 10049 ){ // "The requested address is not valid in this context"
 				// Ignore. We get this when we broadcast and have no access to the local network. For example if we are using a VPN.
 
+			} else if( ex.ErrorCode == 10061 ){ // "Connection refused"
+				// Ignore.
+
 			} else if( ex.ErrorCode == 10040 ){ // "Message too long"
-				Debug.LogWarning( "[OscOut] Failed to send message. Packet is too big (" + data.Length + " bytes)." );
+				Debug.LogWarning( "<b>[OscOut]</b> Failed to send message. Packet is too big (" + data.Length + " bytes)." );
 
 			} else {
-				Debug.LogWarning( "[OscOut] Failed to send message to " + ipAddress + " on port " + port + Environment.NewLine + ex.ErrorCode + ": " + ex.ToString() );
+				Debug.LogWarning( "<b>[OscOut]</b> Failed to send message to " + ipAddress + " on port " + port + Environment.NewLine + ex.ErrorCode + ": " + ex.ToString() );
 			}
 			return false;
 		} catch( Exception ex ) {
-			Debug.LogWarning( "[OscOut] Failed to send message to " + ipAddress + " on port " + port + Environment.NewLine + ex.ToString() );
+			Debug.LogWarning( "<b>[OscOut]</b> Failed to send message to " + ipAddress + " on port " + port + Environment.NewLine + ex.ToString() );
 			return false;
 		}
 

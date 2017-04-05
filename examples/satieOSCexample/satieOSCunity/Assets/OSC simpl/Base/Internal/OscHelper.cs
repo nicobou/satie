@@ -28,11 +28,14 @@ namespace OscSimpl
 		public const int portMax = 65535;
 
 		// http://stackoverflow.com/questions/1098897/what-is-the-largest-safe-udp-packet-size-on-the-internet
-		public const int udpPacketSizeMaxOnInternet = 512;
+		//public const int bufferSizeOnInternet = 512;
+
+		// https://msdn.microsoft.com/en-us/library/system.net.sockets.socket.receivebuffersize(v=vs.110).aspx
+		// https://github.com/Unity-Technologies/mono/blob/unity-staging/mcs/class/System/System.Net.Sockets/UdpClient.cs
+		//public const int bufferSizeDefault = 8192;
 
 		// http://stackoverflow.com/questions/1098897/what-is-the-largest-safe-udp-packet-size-on-the-internet
-		public const int udpPacketSizeMaxOnWindows = 65507;
-
+		//public const int bufferSizeOnWindows = 65507;
 
 		/// <summary>
 		/// Starts a coroutine in Edit Mode. Call UpdateCoroutineInEditMode subsequently on every update.

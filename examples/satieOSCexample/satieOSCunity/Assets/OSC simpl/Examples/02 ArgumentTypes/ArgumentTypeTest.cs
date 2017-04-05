@@ -103,7 +103,7 @@ namespace OscSimpl.Examples
 
 		#region send methods
 
-		// The following methods are meant to be called by Unity's runtime UI.
+		// The following methods are meant to be linked to Unity's runtime UI from the Unity Editor.
 
 
 		public void SendFloat( float value )
