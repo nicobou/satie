@@ -53,7 +53,7 @@ s.waitForBoot{
 	// instiante the satieOSC protocol, and set environment variable
 	if (~satieOsc == nil,{
 		~satieOsc = ~satieOSCProtocol.value(~osc, ~scbr, ~procMan);
-		//~satieOsc.debugFlag = true;
+		// ~satieOsc.debugFlag = false;
 	});
 
 

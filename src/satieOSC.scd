@@ -917,6 +917,7 @@ for debugguing
 		~createSourceNode = { | self, sourceName, uriString , groupName = \default, argsList|
 			var synthName;
 			var type;
+			~uriString = uriString;
 
 			// MAKE SURE URI STRING IS VALID -- if not, will post warning and be set to plugin://dummyPlugin
 			uriString = self.checkUri(sourceName, uriString);
@@ -982,6 +983,8 @@ for debugguing
 				// else  // path format ok, proceed
 				{
 					synthName = self.getUriName(uriString);
+					postln("synthname: "++synthName);
+
 					self.setSynth(sourceName.asSymbol, synthName);
 			});
 
@@ -1080,7 +1083,7 @@ for debugguing
 					if ( ( type == \effect) ,
 						{
 							inBus = self.getFxInBus(uriPath);
-							// postf("satieOSC.setSynth: assigning inBus: % to effects node % \n", satie.aux[inBus] , nodeName);
+							postf("satieOSC.setSynth: assigning inBus: % to effects node % -- %\n", satie.aux[inBus] , nodeName, validPluginName.asSymbol);
 							synth = satie.makeInstance(nodeName.asSymbol, validPluginName.asSymbol, groupName.asSymbol, [\in, satie.aux[inBus] ]);
 						},
 						// else
@@ -1170,12 +1173,17 @@ for debugguing
 		// Utility functions    ****************************************
 
 		~getUriName = { |  self, uriPath |
-			var stringArray = uriPath.asString.split($ );
+/*			var stringArray = uriPath.asString.split($ );
 			var charIndex = uriPath.asString.find("://");
 			var temp = uriPath.asString.subStr(charIndex);
-			var uriName = temp.asString.replace("://", "");
+			var uriName = temp.asString.replace("://", "");*/
+			var uriName, uriSynth;
+			~uriPAth = uriPath;
+			uriName = uriPath.asString.split($ );
+			uriSynth = uriName[0].asString.split($/)[2];
 
-			uriName.asString.split($ )[0].asString;
+			uriSynth.asString;
+			// uriName.asString.split($ )[0].asString;
 		};
 
 		~getUriType = { | self, uriPath |
@@ -1196,9 +1204,11 @@ for debugguing
 				{
 					charIndex = uriPath.asString.find("://");
 
-					temp = uriPath.asString.subStr(charIndex);
-					type = uriPath.asString.subStr(0, charIndex-1);
-					uriName = temp.asString.replace("://", "");
+					// temp = uriPath.asString.subStr(charIndex);
+					type = uriPath.asString.split($:)[0];
+					type.postln;
+					~type = type;
+					// uriName = temp.asString.replace("://", "");
 			});
 			type.asSymbol;
 		};
@@ -1209,6 +1219,7 @@ for debugguing
 			var stringArray;
 			var rawArgVec = nil;
 			var argList = List[];
+			var argsArray;
 
 			//("~getUriArgs:  URI: "++uriPath).postln;
 
@@ -1221,16 +1232,18 @@ for debugguing
 					[];
 				},
 				{
-					charIndex = stringArray[0].asString.find("://");
-					processName = stringArray[0].asString.subStr(charIndex+3);
+					// charIndex = stringArray[0].asString.find("://");
+					// processName = stringArray[0].asString.subStr(charIndex+3);
 
-					argsString = uriPath.asString.subStr(stringArray[0].size+1);
+					// argsString = uriPath.asString.subStr(stringArray[0].size+1);
+					// argsString = uriPath.asString.subStr(stringArray[0].size+1);
+					argsArray = uriPath.asString.split($ );
 
 					//argsString.postln;
 
-					rawArgVec= argsString.asString.split($ );
+					argsArray.removeAt(0);
 					// make list of items in argString
-					rawArgVec.do( { arg item;
+					argsArray.do( { arg item;
 						if ( item != "",
 							{
 								argList.add(item);
@@ -1247,6 +1260,7 @@ for debugguing
 			var satieBus;
 
 			var argList = self.getUriArgs(uriPath);
+			argList.postln;
 
 			// if there are two args, and the first arg is the keyword "inBus"then try to set the effect's \in param to the second arg
 			if (argList.size > 1,
