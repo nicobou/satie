@@ -24,7 +24,7 @@ echo
 #ls $SUPERCOLLIDER_DIR/sc-basic-renderer/examples/satie4UnityExample
 
 #default loads example
-LAUNCH_FILE=examples/satie4UnityExample/main.scd
+LAUNCH_FILE=examples/satieOSCexample/main.scd
 
 
 #number of input args
