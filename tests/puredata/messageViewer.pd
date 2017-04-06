@@ -1,4 +1,4 @@
-#N canvas 511 49 1785 1311 12;
+#N canvas 1271 122 1785 1311 12;
 #X obj 17 10 cnv 15 800 500 empty empty display_RX_renderer_messages
 20 12 0 18 -262130 -66577 0;
 #X obj 650 813 OSCtx;
@@ -40,10 +40,10 @@
 #X floatatom 1182 1025 5 0 0 0 - - -, f 5;
 #X msg 672 1199 /satie/source/set sourceA t_trig 0;
 #X obj 1086 1147 delay 50;
-#X msg 684 749 connect 192.168.0.255 18032;
-#X msg 958 687 /satie/scene load /Users/zack/Dropbox/Unity3D/audioRendering/sc/sc-basic-renderer/projects/ballJam/main.scd
+#X msg 684 749 connect localhost 18032;
+#X msg 958 687 /satie/load /Users/zack/Dropbox/Unity3D/audioRendering/sc/sc-basic-renderer/projects/ballJam/main.scd
 ;
-#X msg 958 761 /satie/scene load /Users/zack/src/balljam/satieProject/main.scd
+#X msg 958 761 /satie/load /Users/zack/src/balljam/satieProject/main.scd
 ;
 #X connect 2 0 39 0;
 #X connect 4 0 9 0;
