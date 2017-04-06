@@ -28,23 +28,23 @@ s.waitForBoot {
 
 	~num_aux_bus = 5;
 	// creating a sc-basic-renderer
-	~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus, satieSrcPath: ~rootSrcPath);
+	~satie = ~satieMaker.value(numAudioAux: ~num_aux_bus, satieSrcPath: ~rootSrcPath);
 	// printing internal aux array with bus indexes
-	// ~scbr.aux;
-	// ~scbr.auxbus.scope;
+	// ~satie.aux;
+	// ~satie.auxbus.scope;
 
 	// generating SynthDef that are going to be used,
 	// here a PinkSin source spatialized by
 	//   - a stereo panner (starting channel 0)
 	//   - a monoSpat (starting channel 2)
 	// mono input
-	~scbr.makeSynthDef(\monoIn, \MonoIn, [], [], [\quadVBAP, \stereoPanner], [0], \defaultMapper, []);
+	~satie.makeSynthDef(\monoIn, \MonoIn, [], [], [\quadVBAP, \stereoPanner], [0], \defaultMapper, []);
     // drone
-	~scbr.makeSynthDef(\tastee, \testee, [], [], [\quadVBAP], [0], \defaultMapper, []);
+	~satie.makeSynthDef(\tastee, \testee, [], [], [\quadVBAP], [0], \defaultMapper, []);
 	// be sure the synthDef is compiled on the server
 
 	// instantiate a renderer control object
-	~srCtl = ~satieRendererCtlMaker.value(~scbr);
+	~srCtl = ~satieRendererCtlMaker.value(~satie);
 
 	~osc = ~satieOSCMaker.value();   // create an OSC RX message mapper object receiveing on port 18032 by default
 

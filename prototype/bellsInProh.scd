@@ -1,6 +1,6 @@
 (
-//x =  ~scbr.makeKamikaze(\whatever, \particule1, \default, [
-x =  ~scbr.makeKamikaze(\whatever, \particule1, \default, [
+//x =  ~satie.makeKamikaze(\whatever, \particule1, \default, [
+x =  ~satie.makeKamikaze(\whatever, \particule1, \default, [
 	\aziDeg, 0, \eleDeg, 0, \gainDB, 0,\delayMs, 0, \lpHz , 22050, \hpHz, 0,
 	\decayMs, 1, \pitch, 47, \force, 1, \incidence, 1, \i_blockDelay, 2,  \t_trig, 1 ]);
 )
@@ -24,13 +24,13 @@ x = Synth(\sheefa, [
 s.scope
 
 (
-//x =  ~scbr.makeKamikaze(\whatever, \particule1, \default, [
-x =  ~scbr.makeInstance(\whatever, \particule1, \default, [
+//x =  ~satie.makeKamikaze(\whatever, \particule1, \default, [
+x =  ~satie.makeInstance(\whatever, \particule1, \default, [
 	\aziDeg, 0, \eleDeg, 0, \gainDB, 0,\delayMs, 400, \lpHz , 22050, \hpHz, 0,
 	\decayMs, 1, \pitch, 47, \force, 0.4, \incidence, 1]);
 x.set(\t_trig,  1);
 )
-~scbr.cleanInstance(\whatever);
+~satie.cleanInstance(\whatever);
 
 
 

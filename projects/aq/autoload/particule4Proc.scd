@@ -90,7 +90,7 @@ if (~particule4_pitchSequences == nil,
 	// add code here to manage project-specific stuff
 	postf("~particule4.clearSynths: clearing synths in node: % group \n", self.nodeName);
 	// var nodename=(self.nodeName++"_"++item).asSymbol;
-	// ~scbr.cleanInstance(nodename.asSymbol, self.nodeGroupName);
+	// ~satie.cleanInstance(nodename.asSymbol, self.nodeGroupName);
 	// });
 	~particule4_instances.removeAt(self.nodeName);
 };
@@ -99,7 +99,7 @@ if (~particule4_pitchSequences == nil,
 // required function but adaptable to project specifics
 // generates N synths
 ~particule4.setup = { | self, nodeName, nodeGroupName, argsList  |
-	var thisGroup = ~scbr.satieGroups[nodeGroupName.asSymbol] ;
+	var thisGroup = ~satie.satieGroups[nodeGroupName.asSymbol] ;
 
 	self.nodeName = nodeName;
 	self.nodeGroupName = nodeGroupName;
@@ -336,7 +336,7 @@ if (~particule4_pitchSequences == nil,
 
 
 						//name, synthDefName, group , synthArgs[]
-						/*				synth = ~scbr.makeKamikaze(nodename, self.synth.asSymbol, self.nodeGroupName, []);
+						/*				synth = ~satie.makeKamikaze(nodename, self.synth.asSymbol, self.nodeGroupName, []);
 						synth.set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB,\delayMs, delayMs, \lpHz , lpHz, \hpHz, hpHz,
 						\decayMs, self.decayMs, \pitch, self.pitch, \force, force, \incidence, incidence);   // \t_trig,  1
 						*/
@@ -344,7 +344,7 @@ if (~particule4_pitchSequences == nil,
 						if (item == 0,   // first clone sounds at give azi and elev
 							{
 								cloneParams = synthParams++ [\aziDeg, aziDeg,  \eleDeg, eleDeg,   \pitch, pitch, \t_trig, 1];
-								synth = ~scbr.makeKamikaze(nodename, self.synth.asSymbol, self.nodeGroupName, cloneParams);
+								synth = ~satie.makeKamikaze(nodename, self.synth.asSymbol, self.nodeGroupName, cloneParams);
 							},
 							{    // else schedule clone creation in the future with random deivation for azi and elev
 
@@ -358,7 +358,7 @@ if (~particule4_pitchSequences == nil,
 
 								TempoClock.default.sched( (cloneDeltaSecs * item).rand,
 									{
-										synth = ~scbr.makeKamikaze(nodename, self.synth.asSymbol, self.nodeGroupName, cloneParams);
+										synth = ~satie.makeKamikaze(nodename, self.synth.asSymbol, self.nodeGroupName, cloneParams);
 
 										nil });
 						});

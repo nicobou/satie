@@ -23,9 +23,9 @@ s.waitForBoot{
 
 
 	// create and initialize an instance of SATIE, and set environment variable
-	if (~scbr == nil,{
+	if (~satie == nil,{
 		postln("loading SATIE kernal...");
-		~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus, satieSrcPath: ~rootSrcPath);
+		~satie = ~satieMaker.value(numAudioAux: ~num_aux_bus, satieSrcPath: ~rootSrcPath);
 	});
 
 	// instantiate the OSC interface, and set environment variable
@@ -36,12 +36,12 @@ s.waitForBoot{
 
 	// instantiate a renderer control object, and set environment variable
 		if (~srCtl == nil,{
-		~srCtl = ~satieRendererCtlMaker.value(~scbr);
+		~srCtl = ~satieRendererCtlMaker.value(~satie);
 	});
 
 	// instiante the satie4Unity protocol, and set environment variable
 	if (~satie4unity == nil,{
-		~satie4unity = ~satie4unityprotocol.value(~osc, ~scbr);
+		~satie4unity = ~satie4unityprotocol.value(~osc, ~satie);
 		~satie4unity.projectDirectory = ~thisProjectResourcePath;
 	});
 
@@ -58,49 +58,49 @@ s.waitForBoot{
 	});
 
 		// required
-	~scbr.makeSynthDef(\dummyPlugin, \emptySource, [], [], [\emptySpat], [0]);    // dummy synthdef, used for new nodes - required for all projects
+	~satie.makeSynthDef(\dummyPlugin, \emptySource, [], [], [\emptySpat], [0]);    // dummy synthdef, used for new nodes - required for all projects
 
-/*		~scbr.makeSynthDef(\string_with_effects, \zkarpluck1, [~scbr.aux[0]], [~scbr.aux[1]], [\stereoPanner], [0], \defaultMapper);
+/*		~satie.makeSynthDef(\string_with_effects, \zkarpluck1, [~satie.aux[0]], [~satie.aux[1]], [\stereoPanner], [0], \defaultMapper);
 	// spatilized reverb effect (input will be set at creation):
-	~scbr.makeSynthDef(\busreverb, \freeverb, [], [], [\stereoPanner], [0]);*/
+	~satie.makeSynthDef(\busreverb, \freeverb, [], [], [\stereoPanner], [0]);*/
 
 
 	//  declare all the project's needed synthDefs here
 	postf("generating example project synthdefs for % format \n", ~listeningFormat);
-	~scbr.makeSynthDef(\zparticle1, \zparticle1, [], [], [~listeningFormat], [0]);
-	~scbr.makeSynthDef(\pink, \PinkSin, [], [], [~listeningFormat], [0]);
-	~scbr.makeSynthDef(\dust, \DustDust, [], [], [~listeningFormat], [0]);
-	~scbr.makeSynthDef(\default, \default, [~scbr.aux[~inBus0]], [], [~listeningFormat], [0]);
-	~scbr.makeSynthDef(\zkarpluck0, \zkarpluck0, [], [], [~listeningFormat], [0]);
-	//~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [], [], [~listeningFormat], [0]);
-	~scbr.makeSynthDef(\test, \testtone,  [], [], [~listeningFormat], [0]);
-	//~scbr.makeSynthDef(\zbell1, \zbell1, [], [], [~listeningFormat], [0]);
+	~satie.makeSynthDef(\zparticle1, \zparticle1, [], [], [~listeningFormat], [0]);
+	~satie.makeSynthDef(\pink, \PinkSin, [], [], [~listeningFormat], [0]);
+	~satie.makeSynthDef(\dust, \DustDust, [], [], [~listeningFormat], [0]);
+	~satie.makeSynthDef(\default, \default, [~satie.aux[~inBus0]], [], [~listeningFormat], [0]);
+	~satie.makeSynthDef(\zkarpluck0, \zkarpluck0, [], [], [~listeningFormat], [0]);
+	//~satie.makeSynthDef(\zkarpluck1, \zkarpluck1, [], [], [~listeningFormat], [0]);
+	~satie.makeSynthDef(\test, \testtone,  [], [], [~listeningFormat], [0]);
+	//~satie.makeSynthDef(\zbell1, \zbell1, [], [], [~listeningFormat], [0]);
 
-	~scbr.makeSynthDef(\pbell1, \pbell1, [], [], [~listeningFormat], [0]);
+	~satie.makeSynthDef(\pbell1, \pbell1, [], [], [~listeningFormat], [0]);
 	// same thing but with with reverb send
-	~scbr.makeSynthDef(\pbell1++'\:rev', \pbell1, [~scbr.aux[~inBus0]], [], [~listeningFormat], [0]);
+	~satie.makeSynthDef(\pbell1++'\:rev', \pbell1, [~satie.aux[~inBus0]], [], [~listeningFormat], [0]);
 
-	~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1, [], [], [~listeningFormat], [0]);
+	~satie.makeSynthDef(\zkarpluck1, \zkarpluck1, [], [], [~listeningFormat], [0]);
 	// same thing but with with reverb send
-	~scbr.makeSynthDef(\zkarpluck1++'\:rev', \zkarpluck1, [~scbr.aux[~inBus0]], [], [~listeningFormat], [0]);
+	~satie.makeSynthDef(\zkarpluck1++'\:rev', \zkarpluck1, [~satie.aux[~inBus0]], [], [~listeningFormat], [0]);
 
 	// effects node
-	~scbr.makeSynthDef(\busreverb, \freeverb, [], [], [~listeningFormat], [0]);
-	~scbr.makeSynthDef(\busgverb, \gverb, [], [], [~listeningFormat], [0]);
+	~satie.makeSynthDef(\busreverb, \freeverb, [], [], [~listeningFormat], [0]);
+	~satie.makeSynthDef(\busgverb, \gverb, [], [], [~listeningFormat], [0]);
 
 	// note order:   name, synthName, fxBusPre, fxBisPost, listenerName, outBusNo, mapName, optArgs
-	~scbr.makeSynthDef(\zkarpluck1P, \zkarpluck1P,   [~scbr.aux[~inBus0]], [], [~listeningFormat],  [0], \randOffsets1, []);   // for kamikazis
-	~scbr.makeSynthDef(\zkarpluck2P, \zkarpluck2P,   [~scbr.aux[~inBus0]],  [],[~listeningFormat],  [0], \randOffsets1, []);  // for resonant updated klones
-    ~scbr.makeSynthDef(\zkarpluck3P, \zkarpluck2P,   [],  [], [~listeningFormat],  [0], \defaultMapper, []);  //  for kamakazis with no clones
-    ~scbr.makeSynthDef(\zkarpluck3P++'\:rev', \zkarpluck2P,   [~scbr.aux[~inBus0]],  [],[~listeningFormat],  [0], \defaultMapper, []);  //  for kamakazis with no clones
-    ~scbr.makeSynthDef(\zkarpluck3P++'\:rev1', \zkarpluck2P,   [~scbr.aux[~inBus1]],  [],[~listeningFormat],  [0], \defaultMapper, []);  //  for kamakazis with no clones
+	~satie.makeSynthDef(\zkarpluck1P, \zkarpluck1P,   [~satie.aux[~inBus0]], [], [~listeningFormat],  [0], \randOffsets1, []);   // for kamikazis
+	~satie.makeSynthDef(\zkarpluck2P, \zkarpluck2P,   [~satie.aux[~inBus0]],  [],[~listeningFormat],  [0], \randOffsets1, []);  // for resonant updated klones
+    ~satie.makeSynthDef(\zkarpluck3P, \zkarpluck2P,   [],  [], [~listeningFormat],  [0], \defaultMapper, []);  //  for kamakazis with no clones
+    ~satie.makeSynthDef(\zkarpluck3P++'\:rev', \zkarpluck2P,   [~satie.aux[~inBus0]],  [],[~listeningFormat],  [0], \defaultMapper, []);  //  for kamakazis with no clones
+    ~satie.makeSynthDef(\zkarpluck3P++'\:rev1', \zkarpluck2P,   [~satie.aux[~inBus1]],  [],[~listeningFormat],  [0], \defaultMapper, []);  //  for kamakazis with no clones
 
 
 
 
-	~scbr.makeSynthDef(\particule1, \particule1,   [~scbr.aux[~inBus0]],  [],[~listeningFormat],  [0], \defaultMapper, []);  //  for kamakazis
+	~satie.makeSynthDef(\particule1, \particule1,   [~satie.aux[~inBus0]],  [],[~listeningFormat],  [0], \defaultMapper, []);  //  for kamakazis
 
-	~scbr.makeSynthDef(\particule1dyn, \particule1dyn,   [~scbr.aux[~inBus0]],  [],[~listeningFormat],  [0], \defaultMapper, []);  //  for allocated staticlly spatialized particles*/
+	~satie.makeSynthDef(\particule1dyn, \particule1dyn,   [~satie.aux[~inBus0]],  [],[~listeningFormat],  [0], \defaultMapper, []);  //  for allocated staticlly spatialized particles*/
 
 
 // - load soundfiles done automatically in the loadSamps file

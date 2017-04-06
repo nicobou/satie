@@ -67,13 +67,13 @@ s.waitForBoot {
 
 		switch (sfType,
 
-			"drop",   { ~scbr.makeSynthDef(sfName.asSymbol++'\:k:rev', \zPsamp1,  [~scbr.aux[~inBus0]],  [],[~listeningFormat],  [0], \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]); }, //  for kamakazis with no clones
+			"drop",   { ~satie.makeSynthDef(sfName.asSymbol++'\:k:rev', \zPsamp1,  [~satie.aux[~inBus0]],  [],[~listeningFormat],  [0], \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]); }, //  for kamakazis with no clones
 
 			"syncSampZombies", {
 				inform("loadSamps: MAKING makeSynthDef2 name:"++sfName.asSymbol++'\:k');
 
-				~scbr.makeSynthDef(sfName.asSymbol++'\:k', \syncSamp1,  [], [], [~listeningFormat],  [0], \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]);
-				~scbr.makeSynthDef(sfName.asSymbol++'\:k:rev', \syncSamp1,  [~scbr.aux[~inBus0]], [], [~listeningFormat],  [0], \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+				~satie.makeSynthDef(sfName.asSymbol++'\:k', \syncSamp1,  [], [], [~listeningFormat],  [0], \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+				~satie.makeSynthDef(sfName.asSymbol++'\:k:rev', \syncSamp1,  [~satie.aux[~inBus0]], [], [~listeningFormat],  [0], \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]);
 
 			}, //  for kamakazis with no clones
 
@@ -81,45 +81,45 @@ s.waitForBoot {
 				inform("loadSamps: MAKING makeSynthDef(s) for name:"++sfName.asSymbol);
 
 				// no reverb version
-				~scbr.makeSynthDef(sfName.asSymbol,   "3chLooper".asSymbol  ,[], [], [~listeningFormat], [0],  \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+				~satie.makeSynthDef(sfName.asSymbol,   "3chLooper".asSymbol  ,[], [], [~listeningFormat], [0],  \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]);
 
 				// note order:   name, synthName, fxBusPre, fxBisPost, listenerName, outBusNo, mapName, optArgs
-				//~scbr.makeSynthDef("3chBellyA.wav".asSymbol,   "3chLooper".asSymbol, [], [], [~listeningFormat], [0],  \defaultMapper, [~aqPlayBuffers["3chBellyA.wav".asSymbol].bufnum] );
+				//~satie.makeSynthDef("3chBellyA.wav".asSymbol,   "3chLooper".asSymbol, [], [], [~listeningFormat], [0],  \defaultMapper, [~aqPlayBuffers["3chBellyA.wav".asSymbol].bufnum] );
 
 				// version with  rev send, referenced by   pluginName:rev  inbus N
-				~scbr.makeSynthDef(sfName.asSymbol++'\:rev',  "3chLooper".asSymbol,  [~scbr.aux[~inBus0]], [], [~listeningFormat], [0],  \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]);
-				~scbr.makeSynthDef(sfName.asSymbol++'\:rev1',  "3chLooper".asSymbol, [~scbr.aux[~inBus1]], [], [~listeningFormat], [0],  \defaultMapper,  [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+				~satie.makeSynthDef(sfName.asSymbol++'\:rev',  "3chLooper".asSymbol,  [~satie.aux[~inBus0]], [], [~listeningFormat], [0],  \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+				~satie.makeSynthDef(sfName.asSymbol++'\:rev1',  "3chLooper".asSymbol, [~satie.aux[~inBus1]], [], [~listeningFormat], [0],  \defaultMapper,  [~aqPlayBuffers[sfName.asSymbol].bufnum]);
 			},
 			"6chLoopBuff", {
 				inform("loadSamps: MAKING makeSynthDef(s) for name:"++sfName.asSymbol);
 
 				// no reverb version
-				~scbr.makeSynthDef(sfName.asSymbol,   "6chLoopbuff".asSymbol, [], [],[~listeningFormat], [0],  \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+				~satie.makeSynthDef(sfName.asSymbol,   "6chLoopbuff".asSymbol, [], [],[~listeningFormat], [0],  \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]);
 
 				// version with  rev send, referenced by   pluginName:rev  inbus N
-				~scbr.makeSynthDef(sfName.asSymbol++'\:rev',  "6chLoopbuff".asSymbol,  [~scbr.aux[~inBus0]] ,  [], [~listeningFormat],  [0], \defaultMapper,  [~aqPlayBuffers[sfName.asSymbol].bufnum]);
-				~scbr.makeSynthDef(sfName.asSymbol++'\:rev1',  "6chLoopbuff".asSymbol,  [~scbr.aux[~inBus1]] ,  [], [~listeningFormat], [0],  \defaultMapper,  [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+				~satie.makeSynthDef(sfName.asSymbol++'\:rev',  "6chLoopbuff".asSymbol,  [~satie.aux[~inBus0]] ,  [], [~listeningFormat],  [0], \defaultMapper,  [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+				~satie.makeSynthDef(sfName.asSymbol++'\:rev1',  "6chLoopbuff".asSymbol,  [~satie.aux[~inBus1]] ,  [], [~listeningFormat], [0],  \defaultMapper,  [~aqPlayBuffers[sfName.asSymbol].bufnum]);
 			},
 
 
 			"normal",  {
 
-				//postf("FX buffer at: %", ~scbr.aux[~inBus0]);
+				//postf("FX buffer at: %", ~satie.aux[~inBus0]);
 
 				// create sample buffer playback with no rev send
-				~scbr.makeSynthDef(sfName.asSymbol, \sndBuffer, [], [],[~listeningFormat], [0], \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+				~satie.makeSynthDef(sfName.asSymbol, \sndBuffer, [], [],[~listeningFormat], [0], \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]);
 
 				// create sample buffer playback with  rev send, referenced by   pluginName:rev
-				~scbr.makeSynthDef(sfName.asSymbol++'\:rev', \sndBuffer,  [~scbr.aux[~inBus0]],  [],[~listeningFormat], [0],   \defaultMapper,  [~aqPlayBuffers[sfName.asSymbol].bufnum]);
-				~scbr.makeSynthDef(sfName.asSymbol++'\:rev1', \sndBuffer,  [~scbr.aux[~inBus1]],   [],[~listeningFormat], [0],  \defaultMapper , [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+				~satie.makeSynthDef(sfName.asSymbol++'\:rev', \sndBuffer,  [~satie.aux[~inBus0]],  [],[~listeningFormat], [0],   \defaultMapper,  [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+				~satie.makeSynthDef(sfName.asSymbol++'\:rev1', \sndBuffer,  [~satie.aux[~inBus1]],   [],[~listeningFormat], [0],  \defaultMapper , [~aqPlayBuffers[sfName.asSymbol].bufnum]);
 			},
 			"sndBuff2", {
 
-				//postf("FX buffer at: %", ~scbr.aux[~inBus0]);
+				//postf("FX buffer at: %", ~satie.aux[~inBus0]);
 
 				// create sample buffer playback with no rev send
-				~scbr.makeSynthDef(sfName.asSymbol, \sndBuffer2,[], [], [~listeningFormat], [0],  \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]);
-				~scbr.makeSynthDef(sfName.asSymbol++'\:rev', \sndBuffer2,[~scbr.aux[~inBus0]] , [], [~listeningFormat], [0],  \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+				~satie.makeSynthDef(sfName.asSymbol, \sndBuffer2,[], [], [~listeningFormat], [0],  \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]);
+				~satie.makeSynthDef(sfName.asSymbol++'\:rev', \sndBuffer2,[~satie.aux[~inBus0]] , [], [~listeningFormat], [0],  \defaultMapper, [~aqPlayBuffers[sfName.asSymbol].bufnum]);
 			}
 
 
@@ -135,9 +135,9 @@ s.waitForBoot {
 
 /*  test
 g = "myNoise_CaveWater_track01.0.M.wav".asSymbol
-~scbr.makeInstance(\sheefa, g, \default);
-~scbr.satieGroupInstances[\default][\sheefa].set(\gainDB, -30, \loop, 1);
-~scbr.satieGroupInstances[\default][\sheefa].set(\gainDB, -99, \loop, 0);
+~satie.makeInstance(\sheefa, g, \default);
+~satie.satieGroupInstances[\default][\sheefa].set(\gainDB, -30, \loop, 1);
+~satie.satieGroupInstances[\default][\sheefa].set(\gainDB, -99, \loop, 0);
 */
 
 

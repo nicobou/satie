@@ -39,10 +39,10 @@ m.action_({ |ez| (  ~setPreset.value( (ez.value)))});
 // proxyspace delay problem:
 
 // 250 ms delay with this
- //   ~scbr.satieGroups[\default][\ball_0].set(\t_trig, 1);
+ //   ~satie.satieGroups[\default][\ball_0].set(\t_trig, 1);
 
 // 0 ms delay with this
-//	~scbr.satieGroups[\default].group.set(\t_trig, 1);
+//	~satie.satieGroups[\default].group.set(\t_trig, 1);
 
 
 
@@ -67,11 +67,11 @@ OSCdef(\presetCallback, ~presetCallback, "/a.renderer/preset", recvPort: 18032);
 
 	~particule1_instances.do{ |item |
 		var groupName = item.nodeGroupName.asSymbol;
-		~scbr.satieGroups[groupName].set(pname.asSymbol, value);
+		~satie.satieGroups[groupName].set(pname.asSymbol, value);
 	};
 	~particule2_instances.do{ |item |
 		var groupName = item.nodeGroupName.asSymbol;
-		~scbr.satieGroups[groupName].set(pname.asSymbol, value);
+		~satie.satieGroups[groupName].set(pname.asSymbol, value);
 	};
 };
 
@@ -80,11 +80,11 @@ OSCdef(\presetCallback, ~presetCallback, "/a.renderer/preset", recvPort: 18032);
 
 	~particule1_instances.do{ |item |
 		var groupName = item.nodeGroupName.asSymbol;
-		~scbr.satieGroups[groupName].set(\c1, c1,  \c3, c3, \fb,  fb);
+		~satie.satieGroups[groupName].set(\c1, c1,  \c3, c3, \fb,  fb);
 	};
 	~particule2_instances.do{ |item |
 		var groupName = item.nodeGroupName.asSymbol;
-		~scbr.satieGroups[groupName].set(\c1, c1,  \c3, c3, \fb,  fb);
+		~satie.satieGroups[groupName].set(\c1, c1,  \c3, c3, \fb,  fb);
 	};
 };
 
@@ -186,6 +186,6 @@ OSCdef(\presetCallback, ~presetCallback, "/a.renderer/preset", recvPort: 18032);
 
 ~setPreset.value(2);
 
-//~scbr.satieGroups[\default].set(\decay, 0.0, \t_trig, 1)
+//~satie.satieGroups[\default].set(\decay, 0.0, \t_trig, 1)
 
 */ßßß

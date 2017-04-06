@@ -53,24 +53,24 @@ s.waitForBoot{
 	(~rootSrcPath ++ "/src/*.scd").pathMatch.do({arg item; item.loadPaths});
 
 	// creating a sc-basic-renderer
-	~scbr = ~scbrMaker.value(~rootSrcPath);
+	~satie = ~satieMaker.value(~rootSrcPath);
 	// loading source plugins
-	~scbr.pluginLoader.loadAudioPlugins(~rootSrcPath ++ "/audiosources/*.scd");
+	~satie.pluginLoader.loadAudioPlugins(~rootSrcPath ++ "/audiosources/*.scd");
 	// see the loaded plugins in the console
-	~scbr.pluginLoader.audioPlugins;
+	~satie.pluginLoader.audioPlugins;
 	// loading spatializer plugins
-	~scbr.pluginLoader.loadSpatPlugins(~rootSrcPath ++ "/spatializers/*.scd");
-	~scbr.pluginLoader.spatPlugins;
+	~satie.pluginLoader.loadSpatPlugins(~rootSrcPath ++ "/spatializers/*.scd");
+	~satie.pluginLoader.spatPlugins;
 	// generating SynthDef that are going to be used,
 	// here a PinkSin source spatialized by
 	//   - a stereo panner (starting channel 0)
 	//   - a monoSpat (starting channel 2)
-	//~scbr.makeSynthDef(\fool, \PinkSin, [\stereoPanner, \monoSpat], [0, 2]);
-	//~scbr.makeSynthDef(\string, \zkarpluck1, [\stereoPanner, \monoSpat], [0, 2]);
-	~scbr.makeSynthDef(\vbap31, \default, [\domeVBAP], [0]);
-	~scbr.makeSynthDef(\vbap8, \default, [\octoVBAP], [0]);
-	~scbr.makeSynthDef(\vbap24, \default, [\labodomeVBAP], [0]);
-	~scbr.makeSynthDef(\ztest1, \zkarpluck1, [\labodomeVBAP], [0]);
+	//~satie.makeSynthDef(\fool, \PinkSin, [\stereoPanner, \monoSpat], [0, 2]);
+	//~satie.makeSynthDef(\string, \zkarpluck1, [\stereoPanner, \monoSpat], [0, 2]);
+	~satie.makeSynthDef(\vbap31, \default, [\domeVBAP], [0]);
+	~satie.makeSynthDef(\vbap8, \default, [\octoVBAP], [0]);
+	~satie.makeSynthDef(\vbap24, \default, [\labodomeVBAP], [0]);
+	~satie.makeSynthDef(\ztest1, \zkarpluck1, [\labodomeVBAP], [0]);
 
 
 	// be sure the synthDef is compiled on the server

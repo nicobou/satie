@@ -14,9 +14,9 @@ s.waitForBoot{
 
 	~num_aux_bus = 5;
 	// creating a sc-basic-renderer
-	~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus, satieSrcPath: ~rootSrcPath);
+	~satie = ~satieMaker.value(numAudioAux: ~num_aux_bus, satieSrcPath: ~rootSrcPath);
 
-	~scbr.makeSynthDef2(\testtone, \testtone, [], [\octoVBAP], [0], \defaultMapper, []);
+	~satie.makeSynthDef2(\testtone, \testtone, [], [\octoVBAP], [0], \defaultMapper, []);
 
 	// be sure the synthDef is compiled on the server
 	s.sync;
@@ -30,11 +30,11 @@ s.waitForBoot{
 // (no sound since string must be trigered)
 
 // creating a custom group:
-~scbr.makeSatieGroup(\cpuTest);
+~satie.makeSatieGroup(\cpuTest);
 
 r = Routine {
 	loop {
-		~scbr.makeInstance((\test ++ rrand(0, 10000).asSymbol), \testtone, \cpuTest);
+		~satie.makeInstance((\test ++ rrand(0, 10000).asSymbol), \testtone, \cpuTest);
 		0.01.wait;
 	}
 };
@@ -44,11 +44,11 @@ r.stop;
 
 
 // see what we have
-~scbr.satieGroupInstances[\cpuTest];
+~satie.satieGroupInstances[\cpuTest];
 
 
 // then triger each string sequentially
-~seqtrig = Routine({ ~scbr.satieGroupInstances[\cpuTest].do({ |item|
+~seqtrig = Routine({ ~satie.satieGroupInstances[\cpuTest].do({ |item|
 	item.set(
 		\aziDeg, rrand(-180,180),
 		\eleDeg, rrand(0,90),

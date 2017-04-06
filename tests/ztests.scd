@@ -27,15 +27,15 @@ Server.default.options.dump;
 
 
 
-~scbr.satieGroups[\effect].["resonance-SC:spatOSCsource_1".asSymbol].set(\outputDB,10);
-~scbr.satieGroups[\effect].["resonance-SC:spatOSCsource_1".asSymbol].set(\room,0.9);
-~scbr.satieGroups[\effect].["resonance-SC:spatOSCsource_1".asSymbol].set(\damp,0.05);
+~satie.satieGroups[\effect].["resonance-SC:spatOSCsource_1".asSymbol].set(\outputDB,10);
+~satie.satieGroups[\effect].["resonance-SC:spatOSCsource_1".asSymbol].set(\room,0.9);
+~satie.satieGroups[\effect].["resonance-SC:spatOSCsource_1".asSymbol].set(\damp,0.05);
 
 
 ~setProperty.value("resonance-SC:spatOSCsource_1".asSymbol, \outputDB, -30);
 
 
-~scbr.satieGroups[\default].group;
+~satie.satieGroups[\default].group;
 
 
 ~dumpSatieGroups.value();
@@ -44,8 +44,8 @@ Server.default.options.dump;
 	var prox;
 	postf("~dumpSatieGroups\n");
 
-	~scbr.satieGroups.keysDo({ arg key;
-		prox = ~scbr.satieGroups[key];
+	~satie.satieGroups.keysDo({ arg key;
+		prox = ~satie.satieGroups[key];
 		postf("\t  proxySpace: %  group: %  existingProxies:% \n", key, prox.group, prox.existingProxies);
 
 	});
@@ -57,10 +57,10 @@ Server.default.options.dump;
 
 
 
-~scbr.satieGroups[\default].group;
+~satie.satieGroups[\default].group;
 
 
-//~scbr.satieGroups.removeAt(2);
+//~satie.satieGroups.removeAt(2);
 
 
 ~removeGroup.value(\sheefa);
@@ -74,13 +74,13 @@ Server.default.options.dump;
 	var groupNameSymb = groupName.asSymbol;
 		var index = -1 ;
 
-		~scbr.satieGroups.keysDo({ arg key, i;
+		~satie.satieGroups.keysDo({ arg key, i;
 		key.postln;
 		if ( key == groupNameSymb,
 				{
 				postf(" FOUND % at item % \n", groupNameSymb, i);
 				index = i;
-				~scbr.satieGroups[key].group.free;
+				~satie.satieGroups[key].group.free;
 
 		});
 
@@ -88,7 +88,7 @@ Server.default.options.dump;
 		});
 		if (index > -1,
 			{
-				~scbr.satieGroups.removeAt(index);
+				~satie.satieGroups.removeAt(index);
 
 				postf("~removeGroup: group %\n", groupName);
 		},
@@ -96,7 +96,7 @@ Server.default.options.dump;
 			{
 				postf("~~removeGroup: group %  not found \n", groupName);
 		});
-					~scbr.satieGroups.postln; };
+					~satie.satieGroups.postln; };
 
 
 
@@ -108,20 +108,20 @@ Server.default.options.dump;
 ************~~makeInstance:  name:sourceB_5    synthdef:default    pluck1_groupprox:
 
 
-~scbr.makeSatieGroup(\pluck1_group);
-~scbr.makeInstance(\sourceA_0, \default, \pluck1_group);
-~scbr.makeInstance(\sourceC_1, \default);
-~scbr.makeInstance(\sourceD_4, \default, \pluck1_group);
-~scbr.makeInstance(\sourceB_5, \default, \pluck1_group);
+~satie.makeSatieGroup(\pluck1_group);
+~satie.makeInstance(\sourceA_0, \default, \pluck1_group);
+~satie.makeInstance(\sourceC_1, \default);
+~satie.makeInstance(\sourceD_4, \default, \pluck1_group);
+~satie.makeInstance(\sourceB_5, \default, \pluck1_group);
 
 
 
-~scbr.cleanInstance(\sourceA_0, \pluck1_group);
-~scbr.cleanInstance(\sourceC_1);
-~scbr.cleanInstance(\sourceD_4, \pluck1_group);
-~scbr.cleanInstance(\sourceB_5, \pluck1_group);
+~satie.cleanInstance(\sourceA_0, \pluck1_group);
+~satie.cleanInstance(\sourceC_1);
+~satie.cleanInstance(\sourceD_4, \pluck1_group);
+~satie.cleanInstance(\sourceB_5, \pluck1_group);
 
-~scbr.cleanInstance(\sourceC_1)
+~satie.cleanInstance(\sourceC_1)
 
 
 
@@ -133,51 +133,51 @@ Server.default.options.dump;
 
 
 
-~scbr.satieGroups[\nil].group.query;
+~satie.satieGroups[\nil].group.query;
 
 
-~scbr.makeSatieGroup(~theGroup);
+~satie.makeSatieGroup(~theGroup);
 
 ~killSatieGroup.value( ~theGroup );
 
 
-~scbr.satieGroups[~theGroup].group.query;
-~scbr.satieGroups[~theGroup].existingProxies;
-~scbr.satieGroups[~theGroup].group.free;
+~satie.satieGroups[~theGroup].group.query;
+~satie.satieGroups[~theGroup].existingProxies;
+~satie.satieGroups[~theGroup].group.free;
 
-~scbr.satieGroups[~theGroup].remove;
+~satie.satieGroups[~theGroup].remove;
 
 
 
 ~allSourceNodes[\sourceB_3].at(\proxySymb)
 ~allSourceNodes[\sourceD_2].at(\proxySymb)
 
-~scbr.oscInterface.removeSourceOSC(nameSym);
+~satie.oscInterface.removeSourceOSC(nameSym);
 
 
 
-~scbr.satieGroups[groupName.asSymbol];
+~satie.satieGroups[groupName.asSymbol];
 
-~scbr.satieGroups[\pluck1_group].free;
-~scbr.satieGroups[\pluck1_group].group.query;
-~scbr.satieGroups[\pluck1_group].existingProxies;
-
-
-
-~scbr.satieGroups[\default]
-~scbr.satieGroups[\nil]
+~satie.satieGroups[\pluck1_group].free;
+~satie.satieGroups[\pluck1_group].group.query;
+~satie.satieGroups[\pluck1_group].existingProxies;
 
 
 
-
-~scbr.cleanInstance(\sourceA_0, \pluck1_group)
-
-~scbr.satieGroups[\nil].existingProxies
-~scbr.satieGroups[\pluck1_group].existingProxies
-~scbr.satieGroups[\default].existingProxies
+~satie.satieGroups[\default]
+~satie.satieGroups[\nil]
 
 
-~scbr.satieGroups[\pluck1_group].stop;
+
+
+~satie.cleanInstance(\sourceA_0, \pluck1_group)
+
+~satie.satieGroups[\nil].existingProxies
+~satie.satieGroups[\pluck1_group].existingProxies
+~satie.satieGroups[\default].existingProxies
+
+
+~satie.satieGroups[\pluck1_group].stop;
 
 
 //UGen.browse

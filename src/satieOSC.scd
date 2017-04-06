@@ -21,7 +21,7 @@ satieOSC's message specification is inspired from the SPATOSC specification  (se
 /*
 for debugguing
 
-~satieOSC = ~satieOSCProtocol.value(~osc, ~scbr);
+~satieOSC = ~satieOSCProtocol.value(~osc, ~satie);
 ~satieOSC.debugFlag = true;
 ~satieOSC.debugFlag = false;
 */
@@ -1431,7 +1431,7 @@ for debugguing
 /*
 for debugguing
 
-~satieOSC = ~satieOSCProtocol.value(~osc, ~scbr);
+~satieOSC = ~satieOSCProtocol.value(~osc, ~satie);
 ~satieOSC.debugFlag = true;
 ~satieOSC.debugFlag = false;
 */

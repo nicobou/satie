@@ -141,13 +141,13 @@ x = Synth(~name, [
 
 
 (
-x =  ~scbr.makeKamikaze(\whatever, \particule1, \default, [
+x =  ~satie.makeKamikaze(\whatever, \particule1, \default, [
 \aziDeg, 10, \eleDeg, 10, \gainDB, 0,\delayMs, 0, \lpHz , 20000, \hpHz, 10,
 \decayMs, 1, \pitch, 55, \force, 1, \incidence, 1, \t_trig, 1]);
 
 
 
-x =  ~scbr.makeKamikaze(\whatever, \particule1, \default);
+x =  ~satie.makeKamikaze(\whatever, \particule1, \default);
 )
 // \t_trig,  1
 

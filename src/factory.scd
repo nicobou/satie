@@ -12,7 +12,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (
-~scbrFactory = {
+~satieFactory = {
 	var e = Environment.make({
 
 		// Method ~makeSynthDef makes a source, n listeners and link them as follow:

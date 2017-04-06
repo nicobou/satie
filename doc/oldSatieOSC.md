@@ -25,7 +25,7 @@ creates an instance of a SATIE synthDef. it also creates a group if the group do
 
 -   Arguments:
     -   **name:** unique identifier for the created object
-    -   **synthType:** the reference name of the synth or effect being used. The synth must have been compiled on the server with `~scbr.makeSynthDef` method before instantiating
+    -   **synthType:** the reference name of the synth or effect being used. The synth must have been compiled on the server with `~satie.makeSynthDef` method before instantiating
 
 ### delete
 

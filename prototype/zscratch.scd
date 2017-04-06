@@ -48,11 +48,11 @@ x.routine.class.dumpMethodList
 
 10.do( {|item|
 	var nodename=("srcNodeSP"++"_"++item);
-~synth = ~scbr.satieGroupInstances[\srcNodeSP_group][nodename];
+~synth = ~satie.satieGroupInstances[\srcNodeSP_group][nodename];
 	~synth.set(\note, [ 60, 1, 1 ] );
 });
 
-~synth = ~scbr.satieGroupInstances[\srcNodeSP_group][\srcNodeSP_1]
+~synth = ~satie.satieGroupInstances[\srcNodeSP_group][\srcNodeSP_1]
 
 
 ~synth.set(\note, [ 60, 1, 1 ] );
@@ -112,7 +112,7 @@ p[\hpHz].class
 
 //gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1
 
-~bell = ~scbr.satieGroupInstances[\oceanScene][\bellSnd_6];
+~bell = ~satie.satieGroupInstances[\oceanScene][\bellSnd_6];
 
 
 
@@ -184,13 +184,13 @@ SynthDef(\prayer_bell,  ~function  ).add;
 
 
 
-~scbr.satieGroups[\whaleBellyScene].set(\note, #[60,0,0]);
+~satie.satieGroups[\whaleBellyScene].set(\note, #[60,0,0]);
 
-~scbr.satieGroups[\whaleBellyScene].set(\note, #[60,1,0]);
+~satie.satieGroups[\whaleBellyScene].set(\note, #[60,1,0]);
 
 
 
-~node = ~scbr.satieGroupInstances[\whaleBellyScene][\coreLoopBuff];
+~node = ~satie.satieGroupInstances[\whaleBellyScene][\coreLoopBuff];
 
 
 ~node.set(\note, #[60,1,1]);
@@ -206,7 +206,7 @@ SynthDef(\prayer_bell,  ~function  ).add;
 
 ~satie4unity.deleteSource(\bellSnd_1);
 
-~scbr.satieGroups[\oceanScene]
+~satie.satieGroups[\oceanScene]
 
 
 ~satie4unity.satieAuxBusCount;
@@ -219,40 +219,40 @@ SynthDef(\prayer_bell,  ~function  ).add;
 
 
 
-~scbr.satieGroups[\oceanScene].freeAll;
+~satie.satieGroups[\oceanScene].freeAll;
 
-~scbr.killSatieGroup(\oceanScene)
+~satie.killSatieGroup(\oceanScene)
 
 
-~scbr.satieGroupInstances[\oceanScene].size()
+~satie.satieGroupInstances[\oceanScene].size()
 
-~scbr.satieGroupInstances[\default][\vStem_61].dump
+~satie.satieGroupInstances[\default][\vStem_61].dump
 
 
 bad values:  15, 26, 29,51, 56,84, 95,
 
 
-~scbr.cleanInstance("bellSnd_3".asSymbol ,\oceanScene );
+~satie.cleanInstance("bellSnd_3".asSymbol ,\oceanScene );
 
 
 
-~scbr.cleanInstance("bellSnd_5".asSymbol ,\oceanScene );
+~satie.cleanInstance("bellSnd_5".asSymbol ,\oceanScene );
 
 
 
 
 ~bell.free
 
-~scbr.satieGroupInstances[\default]
+~satie.satieGroupInstances[\default]
 
 
-~scbr.satieGroupInstances[\default][vStem_63].free
+~satie.satieGroupInstances[\default][vStem_63].free
 
-~scbr.satieGroupInstances[\default][\vStem_18].set(\curve, 6, \warp, 5, \glide, 0, \note, #[60, 1, 1] );
+~satie.satieGroupInstances[\default][\vStem_18].set(\curve, 6, \warp, 5, \glide, 0, \note, #[60, 1, 1] );
 
-~scbr.satieGroupInstances[\default][\vStem_18].set(\glide, 0, \transp, 0, \startLoop, 0, \endLoop, 999999, \bufnum, b.bufnum, \note, #[60, 1, 1] );
+~satie.satieGroupInstances[\default][\vStem_18].set(\glide, 0, \transp, 0, \startLoop, 0, \endLoop, 999999, \bufnum, b.bufnum, \note, #[60, 1, 1] );
 
-~scbr.satieGroupInstances[\default][\vStem_18].set(\bufnum, b.bufnum);
+~satie.satieGroupInstances[\default][\vStem_18].set(\bufnum, b.bufnum);
 
 
 ~aqPlayBuffers["vortexDrone.aif".asSymbol]
@@ -261,23 +261,23 @@ b
 
 
 
-~scbr.satieGroupInstances[\oceanScene][\bellSnd_2].free
+~satie.satieGroupInstances[\oceanScene][\bellSnd_2].free
 
 
 
-~scbr.makeInstance(\sheefa, \busgverb, \effect);
+~satie.makeInstance(\sheefa, \busgverb, \effect);
 
-~scbr.makeInstance(\sheefa, \busgverb, \default);
+~satie.makeInstance(\sheefa, \busgverb, \default);
 
-		if ( ~scbr.satieGroups[\effect] == nil,
-			{~effectProx = ~scbr.makeSatieGroup(~satieFXgroupSym, \addToTail);}
+		if ( ~satie.satieGroups[\effect] == nil,
+			{~effectProx = ~satie.makeSatieGroup(~satieFXgroupSym, \addToTail);}
 		);
 
 
 ~satie4unity.allGroupNodes.size()
 
 
-~scbr.aux.size
+~satie.aux.size
 "sheefa".size
 
 
@@ -286,8 +286,8 @@ b
 ~cloneParams =[ \note, [ 60, 1, 1 ], \t_trig, 1 ];
 
 ~synthName="drops-95.wav:k:rev".asSymbol;
-x = ~scbr.makeKamikaze(\sheefa, ~synthName, \default, ~cloneParams);
-// x = ~scbr.makeInstance(\sheefa, ~synthName, \default);
+x = ~satie.makeKamikaze(\sheefa, ~synthName, \default, ~cloneParams);
+// x = ~satie.makeInstance(\sheefa, ~synthName, \default);
 x.set(\gainDB, 0);
 x.set(\t_trig, 1);
 )
@@ -298,7 +298,7 @@ x.set(\t_trig, 1);
 ~cloneParams =[ \gainDB, 0, \note, [ 60, 1, 1 ], \t_trig, 1 ];
 
 ~synthName="drops-95.wav:k:rev".asSymbol;
-x = ~scbr.makeKamikaze(\sheefa, ~synthName, \default, ~cloneParams);
+x = ~satie.makeKamikaze(\sheefa, ~synthName, \default, ~cloneParams);
 
 )
 
@@ -329,7 +329,7 @@ var n = item + ~incr;
 	~cloneParams =[ \gainDB, 0, \note, [ 60, (0.3 + (0.7*item)/100),  item/100 ], \t_trig, 1 ];
 
 // ~synthName="drops-"++ n++".wav:k:rev".asString;
-x = ~scbr.makeKamikaze(\sheefa, ~synthName, \default, ~cloneParams);
+x = ~satie.makeKamikaze(\sheefa, ~synthName, \default, ~cloneParams);
 
 
 
@@ -349,29 +349,29 @@ x = ~scbr.makeKamikaze(\sheefa, ~synthName, \default, ~cloneParams);
 
 
 
-~scbr.satieGroupInstances[\default][\digestion].set(\gainDB, -10);
+~satie.satieGroupInstances[\default][\digestion].set(\gainDB, -10);
 
 
 
-~scbr.satieGroupInstances[\default][\digestion].run(0);
+~satie.satieGroupInstances[\default][\digestion].run(0);
 
 
-~scbr.satieGroupInstances[\default][\sound].set(\loop, 1);
+~satie.satieGroupInstances[\default][\sound].set(\loop, 1);
 
-~scbr.satieGroupInstances[\default][\sound].set(\gainDB, -60.1);
+~satie.satieGroupInstances[\default][\sound].set(\gainDB, -60.1);
 
 TempoClock.default.sched(0.05,
 									{
-~scbr.satieGroupInstances[\default][\sound].set(\gainDB, -60.1);
+~satie.satieGroupInstances[\default][\sound].set(\gainDB, -60.1);
 
-~scbr.satieGroups[\default].set(\gainDB,  -30);
+~satie.satieGroups[\default].set(\gainDB,  -30);
 
 										nil });
 
 
 
 
-~scbr.satieGroupInstances[\default][\sound].set(\gainDB, -30);
+~satie.satieGroupInstances[\default][\sound].set(\gainDB, -30);
 
 
 
@@ -382,10 +382,10 @@ TempoClock.default.sched(0.05,
 
 ~myGroupName = \srcNodeSP_group;
 
-g = ~scbr.satieGroups[~myGroupName].set(\delayMs, 200, \attackDB, -44);
+g = ~satie.satieGroups[~myGroupName].set(\delayMs, 200, \attackDB, -44);
 
 
-g = ~scbr.satieGroups[~myGroupName].run(true);
+g = ~satie.satieGroups[~myGroupName].run(true);
 
 ~nodeName= \bellSnd_8;
 
@@ -444,17 +444,17 @@ g = ~scbr.satieGroups[~myGroupName].run(true);
 //~myProcess.put(~someKey.asSymbol, 33);
 
 
-	~scbr.satieGroups[~nodeGroupName].set(\c1, 0.7,  \c3, 3, \fb,  100);
+	~satie.satieGroups[~nodeGroupName].set(\c1, 0.7,  \c3, 3, \fb,  100);
 
 
 ~particule1_instances.do{ |item |
 	var groupName = item.nodeGroupName;
 
-	~scbr.satieGroups[groupName].set(\c1, 2,  \c3, 4, \fb,  100);
+	~satie.satieGroups[groupName].set(\c1, 2,  \c3, 4, \fb,  100);
 
 };
 
-	~scbr.satieGroups[groupName].set(\c1, 0.7,  \c3, 3, \fb,  100);
+	~satie.satieGroups[groupName].set(\c1, 0.7,  \c3, 3, \fb,  100);
 
 // 0.7, 3, 100
 
@@ -462,35 +462,35 @@ g = ~scbr.satieGroups[~myGroupName].run(true);
 
 // srcNode_0_group, srcNode_0_6
 
-~scbr.satieGroupInstances[~myGroupName][~cloneName].set(\note, [75,1,1], \t_trig, 1);
+~satie.satieGroupInstances[~myGroupName][~cloneName].set(\note, [75,1,1], \t_trig, 1);
 ~myProcess.put(triggerIntervalMs, 0);
 
-~scbr.satieGroupInstances[~myGroupName][~cloneName].set(\t_trig, 1);
+~satie.satieGroupInstances[~myGroupName][~cloneName].set(\t_trig, 1);
 
-~scbr.satieGroupInstances[~myGroupName][~cloneName].set(\cloudSpread, 2);
+~satie.satieGroupInstances[~myGroupName][~cloneName].set(\cloudSpread, 2);
 
 
 ~myGroup.set(\randTrigMaxMs, 0);
 //~myGroup.set(\t_trig, 1).free
 
 \srcNode_0
-~scbr.satieGroups[~myGroupName].set(\aziDeg,  -89, \eleiDeg,  0, \gainDB, -30, \note, [75,1,1], \t_trig, 1);
+~satie.satieGroups[~myGroupName].set(\aziDeg,  -89, \eleiDeg,  0, \gainDB, -30, \note, [75,1,1], \t_trig, 1);
 
-~scbr.satieGroups[~myGroupName].set(\cloudAziScale,  1, \cloudElevScale,  0, \t_trig, 1);
-~scbr.satieGroups[~myGroupName].set(\cloudAziScale,  0, \cloudElevScale,  0, \t_trig, 1);
+~satie.satieGroups[~myGroupName].set(\cloudAziScale,  1, \cloudElevScale,  0, \t_trig, 1);
+~satie.satieGroups[~myGroupName].set(\cloudAziScale,  0, \cloudElevScale,  0, \t_trig, 1);
 
 
-~scbr.satieGroups[~myGroupName].group.set(\t_trig, 1);
+~satie.satieGroups[~myGroupName].group.set(\t_trig, 1);
 
-{~scbr.satieGroupInstances[~myGroupName].keysDo{ |key |
+{~satie.satieGroupInstances[~myGroupName].keysDo{ |key |
 	var nodeSym = key;
 	// var synthName = "srcNode_"++item++"_group";
 
 
-	~scbr.satieGroupInstances[~myGroupName][key].set(\randTrigMaxMs, 0);
-	~scbr.satieGroupInstances[~myGroupName][key].set(\note, [89,1,1]);
+	~satie.satieGroupInstances[~myGroupName][key].set(\randTrigMaxMs, 0);
+	~satie.satieGroupInstances[~myGroupName][key].set(\note, [89,1,1]);
 
-	~scbr.satieGroupInstances[~myGroupName][key].set(\t_trig, 1);
+	~satie.satieGroupInstances[~myGroupName][key].set(\t_trig, 1);
 	key.postln;
 			0.2.wait;
 };}.fork
@@ -510,7 +510,7 @@ g = ~scbr.satieGroups[~myGroupName].run(true);
 //~myProcess.freeClones();
 
 
-//~scbr.cleanInstance(~cloneName,~myGroupName );
+//~satie.cleanInstance(~cloneName,~myGroupName );
 
 
 ~allSourceNodes[\ball_5].at(\groupNameSym);
@@ -518,16 +518,16 @@ g = ~scbr.satieGroups[~myGroupName].run(true);
 
 \srcNode_0
 
-~scbr.satieGroups[\srcNode_group];
-~scbr.satieGroups[\srcNode_1_group].set(\randTrigMaxMs, 0);
+~satie.satieGroups[\srcNode_group];
+~satie.satieGroups[\srcNode_1_group].set(\randTrigMaxMs, 0);
 
 
 
-~scbr.satieGroups[\srcNode_0_group].set(\aziDeg,  90);
-~scbr.satieGroups[\srcNode_0_group].set(\t_trig, 1);
+~satie.satieGroups[\srcNode_0_group].set(\aziDeg,  90);
+~satie.satieGroups[\srcNode_0_group].set(\t_trig, 1);
 
-~scbr.satieGroups[\srcNode_1_group].set(\aziDeg,  -90);
-~scbr.satieGroups[~myGroupName].set(\t_trig, 1);
+~satie.satieGroups[\srcNode_1_group].set(\aziDeg,  -90);
+~satie.satieGroups[~myGroupName].set(\t_trig, 1);
 
 
 
@@ -546,36 +546,36 @@ g = ~scbr.satieGroups[~myGroupName].run(true);
 
 ~allSourceNodes[\srcNode_0].at(\process) == ~allSourceNodes[\srcNode_1].at(\process);
 
-~scbr.satieGroupInstances[~myGroupName.asSymbol][~cloneName.asSymbol].set(\note, [89,1,1]);   // broken
+~satie.satieGroupInstances[~myGroupName.asSymbol][~cloneName.asSymbol].set(\note, [89,1,1]);   // broken
 
 // should be
 
-~scbr.satieGroupInstances[~myGroupName.asSymbol][~cloneName.asSymbol].set(\note, [89,1,1]);     // new style
+~satie.satieGroupInstances[~myGroupName.asSymbol][~cloneName.asSymbol].set(\note, [89,1,1]);     // new style
 
 
 
-~scbr.satieGroupInstances[~myGroupName.asSymbol][~cloneName.asSymbol].set(\t_trig, 1);
+~satie.satieGroupInstances[~myGroupName.asSymbol][~cloneName.asSymbol].set(\t_trig, 1);
 
 
 
-~scbr.satieGroups.keysDo{ |key |
+~satie.satieGroups.keysDo{ |key |
 	var nodeSym = key;
 
 	if (key != \default,
 		{
-			~scbr.killSatieGroup(key);
+			~satie.killSatieGroup(key);
 	});
 };
 
 
-~scbr.satieGroups
+~satie.satieGroups
 
 
 ( { arg key;
 
 	key.postln;
 
-	~scbr.killSatieGroup(nil);
+	~satie.killSatieGroup(nil);
 
 });
 
@@ -618,7 +618,7 @@ g = ~scbr.satieGroups[~myGroupName].run(true);
 	var nodeName=(~nodeName++"_"++item).asSymbol;
 	var groupName = ~myProcess.at(\nodeGroupName);
 	var synth;
-	synth = ~scbr.satieGroups[ groupName ][nodeName];
+	synth = ~satie.satieGroups[ groupName ][nodeName];
 	synth.set(\gainDB, -10);
 	synth.set(\t_trig, 1);
 });
@@ -633,7 +633,7 @@ g = ~scbr.satieGroups[~myGroupName].run(true);
 			var nodename=(~nodeName++"_"++item).asSymbol;
 	var synth;
 	{
-			synth = ~scbr.makeInstance(nodename.asSymbol, \default, ~myGroupName);
+			synth = ~satie.makeInstance(nodename.asSymbol, \default, ~myGroupName);
 		     s.sync;
 			synth.set(\gainDB, -3);
 	}.fork
@@ -649,7 +649,7 @@ g = ~scbr.satieGroups[~myGroupName].run(true);
 	var synth;
 	{
 		nodename.asSymbol.postln;
-			synth = ~scbr.cleanInstance(nodename.asSymbol, ~myGroupName);
+			synth = ~satie.cleanInstance(nodename.asSymbol, ~myGroupName);
 		     s.sync;
 			synth.set(\gainDB, -3);
 	}.fork
@@ -672,14 +672,14 @@ g = ~scbr.satieGroups[~myGroupName].run(true);
 
 ~synthName=~nodeName++"_12";
 
-~scbr.satieGroups[~myGroupName][~synthName.asSymbol ].set(\gainDB, -30);
+~satie.satieGroups[~myGroupName][~synthName.asSymbol ].set(\gainDB, -30);
 
-~synth  = ~scbr.satieGroups[~myGroupName][~synthName.asSymbol ];
+~synth  = ~satie.satieGroups[~myGroupName][~synthName.asSymbol ];
 
 ~synth.set(\gainDB, -90);
 
 
-~synth = ~scbr.makeInstance(~nodeName.asSymbol ,  \default, ~myGroupName);
+~synth = ~satie.makeInstance(~nodeName.asSymbol ,  \default, ~myGroupName);
 ~synth.dump
 
 ~synth.set(\gainDB, ~myProcess.at(\gainDB))
@@ -716,13 +716,13 @@ g = ~scbr.satieGroups[~myGroupName].run(true);
 
 
 
-~scbr.satieGroups[\default].group.set(\hpHz ,  800 );
+~satie.satieGroups[\default].group.set(\hpHz ,  800 );
 
-~scbr.satieGroups[\default].group.set(\hpHz ,  1 );
+~satie.satieGroups[\default].group.set(\hpHz ,  1 );
 
-~scbr.satieGroups[\default].group.set(\t_trig, 1)
+~satie.satieGroups[\default].group.set(\t_trig, 1)
 
-~scbr.satieGroups[\default].group.set(\decayscale, 0.6)
+~satie.satieGroups[\default].group.set(\decayscale, 0.6)
 
 
 ~setEvent.value(~nodeName, \t_trig, 1)
@@ -734,16 +734,16 @@ g = ~scbr.satieGroups[~myGroupName].run(true);
 
 
 
-~scbr.satieGroups[\effect].set(\aux, 0);
+~satie.satieGroups[\effect].set(\aux, 0);
 
-~scbr.satieGroups[\default].set(\t_trig, 1);
+~satie.satieGroups[\default].set(\t_trig, 1);
 
 
-~scbr.satieGroups[\default].group.set(\gainDB, 4);
+~satie.satieGroups[\default].group.set(\gainDB, 4);
 
-~scbr.satieGroups[\default].set(\gainDB, -200);
+~satie.satieGroups[\default].set(\gainDB, -200);
 
-~scbr.satieGroupInstances[\effect][\resonance_SC].set(\outputDB, -30);
+~satie.satieGroupInstances[\effect][\resonance_SC].set(\outputDB, -30);
 
 
 ~effectProx[\effect]
@@ -782,24 +782,24 @@ gainDB
 // proxyspace delay problem:
 
 // 250 ms delay with this
-~scbr.satieGroups[\default][~nodeName.asSymbol].set(\t_trig, 1);
+~satie.satieGroups[\default][~nodeName.asSymbol].set(\t_trig, 1);
 
 // 0 ms delay with this
-	~scbr.satieGroups[\default].group.set(\t_trig, 1);
+	~satie.satieGroups[\default].group.set(\t_trig, 1);
 
 
-~scbr.satieGroups[\default][~nodeName.asSymbol].set(\t_trig, 1);
-~scbr.satieGroups[\default].group.set(\t_trig, 1);
+~satie.satieGroups[\default][~nodeName.asSymbol].set(\t_trig, 1);
+~satie.satieGroups[\default].group.set(\t_trig, 1);
 
 
 
 		~cleanInstance = { | self, name, group = \default |
 
 
-	~scbr.satieGroupInstances[\default][name].release();
+	~satie.satieGroupInstances[\default][name].release();
 			// fadeTime must be higher than SATIE internal fadeTime:
-			~scbr.satieGroupInstances[group][name].clear(0.03);
-			~scbr.satieGroupInstances[group].removeAt(name);
+			~satie.satieGroupInstances[group][name].clear(0.03);
+			~satie.satieGroupInstances[group].removeAt(name);
 			nil;
 		};
 
@@ -961,7 +961,7 @@ t.stop;
 
 
 
-~setProperty.value(~reverbName, \in, ~scbr.aux[0]);
+~setProperty.value(~reverbName, \in, ~satie.aux[0]);
 ~setProperty.value(~reverbName, \outputDB, 10);
 ~setProperty.value(~reverbName, \mix, 1);  //wet only
 ~setProperty.value(~reverbName, \room, 0.8);

@@ -27,30 +27,30 @@ s.waitForBoot{
 
 	~num_aux_bus = 5;
 	// creating a sc-basic-renderer
-	~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus, satieSrcPath: ~rootSrcPath);
+	~satie = ~satieMaker.value(numAudioAux: ~num_aux_bus, satieSrcPath: ~rootSrcPath);
 	// printing internal aux array with bus indexes
-	~scbr.aux;
-    // ~scbr.auxbus.scope;
+	~satie.aux;
+    // ~satie.auxbus.scope;
 	// list plugins
-	~scbr.pluginLoader.audioPlugins;
-	~scbr.pluginLoader.spatPlugins;
-	~scbr.pluginLoader.effectPlugins;
-	~scbr.pluginLoader.mapperPlugins;
+	~satie.pluginLoader.audioPlugins;
+	~satie.pluginLoader.spatPlugins;
+	~satie.pluginLoader.effectPlugins;
+	~satie.pluginLoader.mapperPlugins;
 	// generating SynthDef that are going to be used,
 	// here a PinkSin source spatialized by
 	//   - a stereo panner (starting channel 0)
 	//   - a monoSpat (starting channel 2)
-	~scbr.makeSynthDef(\fool, \PinkSin, [], [], [\stereoPanner, \monoSpat], [0, 2]);
+	~satie.makeSynthDef(\fool, \PinkSin, [], [], [\stereoPanner, \monoSpat], [0, 2]);
 
-	~scbr.makeSynthDef(\string, \zkarpluck1, [], [], [\domeVBAP], [0]);
-	~scbr.makeSynthDef(\pinksin, \PinkSin, [], [], [\stereoPanner], [0]);
-	~scbr.makeSynthDef(\testtone, \testtone, [], [], [\stereoPanner], [0]);
+	~satie.makeSynthDef(\string, \zkarpluck1, [], [], [\domeVBAP], [0]);
+	~satie.makeSynthDef(\pinksin, \PinkSin, [], [], [\stereoPanner], [0]);
+	~satie.makeSynthDef(\testtone, \testtone, [], [], [\stereoPanner], [0]);
 	// writing to all aux busses (first is starting a 0):
-	~scbr.makeSynthDef(\string_all_aux, \zkarpluck1, ~scbr.aux, [], [\domeVBAP], [0], \defaultMapper);
+	~satie.makeSynthDef(\string_all_aux, \zkarpluck1, ~satie.aux, [], [\domeVBAP], [0], \defaultMapper);
 	// writing to only to the third audio bus
-	~scbr.makeSynthDef(\string_third_aux, \zkarpluck1, [~scbr.aux[2]], [], [\domeVBAP], [0], \defaultMapper);
+	~satie.makeSynthDef(\string_third_aux, \zkarpluck1, [~satie.aux[2]], [], [\domeVBAP], [0], \defaultMapper);
 	// spatilized reverb effect (input will be set at creation):
-	~scbr.makeSynthDef(\busreverb, \freeverb, [], [], [\stereoPanner], [0]);
+	~satie.makeSynthDef(\busreverb, \freeverb, [], [], [\stereoPanner], [0]);
 	// streaming a soundfile from disk
 	~playBuffers = (
 		// the first one will work only on linux
@@ -58,11 +58,11 @@ s.waitForBoot{
 		\boo: Buffer.cueSoundFile(s, Platform.resourceDir +/+ "sounds/a11wlk01.wav", 0, 1)
 	);
 	// load sound files using arguments
-	~scbr.makeSynthDef(\snd1, \sndFile, [], [], [\stereoPanner], [0], \defaultMapper, [~playBuffers[\boo].bufnum]);
-	~scbr.makeSynthDef(\snd2, \sndFile, [], [], [\stereoPanner], [0], \defaultMapper, [~playBuffers[\alsaTest].bufnum]);
+	~satie.makeSynthDef(\snd1, \sndFile, [], [], [\stereoPanner], [0], \defaultMapper, [~playBuffers[\boo].bufnum]);
+	~satie.makeSynthDef(\snd2, \sndFile, [], [], [\stereoPanner], [0], \defaultMapper, [~playBuffers[\alsaTest].bufnum]);
 	// load synths with arguments
-	~scbr.makeSynthDef(\pink400, \PinkSin, [], [], [\stereoPanner], [0], \defaultMapper, [], [400]);
-	~scbr.makeSynthDef(\pink800, \PinkSin, [], [], [\stereoPanner], [0], \defaultMapper, [], [800]);
+	~satie.makeSynthDef(\pink400, \PinkSin, [], [], [\stereoPanner], [0], \defaultMapper, [], [400]);
+	~satie.makeSynthDef(\pink800, \PinkSin, [], [], [\stereoPanner], [0], \defaultMapper, [], [800]);
 	// be sure the synthDef is compiled on the server
 	s.sync;
 
@@ -75,11 +75,11 @@ s.waitForBoot{
 // (no sound since string must be trigered)
 
 // creating a custom group:
-~scbr.makeSatieGroup(\cpuTest);
+~satie.makeSatieGroup(\cpuTest);
 
 r = Routine {
 	loop {
-		~scbr.makeInstance((\test ++ rrand(0, 10000).asSymbol), \string, \cpuTest);
+		~satie.makeInstance((\test ++ rrand(0, 10000).asSymbol), \string, \cpuTest);
 		0.1.wait;
 	}
 };
@@ -87,13 +87,14 @@ r.play;
 r.stop;
 
 // see what we have
-~scbr.satieGroupInstances[\cpuTest];
+~satie.satieGroupInstances[\cpuTest];
 
 
 // then triger each string sequentially
-~seqtrig = Routine({ ~scbr.satieGroupInstances[\cpuTest].do({ |item|
+~seqtrig = Routine({ ~satie.satieGroupInstances[\cpuTest].do({ |item|
 	item.set(
 		\t_trig, 1,
+		\gainDB, rrand(-30, -20),
 		\aziDeg, rrand(-180,180),
 		\eleDeg, rrand(0,90),
 		\note, rrand(42, 72), rrand(1, 2), rrand(0.1, 0.9));
@@ -104,9 +105,9 @@ r.stop;
 ~seqtrig.stop;
 
 // trig all once
-~scbr.satieGroups[\cpuTest].set(\gainDB, -45);
-~scbr.satieGroups[\cpuTest].set(\t_trig, 1);
-~scbr.satieGroups[\cpuTest].set(\t_trig, 1,
+~satie.satieGroups[\cpuTest].set(\gainDB, -45);
+~satie.satieGroups[\cpuTest].set(\t_trig, 1);
+~satie.satieGroups[\cpuTest].set(\t_trig, 1,
 	\note, rrand(42, 72), rrand(1, 2), rrand(0.1, 0.9),
 	\aziDeg, rrand(-180,180),
 	\eleDeg, rrand(0,90));
@@ -118,21 +119,21 @@ w.view.decorator=FlowLayout(w.view.bounds);
 w.view.decorator.gap=8@2;
 h = EZRanger(w, 380@20, "azi", ControlSpec(-180, 180, \lin, 0.1), initVal:[-60, 60],
 	action: {|sl|
-		~scbr.satieGroupInstances[\cpuTest].do({|item|
+		~satie.satieGroupInstances[\cpuTest].do({|item|
 			item.set(\aziDeg, rrand(sl.value[0], sl.value[1]))
 		});
 	}
 );
 i = EZRanger(w, 380@20, "elev", ControlSpec(0, 90, \lin, 0.1), initVal:[30, 60],
 	action: {|sl|
-		~scbr.satieGroupInstances[\cpuTest].do({|item|
+		~satie.satieGroupInstances[\cpuTest].do({|item|
 			item.set(\eleDeg, rrand(sl.value[0], sl.value[1]))
 		});
 	}
 );
 i = EZRanger(w, 380@20, "note", ControlSpec(42, 84, \lin, 0.25), initVal:[42, 60],
 	action: {|sl|
-		~scbr.satieGroupInstances[\cpuTest].do({|item|
+		~satie.satieGroupInstances[\cpuTest].do({|item|
 			var note = rrand(sl.value[0], sl.value[1]);
 			note.postln;
 			item.set(\note, note, rrand(1, 2), rrand(0.1, 0.9));
@@ -141,24 +142,7 @@ i = EZRanger(w, 380@20, "note", ControlSpec(42, 84, \lin, 0.25), initVal:[42, 60
 );
 
 j = EZSlider(w, 380@20, "spread", ControlSpec(0, 100, \lin, 0.1, 5));
-j.action_({ |ez| ( ~scbr.satieGroups[\cpuTest].set(\spread, (ez.value)))});
+j.action_({ |ez| ( ~satie.satieGroups[\cpuTest].set(\spread, (ez.value)))});
 b = Button(w, Rect(20, 20, 80, 26)).states_([["play", Color.black, Color.rand]]);
-b.action_({|ez| ~scbr.satieGroups[\cpuTest].set(\t_trig, 1)});
+b.action_({|ez| ~satie.satieGroups[\cpuTest].set(\t_trig, 1)});
 
-
-
-
-/*
-// change with gui
-w=Window.new("sheefa", Rect(30, 30, 400, 100)).front;
-w.view.decorator=FlowLayout(w.view.bounds);
-w.view.decorator.gap=8@2;
-h = EZSlider(w, 380@20, "azi", ControlSpec(-180, 180, \lin, 0.1, 0));
-h.action_({ |ez| ( ez.value.postln; ~scbr.satieGroups[\cpuTest].set(\aziDeg, (ez.value)))});
-i = EZSlider(w, 380@20, "elev", ControlSpec(-90, 90, \lin, 0.1, 0));
-i.action_({ |ez| ( ~scbr.satieGroups[\cpuTest].set(\eleDeg, (ez.value)))});
-j = EZSlider(w, 380@20, "spread", ControlSpec(0, 100, \lin, 0.1, 5));
-j.action_({ |ez| ( ~scbr.satieGroups[\cpuTest].set(\spread, (ez.value)))});
-b = Button(w, Rect(20, 20, 80, 26)).states_([["play", Color.black, Color.rand]]);
-b.action_({|ez| ~scbr.satieGroups[\cpuTest].set(\t_trig, 1)});
-*/

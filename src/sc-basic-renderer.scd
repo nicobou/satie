@@ -13,7 +13,7 @@
 
 
 (
-~scbrMaker = { | numAudioAux = 0, satieSrcPath|
+~satieMaker = { | numAudioAux = 0, satieSrcPath|
 	var e = Environment.make({
 		// TODO use try catch with this
 		~pluginLoader;
@@ -107,8 +107,8 @@
 	e.know = true;
 	e.auxbus = Bus.audio(s, numAudioAux);
 	e.aux = Array.fill(numAudioAux, {arg i; e.auxbus.index + i });
-	e.pluginLoader = ~scbrPlugins.value();
-	e.synthDefFactory = ~scbrFactory.value();
+	e.pluginLoader = ~satiePlugins.value();
+	e.synthDefFactory = ~satieFactory.value();
 	e.defaultSatieGroup = e.makeSatieGroup();
 	e.satieGroups.put(\default, e.defaultSatieGroup);
 	e.satieGroupInstances.put(\default, Dictionary.new);
@@ -119,5 +119,5 @@
 	e.pluginLoader.loadEffectPlugins(e.satieSrcPath ++ "/effects/*.scd");
 	e.pluginLoader.loadMapperPlugins(e.satieSrcPath ++ "/mappers/*.scd");
 	e;  // return
-};  // scbrMaker
+};  // satieMaker
 )

@@ -85,7 +85,7 @@ if (~particuleAlloc1_pitchSequences == nil,
 	postf("~particuleAlloc1.clearSynths: clearing synths in node: % group \n", self.nodeName);
 	self.voicePool.do( { arg item;
 		var nodename=(self.nodeName++"_"++item).asSymbol;
-		~scbr.cleanInstance(nodename.asSymbol, self.nodeGroupName);
+		~satie.cleanInstance(nodename.asSymbol, self.nodeGroupName);
 	});
 	~particuleAlloc1_instances.removeAt(self.nodeName);
 };
@@ -96,7 +96,7 @@ if (~particuleAlloc1_pitchSequences == nil,
 
 // optional args:  (order important):    voiceCount, synthName
 ~particuleAlloc1.setup = { | self, nodeName, nodeGroupName, argsList  |
-	var thisGroup = ~scbr.satieGroups[nodeGroupName.asSymbol] ;
+	var thisGroup = ~satie.satieGroups[nodeGroupName.asSymbol] ;
 
 	self.nodeName = nodeName;
 	self.nodeGroupName = nodeGroupName;
@@ -147,7 +147,7 @@ if (~particuleAlloc1_pitchSequences == nil,
 		var nodename=(self.nodeName++"_"++item).asSymbol;
 		var synth;
 
-		synth = ~scbr.makeInstance(nodename.asSymbol, self.synthName.asSymbol, self.nodeGroupName);
+		synth = ~satie.makeInstance(nodename.asSymbol, self.synthName.asSymbol, self.nodeGroupName);
 		self.voiceVector.add(synth);
 		synth.set(\gainDB, -99);  // instantiate full attenuated
 		synth.run(false);

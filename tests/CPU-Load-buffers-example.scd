@@ -14,15 +14,15 @@ s.waitForBoot{
 
 	~num_aux_bus = 5;
 	// creating a sc-basic-renderer
-	~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus, satieSrcPath: ~rootSrcPath);
+	~satie = ~satieMaker.value(numAudioAux: ~num_aux_bus, satieSrcPath: ~rootSrcPath);
 	// printing internal aux array with bus indexes
-	~scbr.aux;
-    // ~scbr.auxbus.scope;
+	~satie.aux;
+    // ~satie.auxbus.scope;
 	// list plugins
-	~scbr.pluginLoader.audioPlugins;
-	~scbr.pluginLoader.spatPlugins;
-	~scbr.pluginLoader.effectPlugins;
-	~scbr.pluginLoader.mapperPlugins;
+	~satie.pluginLoader.audioPlugins;
+	~satie.pluginLoader.spatPlugins;
+	~satie.pluginLoader.effectPlugins;
+	~satie.pluginLoader.mapperPlugins;
 	// streaming a soundfile from disk
 	~playBuffers = (
 		// the first one will work only on linux
@@ -30,10 +30,10 @@ s.waitForBoot{
 		\boo: Buffer.cueSoundFile(s, Platform.resourceDir +/+ "sounds/a11wlk01.wav", 0, 1, bufferSize: 40*2*o.blockSize)
 	);
 	// load sound files using arguments
-	~scbr.makeSynthDef2(\snd1, \sndBuffer, [], [\octoVBAP], [0], \defaultMapper, [~playBuffers[\boo].bufnum]);
-	//~scbr.makeSynthDef(\snd2, \sndBuffer, [\domeVBAP], [0], [], [~playBuffers[\alsaTest].bufnum]);
+	~satie.makeSynthDef2(\snd1, \sndBuffer, [], [\octoVBAP], [0], \defaultMapper, [~playBuffers[\boo].bufnum]);
+	//~satie.makeSynthDef(\snd2, \sndBuffer, [\domeVBAP], [0], [], [~playBuffers[\alsaTest].bufnum]);
 
-	~scbr.makeSynthDef2(
+	~satie.makeSynthDef2(
 		\string,
 		\zkarpluck1,
 		[],
@@ -55,11 +55,11 @@ s.waitForBoot{
 // (no sound since string must be trigered)
 
 // creating a custom group:
-~scbr.makeSatieGroup(\cpuTest);
+~satie.makeSatieGroup(\cpuTest);
 
 r = Routine {
 	loop {
-		~scbr.makeInstance((\test ++ rrand(0, 10000).asSymbol), \snd2, \cpuTest);
+		~satie.makeInstance((\test ++ rrand(0, 10000).asSymbol), \snd2, \cpuTest);
 		0.01.wait;
 	}
 };
@@ -67,11 +67,11 @@ r.play;
 r.stop;
 
 // see what we have
-~scbr.satieGroupInstances[\cpuTest];
+~satie.satieGroupInstances[\cpuTest];
 
 
 // then triger each string sequentially
-~seqtrig = Routine({ ~scbr.satieGroupInstances[\cpuTest].do({ |item|
+~seqtrig = Routine({ ~satie.satieGroupInstances[\cpuTest].do({ |item|
 	item.set(
 		\loop, 1,
 		\gainDB, rrand(-65, -40),
@@ -85,13 +85,13 @@ r.stop;
 ~seqtrig.reset; // hit it before playing again
 ~seqtrig.stop;
 
-~scbr.makeInstance(\soundOne, \snd1, \default);
-~scbr.makeInstance(\soundTwo, \snd2, \default);
+~satie.makeInstance(\soundOne, \snd1, \default);
+~satie.makeInstance(\soundTwo, \snd2, \default);
 
 
-~scbr.satieGroupInstances[\default][\soundOne].set(\gainDB, -30, \loop, 1, \t_trig, 1);
-~scbr.satieGroupInstances[\default][\soundTwo].set(\gainDB, -30, \loop, 1);
+~satie.satieGroupInstances[\default][\soundOne].set(\gainDB, -30, \loop, 1, \t_trig, 1);
+~satie.satieGroupInstances[\default][\soundTwo].set(\gainDB, -30, \loop, 1);
 
-~scbr.satieGroups[\cpuTest].set(\loop, 0);
+~satie.satieGroups[\cpuTest].set(\loop, 0);
 
 2**20

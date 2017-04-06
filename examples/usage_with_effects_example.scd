@@ -25,16 +25,16 @@ s.waitForBoot {
 	// creating 2 busses in order to route pre and post source audio
 	~num_aux_bus = 2;
 	// creating a sc-basic-renderer
-	~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus, satieSrcPath: ~rootSrcPath);
+	~satie = ~satieMaker.value(numAudioAux: ~num_aux_bus, satieSrcPath: ~rootSrcPath);
 	// printing internal aux array with bus indexes
-	// ~scbr.aux;
+	// ~satie.aux;
 	// monitoring pre and post busses
-	~scbr.auxbus.scope;
+	~satie.auxbus.scope;
 
 	// writing to only to the third audio bus
-	~scbr.makeSynthDef(\string_with_effects, \zkarpluck1, [~scbr.aux[0]], [~scbr.aux[1]], [\stereoPanner], [0], \defaultMapper);
+	~satie.makeSynthDef(\string_with_effects, \zkarpluck1, [~satie.aux[0]], [~satie.aux[1]], [\stereoPanner], [0], \defaultMapper);
 	// spatilized reverb effect (input will be set at creation):
-	~scbr.makeSynthDef(\busreverb, \freeverb, [], [], [\stereoPanner], [0]);
+	~satie.makeSynthDef(\busreverb, \freeverb, [], [], [\stereoPanner], [0]);
 	s.sync;
 	s.makeGui;
 	s.meter;
@@ -46,32 +46,32 @@ s.waitForBoot {
 
 // making two trigered sound source
 (
-~scbr.makeInstance(\test_src, \string_with_effects);
-~scbr.satieGroups[\default].set(\gainDB, -20);
-~scbr.satieGroupInstances[\default][\test_src].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
+~satie.makeInstance(\test_src, \string_with_effects);
+~satie.satieGroups[\default].set(\gainDB, -20);
+~satie.satieGroupInstances[\default][\test_src].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
 // making a group for effects. We need them to be added to tail for being computed after the source sound.
-~scbr.makeSatieGroup(\effect, \addToTail);
+~satie.makeSatieGroup(\effect, \addToTail);
 )
 
 // Adding reverb to the pre bus (left).
 (
-~scbr.makeInstance(\rev_pre, \busreverb, \effect);
-~scbr.satieGroupInstances[\effect][\rev_pre].set(\in, ~scbr.aux[0]);  // attached to source Pre bus
+~satie.makeInstance(\rev_pre, \busreverb, \effect);
+~satie.satieGroupInstances[\effect][\rev_pre].set(\in, ~satie.aux[0]);  // attached to source Pre bus
 // Note the volume of the effect is reduced since it is reading the
 // "raw" audio from the pre bus, where sound source volume control has no effect:
-~scbr.satieGroupInstances[\effect][\rev_pre].set(\mix, 1 /*wet only*/, \room, 0.3, \damp, 1, \aziDeg, -180/*left*/, \gainDB, -20);
+~satie.satieGroupInstances[\effect][\rev_pre].set(\mix, 1 /*wet only*/, \room, 0.3, \damp, 1, \aziDeg, -180/*left*/, \gainDB, -20);
 // listen: string is centered and rev_pre is located on the left
-~scbr.satieGroupInstances[\default][\test_src].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
+~satie.satieGroupInstances[\default][\test_src].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
 )
 
 // Adding reverd to the post bus (right).
 (
-~scbr.makeInstance(\rev_post, \busreverb, \effect);
-~scbr.satieGroupInstances[\effect][\rev_post].set(\in, ~scbr.aux[1]);  // attached to source Post bus
-~scbr.satieGroupInstances[\effect][\rev_post].set(
+~satie.makeInstance(\rev_post, \busreverb, \effect);
+~satie.satieGroupInstances[\effect][\rev_post].set(\in, ~satie.aux[1]);  // attached to source Post bus
+~satie.satieGroupInstances[\effect][\rev_post].set(
 	\mix, 1 /*wet only*/, \room, 0.9, \damp, 1, \aziDeg, 180/*right*/, \gainDB, 0);
 // listen: post reverb is on the right
-~scbr.satieGroupInstances[\default][\test_src].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
+~satie.satieGroupInstances[\default][\test_src].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
 )
 
 

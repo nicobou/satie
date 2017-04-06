@@ -12,7 +12,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (
-~scbrPlugins = {
+~satiePlugins = {
 	var e = Environment.make({
 		~audioPlugins = Dictionary.new;
 		~loadAudioPlugins = { | self,  path = "./*.scd" |
@@ -49,5 +49,5 @@
 	});  // Environment.make
 	e.know = true;
 	e;
-};  // scbrPlugins
+};  // satiePlugins
 )

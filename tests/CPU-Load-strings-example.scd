@@ -14,9 +14,9 @@ s.waitForBoot{
 
 	~num_aux_bus = 5;
 	// creating a sc-basic-renderer
-	~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus, satieSrcPath: ~rootSrcPath);
+	~satie = ~satieMaker.value(numAudioAux: ~num_aux_bus, satieSrcPath: ~rootSrcPath);
 
-	~scbr.makeSynthDef2(
+	~satie.makeSynthDef2(
 		\string,
 		\zkarpluck1,
 		[],
@@ -34,11 +34,11 @@ s.waitForBoot{
 // (no sound since string must be trigered)
 
 // creating a custom group:
-~scbr.makeSatieGroup(\cpuTest);
+~satie.makeSatieGroup(\cpuTest);
 
 r = Routine {
 	loop {
-		~scbr.makeInstance((\test ++ rrand(0, 10000).asSymbol), \string, \cpuTest);
+		~satie.makeInstance((\test ++ rrand(0, 10000).asSymbol), \string, \cpuTest);
 		0.1.wait;
 	}
 };
@@ -47,10 +47,10 @@ r.next;
 r.stop;
 
 // see what we have
-~scbr.satieGroupInstances[\cpuTest];
+~satie.satieGroupInstances[\cpuTest];
 
 // then triger each string sequentially
-~seqtrig = Routine({ ~scbr.satieGroupInstances[\cpuTest].do({ |item|
+~seqtrig = Routine({ ~satie.satieGroupInstances[\cpuTest].do({ |item|
 	item.set(
 		\t_trig, 1,
 		\aziDeg, rrand(-180,180),
@@ -58,7 +58,7 @@ r.stop;
 		\note, rrand(42, 72), rrand(1, 2), rrand(0.1, 0.9));
 	rrand(0.05, 0.1).wait;
 	});});
-~scbr.satieGroups[\cpuTest].set(\gainDB, -50);
+~satie.satieGroups[\cpuTest].set(\gainDB, -50);
 ~seqtrig.play;
 ~seqtrig.reset; // hit it before playing again
 ~seqtrig.stop;

@@ -68,7 +68,7 @@ oscsend localhost 18032 /satie/pluginargs s misDrone
 
 ~getAudioPlugins = {
 	var keys, newkeys;
-	keys = ~scbr.pluginLoader.audioPlugins.keys.asArray;
+	keys = ~satie.pluginLoader.audioPlugins.keys.asArray;
 	keys.do(~makeJsonArray);
 	~json = ~json.replace("\"\"", "\", \"");
 	~json = "[" ++ ~json ++ "]";
@@ -79,7 +79,7 @@ oscsend localhost 18032 /satie/pluginargs s misDrone
 ~getPluginArguments = { | msg , time, addr, recvPort|
 	var synth, argnames;
 	synth = msg[1];
-	argnames = ~scbr.pluginLoader.audioPlugins[synth].def.keyValuePairsFromArgs;
+	argnames = ~satie.pluginLoader.audioPlugins[synth].def.keyValuePairsFromArgs;
 	argnames.do({|item, i| item.class.postln;});
 	argnames.asArray.pairsDo(~makeJsonFromArgnames);
 	~json = ~json.replace("}\n\t{", "},\n\t{");

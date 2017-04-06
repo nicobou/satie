@@ -23,8 +23,8 @@ s.plotTree;
 s.waitForBoot {
 	~rootSrcPath = thisProcess.nowExecutingPath.dirname ++ "/..";
 	(~rootSrcPath ++ "/src/*.scd").pathMatch.do({arg item; item.loadPaths});
-	~scbr = ~scbrMaker.value(numAudioAux: 0, satieSrcPath: ~rootSrcPath);
-	~scbr.makeSynthDef(\string, \zkarpluck1, [], [], [\stereoPanner], [0], \defaultMapper, []);
+	~satie = ~satieMaker.value(numAudioAux: 0, satieSrcPath: ~rootSrcPath);
+	~satie.makeSynthDef(\string, \zkarpluck1, [], [], [\stereoPanner], [0], \defaultMapper, []);
 	s.sync;
 	s.makeGui;
 };
@@ -43,7 +43,7 @@ r = Routine {
 		var synth;
 		var note;
 		note = rrand(60, 63);
-		synth = ~scbr.makeKamikaze(nodename.asSymbol, \string, \default);
+		synth = ~satie.makeKamikaze(nodename.asSymbol, \string, \default);
 		synth.set(
 			\t_trig, 1,
 			\gainDB, rrand(-40, -30),
@@ -57,4 +57,3 @@ r.play;
 
 r.stop;
 
-)

@@ -14,9 +14,9 @@ s.waitForBoot{
 
 	~num_aux_bus = 5;
 	// creating a sc-basic-renderer
-	~scbr = ~scbrMaker.value(numAudioAux: ~num_aux_bus, satieSrcPath: ~rootSrcPath);
+	~satie = ~satieMaker.value(numAudioAux: ~num_aux_bus, satieSrcPath: ~rootSrcPath);
 
-	~scbr.makeSynthDef2(
+	~satie.makeSynthDef2(
 		\string,
 		\zkarpluck1,
 		[],
@@ -38,11 +38,11 @@ s.waitForBoot{
 (
 // custom group:
 
-~scbr.makeSatieGroup(\kamikaze);
+~satie.makeSatieGroup(\kamikaze);
 
 r = Routine {
 	loop {
-		~scbr.makeKamikaze(
+		~satie.makeKamikaze(
 			(\test ++ rrand(0, 10000).asSymbol),
 			\string,
 			\kamikaze,
