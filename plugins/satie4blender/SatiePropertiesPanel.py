@@ -33,7 +33,11 @@ class SatiePropertiesPanel(bpy.types.Panel):
             if bpy.satiePropertiesLayouts:
                 for groupName, groupAttributes in bpy.satiePropertiesLayouts.items():
                     # get the instance of the group
-                    propertyGroup = getattr(obj, groupName)
+                    try:
+                        propertyGroup = getattr(obj, groupName)
+                    except AttributeError:
+                        # it lost its previous referencem, ignore
+                        pass
                     TheCol.label("{} specific props: ".format(groupName))
 
                     for att in groupAttributes:
@@ -58,12 +62,7 @@ def initObjectProperties():
         default = False
     )
     
-    bpy.types.Object.bus = bpy.props.IntProperty(
-        name = "Bus number",
-        description = "Input bus",
-        default = 0,
-        update = control.setInputBus
-    )
+
 
     bpy.types.Object.satieGroup = bpy.props.StringProperty(
         name = "Group",
@@ -76,35 +75,6 @@ def initObjectProperties():
         description = "(Un)mute the SATIE instance",
         default = False
     )
-    bpy.types.Object.state = bpy.props.BoolProperty(
-        name = "Source playing state",
-        description = "Playing state (on, off)",
-        default = False
-    )
-
-    bpy.types.Object.hiPass = bpy.props.FloatProperty(
-        name = "High pass",
-        description = "High pass filter",
-        default = 0.5,
-        set = control.setSatieHP
-    )
-    bpy.types.Object.loPass = bpy.props.FloatProperty(
-        name = "Low pass",
-        description = "Low pass filter",
-        default = 15000.00
-    )
-
-    bpy.types.Scene.active = bpy.props.BoolProperty(
-        name = "Use Satie",
-        description = "Activate SATIE communication",
-        default = False,
-        # set = control.setSatieSendCtl,
-        # get = control.getSatieSendCtl
-    )
-
-    bpy.types.Scene.SatieSources = bpy.props.EnumProperty(
-        items = [],
-        name = "Sources")
 
 initObjectProperties()
 
