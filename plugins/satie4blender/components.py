@@ -32,14 +32,26 @@ def load():
             aType = attribute["type"]
             aName = attribute["name"]
             if aType == "Integer":
-                attributes[aName] = IntProperty(name=aName.title())
+                attributes[aName] = IntProperty(
+                    name=aName.title(),
+                    update=update_property
+                )
             elif aType == "Float":
-                attributes[aName] = FloatProperty(name=aName.title())
+                attributes[aName] = FloatProperty(
+                    name=aName.title(),
+                    update=update_property
+                )
             elif aType == "String":
-                attributes[aName] = StringProperty(name=aName.title())
+                attributes[aName] = StringProperty(
+                    name=aName.title(),
+                    update=update_property
+                )
             # FIXME: need to find a way of lading an Array with correct types
             elif aType == "Array":
-                attributes[aName] = StringProperty(name=aName.title())
+                attributes[aName] = StringProperty(
+                    name=aName.title(),
+                    update=update_property
+                )
             else:
                 raise TypeError("Unsupported type ({}) for {} on {}".format(aType, aName, groupName))
 
@@ -70,6 +82,9 @@ def unload():
         pass
     bpy.satieRegisteredTypes = {}
 
+
+def update_property(self, context):
+    print("**  ", self, context)
 
 def load_synth_properties(synth):
     osc.satie_send("/satie/pluginargs", synth)
