@@ -15,6 +15,17 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // -----------------------------------------------------------
 
+
+// Evaluate this file to
+// 1)  load the items in /src
+// 2) create a satieOSCmaker instance
+// 3) create an audioRenderer control instance
+// 4) create an OSC messageHandler to load files    /satie/load fileName
+
+// using the messageHandler, additional satie state can be instantiated, like the basic-renderer or saiteOSC
+
+
+
 // defaults to stereo
 ~listeningFormat = \stereoListener;    // you can also set this to  \domeVBAP  or  \labodomeVBAP  or   \octoVBAP
 

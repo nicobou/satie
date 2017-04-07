@@ -19,4 +19,4 @@
 
 Satie4Unity provides SuperCollider-based audio rendering support for Unity3D. A Unity3D package, containing a demo scene and all the necessary resources is provided, as well as the Unity3D scripts (already in the package) themselves. 
 
-To run the example, create an empty scene in Unity, then import the package. Then launch supercollider and evaluate the file "main.scd".  Then run the scene.
+To run the example, create an empty scene in Unity, then import the package. Then launch supercollider and evaluate the file "satieOSCexample.scd”.  Then run the scene.

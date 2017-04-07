@@ -1,11 +1,27 @@
 // Tester for satieOSC protocol
 
 
-(
+
 
 // EVALUATE THIS BLOCK FIRST
+(
 
-(thisProcess.nowExecutingPath.dirname++"/main.scd").load;   // load the satieOSC and example project resources, such as processes, synthdefs, etc
+s.waitForBoot {
+
+	// load the satie low level environment
+	(thisProcess.nowExecutingPath.dirname++"/../../prototype/bootSatie.scd").load;
+	s.sync;
+
+	// load the project, which will instantiante a basic renderer and all that goes with
+	(thisProcess.nowExecutingPath.dirname++"/satieOSCexample.scd").load;   // load the satieOSC and example project resources, such as processes, synthdefs, etc
+	s.sync;
+};
+
+
+
+
+
+
 b = NetAddr.new("127.0.0.1", 18032);    // connect to satie's RX port
 b.sendMsg("/satie/scene", "debugFlag", 1);    // activate  debugging printing to console
 

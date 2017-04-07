@@ -1,4 +1,4 @@
-#N canvas 1271 122 1785 1311 12;
+#N canvas 463 29 1785 1311 12;
 #X obj 17 10 cnv 15 800 500 empty empty display_RX_renderer_messages
 20 12 0 18 -262130 -66577 0;
 #X obj 650 813 OSCtx;
@@ -26,7 +26,7 @@
 #X obj 77 565 t b;
 #X obj 169 674 p;
 #X obj 79 488 OSCparse /satie/*/property;
-#X obj 801 802 r \$0-toOSCout;
+#X obj 798 833 r \$0-toOSCout;
 #X obj 1027 301 s \$0-toOSCout;
 #X obj 1035 241 OSCprepend /satie/process/setvec;
 #X msg 1035 144 srcNode_0 note 50 1 1;
@@ -40,10 +40,10 @@
 #X floatatom 1182 1025 5 0 0 0 - - -, f 5;
 #X msg 672 1199 /satie/source/set sourceA t_trig 0;
 #X obj 1086 1147 delay 50;
-#X msg 684 749 connect localhost 18032;
-#X msg 958 687 /satie/load /Users/zack/Dropbox/Unity3D/audioRendering/sc/sc-basic-renderer/projects/ballJam/main.scd
+#X msg 684 749 connect 192.168.0.255 18032;
+#X msg 949 820 /satie/load /Users/zack/src/balljam/satieProject/balljam.scd
 ;
-#X msg 958 761 /satie/load /Users/zack/src/balljam/satieProject/main.scd
+#X msg 1026 667 /satie/load /Users/zack/Dropbox/Unity3D/audioRendering/sc/sc-basic-renderer/examples/satieOSCexample/satieOSCexample.scd
 ;
 #X connect 2 0 39 0;
 #X connect 4 0 9 0;
