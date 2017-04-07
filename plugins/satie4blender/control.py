@@ -25,8 +25,8 @@ def instanceHandler():
                     if o.name in synths:
                         pass
                     else:
-                        print("acting on ", o.name, o.satieSynth)
-                        props.synths.append(ss.SatieSynth(o, o.name, o.satieSynth))
+                        print("acting on ", o.name, o.satie_synth)
+                        props.synths.append(ss.SatieSynth(o, o.name, o.satie_synth))
                 else:
                     print("{}'s satie ID cannot be empty", o.name)
             else:
