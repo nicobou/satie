@@ -27,6 +27,8 @@
 		~auxbus;
 		~aux;
 		~satieSrcPath;
+		// processes
+		~processes = Dictionary.new;
 
 		~makeSynthDef = {
 			| self,
@@ -106,6 +108,41 @@
 			self.satieGroupInstances[group][name].release();
 			nil;
 		};
+
+		// processes
+		~makeProcess = { | self, processName, env |
+			self.removeProcess(processName);
+			inform("satieProcessManager: registering process environment: "++processName);
+			self.processes.put(processName.asSymbol, env);
+			env.know = true;
+			env;
+		};
+
+		~cloneProcess = { | self, processName |
+			var processClone = nil;
+
+			if (self.processes.includesKey(processName.asSymbol),
+				{
+					var temp = self.processes.at(processName.asSymbol);
+					processClone = temp.copy;
+				},
+				{
+					warn("undefined process environment: "++processName);
+					processClone = nil;
+			});
+			processClone;
+		};
+
+		~removeProcess =  { | self, processName |
+			if (  self.processes.includesKey(processName.asSymbol) == true,
+				{
+					warn("un-registering process environment: "++processName);
+					// FIXME check if free is needed
+					self.processes.removeAt(processName.asSymbol);
+			});
+			nil;  // return nil
+		};
+
 	});  // Environment.make
 
 	e.know = true;
