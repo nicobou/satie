@@ -21,16 +21,20 @@ from . import properties
 from . import osc
 
 class SatieComponents(PropertyGroup):
+    def get_current_item(self):
+        print("*******", self)
+        return self.satie_synth
+        
     def update_types_menu(self, context):
         if properties.active:
-            print("updating types menu")
+            # print("updating types menu", self.satie_synth)
             components.load_synth_types()
             return(bpy.satie_types_list)
 
     def update_components(self, context):
         if properties.active:
             satie_type = str(context.object.satie_synth)
-            print("updating synth menu", self, satie_type)
+            print("updating synth menu", self, bpy.satie_types_list[self['satie_synth']][1])
             components.unload()
             components.load_synth_properties(satie_type)
 		
@@ -38,5 +42,6 @@ class SatieComponents(PropertyGroup):
         name = "Sound source",
         description = "SATIE plugin to use",
         items = update_types_menu,
+        # get = get_current_item,
         update = update_components
 )
