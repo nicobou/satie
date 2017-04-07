@@ -123,7 +123,6 @@ oscsend localhost 18032 /satie/pluginargs s misDrone
 	var synth, argnames;
 	synth = msg[1];
 	argnames = ~satie.pluginLoader.audioPlugins[synth].def.keyValuePairsFromArgs;
-	argnames.do({|item, i| item.class.postln;});
 	argnames.asArray.pairsDo(~makeJsonFromArgnames);
 	~json = ~json.replace("}\n\t{", "},\n\t{");
 	~json = "{\n" ++ synth.asString.quote ++ ": \n[" ++ ~json ++ "\n]}\n";
