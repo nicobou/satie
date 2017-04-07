@@ -50,15 +50,29 @@ oscsend localhost 18032 /satie/pluginargs s misDrone
 	value = val;
 	type = val.class.asString.quote;
 	str = "\t{\n\t\t" ++ "name".quote ++ ": " ++ param ++ "," ++ "value".quote ++ ": " ++ value ++ "," ++ "type".quote ++ ":" ++ type ++ "\n\t}\n";
-	postln("mkJsn " ++ str);
 	~json = ~json ++ str;
 
 };
 
 ~makeJsonArray = {| item, index |
 	var str = String.new;
-	str = item.asString.quote;
+	postln("new item: "++ item);
+	if (~satie.generatorSynthDef.includes(item.asSymbol),
+		{ postln(item ++ " found in generators");
+			str = item.asString.quote;
+		},
+		{ format("% not found in generators", item).warn}
+	);
+	if (~satie.effectSynthDef.includes(item.asSymbol),
+		{
+			postln(item ++ " found in effects");
+			str = item.asString.quote;
+		},
+		{ format("% not found in effects", item).warn}
+		);
+	// TODO: separate generators and effects into two different json objects
 	~json = ~json ++ str;
+
 };
 
 ~printType = {
@@ -66,17 +80,46 @@ oscsend localhost 18032 /satie/pluginargs s misDrone
 	postf("% is a %\n", item, item.class);
 };
 
+~jsonBrace = {|str|
+	var ret;
+	// surround a string with curly braces
+	ret = "{"++str++"}";
+	ret;
+};
+
+~makeJsonFromPairs = { |key, val|
+	var str, keyName, sName;
+	keyName = key[0].asString.quote;
+	sName = key[1].asString.quote;
+	str = ~jsonParam.value("name")++keyName++",";
+	str = str++~jsonParam.value("srcName")++sName++",";
+	str = str++~jsonParam.value("description")++"Description...".quote;
+	str = ~jsonBrace.value(str);
+	~json = ~json++str;
+};
+
+
+
+~jsonParam = {|param|
+	// provide a quoted string representing json param followed by a colon (:)
+	var str;
+	str = param.quote++":";
+};
+
+
 ~getAudioPlugins = {
-	var keys, newkeys;
-	keys = ~satie.pluginLoader.audioPlugins.keys.asArray;
-	keys.do(~makeJsonArray);
-	~json = ~json.replace("\"\"", "\", \"");
+	// get present synthdefs and send them via OSC as json object
+	var keys, pairs;
+	~satie.generatorSynthDef.keysValuesDo({|key, value| pairs = pairs.add(Array[key, value])});
+	pairs.do(~makeJsonFromPairs);
+	~json = ~json.replace("\}\{", "\}, \{");
 	~json = "[" ++ ~json ++ "]";
 	~responder.sendMsg("/plugins", ~json);
-
+	~json = "";
 };
 
 ~getPluginArguments = { | msg , time, addr, recvPort|
+	// get synth definition arguments and send them as json object
 	var synth, argnames;
 	synth = msg[1];
 	argnames = ~satie.pluginLoader.audioPlugins[synth].def.keyValuePairsFromArgs;

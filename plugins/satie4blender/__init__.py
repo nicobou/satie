@@ -29,9 +29,16 @@ bl_info = {
 if "bpy" in locals():
     import imp
     imp.reload(SatieTool)
+    imp.reload(SatiePropertiesPanel)
+    imp.reload(components)
+    imp.reload(settings)
+    imp.reload(osc)
 else:
     from . import SatieTool
     from . import SatiePropertiesPanel
+    from . import components
+    from . import settings
+    from . import osc
 
 # register SATIE in blender:
 
@@ -42,10 +49,31 @@ def initialize():
 
 def register():
     initialize()
-    bpy.utils.register_module(__name__)
+    #bpy.utils.register_module(__name__)
+    # register components related to the SATIE properties panel
+    bpy.utils.register_class(settings.SatieComponents)
+    # register SATIE properties panel
+    bpy.utils.register_class(SatiePropertiesPanel.SatiePropertiesPanel)
+    # register SATIE tool shelf panel
+    bpy.utils.register_class(SatieTool.ToolsPanel)
+    try:
+        osc.init_osc_server()
+        print("OSC sever started")
+    except Exception as e:
+        print("could not start osc server, reasons:", e)
+    
+    components.load()
  
 def unregister():
-    bpy.utils.unregister_module(__name__)
+    """Unregister various classes"""
+    #bpy.utils.unregister_module(__name__)
+    bpy.utils.unregister_class(SatiePropertiesPanel.SatiePropertiesPanel)
+    bpy.utils.unregister_class(SatieTool.ToolsPanel)
+    components.unload()
+    try:
+        osc.stop_osc_server()
+    except Exception as e:
+        print("Could not strop osc server, reason:", e)
 
 if __name__ == "__main__":
     register()

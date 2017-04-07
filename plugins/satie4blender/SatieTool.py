@@ -14,8 +14,10 @@
 import bpy
 from . import control
 from . import properties
+from . import osc
 
 class ToolsPanel(bpy.types.Panel):
+    """SATIE tool shelf"""
     bl_label = "SATIE tool"
     bl_context = "objectmode"
     bl_category = "SATIE"
@@ -28,53 +30,43 @@ class ToolsPanel(bpy.types.Panel):
         layout.label(text='', icon='SPEAKER')
     
     def draw(self, context):
-        layout = self.layout
-        layout.label("SATIE connection")
+        col = self.layout.column(align=True)
+        col.label("SATIE connection")
         
-        row = layout.row()
 
-        row = layout.row()
-        row.prop(context.scene, "SatieSources")
-        row = layout.row()
-        row.prop(context.scene, "OSCdestination")
-        row = layout.row()
-        row.prop(context.scene, "OSCport")
-        row = layout.row()
-        row.prop(context.scene, "Active")
-
-
-class SatieObject(bpy.types.BoolProperty):
-    bl_idname = "mesh.satie_sound"
-    bl_label = "SATIE sound source"
-    bl_options = {"REGISTER", "UNDO"}
-    fcount = 0
-    active = bpy.props.BoolProperty()
-
-    def execute(self, context):
-        if self.active:
-            if control.satieInstanceCb not in bpy.app.handlers.scene_update_post:
-                bpy.app.handlers.scene_update_post.append(control.satieInstanceCb)
-        else:
-            if control.satieInstanceCb in bpy.app.handlers.scene_update_post:
-                control.cleanCallbackQueue()
-        return {'FINISHED'}
-                
-    def getSatieID(self):
-        print(bpy.context.object.name)
-
+        # col.prop(context.scene, "SatieSources")
+        col.prop(context.scene, "OSCdestination")
+        col.prop(context.scene, "OSC_destination_port")
+        col.label("OSC server")
+        col.prop(context.scene, "OSC_server_port")
+        col.separator()
+        col.prop(context.scene, "Active")
 
 
 def useSatie(self, context):
     active = context.scene.Active
     control.setSatieSendCtl(active)
     if active:
+        if bpy.s4b_OSCserver:
+            if osc.osc_rcv_cb not in bpy.app.handlers.scene_update_post:
+                try:
+                    bpy.app.handlers.scene_update_post.append(osc.osc_rcv_cb)
+                    print("added osc_rcv callback")
+                except Exception as e:
+                    print("could not add osc_rcv_cb to queue:", e)
+        else:
+            print("OSC server was not ready so callback  not loaded")
         if control.satieInstanceCb not in bpy.app.handlers.scene_update_post:
             bpy.app.handlers.scene_update_post.append(control.satieInstanceCb)
     else:
         if control.satieInstanceCb in bpy.app.handlers.scene_update_post:
             control.cleanCallbackQueue()
-
-    
+        if osc.osc_rcv_cb in bpy.app.handlers.scene_update_post:
+            bpy.app.handlers.scene_update_post.remove(osc.osc_rcv_cb)
+            try:
+                osc.stop_osc_server()
+            except Exception as e:
+                print("Could not strop osc server, reason:", e)
 
 def initToolsProperties():
     bpy.types.Scene.Active = bpy.props.BoolProperty(
@@ -95,11 +87,18 @@ def initToolsProperties():
         update = control.setOSCdestination
     )
 
-    bpy.types.Scene.OSCport = bpy.props.IntProperty(
-        name = "OSC port",
-        description = "OSC port",
-        default = properties.port,
-        update = control.setOSCport
+    bpy.types.Scene.OSC_destination_port = bpy.props.IntProperty(
+        name = "destination OSC port",
+        description = "SATIE server OSC port",
+        default = properties.satie_port,
+        update = control.setOSC_destination_port
+    )
+
+    bpy.types.Scene.OSC_server_port = bpy.props.IntProperty(
+        name = "OSC server port",
+        description = "OSC server port",
+        default = properties.server_port,
+        update = control.setOSC_server_port
     )
 
 

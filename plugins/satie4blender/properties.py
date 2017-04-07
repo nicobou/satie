@@ -14,4 +14,5 @@
 synths = []
 active = False
 destination = "localhost"
-port = 18032
+satie_port = 18032
+server_port = 6666

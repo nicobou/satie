@@ -22,7 +22,8 @@
 		~defaultSatieGroup;
 		~satieGroups = Dictionary.new;
 		~satieGroupInstances = Dictionary.new;
-		~effectSynthDef = Set.new;
+		~effectSynthDef = IdentityDictionary.new;
+		~generatorSynthDef = IdentityDictionary.new;
 		~auxbus;
 		~aux;
 		~satieSrcPath;
@@ -41,10 +42,13 @@
 			if (nil != self.pluginLoader.audioPlugins.at(srcSymbol),
 				{
 					dictionary = self.pluginLoader.audioPlugins;
+					postln("adding "++name.asSymbol++"->"++srcSymbol.asSymbol++" to generatorSynthDef");
+					self.generatorSynthDef.add(name.asSymbol -> srcSymbol.asSymbol);
 				},
 				{
 					dictionary = self.pluginLoader.effectPlugins;
-					self.effectSynthDef.add(name.asSymbol);  // ? this needs to be figured out
+					postln("adding "++name.asSymbol++"->"++srcSymbol.asSymbol++" to effectSynthDef");
+					self.effectSynthDef.add(name.asSymbol -> srcSymbol.asSymbol);  // ? this needs to be figured out
 				}
 			); //  endif
 			// Factory
@@ -89,7 +93,7 @@
 		};
 
 		~cleanInstance = { | self, name, group = \default |
-			self.satieGroupInstances[group][name].release();
+			// self.satieGroupInstances[group][name].release();
 			// fadeTime must be higher than SATIE internal fadeTime:
 			// self.satieGroupInstances[group][name].clear(0.03);
 			// FIXME: the above method applied to NodeProxy handling. For now we will be a little more violent

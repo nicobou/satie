@@ -64,11 +64,24 @@ def setInputBus(self, value):
         for s in toSet:
             s.set('bus', int(self.bus))
         
+def setInputBus(self, value):
+    print("setInputBus called", self.name, self.bus)
+    synths = [obj.id for obj in props.synths]
+    print("we got the following synths: ", synths)
+    if self.name in synths:
+        toSet = [s for s in props.synths if s.id == self.name]
+        for s in toSet:
+            s.set('bus', int(self.bus))
+        
 def setOSCdestination(self, context):
     print ("setting host to ", context.scene.OSCdestination)
     destination = context.scene.OSCdestination
     props.destination = destination
 
-def setOSCport(self, context):
-    port = context.scene.OSCport    
-    props.port = port
+def setOSC_destination_port(self, context):
+    port = context.scene.OSC_destination_port    
+    props.satie_port = port
+
+def setOSC_server_port(self, context):
+    port = context.scene.OSC_server_port    
+    props.server_port = port

@@ -32,9 +32,9 @@ if (~listeningFormat == nil,
 
 // create and initialize an instance of SATIE, and set environment variable
 //  THERE IS A CHOICE TO MAKE:  DO WE KILL AN EXISTING SATIE FIRST ??
-if (~scbr == nil,{
+if (~satie == nil,{
 	postln("loading SATIE kernal...");
-	~scbr = ~satieMaker.value(numAudioAux: ~num_aux_bus, satieSrcPath: ~rootSrcPath);
+	~satie = ~satieMaker.value(numAudioAux: ~num_aux_bus, satieSrcPath: ~rootSrcPath);
 });
 
 // THIS SHOULD BE A GLOBAL SATIE ITEM, DEFINED AS SOON AS THE SATIE /src folder has been loaded
@@ -45,12 +45,12 @@ if (~osc == nil,{
 
 // instantiate a process manager , and set environment variable
 if (~procMan == nil,{
-	~procMan = ~pmMaker.value(~scbr);
+	~procMan = ~pmMaker.value(~satie);
 });
 
 // instiante the satieOSC protocol, and set environment variable
 if (~satieOsc == nil,{
-	~satieOsc = ~satieOSCProtocol.value(~osc, ~scbr, ~procMan);
+	~satieOsc = ~satieOSCProtocol.value(~osc, ~satie, ~procMan);
 	//~satieOsc.debugFlag = true;
 });
 
@@ -89,22 +89,22 @@ s.waitForBoot{
 	s.sync;
 
 	postf("generating example project synthdefs for % format \n", ~listeningFormat);
-	~scbr.makeSynthDef(\zparticle1, \zparticle1, [], [], [~listeningFormat], [0]);
-	~scbr.makeSynthDef(\pink, \PinkSin, [], [],  [~listeningFormat], [0]);
-	~scbr.makeSynthDef(\dust, \DustDust,   [], [~scbr.aux[~fxBus0]], [~listeningFormat], [0]);
-	~scbr.makeSynthDef(\default, \default,  [], [], [~listeningFormat], [0]);
-	~scbr.makeSynthDef(\zkarpluck0, \zkarpluck0,  [], [], [~listeningFormat], [0]);
-	~scbr.makeSynthDef(\test, \testtone,   [], [], [~listeningFormat], [0]);
-	~scbr.makeSynthDef(\pbell1, \pbell1, [], [],  [~listeningFormat], [0]);
-	~scbr.makeSynthDef(\zkarpluck1P, \zkarpluck1P,   [~scbr.aux[~fxBus0]], [], [~listeningFormat], [0] );   // sends to effects bus, pre-spatializer
-   ~scbr.makeSynthDef(\zkarpluck1, \zkarpluck1,  [], [~scbr.aux[~fxBus0]], [~listeningFormat], [0] );   // sends to effects bus, post-spatializer
-	~scbr.makeSynthDef(\busreverb, \freeverb,  [], [], [~listeningFormat], [0]);
-	~scbr.makeSynthDef(\busgverb, \gverb,  [], [], [~listeningFormat], [0]);
+	~satie.makeSynthDef(\zparticle1, \zparticle1, [], [], [~listeningFormat], [0]);
+	~satie.makeSynthDef(\pink, \PinkSin, [], [],  [~listeningFormat], [0]);
+	~satie.makeSynthDef(\dust, \DustDust,   [], [~satie.aux[~fxBus0]], [~listeningFormat], [0]);
+	~satie.makeSynthDef(\default, \default,  [], [], [~listeningFormat], [0]);
+	~satie.makeSynthDef(\zkarpluck0, \zkarpluck0,  [], [], [~listeningFormat], [0]);
+	~satie.makeSynthDef(\test, \testtone,   [], [], [~listeningFormat], [0]);
+	~satie.makeSynthDef(\pbell1, \pbell1, [], [],  [~listeningFormat], [0]);
+	~satie.makeSynthDef(\zkarpluck1P, \zkarpluck1P,   [~satie.aux[~fxBus0]], [], [~listeningFormat], [0] );   // sends to effects bus, pre-spatializer
+   ~satie.makeSynthDef(\zkarpluck1, \zkarpluck1,  [], [~satie.aux[~fxBus0]], [~listeningFormat], [0] );   // sends to effects bus, post-spatializer
+	~satie.makeSynthDef(\busreverb, \freeverb,  [], [], [~listeningFormat], [0]);
+	~satie.makeSynthDef(\busgverb, \gverb,  [], [], [~listeningFormat], [0]);
 
-	~scbr.makeSynthDef(\zkarpluck2P, \zkarpluck2P,   [~scbr.aux[~fxBus0]],  [],[~listeningFormat],  [0], \randOffsets1);  // for resonant updated klones
+	~satie.makeSynthDef(\zkarpluck2P, \zkarpluck2P,   [~satie.aux[~fxBus0]],  [],[~listeningFormat],  [0], \randOffsets1);  // for resonant updated klones
 
 	// dummy
-	~scbr.makeSynthDef(\dummyPlugin, \emptySource,  [], [], [\emptySpat], [0]);    // dummy synthdef, used for new nodes
+	~satie.makeSynthDef(\dummyPlugin, \emptySource,  [], [], [\emptySpat], [0]);    // dummy synthdef, used for new nodes
 	// be sure the synthDef is compiled on the server
 	s.sync;
 
