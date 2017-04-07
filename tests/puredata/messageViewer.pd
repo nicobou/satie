@@ -1,11 +1,11 @@
-#N canvas 511 49 1425 1288 16;
+#N canvas 463 29 1785 1311 12;
 #X obj 17 10 cnv 15 800 500 empty empty display_RX_renderer_messages
 20 12 0 18 -262130 -66577 0;
 #X obj 650 813 OSCtx;
 #X obj 727 694 loadbang;
 #X obj 579 780 p;
 #X msg 804 387 sourceB gainDB -11 aziDeg -90;
-#X msg 951 659 /satie/scene clear;
+#X msg 933 610 /satie/scene clear;
 #X msg 421 436 sourceB spread 0;
 #X obj 412 542 OSCprepend /satie/group/set;
 #X msg 472 473 pluck1_group amp 1;
@@ -26,21 +26,25 @@
 #X obj 77 565 t b;
 #X obj 169 674 p;
 #X obj 79 488 OSCparse /satie/*/property;
-#X obj 801 802 r \$0-toOSCout;
+#X obj 798 833 r \$0-toOSCout;
 #X obj 1027 301 s \$0-toOSCout;
 #X obj 1035 241 OSCprepend /satie/process/setvec;
 #X msg 1035 144 srcNode_0 note 50 1 1;
 #X msg 982 77 srcNode_0 t_trig 1;
 #X obj 80 95 OSCrx 1803;
-#X msg 723 887 /satie/source/setvec sourceA note 60 1 1;
-#X obj 1140 986 metro 100;
-#X msg 765 972 /satie/source/set sourceA t_trig 1;
-#X obj 1187 905 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1
+#X msg 682 982 /satie/source/setvec sourceA note 60 1 1;
+#X obj 1099 1081 metro 100;
+#X msg 724 1067 /satie/source/set sourceA t_trig 1;
+#X obj 1146 1000 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1
 0 1;
-#X floatatom 1223 930 5 0 0 0 - - -, f 5;
-#X msg 713 1104 /satie/source/set sourceA t_trig 0;
-#X obj 1127 1052 delay 50;
-#X msg 684 749 connect 192.168.0.34 8888;
+#X floatatom 1182 1025 5 0 0 0 - - -, f 5;
+#X msg 672 1199 /satie/source/set sourceA t_trig 0;
+#X obj 1086 1147 delay 50;
+#X msg 684 749 connect 192.168.0.255 18032;
+#X msg 949 820 /satie/load /Users/zack/src/balljam/satieProject/balljam.scd
+;
+#X msg 1026 667 /satie/load /Users/zack/Dropbox/Unity3D/audioRendering/sc/sc-basic-renderer/examples/satieOSCexample/satieOSCexample.scd
+;
 #X connect 2 0 39 0;
 #X connect 4 0 9 0;
 #X connect 5 0 1 0;
@@ -80,3 +84,5 @@
 #X connect 36 0 33 1;
 #X connect 37 0 1 0;
 #X connect 39 0 1 0;
+#X connect 40 0 1 0;
+#X connect 41 0 1 0;

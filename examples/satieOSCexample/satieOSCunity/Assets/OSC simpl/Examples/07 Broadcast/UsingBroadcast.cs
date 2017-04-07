@@ -25,7 +25,7 @@ namespace OscSimpl.Examples
 
 		void Start()
 		{
-			// Create objects for sending and receiving
+			// Create objects for sending and receiving.
 			oscOut = gameObject.AddComponent<OscOut>();
 			oscIn = gameObject.AddComponent<OscIn>(); 
 
@@ -37,7 +37,7 @@ namespace OscSimpl.Examples
 			// Prepare for receiving unicasted and broadcasted messages from this and other devices on port 7000.
 			oscIn.Open( 7000 );
 
-			// Forward recived messages with address to method
+			// Forward recived messages with address to method.
 			oscIn.Map( address, OnMessageReceived );
 
 			// Show UI

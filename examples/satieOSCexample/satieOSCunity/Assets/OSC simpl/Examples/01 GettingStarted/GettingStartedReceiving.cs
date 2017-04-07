@@ -30,12 +30,12 @@ namespace OscSimpl.Examples
 
 			// 1) For messages with one argument, simply provide the address and
 			// a method with one argument. In this case, OnTest1 takes a float argument.
-			//oscIn.Map( "/test1", OnTest1 );
+			oscIn.MapFloat( "/test1", OnTest1 );
 
 			// 2) The same can be achieved using a delgate.
-			oscIn.Map( "/test2", delegate( float value ){ Debug.Log( "Received: " + value ); });
+			oscIn.MapFloat( "/test2", delegate( float value ){ Debug.Log( "Received: " + value ); });
 
-			// 3) For messages with multiple arguments, provide the address and a method
+			// 3) For messages with multiple arguments, provide an address and a method
 			// that takes a OscMessage object argument, then process the message manually.
 			// See the OnTest3 method.
 			oscIn.Map( "/test3", OnTest3 );
@@ -47,12 +47,12 @@ namespace OscSimpl.Examples
 			// If you want to stop receiving messages you have to "unmap".
 
 			// For mapped methods, simply pass them to Unmap.
-			//oscIn.Unmap( OnTest1 );
+			oscIn.UnmapFloat( OnTest1 );
 			oscIn.Unmap( OnTest3 );
 
 			// For mapped delegates, pass the address. Note that this will cause all mappings 
 			// made to that address to be unmapped.
-			oscIn.Unmap( "/test2" );
+			oscIn.UnmapAll( "/test2" );
 		}
 
 		

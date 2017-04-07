@@ -16,7 +16,7 @@ namespace OscSimpl.Examples
 		public GameObject uiWrapper;
 		public Text sendLabel;
 		public Text receiveLabel;
-		public bool sendAsBundle;
+		public bool sendTimeTagWithBundle;
 
 		OscOut oscOut;
 		OscIn oscIn;
@@ -36,7 +36,7 @@ namespace OscSimpl.Examples
 			// Prepare for receiving messages on port 7000.
 			oscIn.Open( 7000 );
 
-			// Forward recived messages with address to method.
+			// Forward received messages with address to method.
 			oscIn.Map( address, OnMessageReceived );
 
 			// Show UI.
@@ -46,11 +46,7 @@ namespace OscSimpl.Examples
 
 		void Update()
 		{
-			// If we are going to send 'as bundle', then we would like OSC io
-			// to add the timetag to the messeges contained in the bundle.
-			oscIn.addTimeTagsToBundledMessages = sendAsBundle;
-
-			// Create a messege
+			// Create a messege.
 			OscMessage message = new OscMessage( address );
 
 			// Create a timetag. Default time is DateTime.Now.
@@ -60,7 +56,7 @@ namespace OscSimpl.Examples
 			timetag.time = timetag.time.AddMilliseconds( 1 );
 
 			// Two possible methods for sending timetags ...
-			if( sendAsBundle )
+			if( sendTimeTagWithBundle )
 			{
 				// Either create a bundle with the timetag, add the message and send.
 				OscBundle bundle = new OscBundle( timetag );
@@ -71,6 +67,12 @@ namespace OscSimpl.Examples
 				message.Add( timetag );
 				oscOut.Send( message );
 			}
+
+			// Incoming bundles are unpacked automatically and are never exposed.
+			// In the case where we send the timetag with a bundle and want to 
+			// access them through incoming messages, we can ask OscIn to add 
+			// the timetags from bundles to each of their contained messages. 
+			oscIn.addTimeTagsToBundledMessages = sendTimeTagWithBundle;
 
 			// Update label.
 			sendLabel.text = timetag.time + ":" + timetag.time.Millisecond;

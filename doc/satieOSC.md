@@ -5,14 +5,20 @@
 
 ```javascript
 
+// experimental
+/satie/load filename    // loads and evaluates file in supercollider.  Filename must be a full file path to a file located on the audiorendering machine
+
+
 /satie/scene createSource  nodeName  URI<plugin://synthdefName groupName<opt>   // default groupName = 'default'
 /satie/scene createSource  nodeName  URI<effect://synthdefName  optionalArgs: inbus N >   groupName<opt>   // defaults:  groupName = 'defaultFx',  inbus = 0
 /satie/scene createGroup nodeName   optionalURI<effect://>   // uri determines the DSP position of group (head or tail)   -defaults to head
 /satie/scene createProcess nodeName URI<uriPath process://processName optargs >   // unique group is automatically generated for each created process node
 /satie/scene deleteNode nodeName
 /satie/scene clear
-
 /satie/scene/set keyword value   // to set scene parameters like 'debugFlag 1'
+
+
+
 ```
 ## Project Messages
 

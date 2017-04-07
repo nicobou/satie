@@ -22,7 +22,7 @@ namespace OscSimpl.Examples
 			if( !oscOut ) oscOut = gameObject.AddComponent<OscOut>();
 
 			// Prepare for sending messages to applications on this device on port 7000.
-			oscOut.Open( 7000, "" );
+			oscOut.Open( 7000 );
 
 			// Or, to a target IP Address (Unicast).
 			//oscOut.Open( 7000, "192.168.1.101" );

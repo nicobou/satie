@@ -26,7 +26,7 @@ namespace OscSimpl.Examples
 
 		void Start()
 		{
-			// Create objects for sending and receiving
+			// Create objects for sending and receiving.
 			oscOut = gameObject.AddComponent<OscOut>();
 			oscIn = gameObject.AddComponent<OscIn>(); 
 
@@ -34,8 +34,8 @@ namespace OscSimpl.Examples
 			// multicast group with address 224.0.1.0 and are listening on port 7000.
 			oscOut.Open( 7000, multicastAddress );
 
-			// Technically multicasting addresses must be between 224.0.0.0 to 239.255.255.255, 
-			// but 224.0.0.0 to 224.0.0.255 is reserved for routing info so you should really 
+			// NOTE: Technically, multicasting addresses must be between 224.0.0.0 to 239.255.255.255, 
+			// but addresses 224.0.0.0 to 224.0.0.255 are reserved for routing info so you should really 
 			// only use 224.0.1.0 to 239.255.255.255.
 
 			// Prepare for receiving messages that are send to multicast group with address 224.0.1.0
@@ -46,7 +46,7 @@ namespace OscSimpl.Examples
 			// applications, then set the multicastLoopback property on OscOut to false.
 			//oscOut.multicastLoopback = false;
 
-			// Forward recived messages with address to method
+			// Forward recived messages with address to method.
 			oscIn.Map( oscAddress, OnMessageReceived );
 
 			// Show UI
@@ -56,22 +56,22 @@ namespace OscSimpl.Examples
 
 		void Update()
 		{
-			// Send a random value
+			// Send a random value.
 			float value = Random.value;
 			oscOut.Send( oscAddress, value );
 
-			// Update label
+			// Update label.
 			if( oscOut.isOpen ) sendLabel.text = value.ToString();
 		}
 
 
 		void OnMessageReceived( OscMessage message )
 		{
-			// Get the value
+			// Get the value.
 			float value;
 			if( message.TryGet( 0, out value ) ) return;
 
-			// Update label
+			// Update label.
 			receiveLabel.text = value.ToString();
 		}
 	}

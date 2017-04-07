@@ -78,9 +78,9 @@ public class OscMessage : OscPacket
 	/// <summary>
 	/// Constructor taking an address and an arbitrary number of OSC type arguments.
 	/// </summary>
-	public OscMessage( string address, params object[] argParams ) : this( address, argParams == null ? 1 : argParams.Length ){
-		if( argParams == null ) _args.Add( null );
-		else _args.AddRange( argParams );
+	public OscMessage( string address, params object[] args ) : this( address, args == null ? 1 : args.Length ){
+		if( args == null ) _args.Add( null );
+		else _args.AddRange( args );
 	}
 
 
@@ -92,24 +92,12 @@ public class OscMessage : OscPacket
 
 
 	/// <summary>
-	/// Add argument. Supports all other OSC argument types. Shorthand for message.args.Add.
+	/// Add one or more OSC type arguments. Shorthand for message.args.Add.
 	/// </summary>
-	public void Add( float value )
-	{
-		_args.Add( value );
+	public void Add( params object[] args ){
+		if( args == null ) _args.Add( null );
+		else _args.AddRange( args );
 	}
-	public void Add( double value ){ _args.Add( value ); }
-	public void Add( int value ){ _args.Add( value ); }
-	public void Add( long value ){ _args.Add( value ); }
-	public void Add( string value ){ _args.Add( value ); }
-	public void Add( char value ){ _args.Add( value ); }
-	public void Add( bool value ){ _args.Add( value ); }
-	public void Add( Color32 value ){ _args.Add( value ); }
-	public void Add( Color value ){ _args.Add( value ); }
-	public void Add( byte[] value ){ _args.Add( value ); }
-	public void Add( OscTimeTag value ){ _args.Add( value ); }
-	public void Add( DateTime value ){ _args.Add( value ); }
-	public void Add( OscImpulse value ){ _args.Add( value ); }
 
 
 	/// <summary>
@@ -122,7 +110,7 @@ public class OscMessage : OscPacket
 
 
 	/// <summary>
-	/// Tries to get argument at index.
+	/// Tries to get argument at index of type float. Returns success status.
 	/// </summary>
 	public bool TryGet( int index, out float value )
 	{
@@ -139,7 +127,9 @@ public class OscMessage : OscPacket
 		return true;
 	}
 
-
+	/// <summary>
+	/// Same as above, double type.
+	/// </summary>
 	public bool TryGet( int index, out double value )
 	{
 		if( index >= _args.Count || index < 0 ){
@@ -155,7 +145,9 @@ public class OscMessage : OscPacket
 		return true;
 	}
 
-
+	/// <summary>
+	/// Same as above, int type.
+	/// </summary>
 	public bool TryGet( int index, out int value )
 	{
 		if( index >= _args.Count || index < 0 ){
@@ -171,7 +163,9 @@ public class OscMessage : OscPacket
 		return true;
 	}
 
-
+	/// <summary>
+	/// Same as above, long type.
+	/// </summary>
 	public bool TryGet( int index, out long value )
 	{
 		if( index >= _args.Count || index < 0 ){
@@ -187,7 +181,9 @@ public class OscMessage : OscPacket
 		return true;
 	}
 
-
+	/// <summary>
+	/// Same as above, string type.
+	/// </summary>
 	public bool TryGet( int index, out string value )
 	{
 		if( index >= _args.Count || index < 0 ){
@@ -202,8 +198,10 @@ public class OscMessage : OscPacket
 		value = (string) a;
 		return true;
 	}
-
-
+		
+	/// <summary>
+	/// Same as above, char type.
+	/// </summary>
 	public bool TryGet( int index, out char value )
 	{
 		if( index >= _args.Count || index < 0 ){
@@ -219,7 +217,9 @@ public class OscMessage : OscPacket
 		return true;
 	}
 
-
+	/// <summary>
+	/// Same as above, bool type.
+	/// </summary>
 	public bool TryGet( int index, out bool value )
 	{
 		if( index >= _args.Count || index < 0 ){
@@ -235,7 +235,9 @@ public class OscMessage : OscPacket
 		return true;
 	}
 
-
+	/// <summary>
+	/// Same as above, color type.
+	/// </summary>
 	public bool TryGet( int index, out Color32 value )
 	{
 		if( index >= _args.Count || index < 0 ){
@@ -251,23 +253,9 @@ public class OscMessage : OscPacket
 		return true;
 	}
 
-
-	public bool TryGet( int index, out Color value )
-	{
-		if( index >= _args.Count || index < 0 ){
-			value = new Color();
-			LogOscMessageArgBoundsWarning( index ); return false;
-		}
-		object a = _args[index];
-		if( !( a is Color32 ) ){
-			value = new Color();
-			LogOscMessageArgTypeWarning( typeof( Color32 ), index ); return false;
-		}
-		value = (Color) (Color32) a;
-		return true;
-	}
-
-
+	/// <summary>
+	/// Same as above, blob type.
+	/// </summary>
 	public bool TryGet( int index, out byte[] value )
 	{
 		if( index >= _args.Count || index < 0 ){
@@ -284,6 +272,9 @@ public class OscMessage : OscPacket
 	}
 
 
+	/// <summary>
+	/// Same as above, osc timetag type.
+	/// </summary>
 	public bool TryGet( int index, out OscTimeTag value )
 	{
 		if( index >= _args.Count || index < 0 ){
@@ -299,23 +290,9 @@ public class OscMessage : OscPacket
 		return true;
 	}
 
-
-	public bool TryGet( int index, out DateTime value )
-	{
-		if( index >= _args.Count || index < 0 ){
-			value = OscTimeTag.epochTime;
-			LogOscMessageArgBoundsWarning( index ); return false;
-		}
-		object a = _args[index];
-		if( !( a is DateTime ) ){
-			value = OscTimeTag.epochTime;
-			LogOscMessageArgTypeWarning( typeof( DateTime ), index ); return false;
-		}
-		value = (DateTime) a;
-		return true;
-	}
-
-
+	/// <summary>
+	/// Same as above, null type.
+	/// </summary>
 	public bool TryGetNull( int index )
 	{
 		if( index >= _args.Count || index < 0 ){ LogOscMessageArgBoundsWarning( index ); return false; }
@@ -324,7 +301,9 @@ public class OscMessage : OscPacket
 		return true;
 	}
 
-
+	/// <summary>
+	/// Same as above, impulse type.
+	/// </summary>
 	public bool TryGetImpulse( int index )
 	{
 		if( index >= _args.Count || index < 0 ){ LogOscMessageArgBoundsWarning( index ); return false; }
@@ -336,7 +315,7 @@ public class OscMessage : OscPacket
 
 	void LogOscMessageArgBoundsWarning( int index )
 	{
-		Debug.LogWarning( "[OscMessage] TryGet failed. Augument index " + index + " out of bounds. Message has " + _args.Count + " arguments." + Environment.NewLine );
+		Debug.LogWarning( "[OscMessage] TryGet failed. Augument index " + index + " out of bounds. Message with address '" + _address + "' has " + _args.Count + " arguments." + Environment.NewLine );
 	}
 
 

@@ -44,7 +44,7 @@ namespace OscSimpl.Examples
 		{
 			if( messageBuffer == null ) messageBuffer = new Queue<OscMessage>( messageBufferCapacity );
 
-			// Load settings and apply
+			// Load settings and apply.
 			if( PlayerPrefs.HasKey( portPrefKey ) && PlayerPrefs.HasKey( ipAddressPrefKey ) && PlayerPrefs.HasKey( messagesVisibilityPrefKey ) ){
 				int tempPort = PlayerPrefs.GetInt( portPrefKey );
 				string tempIpAddress = PlayerPrefs.GetString( ipAddressPrefKey );
@@ -54,7 +54,7 @@ namespace OscSimpl.Examples
 				OnMessageVisibilityChanged( messagesToggle.isOn );
 			}
 
-			// Subcribe to UI events
+			// Subcribe to UI events.
 			openToggle.onValueChanged.AddListener( OnOpenChanged );
 			portInputField.onEndEdit.AddListener( OnPortEndEdit );
 			modeDropdown.onValueChanged.AddListener( OnModeChanged );
@@ -67,14 +67,14 @@ namespace OscSimpl.Examples
 		{
 			messageBuffer.Clear();
 
-			// Unsubcribe to UI events
+			// Unsubcribe to UI events.
 			openToggle.onValueChanged.RemoveListener( OnOpenChanged );
 			portInputField.onEndEdit.RemoveListener( OnPortEndEdit );
 			modeDropdown.onValueChanged.RemoveListener( OnModeChanged );
 			ipAddressInputField.onEndEdit.RemoveListener( OnIpAddressEndEdit );
 			messagesToggle.onValueChanged.RemoveListener( OnMessageVisibilityChanged );
 
-			// Save settings
+			// Save settings.
 			PlayerPrefs.SetInt( portPrefKey, oscOut.port );
 			PlayerPrefs.SetString( ipAddressPrefKey, oscOut.ipAddress );
 			PlayerPrefs.SetInt( messagesVisibilityPrefKey, messagesToggle.isOn ? 1 : 0 );
@@ -89,7 +89,7 @@ namespace OscSimpl.Examples
 				return;
 			}
 
-			// Update UI
+			// Update UI.
 			if( oscOut.isOpen != openToggle.isOn ) openToggle.isOn = oscOut.isOpen;
 			if( oscOut.port != port ){
 				port = oscOut.port;

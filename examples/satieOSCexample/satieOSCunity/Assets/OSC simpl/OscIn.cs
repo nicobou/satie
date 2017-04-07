@@ -8,14 +8,13 @@
 using UnityEngine;
 using UnityEngine.Events;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Net;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Net.Sockets;
-using System.Threading;
 using OscSimpl;
+
+#pragma warning disable 169 // Don't complain over editor foldout flags (_settingsFoldout etc.)
 
 /// <summary>
 /// MonoBehaviour for receiving OscMessage objects.
@@ -57,25 +56,12 @@ public class OscIn : MonoBehaviour
 	/// </summary>
 	public static string ipAddress {
 		get {
-			IPHostEntry host = Dns.GetHostEntry( Dns.GetHostName() );
-			foreach( IPAddress ip in host.AddressList ) if( ip.AddressFamily == AddressFamily.InterNetwork && !IPAddress.IsLoopback( ip ) ) return ip.ToString();
-			return string.Empty;
-
-			// TODO if there is a way to detect whether Unity's scripting backend is set to ".NET 2.0" or ".NET 2.0 Subet" then use this when using ".NET 2.0". It is more realiable.
-			//System.Net.NetworkInformation.NetworkInterface[] networkInterfaces = System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces(); 
-			//foreach( System.Net.NetworkInformation.NetworkInterface network in networkInterfaces ){ 							// All network interfaces (usually one per network card, dialup, and VPN connection) 
-			//	System.Net.NetworkInformation.IPInterfaceProperties properties = network.GetIPProperties(); 					// Read the IP configuration for each network 
-			//	foreach( System.Net.NetworkInformation.IPAddressInformation address in properties.UnicastAddresses ){			// Each network interface may have multiple IP addresses { 
-			//		if( address.Address.AddressFamily != AddressFamily.InterNetwork ) continue; 								// Ignoore NON IPv4 addresses
-			//		if( IPAddress.IsLoopback( address.Address ) ) continue; 													// Ignore loopback addresses (e.g., 127.0.0.1) 
-			//		if( network.NetworkInterfaceType == System.Net.NetworkInformation.NetworkInterfaceType.Unknown ) continue;	// Ignore unknown network interfaces
-			//		return address.Address.ToString();
-			//	} 
-			//} 
-			//return string.Empty;
+			string address = Network.player.ipAddress;
+			if( address == IPAddress.Any.ToString() ) return IPAddress.Loopback.ToString();
+			return address;
 		}
 	}
-		
+
 	/// <summary>
 	/// Indicates whether the Open method has been called and the object is ready to receive.
 	/// </summary>
@@ -340,7 +326,7 @@ public class OscIn : MonoBehaviour
 
 		// Validate port number range
 		if( port < OscHelper.portMin || port > OscHelper.portMax ){
-			Debug.LogWarning( "[Oscin] Open failed. Port " + port + " is out of range." + Environment.NewLine );
+			Debug.LogWarning( "<b>[OscIn]</b> Open failed. Port " + port + " is out of range." + Environment.NewLine );
 			return false;
 		}
 		_port = port;
@@ -351,7 +337,7 @@ public class OscIn : MonoBehaviour
 				_mode = OscReceiveMode.UnicastBroadcastMulticast;
 				_multicastAddress = multicastAddress;
 			} else {
-				Debug.LogWarning( "[Oscin] Open failed. Multicast IP address " + multicastAddress + " is out not valid. It must be in range 224.0.0.0 to 239.255.255.255." + Environment.NewLine );
+				Debug.LogWarning( "<b>[OscIn]</b> Open failed. Multicast IP address " + multicastAddress + " is out not valid. It must be in range 224.0.0.0 to 239.255.255.255." + Environment.NewLine );
 				return false;
 			}
 		} else {
@@ -360,15 +346,15 @@ public class OscIn : MonoBehaviour
 
 		// Attempt to open socket
 		try {
-			IPEndPoint ipEndPoint = new IPEndPoint( IPAddress.Any, port );
 			_udpClient = new UdpClient();
 
-			// Ensure that we can have multiple OscIn objects listening to the same port.
-			// Must be set before bind. Same as _udpClient.Client.SetSocketOption( SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true );
-			//_udpClient.ExclusiveAddressUse = false;
+			// Ensure that we can have multiple OscIn objects listening to the same port. Must be set before bind.
+			// Note that only one OscIn object will receive the packet anyway: http://stackoverflow.com/questions/22810511/bind-multiple-listener-to-the-same-port
+			_udpClient.ExclusiveAddressUse = false;
 			_udpClient.Client.SetSocketOption( SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true );
 
 			// Bind the socket to the endpoint
+			IPEndPoint ipEndPoint = new IPEndPoint( IPAddress.Any, port );
 			_udpClient.Client.Bind( ipEndPoint );
 
 			// Join multicast group if in multicast mode
@@ -383,20 +369,22 @@ public class OscIn : MonoBehaviour
 			_isReceiving = true;
 			_udpClient.BeginReceive( _callback, udpState );
 
-		} catch( SocketException e ){
+		} catch( Exception e ){
 			// Socket error reference: https://msdn.microsoft.com/en-us/library/windows/desktop/ms740668(v=vs.85).aspx
 
-			if( e.ErrorCode == 10048 ){ // "Address already in use"
-				Debug.LogWarning( "[OscIn] Could not open port " + _port + " beecause another application is listening on it." + Environment.NewLine );
+			if( e is SocketException && ( e as SocketException ).ErrorCode == 10048 ){ // "Address already in use"
+				Debug.LogWarning( "<b>[OscIn]</b> Could not open port " + _port + " because another application is listening on it." + Environment.NewLine );
 
-			} else if( _mode == OscReceiveMode.UnicastBroadcastMulticast ){
-				Debug.LogWarning( "[OscIn] Could not subscribe to multicast group. Perhaps your router is not multicast enabled." + Environment.NewLine + e.ErrorCode + ": " + e.ToString() );
+			} else if( e is SocketException && _mode == OscReceiveMode.UnicastBroadcastMulticast ) {
+				Debug.LogWarning( "<b>[OscIn]</b> Could not subscribe to multicast group. Perhaps you are offline, or your router is not multicast enabled." + Environment.NewLine + (e as SocketException).ErrorCode + ": " + e.ToString() );
+			
+			} else if( e.Data is ArgumentOutOfRangeException ){
+				Debug.LogWarning( string.Format( "[OscIn] Could not open port {0}. Invalid Port Number.\n{1}", _port, e.ToString() ) );
+
+			} else {
+				//Debug.Log( e );
 			}
-			Close();
-			return false;
 
-		} catch( ArgumentOutOfRangeException e ){
-			Debug.LogWarning( string.Format( "[OscIn] Could not open port {0}. Invalid Port Number.\n{1}", _port, e.ToString() ) );
 			Close();
 			return false;
 		}
@@ -405,7 +393,7 @@ public class OscIn : MonoBehaviour
 		if( Application.isPlaying ){
 			string logString;
 			if( _mode == OscReceiveMode.UnicastBroadcast ) logString = "[OscIn] Listening for unicast and broadcast messages on port " + _port + Environment.NewLine;
-			else logString = "[OscIn] Listening for multicast messages on address " + _multicastAddress + ", unicast and broadcast messages on port " + _port + Environment.NewLine;
+			else logString = "<b>[OscIn]</b> Listening for multicast messages on address " + _multicastAddress + ", unicast and broadcast messages on port " + _port + Environment.NewLine;
 			//logString += "Buffer size: " + _udpClient.Client.ReceiveBufferSize + " bytes. " + Environment.NewLine;
 			Debug.Log( logString );
 		}
@@ -442,10 +430,12 @@ public class OscIn : MonoBehaviour
 				// Ignore
 			}
 
-		} catch( ObjectDisposedException ){
-			// Ignore.
-		} catch( Exception ex ){
-			Debug.LogWarning( "[OscIn] Error occurred while receiving message." + Environment.NewLine + ex.ToString() );
+		} catch( Exception e ){
+			if( e is ObjectDisposedException ){
+				// Ignore.
+			} else {
+				Debug.LogWarning( "[OscIn] Error occurred while receiving message." + Environment.NewLine + e.ToString() );
+			}
 		}
 	}
 
@@ -520,13 +510,65 @@ public class OscIn : MonoBehaviour
 
 	#region Mapping
 
+	/// <summary>
+	/// Request that incoming messages with OSC 'address' are forwarded to 'method'.
+	/// </summary>
+	public void Map( string address, UnityAction<OscMessage> method ){ Map<OscMessage>( address, method, OscMessageType.OscMessage ); }
 
 	/// <summary>
-	/// Request that specified method is invoked when a message with specified OSC address is received.
-	/// Methods with one argument of any of the following types are supported:
-	/// float, double, int, long, string, char, bool, Color32, byte[] and OscMessage (for entire message).
+	/// Request that float type argument is extracted from incoming messages with OSC 'address' and forwarded to 'method'.
 	/// </summary>
-	public void Map( string address, UnityAction method )
+	public void MapFloat( string address, UnityAction<float> method ){ Map<float>( address, method, OscMessageType.Float ); }
+
+	/// <summary>
+	/// Same as above, for double type.
+	/// </summary>
+	public void MapDouble( string address, UnityAction<double> method ){ Map<double>( address, method, OscMessageType.Double ); }
+
+	/// <summary>
+	/// Same as above, for int type.
+	/// </summary>
+	public void MapInt( string address, UnityAction<int> method ){ Map<int>( address, method, OscMessageType.Int ); }
+
+	/// <summary>
+	/// Same as above, for long type.
+	/// </summary>
+	public void MapLong( string address, UnityAction<long> method ){ Map<long>( address, method, OscMessageType.Long ); }
+
+	/// <summary>
+	/// Same as above, for string type.
+	/// </summary>
+	public void MapString( string address, UnityAction<string> method ){ Map<string>( address, method, OscMessageType.String ); }
+
+	/// <summary>
+	/// Same as above, for char type.
+	/// </summary>
+	public void MapChar( string address, UnityAction<char> method ){ Map<char>( address, method, OscMessageType.Char ); }
+
+	/// <summary>
+	/// Same as above, for bool type.
+	/// </summary>
+	public void MapBool( string address, UnityAction<bool> method ){ Map<bool>( address, method, OscMessageType.Bool ); }
+
+	/// <summary>
+	/// Same as above, for color type.
+	/// </summary>
+	public void MapColor( string address, UnityAction<Color32> method ){ Map<Color32>( address, method, OscMessageType.Color ); }
+
+	/// <summary>
+	/// Same as above, for blob type.
+	/// </summary>
+	public void MapBlob( string address, UnityAction<byte[]> method ){ Map<byte[]>( address, method, OscMessageType.Blob ); }
+
+	/// <summary>
+	/// Same as above, for time tag type.
+	/// </summary>
+	public void MapTimeTag( string address, UnityAction<OscTimeTag> method ){ Map<OscTimeTag>( address, method, OscMessageType.TimeTag ); }
+
+	/// <summary>
+	/// Request that 'method' is invoked when a message with OSC 'address' is received with type tag Impulse (i), Null (N) or simply without arguments.
+	/// </summary>
+	public void MapImpulseNullOrEmpty( string address, UnityAction method )
 	{
 		if( !ValidateAddressForMapping( address ) ) return;
 
@@ -545,19 +587,6 @@ public class OscIn : MonoBehaviour
 		// Set dirty flag
 		_dirtyMappings = true;
 	}
-	
-
-	public void Map( string address, UnityAction<OscMessage> method ){ Map<OscMessage>( address, method, OscMessageType.OscMessage ); }
-	public void Map( string address, UnityAction<float> method ){ Map<float>( address, method, OscMessageType.Float ); }
-	public void Map( string address, UnityAction<double> method ){ Map<double>( address, method, OscMessageType.Double ); }
-	public void Map( string address, UnityAction<int> method ){ Map<int>( address, method, OscMessageType.Int ); }
-	public void Map( string address, UnityAction<long> method ){ Map<long>( address, method, OscMessageType.Long ); }
-	public void Map( string address, UnityAction<string> method ){ Map<string>( address, method, OscMessageType.String ); }
-	public void Map( string address, UnityAction<char> method ){ Map<char>( address, method, OscMessageType.Char ); }
-	public void Map( string address, UnityAction<bool> method ){ Map<bool>( address, method, OscMessageType.Bool ); }
-	public void Map( string address, UnityAction<Color32> method ){ Map<Color32>( address, method, OscMessageType.Color ); }
-	public void Map( string address, UnityAction<byte[]> method ){ Map<byte[]>( address, method, OscMessageType.Blob ); }
-	public void Map( string address, UnityAction<OscTimeTag> method ){ Map<OscTimeTag>( address, method, OscMessageType.TimeTag ); }
 
 
 	void Map<T>( string address, UnityAction<T> method, OscMessageType type )
@@ -616,13 +645,13 @@ public class OscIn : MonoBehaviour
 	{
 		// Check address for slash
 		if( address.Length < 2 || address[0] != '/' ){
-			Debug.LogWarning( "[OscIn] Ignored attempt to create mapping. OSC addresses must begin with slash '/'." );
+			Debug.LogWarning( "<b>[OscIn]</b> Ignored attempt to create mapping. OSC addresses must begin with slash '/'." );
 			return false;
 		}
 
 		// Check for whitespace
 		if( address.Contains(" ") ){
-			Debug.LogWarning( "[OscIn] Ignored attempt to create mapping. OSC addresses are advised not to contain whitespaces." );
+			Debug.LogWarning( "<b>[OscIn]</b> Ignored attempt to create mapping. OSC addresses are advised not to contain whitespaces." );
 			return false;
 		}
 
@@ -645,10 +674,65 @@ public class OscIn : MonoBehaviour
 
 
 	/// <summary>
-	/// Request that specified method is no longer invoked.
+	/// Request that 'method' is no longer invoked.
 	/// Note that only mappings made at runtime can be unmapped.
 	/// </summary>
-	public void Unmap( UnityAction method )
+	public void Unmap( UnityAction<OscMessage> method )	{ Unmap<OscMessage>( method ); }
+
+	/// <summary>
+	/// Same as above for float type.
+	/// </summary>
+	public void UnmapFloat( UnityAction<float> method ){ Unmap<float>( method ); }
+
+	/// <summary>
+	/// Same as above for double type.
+	/// </summary>
+	public void UnmapDouble( UnityAction<double> method ){ Unmap<double>( method ); }
+
+	/// <summary>
+	/// Same as above for int type.
+	/// </summary>
+	public void UnmapInt( UnityAction<int> method ){ Unmap<int>( method ); }
+
+	/// <summary>
+	/// Same as above for long type.
+	/// </summary>
+	public void UnmapLong( UnityAction<long> method ){ Unmap<long>( method ); }
+
+	/// <summary>
+	/// Same as above for string type.
+	/// </summary>
+	public void UnmapString( UnityAction<string> method ){ Unmap<string>( method ); }
+
+	/// <summary>
+	/// Same as above for char type.
+	/// </summary>
+	public void UnmapChar( UnityAction<char> method ){ Unmap<char>( method ); }
+
+	/// <summary>
+	/// Same as above for bool type.
+	/// </summary>
+	public void UnmapBool( UnityAction<bool> method ){ Unmap<bool>( method ); }
+
+	/// <summary>
+	/// Same as above for color type.
+	/// </summary>
+	public void UnmapColor( UnityAction<Color32> method ){ Unmap<Color32>( method ); }
+
+	/// <summary>
+	/// Same as above for blob type.
+	/// </summary>
+	public void UnmapBlob( UnityAction<byte[]> method ){ Unmap<byte[]>( method ); }
+
+	/// <summary>
+	/// Same as above for time tag type.
+	/// </summary>
+	public void UnmapTimeTag( UnityAction<OscTimeTag> method ){ Unmap<OscTimeTag>( method ); }
+
+	/// <summary>
+	/// Same as above for methods with no arguments.
+	/// </summary>
+	public void UnmapImpulseNullOrEmpty( UnityAction method )
 	{
 		// UnityEvent is secret about whether we removed a runtime handler, so we have to iterate the whole array og mappings
 		for( int m=_mappings.Count-1; m>=0; m-- )
@@ -676,26 +760,11 @@ public class OscIn : MonoBehaviour
 		_dirtyMappings = true;
 	}
 
-	public void Unmap( UnityAction<OscMessage> handler )	{ Unmap<OscMessage>( handler ); }
-	public void Unmap( UnityAction<float> handler )			{ Unmap<float>( handler ); }
-	public void Unmap( UnityAction<double> handler )		{ Unmap<double>( handler ); }
-	public void Unmap( UnityAction<int> handler )			{ Unmap<int>( handler ); }
-	public void Unmap( UnityAction<long> handler )			{ Unmap<long>( handler ); }
-	public void Unmap( UnityAction<string> handler )		{ Unmap<string>( handler ); }
-	public void Unmap( UnityAction<char> handler )			{ Unmap<char>( handler ); }
-	public void Unmap( UnityAction<bool> handler )			{ Unmap<bool>( handler ); }
-	public void Unmap( UnityAction<Color32> handler )		{ Unmap<Color32>( handler ); }
-	public void Unmap( UnityAction<byte[]> handler )		{ Unmap<byte[]>( handler ); }
-	public void Unmap( UnityAction<OscTimeTag> handler )	{ Unmap<OscTimeTag>( handler ); }
-	public void Unmap( UnityAction<float[]> handler )		{ Unmap<float[]>( handler ); }
-	public void Unmap( UnityAction<int[]> handler )			{ Unmap<int[]>( handler ); }
-
-
 	/// <summary>
-	/// Request that all methods that are mapped to specified OSC address will no longer invoked.
+	/// Request that all methods that are mapped to OSC 'address' will no longer be invoked.
 	/// This is useful for unmapping delegates.
 	/// </summary>
-	public void Unmap( string address )
+	public void UnmapAll( string address )
 	{
 		OscMapping mapping = _mappings.Find( m => m.address == address );
 		if( mapping != null ){
@@ -779,7 +848,7 @@ public class OscIn : MonoBehaviour
 	string BuildFailedToMapMessage( string address, OscMessageType type, OscMessageType mappedType )
 	{
 		return string.Format(
-			"[OscIn] Failed to map address'{0}' to method with argument type '{1}'. Address is already set to receive type '{2}', either in the editor, or by a script. " + Environment.NewLine
+			"<b>[OscIn]</b> Failed to map address'{0}' to method with argument type '{1}'. Address is already set to receive type '{2}', either in the editor, or by a script. " + Environment.NewLine
 			+ "Only one type per address is allowed.", address, type, mappedType );
 	}
 

@@ -117,22 +117,29 @@ public class OscTimeTag
 	public const int byteSize = 8;
 
 
+	/// <summary>
+	/// Create new timetag with time set to now.
+	/// </summary>
     public OscTimeTag() : this( DateTime.Now ) {}
 
 
+	/// <summary>
+	/// Create new timetag with 'time'.
+	/// </summary>
     public OscTimeTag( DateTime time )
 	{
 		this.time = time;
     }
 
-
+	/// <summary>
+	/// Create new timetag with 'time' and 'immediately' flag.
+	/// </summary>
 	public OscTimeTag( DateTime time, bool immediately )
 	{
 		this.time = time;
 		this.immediately = immediately;
 	}
-
-
+		
 	public OscTimeTag( byte[] oscNtpBytes )
 	{
 		// Ensure big-endian bit order, required by the OSC 1.0 specification.

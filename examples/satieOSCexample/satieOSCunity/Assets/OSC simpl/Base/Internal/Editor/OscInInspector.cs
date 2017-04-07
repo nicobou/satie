@@ -109,7 +109,6 @@ namespace OscSimpl
 
 			Color boxColor = EditorGUIUtility.isProSkin ? new Color( 1, 1, 1, 0.07f ) : new Color( 1, 1, 1, 0.35f );
 
-
 			// Check for key down before drawing any fields because they might consume the event.
 			bool enterKeyDown = Event.current.type == EventType.keyDown && Event.current.keyCode == KeyCode.Return;
 			
@@ -136,7 +135,7 @@ namespace OscSimpl
 					oscIn.Open( _port.intValue );
 				}
 			}
-
+				
 			// Mode field
 			EditorGUI.BeginChangeCheck();
 			EditorGUILayout.PropertyField( _mode, _modeLabel );
@@ -169,6 +168,8 @@ namespace OscSimpl
 				}
 			}
 
+
+
 			// IP Address field
 			EditorGUILayout.BeginHorizontal();
 			string ipAddressString = OscIn.ipAddress.ToString();
@@ -180,7 +181,7 @@ namespace OscSimpl
 			else EditorGUI.SelectableLabel( rect, ipAddressString );
 			EditorGUI.EndDisabledGroup();
 			EditorGUILayout.EndHorizontal();
-			
+
 			// Is Open field
 			EditorGUI.BeginDisabledGroup( true );
 			EditorGUILayout.Toggle( _isOpenLabel, oscIn.isOpen );
@@ -204,7 +205,7 @@ namespace OscSimpl
 				// Add Time Tags To Bundled Messages FIeld
 				BoolSettingsField( _addTimeTagsToBundledMessages, _addTimeTagsToBundledMessagesLabel );
 			}
-				
+
 			// Mappings ...
 			string mappingsFoldLabel = "Mappings (" + _mappings.arraySize + ")";
 			_mappingsFoldout.boolValue = EditorGUILayout.Foldout( _mappingsFoldout.boolValue, mappingsFoldLabel );
@@ -272,6 +273,8 @@ namespace OscSimpl
 			
 			EditorGUI.indentLevel--;
 
+
+			
 			// Apply
 			serializedObject.ApplyModifiedProperties();
 			
