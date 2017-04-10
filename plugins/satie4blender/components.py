@@ -17,6 +17,7 @@ from bpy.props import FloatProperty, StringProperty, IntProperty, BoolProperty, 
 from bpy.types import PropertyGroup
 
 from . import osc
+from . import control
 
 bpy.satie_types_list = []
 bpy.satiePropertiesLayouts = {}
@@ -31,31 +32,36 @@ def load():
         for attribute in groupAttributes:
             aType = attribute["type"]
             aName = attribute["name"]
+            aDefault = attribute["value"]
             if aType == "Integer":
                 attributes[aName] = IntProperty(
-                    name=aName.title(),
+                    name=aName,
+                    default=aDefault,
                     update=update_property
                 )
             elif aType == "Float":
                 attributes[aName] = FloatProperty(
-                    name=aName.title(),
+                    name=aName,
+                    default=aDefault,
                     update=update_property
                 )
             elif aType == "String":
                 attributes[aName] = StringProperty(
-                    name=aName.title(),
+                    name=aName,
+                    default=aDefault,
                     update=update_property
                 )
             # FIXME: need to find a way of lading an Array with correct types
             elif aType == "Array":
                 attributes[aName] = StringProperty(
-                    name=aName.title(),
+                    name=aName,
+                    default=aDefault,
                     update=update_property
                 )
             else:
                 raise TypeError("Unsupported type ({}) for {} on {}".format(aType, aName, groupName))
 
-        # build the class representing a property group 
+        # build the class representing a property group
         propertyGroupClass = type(groupName, (PropertyGroup, ), attributes)
 
         # register with blender
@@ -65,7 +71,7 @@ def load():
         setattr(bpy.types.Object, groupName, PointerProperty(type=propertyGroupClass))
 
         # keep track of it
-        bpy.satieRegisteredTypes[groupName] = propertyGroupClass
+        # bpy.satieRegisteredTypes[groupName] = propertyGroupClass
 
     print("loaded SATIE property panel")
 
@@ -82,9 +88,12 @@ def unload():
         pass
     bpy.satieRegisteredTypes = {}
 
-
 def update_property(self, context):
-    print("**  ", self, context)
+    aName = type(self).__name__
+    owner = context.active_object.name
+    for i in self.items():
+        control.set_param(owner, i[0], i[1])
+    
 
 def load_synth_properties(synth):
     osc.satie_send("/satie/pluginargs", synth)
