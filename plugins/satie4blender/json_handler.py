@@ -20,11 +20,18 @@ def parse_plugin_properties(j):
     """Load a json
     j - a string representing json object
     """
-    my_json = json.loads(j)
-    print("got json", my_json)
-    bpy.satiePropertiesLayouts = my_json
-    # FIXME: a cludge to ensure that the above dictionary is ready before components load
-    components.load()
+    my_json = None
+    try:
+        my_json = json.loads(j)
+    except:
+        print("Invalid json")
+        pass
+    
+    if my_json is not None:
+        print("got json", my_json)
+        bpy.satiePropertiesLayouts = my_json
+        # FIXME: a cludge to ensure that the above dictionary is ready before components load
+        components.load()
 
 def parse_plugin_list(plugs):
     """Parse the json object containing plugins list
