@@ -35,13 +35,14 @@ class SatiePropertiesPanel(bpy.types.Panel):
                     # get the instance of the group
                     try:
                         propertyGroup = getattr(obj, groupName)
+                        TheCol.label("{} specific props: ".format(groupName))
+
+                        for att in groupAttributes:
+                            TheCol.prop(propertyGroup, att["name"])
                     except AttributeError:
                         # it lost its previous referencem, ignore
                         pass
-                    TheCol.label("{} specific props: ".format(groupName))
 
-                    for att in groupAttributes:
-                        TheCol.prop(propertyGroup, att["name"])
             else:
                 self.layout.label("------------- nothing to display")
                 self.layout.label(
