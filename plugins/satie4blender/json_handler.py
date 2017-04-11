@@ -23,8 +23,9 @@ def parse_plugin_properties(j):
     my_json = None
     try:
         my_json = json.loads(j)
-    except:
-        print("Invalid json")
+    except Exception as e:
+        print("Invalid json", e)
+        print(j)
         pass
     
     if my_json is not None:
