@@ -47,8 +47,16 @@ oscsend localhost 18032 /satie/pluginargs s misDrone
 	var str, param, value, type;
 	str = "";
 	param = key.asString.quote;
-	value = val;
-	type = val.class.asString.quote;
+	if (val != nil,
+		{
+			value = val;
+
+		},
+		{
+			value = "unused".quote;
+		}
+	);
+	type = value.class.asString.quote;
 	str = "\t{\n\t\t" ++ "name".quote ++ ": " ++ param ++ "," ++ "value".quote ++ ": " ++ value ++ "," ++ "type".quote ++ ":" ++ type ++ "\n\t}\n";
 	~json = ~json ++ str;
 
@@ -111,6 +119,7 @@ oscsend localhost 18032 /satie/pluginargs s misDrone
 	// get present synthdefs and send them via OSC as json object
 	var keys, pairs;
 	~satie.generatorSynthDef.keysValuesDo({|key, value| pairs = pairs.add(Array[key, value])});
+	~satie.effectSynthDef.keysValuesDo({|key, value| pairs = pairs.add(Array[key, value])});
 	pairs.do(~makeJsonFromPairs);
 	~json = ~json.replace("\}\{", "\}, \{");
 	~json = "[" ++ ~json ++ "]";
@@ -122,7 +131,15 @@ oscsend localhost 18032 /satie/pluginargs s misDrone
 	// get synth definition arguments and send them as json object
 	var synth, argnames;
 	synth = msg[1];
-	argnames = ~satie.pluginLoader.audioPlugins[synth].def.keyValuePairsFromArgs;
+	if (~satie.pluginLoader.audioPlugins.keys.includes(synth.asSymbol),
+		{
+			argnames = ~satie.pluginLoader.audioPlugins[synth].def.keyValuePairsFromArgs;
+		},
+		{
+			// FIXME: we assume it's an effect but we should make sure...
+			argnames = ~satie.pluginLoader.effectPlugins[synth].def.keyValuePairsFromArgs;
+		}
+	);
 	argnames.asArray.pairsDo(~makeJsonFromArgnames);
 	~json = ~json.replace("}\n\t{", "},\n\t{");
 	~json = "{\n" ++ synth.asString.quote ++ ": \n[" ++ ~json ++ "\n]}\n";
