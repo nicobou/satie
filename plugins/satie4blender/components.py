@@ -55,7 +55,7 @@ def load():
             elif aType == "Array":
                 attributes[aName] = StringProperty(
                     name=aName,
-                    default=aDefault,
+                    default=str(aDefault),
                     update=update_property
                 )
             else:
