@@ -100,7 +100,6 @@ oscsend localhost 18032 /satie/pluginargs s misDrone
 	var str;
 	str = ~toJSON.value(key, val);
 	~generatorsJSON = ~generatorsJSON++str;
-	"****".postln;
 };
 
 
@@ -108,6 +107,7 @@ oscsend localhost 18032 /satie/pluginargs s misDrone
 	var str;
 	str = ~toJSON.value(key, val);
 	~effectsJSON = ~effectsJSON ++ str;
+	~effectsJSON.warn;
 
 };
 
@@ -142,15 +142,17 @@ oscsend localhost 18032 /satie/pluginargs s misDrone
 	~generatorsJSON = "["++~generatorsJSON++"]";
 
 	~generatorsJSON = ~jsonParam.value("sources")++~generatorsJSON++",";
-	~generatorsJSON.warn;
+	// ~generatorsJSON.warn;
 	// ~generatorsJSON.asCompileString.inform;
 	~effectsJSON = ~effectsJSON.replace("\}\{", "\}, \{");
 	~effectsJSON = "["++~effectsJSON++"]";
-	~effectsJSON = ~jsonParam.value("effects")++~effectsJSON++",";
-
-	~json = "{" ++ ~generatorsJSON++~effectJSON ++ "}";
-	// ~json.inform;
+	~effectsJSON = ~jsonParam.value("effects")++~effectsJSON;
+	// ~effectsJSON.warn;
+	~json = "{" ++ ~generatorsJSON++~effectsJSON ++ "}";
+	// ~json.warn;
 	~responder.sendMsg("/plugins", ~json);
+	~effectsJSON = "";
+	~generatorsJSON = "";
 	~json = "";
 };
 
