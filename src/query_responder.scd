@@ -41,7 +41,8 @@ oscsend localhost 18032 /satie/pluginargs s misDrone
 (
 ~responder = NetAddr("localhost", 6666);
 
-~json = String.new;
+~generatorsJSON = String.new;
+~effectsJSON = String.new;
 
 ~makeJsonFromArgnames = {|key, val|
 	var str, param, value, type;
@@ -95,7 +96,23 @@ oscsend localhost 18032 /satie/pluginargs s misDrone
 	ret;
 };
 
-~makeJsonFromPairs = { |key, val|
+~makeGeneratorsJSON = { |key, val|
+	var str;
+	str = ~toJSON.value(key, val);
+	~generatorsJSON = ~generatorsJSON++str;
+	"****".postln;
+};
+
+
+~makeEffectsJSON = { |key, val|
+	var str;
+	str = ~toJSON.value(key, val);
+	~effectsJSON = ~effectsJSON ++ str;
+
+};
+
+
+~toJSON = { |key, val|
 	var str, keyName, sName;
 	keyName = key[0].asString.quote;
 	sName = key[1].asString.quote;
@@ -103,10 +120,8 @@ oscsend localhost 18032 /satie/pluginargs s misDrone
 	str = str++~jsonParam.value("srcName")++sName++",";
 	str = str++~jsonParam.value("description")++"Description...".quote;
 	str = ~jsonBrace.value(str);
-	~json = ~json++str;
+	str;
 };
-
-
 
 ~jsonParam = {|param|
 	// provide a quoted string representing json param followed by a colon (:)
@@ -117,12 +132,24 @@ oscsend localhost 18032 /satie/pluginargs s misDrone
 
 ~getAudioPlugins = {
 	// get present synthdefs and send them via OSC as json object
-	var keys, pairs;
-	~satie.generatorSynthDef.keysValuesDo({|key, value| pairs = pairs.add(Array[key, value])});
-	~satie.effectSynthDef.keysValuesDo({|key, value| pairs = pairs.add(Array[key, value])});
-	pairs.do(~makeJsonFromPairs);
-	~json = ~json.replace("\}\{", "\}, \{");
-	~json = "[" ++ ~json ++ "]";
+	var keys, generators, effects;
+	~satie.generatorSynthDef.keysValuesDo({|key, value| generators = generators.add(Array[key, value])});
+	~satie.effectSynthDef.keysValuesDo({|key, value| effects = effects.add(Array[key, value])});
+	generators.do(~makeGeneratorsJSON);
+	effects.do(~makeEffectsJSON);
+	"    <---".inform;
+	~generatorsJSON = ~generatorsJSON.replace("\}\{", "\}, \{");
+	~generatorsJSON = "["++~generatorsJSON++"]";
+
+	~generatorsJSON = ~jsonParam.value("sources")++~generatorsJSON++",";
+	~generatorsJSON.warn;
+	// ~generatorsJSON.asCompileString.inform;
+	~effectsJSON = ~effectsJSON.replace("\}\{", "\}, \{");
+	~effectsJSON = "["++~effectsJSON++"]";
+	~effectsJSON = ~jsonParam.value("effects")++~effectsJSON++",";
+
+	~json = "{" ++ ~generatorsJSON++~effectJSON ++ "}";
+	// ~json.inform;
 	~responder.sendMsg("/plugins", ~json);
 	~json = "";
 };
