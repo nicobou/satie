@@ -1,4 +1,4 @@
-// USES GLOBAL VARIABLES:   ~procMan <required> and  ~thisProjectResourcePath <optional>
+// USES GLOBAL VARIABLES:   ~satie <required> and  ~thisProjectResourcePath <optional>
 
 // this file defines  a process class, which is ONLY used by source nodes that have that have a URI of type:   "process" , e.g:      uri://process  "helloWorld"
 // you can define any number of these process clases, each one, corresponding to a particular type of processing  behavoir you define
@@ -29,13 +29,13 @@
 ~processName = \helloWorld;
 ~process = ~helloWorld;
 ~process.know=true;
-~procMan.registerProcessEnv(~processName, ~process);
+~satie.makeProcess(~processName, ~process);
 
 
 // required functions
 // required  setup function,  can be extended to suit particular needs of process
 ~helloWorld.setup = { | self, nodeName, nodeGroupName, args |
-	var thisGroup = ~procMan.satie.satieGroups[nodeGroupName.asSymbol] ;
+	var thisGroup = ~satie.satieGroups[nodeGroupName.asSymbol] ;
 
 	// required
 	self.nodeName = nodeName;

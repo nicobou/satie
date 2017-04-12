@@ -43,10 +43,6 @@ if (~osc == nil,{
 	~osc = ~satieOSCMaker.value();   // create an OSC RX message mapper object receiveing on port 18032 by default
 });
 
-// instantiate a process manager , and set environment variable
-if (~procMan == nil,{
-	~procMan = ~pmMaker.value(~satie);
-});
 
 // instiante the satieOSC protocol, and set environment variable
 if (~satieOsc == nil,{

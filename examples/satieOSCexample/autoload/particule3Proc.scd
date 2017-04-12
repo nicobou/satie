@@ -1,4 +1,4 @@
-// USES GLOBAL VARIABLES:   ~procMan and  ~thisProjectResourcePath
+// USES GLOBAL VARIABLES:   ~satie and  ~thisProjectResourcePath
 
 // this file defines  a process class, which is ONLY used by source nodes that have that have a URI of type:   "process" , e.g:      uri://process  "particule3"
 // you can define any number of these process clases, each one, corresponding to a particular type of processing  behavoir you define
@@ -44,7 +44,7 @@
 ~processName = \particule3;
 ~process = ~particule3;
 ~process.know=true;
-~procMan.registerProcessEnv(~processName, ~process); // regester this process with satie
+~satie.makeProcess(~processName, ~process); // regester this process with satie
 
 
 // set up class instance dictionary
@@ -68,7 +68,7 @@ if (~particule3_pitchSequences == nil,
 // required function but adaptable to project specifics
 // generates N synths
 ~particule3.setup = { | self, nodeName, nodeGroupName, argsList  |
-	var thisGroup = ~procMan.satie.satieGroups[nodeGroupName.asSymbol] ;
+	var thisGroup = ~satie.satieGroups[nodeGroupName.asSymbol] ;
 
 	self.nodeName = nodeName;
 	self.nodeGroupName = nodeGroupName;
@@ -109,7 +109,7 @@ if (~particule3_pitchSequences == nil,
 	// add code here to manage project-specific stuff
 	postf("~particule3.clearSynths: clearing synths in node: % group \n", self.nodeName);
 	// var nodename=(self.nodeName++"_"++item).asSymbol;
-	// ~procMan.satie.cleanInstance(nodename.asSymbol, self.nodeGroupName);
+	// ~satie.cleanInstance(nodename.asSymbol, self.nodeGroupName);
 	// });
 	~particule3_instances.removeAt(self.nodeName);
 };
@@ -309,7 +309,7 @@ if (~particule3_pitchSequences == nil,
 
 						//[ \note, [ pitch+self.transposition, force, incidence ]].postln;
 
-						synth = ~procMan.satie.makeKamikaze(nodename, self.synth.asSymbol, self.nodeGroupName, cloneParams);
+						synth = ~satie.makeKamikaze(nodename, self.synth.asSymbol, self.nodeGroupName, cloneParams);
 						// synth.set(\note, [ pitch+self.transposition, force, incidence ], \t_trig, 1);
 				});
 				self.polyCounter = self.polyCounter + 1;

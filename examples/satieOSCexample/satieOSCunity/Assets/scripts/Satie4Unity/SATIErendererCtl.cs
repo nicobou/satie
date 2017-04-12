@@ -34,13 +34,10 @@ public class SATIErendererCtl : MonoBehaviour
     public bool dspState = true;
     private bool _dspState;
 
-    [Tooltip ("default == unity project file name")]
-    public string projectName = "default";
+    [Tooltip ("files for renderer to load.. accepts  '~' ")]
+       public List <string> rendererLoadFiles = new List<string>();
 
-    [Tooltip ("default == dirPathToThisProject/Assets/StreamingAssets")]
-    public string projectDir = "default";
-    // defaults to $PROJECT/StreamingAssets
-    private string _projectDir;
+
 
     [Range(-90f, 18)]
     public float outputGainDB = -10f;
@@ -71,7 +68,7 @@ public class SATIErendererCtl : MonoBehaviour
 
     private string _renderCtlmess = "/satie/rendererCtl";
 
-    private string _projectMessage;
+    private string _loadMessage = "/satie/load";
 
     private string _satieSceneAddr = "/satie/scene"; 
 
@@ -119,12 +116,7 @@ public class SATIErendererCtl : MonoBehaviour
             Destroy(this);
         }
 
-        if (projectName.Equals("default"))
-        {
-            string[] s = Application.dataPath.Split('/');
-            projectName = s[s.Length - 2];
-            Debug.Log("project = " + projectName);
-        }
+
 
         _initialized = true;
         _dspState = dspState;
@@ -133,11 +125,10 @@ public class SATIErendererCtl : MonoBehaviour
         _outputTrimDB = outputTrimDB;
         _mute = mute;
         _outputFormat = outputFormat;
-        _projectMessage = "/satie/project/" + projectName;
         _rendererDebugFlag = rendererDebugFlag;
  
 
-        updateProjectDir();
+        updateLoadFiles();
         updateGainDB();
         updateTrimDB();
         updateMute();
@@ -147,39 +138,7 @@ public class SATIErendererCtl : MonoBehaviour
 
     }
 
-
-//    private bool reconnet2renderer()
-//    {
-//        if ( sharedOscOutNode.isOpen)
-//            return true;
-//        try
-//        {
-//            Debug.Log(transform.name + " : " + GetType() +  " reconnet2renderer(): sending to " + address + ":" + port);
-//            connected = true;
-//            sharedOscOutNode = new OSCTransmitter(address, port);
-//            //thread = new Thread(new ThreadStart(listen));
-//            //thread.Start();
-//        }
-//        catch (Exception e)
-//        {
-//            Debug.LogError(transform.name + " : " + GetType() +  " reconnet2renderer(): OSC failed to connect to " + address + ":" + port + " cannot initialize component");
-//            Debug.LogError(e.Message);
-//            connected = false;
-//            sharedOscOutNode = null;
-//            return false;
-//        }
-//        string localHostName = Dns.GetHostName();
-//        IPHostEntry hostEntry = Dns.GetHostEntry(localHostName);
-//        foreach (IPAddress ipAddr in hostEntry.AddressList)
-//        {
-//            Debug.Log(transform.name + " : " + GetType() +  " reconnet2renderer(): MY IP:" + ipAddr.ToString());
-//        }
-//        return true;
-//    }
-//
-
-
- 
+     
     private void updateDSPstate()
     {
         OscMessage message = new OscMessage(_renderCtlmess);
@@ -190,87 +149,17 @@ public class SATIErendererCtl : MonoBehaviour
         SATIEsetup.sendOSC(message);
     }
 
-    private void updateProjectDir()
+    private void updateLoadFiles()
     {
         string path = "";
 
-        //Debug.Log ("PROJECT DIR: "+ projectDir);
-
-        if (projectDir == "")
+       
+        foreach(string s in rendererLoadFiles)
         {
-            return;   // if no project path is provided, use the one that is definied in the satie server project
-
-//            _projectDir = projectDir = "../StreamingAssets";
-//            path = Application.streamingAssetsPath;
-            // Debug.Log ("projectDir EMPTY,  path= "+ path);
+            OscMessage message = new OscMessage(_loadMessage);		
+            message.Add(s);
+            SATIEsetup.sendOSC(message);
         }
-        else if (projectDir.Equals("default"))    // users can specify $DROPBOX, and assuming a standard filepath like  "C:\Users or /Users,  we replace /Users/name with "~"
-        {
-            _projectDir = projectDir = path = Application.streamingAssetsPath;
-        }
-        else if (projectDir.StartsWith("$DROPBOX"))    // users can specify $DROPBOX, and assuming a standard filepath like  "C:\Users or /Users,  we replace /Users/name with "~"
-        {
-            string[] pathItems;
-//			int dirIndex = 0; // Never used warning
-            string relPath = "~";
-            int counter = 0;
-            int usersIndex = 0;
-//			int dropBoxIndex = 0; // Never used warning
-            char delimiter = '/';  // Path.DirectorySeparatorChar;   NOT NEEDED FOR WINDOWS ANYMORE
-
-
-            // will default to this if there are errors
-            _projectDir = projectDir = "../StreamingAssets";
-            path = Application.streamingAssetsPath;
-
-
-            //Debug.Log("***************************** PATH= "+path);
-
-            if (!path.Contains("Dropbox") || (!path.Contains("Users") && !path.Contains("Utilisateurs")))
-            {
-                Debug.LogWarning(transform.name + " : " + GetType() + " updateProjectDir(): no DROPBOX and/or /Users directory found, setting project path to default");
-                return;
-            }
-
-            pathItems = path.Split(delimiter);   // get array of directory items
- 
-            counter = 0;
-            foreach (string s in pathItems)
-            {
-                if (s == "Users" || s == "Utilisateurs")
-                {
-                    usersIndex = counter;
-                    break;
-                }
-                counter++;
-            }
-
-            if (pathItems.Length < usersIndex + 3)   // /users/name/relativestuff.....
-            {
-                Debug.LogError(transform.name + " : " + GetType() + " updateProjectDir(): poorly formated directory path (BUG??), setting project path to default");
-                return;
-            }
-
-            for (int i = usersIndex + 2; i < pathItems.Length; i++)
-            {
-                relPath += "/" + pathItems[i];
-            }
-            //Debug.Log("***************************** pathItems[0] = " + pathItems[0]);
-            // Debug.Log("RELPATH= "+relPath);
-            _projectDir = projectDir = relPath;
-            path = relPath;
-        }
-        else if (projectDir.StartsWith("/"))
-            path = projectDir;
-        else
-            _projectDir = projectDir = path = Application.streamingAssetsPath;
-
-
-        OscMessage message = new OscMessage(_projectMessage);
-		
-        message.Add("setProjectDir");
-        message.Add(path);
-        SATIEsetup.sendOSC(message);
     }
 
     public void setSatieDebugMode(float state)
@@ -369,7 +258,7 @@ public class SATIErendererCtl : MonoBehaviour
     // only three message value types
     public void projectMess(string key)
     {
-        OscMessage message = new OscMessage(_projectMessage);
+        OscMessage message = new OscMessage(_loadMessage);
  
         Debug.Log(transform.name + " " + GetType() + " projectMess()  sending projectMess:    project: " + message + "   key: " + key);
 
@@ -380,7 +269,7 @@ public class SATIErendererCtl : MonoBehaviour
 
     public void projectMess(string key, float val)
     {
-        OscMessage message = new OscMessage(_projectMessage);
+        OscMessage message = new OscMessage(_loadMessage);
 
         Debug.Log(transform.name + " " + GetType() + "projectMess() sending projectMess:    project: " + message + "   key: " + key);
         message.Add(key);
@@ -390,7 +279,7 @@ public class SATIErendererCtl : MonoBehaviour
 
     public void projectMess(string key, string val)
     {
-        OscMessage message = new OscMessage(_projectMessage);
+        OscMessage message = new OscMessage(_loadMessage);
 
         Debug.Log(transform.name + " " + GetType() + " projectMess() sending projectMess:    project: " + message + "   key: " + key);
         message.Add(key);
@@ -412,12 +301,7 @@ public class SATIErendererCtl : MonoBehaviour
             _rendererDebugFlag = rendererDebugFlag;
             updateSatieDebugMode();
         }
-
-        if (_projectDir != projectDir)
-        {
-            _projectDir = projectDir;
-            updateProjectDir();
-        }
+            
 
         if (_outputGainDB != outputGainDB)
         {

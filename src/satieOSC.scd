@@ -28,10 +28,9 @@ for debugguing
 
 
 (
-~satieOSCProtocol = { | oscContext, satieContext, satieProcessContext,  oscID = \satieOSCOSC |
+~satieOSCProtocol = { | oscContext, satieContext,  oscID = \satieOSCOSC |
 	var osc = oscContext;
 	var satie = satieContext;
-	var procMan = satieProcessContext;
 
 	var e = Environment.make({
 		~allSourceNodes = Dictionary();        //  ~allSourceNodes.postln;
@@ -829,18 +828,14 @@ for debugguing
 		~createProcessNode = { | self, sourceName, uriPath , groupNameDummy = \default |
 			var temp, type, charIndex, processName, myProcess, cloneGroup, cloneGroupName;
 			var processClone = nil;
-			var argsString = "";
-			var stringArray;
 			var rawArgVec = nil;
 			var argList = List[];
 
 			if ( e.debugFlag,  { postf("•satieOSC.createProcessNode:   %   URI  % \n", sourceName, uriPath);});
 
-			stringArray = uriPath.asString.split($ );
-			charIndex = stringArray[0].asString.find("://");
-			processName = stringArray[0].asString.subStr(charIndex+3);
-			argsString = uriPath.asString.subStr(stringArray[0].size+1);
-			rawArgVec= argsString.asString.split($ );
+			processName= uriPath.asString.split($ )[0].split($/)[2];
+			rawArgVec = uriPath.asString.split($ );
+			rawArgVec.removeAt(0);  // drop first item in list
 
 			// make list of items in argString
 			rawArgVec.do( { arg item;
@@ -857,7 +852,7 @@ for debugguing
 				},
 				// else ALL GOOD,  instantiate
 				{
-					processClone = procMan.cloneProcess(processName.asSymbol);
+					processClone = satie.cloneProcess(processName.asSymbol);
 					if (processClone == nil,
 						{
 							error("satieOSC.createProcessNode: undefined process name:"++processName++"   ,  node not created \n");
@@ -1206,7 +1201,7 @@ for debugguing
 
 					// temp = uriPath.asString.subStr(charIndex);
 					type = uriPath.asString.split($:)[0];
-					type.postln;
+					//type.postln;
 					~type = type;
 					// uriName = temp.asString.replace("://", "");
 			});

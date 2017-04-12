@@ -1,4 +1,4 @@
-// USES GLOBAL VARIABLES:   ~procMan <required> and  ~thisProjectResourcePath <optional>
+// USES GLOBAL VARIABLES:   ~satie <required> and  ~thisProjectResourcePath <optional>
 
 // this file defines  a process class, which is ONLY used by source nodes that have that have a URI of type:   "process" , e.g:      uri://process  "sheefa"
 // you can define any number of these process clases, each one, corresponding to a particular type of processing  behavoir you define
@@ -42,7 +42,7 @@
 ~processName = \sheefa;
 ~process = ~sheefa;
 ~process.know=true;
-~procMan.registerProcessEnv(~processName, ~process);
+~satie.makeProcess(~processName, ~process);
 
 // optional custom global variables, that can be referenced by all "instants"  of "sheefa" class
 ~sheefa_pitchRoot = 60;
@@ -52,7 +52,7 @@
 
 // required  setup function,  can be extended to suit particular needs of process
 ~sheefa.setup = { | self, nodeName, nodeGroupName, args |
-	var thisGroup = ~procMan.satie.satieGroups[nodeGroupName.asSymbol] ;
+	var thisGroup = ~satie.satieGroups[nodeGroupName.asSymbol] ;
 
 	// required
 	self.nodeName = nodeName;
@@ -88,7 +88,7 @@
 		var nodename=(self.nodeName++"_"++item).asSymbol;
 		var synth;
 
-		synth = ~procMan.satie.makeInstance(nodename.asSymbol, self.synth.asSymbol, self.nodeGroupName);
+		synth = ~satie.makeInstance(nodename.asSymbol, self.synth.asSymbol, self.nodeGroupName);
 		// synth now created, so we can set its state
 		synth.set(\aziDeg, self.aziDeg, \eleDeg, self.elevDeg, \gainDB, self.gainDB , \delayMs, self.delayMs, \lpHz, self.lpHz, \hpHz, self.hpHz);
 		synth.set(\randTrigMaxMs, self.triggerIntervalMs);
@@ -105,7 +105,7 @@
 
 	self.cloneCount.do( { arg item;
 		var nodename=(self.nodeName++"_"++item).asSymbol;
-		~procMan.satie.cleanInstance(nodename.asSymbol, self.nodeGroupName);
+		~satie.cleanInstance(nodename.asSymbol, self.nodeGroupName);
 	});
 };
 
@@ -140,7 +140,7 @@
 		// this is where we can calculate clone-specific parameters
 		// value = value *  item;
 
-		~procMan.satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(key.asSymbol,value);
+		~satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(key.asSymbol,value);
 	});
 };
 
@@ -257,7 +257,7 @@
 
 				// this is where we cn calculate clone-specific parameters
 				var clone_pitch = pitch + item;
-				var synth =  ~procMan.satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ];
+				var synth =  ~satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ];
 				synth.set(\aziDeg, 360.rand, \eleDeg, 360.rand);
 				synth.set(\note, [ pitch, vel, incidence ] );
 				synth.set(\t_trig, 1);
@@ -294,8 +294,8 @@
 
 	self.cloneCount.do( { arg item;
 		var nodename=(self.nodeName++"_"++item).asSymbol;
-		var synth =  ~procMan.satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ];
-		~procMan.satie.cleanInstance(nodename, self.nodeGroupName );
+		var synth =  ~satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ];
+		~satie.cleanInstance(nodename, self.nodeGroupName );
 		//synth.free;    // KLUGE:  to make sure it gets cleaned from the node tree
 	});
 
@@ -306,7 +306,7 @@
 		var nodename=(self.nodeName++"_"++item).asSymbol;
 		var synth;
 
-		synth = ~procMan.satie.makeInstance(nodename.asSymbol, self.synth.asSymbol, self.nodeGroupName);
+		synth = ~satie.makeInstance(nodename.asSymbol, self.synth.asSymbol, self.nodeGroupName);
 		// synth now created, so we can set its state
 		synth.set(\aziDeg, self.aziDeg, \eleDeg, self.elevDeg, \gainDB, self.gainDB , \delayMs, self.delayMs, \lpHz, self.lpHz, \hpHz, self.hpHz);
 		synth.set(\randTrigMaxMs, self.triggerIntervalMs);

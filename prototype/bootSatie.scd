@@ -209,9 +209,6 @@ if (~meter == nil,  { ~plotTree=s.meter;});
 //~startupfiles.add(~rootSrcPath++"/utils/dacTest.scd");
 
 
-
-
-
 // load the additional files
 s.waitForBoot {
 
@@ -242,18 +239,18 @@ if (~srCtl == nil,{
 				{~thisFile++" : satieFileLoader:  message missing filepath".warn;},
 				// else
 				{
-					var filepath = msg[1].asString;
+			var filepath = msg[1].asString.standardizePath;   // can handle '~'
 
-					if ( File.exists(filepath.standardizePath) == false,
+					if ( File.exists(filepath) == false,
 						{
-							error(~thisFile++" : satieFileLoader:   "++filepath.standardizePath++" not found, aborting");
+							error(~thisFile++" : satieFileLoader:   "++filepath++" not found, aborting");
 						},
 						// else  file exists, process
 						{
 
 							if (filepath.splitext.last != "scd",
 								{
-									error(~thisFile++" : satieFileLoader: "++filepath.standardizePath++" must be a file of type  '.scd'  ");
+									error(~thisFile++" : satieFileLoader: "++filepath++" must be a file of type  '.scd'  ");
 								},
 								// else file type is good. Try to load
 								{

@@ -1,4 +1,4 @@
-// USES GLOBAL VARIABLES:   ~procMan and  ~thisProjectResourcePath
+// USES GLOBAL VARIABLES:   ~satie and  ~thisProjectResourcePath
 
 // this file defines  a process class, which is ONLY used by source nodes that have that have a URI of type:   "process" , e.g:      uri://process  "particule1"
 // you can define any number of these process clases, each one, corresponding to a particular type of processing  behavoir you define
@@ -41,7 +41,7 @@
 ~processName = \particule1;
 ~process = ~particule1;
 ~process.know=true;
-~procMan.registerProcessEnv(~processName, ~process);  // regester this process with satie
+~satie.makeProcess(~processName, ~process);  // regester this process with satie
 
 
 // set up class instance dictionary
@@ -68,7 +68,7 @@ if (~particule1_pitchSequences == nil,
 // required function but adaptable to project specifics
 // generates N synths
 ~particule1.setup = { | self, nodeName, nodeGroupName, argsList  |
-	var thisGroup = ~procMan.satie.satieGroups[nodeGroupName.asSymbol] ;
+	var thisGroup = ~satie.satieGroups[nodeGroupName.asSymbol] ;
 
 	self.nodeName = nodeName;
 	self.nodeGroupName = nodeGroupName;
@@ -102,7 +102,7 @@ if (~particule1_pitchSequences == nil,
 		var nodename=(self.nodeName++"_"++item).asSymbol;
 		var synth;
 
-		synth = ~procMan.satie.makeInstance(nodename.asSymbol, self.synth.asSymbol, self.nodeGroupName);
+		synth = ~satie.makeInstance(nodename.asSymbol, self.synth.asSymbol, self.nodeGroupName);
 		// synth now created, so we can set its state
 		synth.set(\aziDeg, self.aziDeg, \eleDeg, self.elevDeg, \gainDB, self.gainDB , \delayMs, self.delayMs, \lpHz, self.lpHz, \hpHz, self.hpHz);
 		synth.set(\randTrigMaxMs, self.triggerIntervalMs);
@@ -117,7 +117,7 @@ if (~particule1_pitchSequences == nil,
 
 	(self.cloneCount - 1).do( { arg item;
 		var nodename=(self.nodeName++"_"++item).asSymbol;
-		~procMan.satie.cleanInstance(nodename.asSymbol, self.nodeGroupName);
+		~satie.cleanInstance(nodename.asSymbol, self.nodeGroupName);
 	});
 
 	~particule1_instances.removeAt(self.nodeName);
@@ -136,7 +136,7 @@ if (~particule1_pitchSequences == nil,
 		// this is where we can calculate clone-specific parameters
 		// value = value *  item;
 
-		~procMan.satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(key.asSymbol,value);
+		~satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(key.asSymbol,value);
 	});
 
 
@@ -284,8 +284,8 @@ if (~particule1_pitchSequences == nil,
 						pitch =  self.transposition + ~particule1_pitchSequences.at(seqName.asSymbol).at(\pitches)[position];
 						self.pitchSeqPos = ((position + incr) % size);
 				});
-				~procMan.satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(\note, [ pitch, vel, incidence ] );
-				~procMan.satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(\t_trig, 1);
+				~satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(\note, [ pitch, vel, incidence ] );
+				~satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ].set(\t_trig, 1);
 			});
 	});
 };
@@ -415,8 +415,8 @@ if (~particule1_pitchSequences == nil,
 
 	(self.cloneCount - 1).do( { arg item;
 		var nodename=(self.nodeName++"_"++item).asSymbol;
-		var synth =  ~procMan.satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ];
-		~procMan.satie.cleanInstance(nodename, self.nodeGroupName );
+		var synth =  ~satie.satieGroupInstances[ self.nodeGroupName.asSymbol ][ nodename.asSymbol ];
+		~satie.cleanInstance(nodename, self.nodeGroupName );
 		//synth.free;    // KLUGE:  to make sure it gets cleaned from the node tree
 	});
 
@@ -427,7 +427,7 @@ if (~particule1_pitchSequences == nil,
 		var nodename=(self.nodeName++"_"++item).asSymbol;
 		var synth;
 
-		synth = ~procMan.satie.makeInstance(nodename.asSymbol, self.synth.asSymbol, self.nodeGroupName);
+		synth = ~satie.makeInstance(nodename.asSymbol, self.synth.asSymbol, self.nodeGroupName);
 		// synth now created, so we can set its state
 		synth.set(\aziDeg, self.aziDeg, \eleDeg, self.elevDeg, \gainDB, self.gainDB , \delayMs, self.delayMs, \lpHz, self.lpHz, \hpHz, self.hpHz);
 		synth.set(\randTrigMaxMs, self.triggerIntervalMs);

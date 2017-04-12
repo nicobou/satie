@@ -96,7 +96,7 @@ b.sendMsg("/satie/scene", "clear");    // clear scene
 b.sendMsg("/satie/scene", "createProcess",  "myProcess", "process://helloWorld" );    // create process node - unique group will be automatically generated for each created
 b.sendMsg("/satie/process/set", "myProcess", "someParam", 1);    //
 
-b.sendMsg("/satie/process/property", "myProcess", "debugFlag", 0);    // set process environment variable
+b.sendMsg("/satie/process/property", "myProcess", "debugFlag", 1);    // set process environment variable
 b.sendMsg("/satie/process/set", "myProcess", "someParam", 2);    // set synth param
 
 b.sendMsg("/satie/scene", "deleteNode", "myProcess");
@@ -104,7 +104,7 @@ b.sendMsg("/satie/scene", "deleteNode", "myProcess");
 
 // Custom Process
 (
-b.sendMsg("/satie/scene", "createProcess",  "sheefaProcess", "process://sheefa cloneCount 10" );    // create process node - unique group will be automatically generated for each created node
+b.sendMsg("/satie/scene", "createProcess",  "sheefaProcess", "process://sheefa cloneCount 20" );    // create process node - unique group will be automatically generated for each created node
 b.sendMsg("/satie/process/update", "sheefaProcess", 0,0, -6,0,15000,20);   // update spatialiser
 b.sendMsg("/satie/process/set", "sheefaProcess", "spread", 30);    // calls custom handler 'spread', defined in process's environment
 )
