@@ -1,28 +1,36 @@
 // BASIC PROJECT FORMAT
 
 //  ~listeningFormat SHOULD BE A GLOBAL SATIE ITEM, DEFINED AS SOON AS THE SERVER IS BOOTED
-
+//  ~satieRootPath    SHOULD BE A GLOBAL SATIE ITEM ,DEFINED AS SOON AS THE SERVER IS BOOTED
 
 // Optional Definition:   value of this variable can be overwritten via OSC messages from Project
 ~thisProjectResourcePath = thisProcess.nowExecutingPath.dirname++"/satieOSCunity/Assets/StreamingAssets";
 
 
-~thisFile = thisProcess.nowExecutingPath.split($/).last;
-~thisDir = thisProcess.nowExecutingPath.dirname;
+
 ~num_aux_bus = 5;
 ~fxBus0 = 0;  // relative aux bus number that satie will use for this project's synthdef sends to fx synthdefs
 
-// ~satieDir  SHOULD BE A GLOBAL POINTING TO WHERE THE SATIE KERNAL LIVES e.g. ~/src/satie
-~satieDir = ~thisDir++"/../..";
+
+// used only for debug printing
+~thisProjectFile = thisProcess.nowExecutingPath.split($/).last;
+~thisProjectDir = thisProcess.nowExecutingPath.dirname;
+
+postf("***"++~thisProjectFile++" :  loading project,  using listenerFormat: %  with %  FX busses  \n", ~listeningFormat, ~num_aux_bus);
 
 
-postf("***"++~thisFile++" :  loading project,  using listenerFormat: %  with %  FX busses  \n", ~listeningFormat, ~num_aux_bus);
 
-
+//   REMOVE THIS TEST ONCE THE GLOBALS HAVE BEEN SORTED OUT
 if (~listeningFormat == nil,
 	{
-		error(~thisFile++" : BUG FOUND:  listening format not defined, setting to stereo");
+		error(~thisProjectFile++" : BUG FOUND:  listening format not defined, setting to stereo");
 		~listeningFormat = \stereoListener;
+});
+
+if (~satieRootPath == nil,
+	{
+		error(~thisProjectFile++" : BUG FOUND:  ~satieRootPath  not defined, GUESSING.... ");
+		~satieRootPath = ~thisProjectDir++"/../..";
 });
 
 
@@ -34,7 +42,7 @@ if (~listeningFormat == nil,
 //  THERE IS A CHOICE TO MAKE:  DO WE KILL AN EXISTING SATIE FIRST ??
 if (~satie == nil,{
 	postln("loading SATIE kernal...");
-	~satie = ~satieMaker.value(numAudioAux: ~num_aux_bus, satieSrcPath: ~rootSrcPath);
+	~satie = ~satieMaker.value(numAudioAux: ~num_aux_bus, satieSrcPath:  ~satieRootPath );
 });
 
 // THIS SHOULD BE A GLOBAL SATIE ITEM, DEFINED AS SOON AS THE SATIE /src folder has been loaded
@@ -46,7 +54,7 @@ if (~osc == nil,{
 
 // instiante the satieOSC protocol, and set environment variable
 if (~satieOsc == nil,{
-	~satieOsc = ~satieOSCProtocol.value(~osc, ~satie, ~procMan);
+	~satieOsc = ~satieOSCProtocol.value(~osc, ~satie);
 	//~satieOsc.debugFlag = true;
 });
 
@@ -105,13 +113,13 @@ s.waitForBoot{
 	s.sync;
 
 	// load project file, and any  utility files
-	if ( ~utilityFIles.size > 0, { postf(~thisFile++" :  loading utility files \n")});
+	if ( ~utilityFIles.size > 0, { postf(~thisProjectFile++" :  loading utility files \n")});
 	~utilityFiles.do { |f|  f.postln;  f.load ; s.sync;};
 
 	s.sync;
 
 	// load additional project-specific files from the "autoload" subdir.
-	postf(~thisFile++" :  loading % items in %/autoload subdirectory\n", ~files.size, ~thisDir);
+	postf(~thisProjectFile++" :  loading % items in %/autoload subdirectory\n", ~files.size, ~thisProjectDir);
 	~files.do { |f|  f.split.last.postln;  f.load; s.sync;};
 	s.sync;
 
@@ -125,8 +133,8 @@ s.waitForBoot{
 		//postf(~myProjectName++" Project:  command: %, msg: %, \n", command, msg);
 
 		if (msg.size < 2,
-			{~thisFile++" : myProjectCallback:  empty message".warn;
-				postf(~thisFile++" : myProjectCallback:  Project:  MESS LEN: %", msg.size);
+			{~thisProjectFile++" : myProjectCallback:  empty message".warn;
+				postf(~thisProjectFile++" : myProjectCallback:  Project:  MESS LEN: %", msg.size);
 
 			},
 			// else
@@ -136,13 +144,13 @@ s.waitForBoot{
 					'setProjectDir',
 					{
 						if ( (msg.size != 3 ) ,
-							{~thisFile++" : myProjectCallback: Project: setProjectDir bad arg count: expecting 'setProjectDir projectDirPath' ".warn;},
+							{~thisProjectFile++" : myProjectCallback: Project: setProjectDir bad arg count: expecting 'setProjectDir projectDirPath' ".warn;},
 							// else
 							{
 								~thisProjectResourcePath = msg[2];     // optionally referenced by certain processes
 
 								//e.projectDirectory.postln;
-								postf(~thisFile++" : myProjectCallback: setting project directory to: % \n", ~thisProjectResourcePath);
+								postf(~thisProjectFile++" : myProjectCallback: setting project directory to: % \n", ~thisProjectResourcePath);
 							}
 						)
 				})
@@ -151,8 +159,8 @@ s.waitForBoot{
 
 
 	// set up to receive OSC project messages: e.g.  /satie/project/myProjectname data1 .... dataN
-	~osc.removeProjectOSC(~thisFile.asSymbol);   // just in case
-	~osc.makeProjectOSC(~thisFile.asSymbol, ~myProjectCallback);   // now create osc callback for project
+	~osc.removeProjectOSC(~thisProjectFile.asSymbol);   // just in case
+	~osc.makeProjectOSC(~thisProjectFile.asSymbol, ~myProjectCallback);   // now create osc callback for project
 
 
 /*
