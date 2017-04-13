@@ -16,6 +16,14 @@
 // -----------------------------------------------------------
 
 
+
+// REQUIRED  GLOBAL VARIABLES  -- used from elsewhere in the environment--
+~satieRootPath = thisProcess.nowExecutingPath.dirname++ "/..";   //  needed when calling ~satieMaker
+
+~listeningFormat = \stereoListener;    // defaults to stereo    - needed when calling makeSynthDef
+
+
+
 // Evaluate this file to
 // 1)  load the items in /src
 // 2) create a satieOSCmaker instance
@@ -25,9 +33,10 @@
 // using the messageHandler, additional satie state can be instantiated, like the basic-renderer or saiteOSC
 
 
+// set this flags depending on your environment
 
-// defaults to stereo
-~listeningFormat = \stereoListener;    // you can also set this to  \domeVBAP  or  \labodomeVBAP  or   \octoVBAP
+~superNovaFlag = true;
+
 
 
 // or specify the listening format via command line args
@@ -70,24 +79,8 @@ if  (thisProcess.argv.size >= 1,
 
 });
 
+~thisFile = thisProcess.nowExecutingPath.split($/).last;  // used for debug printing
 
-~thisFile = thisProcess.nowExecutingPath.split($/).last;
-
-~thisDir = thisProcess.nowExecutingPath.dirname;
-
-// Only edit this path to point to the sate root if you have moved location of this example project directory to a different level of the satie distribution directory tree
-// by default it is: ~rootSrcPath = ~thisDir++ "/../..";
-
-~rootSrcPath = ~thisDir++ "/../";
-
-
-// set these flags depending on your environment
-~outAudioDev = nil;
-~superNovaFlag = true;
-
-
-
-// PROBABLY NO NEED TO MODIFY ANYTHING ELSE BELOW  HERE
 
 if ( ~superNovaFlag != nil,
 	{
@@ -198,7 +191,7 @@ if (~meter == nil,  { ~plotTree=s.meter;});
 // Initialize and load  section   ----------------------------------
 (
 // Load SATIE kernel
-(~rootSrcPath ++ "/src/*.scd").pathMatch.do({arg item; item.loadPaths});
+(~satieRootPath ++ "/src/*.scd").pathMatch.do({arg item; item.loadPaths});
 
 
 // specify any other files to be loaded:
