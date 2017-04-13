@@ -44,9 +44,12 @@ class ToolsPanel(bpy.types.Panel):
 
 
 def useSatie(self, context):
+    """Start osc server and add satie callback to update queue
+    """
     active = context.scene.Active
     control.setSatieSendCtl(active)
     if active:
+        osc.scene_clear()
         if bpy.s4b_OSCserver:
             if osc.osc_rcv_cb not in bpy.app.handlers.scene_update_post:
                 try:
@@ -64,6 +67,7 @@ def useSatie(self, context):
         if osc.osc_rcv_cb in bpy.app.handlers.scene_update_post:
             bpy.app.handlers.scene_update_post.remove(osc.osc_rcv_cb)
             try:
+                osc.scene_clear()
                 osc.stop_osc_server()
             except Exception as e:
                 print("Could not strop osc server, reason:", e)
