@@ -25,12 +25,12 @@ bpy.s4b_OSCclient = None
 NODE_TYPES = ["source", "group", "process"]
 SCENE_URI = "/satie/scene"
 
-OSC_ADDRESS = libro.Address(props.destination, props.satie_port)
+OSC_ADDRESS = liblo.Address(props.destination, props.satie_port)
 
 def init_osc_server():
-    bpy.s4b_OSCclient = liblo.Address("localhost", 18032)
+    bpy.s4b_OSCclient = liblo.Address(props.destination, props.satie_port)
 
-    bpy.s4b_OSCserver = liblo.Server(6666)
+    bpy.s4b_OSCserver = liblo.Server(props.server_port)
     #msg = liblo.Message("/notify", 1)
     # msg = liblo.Message("/satie/pluginargs", synth)
 
@@ -81,7 +81,7 @@ def scene_create_source(nodeName, synthdefName, schemaName='plugin', group='defa
     synthdefName: string - name of the compiled synthdef
     group: string - optional, 'default' by default
     """
-    liblo.send(OSC_ADDRESS, SCENE_URI, "createSource", nodeName,  "plugin://"+synthdefName, group)
+    liblo.send(bpy.s4b_OSCclient, SCENE_URI, "createSource", nodeName,  "plugin://"+synthdefName, group)
 
 def scene_create_effect(nodeName, synthdefName, schemaName='plugin', group='defaultFx', in_bus=0):
     """Create an audio effect
@@ -94,25 +94,25 @@ def scene_create_effect(nodeName, synthdefName, schemaName='plugin', group='defa
     group: string - optional, 'default' by default
     in_bus: int - bus number, default=0
     """
-    liblo.send(OSC_ADDRESS, SCENE_URI, "createSource", nodeName, "effect://"+synthdefName, group, in_bus)
+    liblo.send(bpy.s4b_OSCclient, SCENE_URI, "createSource", nodeName, "effect://"+synthdefName, group, in_bus)
 
 def scene_create_group(nodeName, schema='plugin'):
     """Create a group"""
-    liblo.send(OSC_ADDRESS, SCENE_URI, "createGroup", nodeName, "effect://")
+    liblo.send(bpy.s4b_OSCclient, SCENE_URI, "createGroup", nodeName, "effect://")
 
 def scene_clear():
-    liblo.send(OSC_ADDRESS, SCENE_URI, "clear")
+    liblo.send(bpy.s4b_OSCclient, SCENE_URI, "clear")
 
 def scene_set(key, value):
-    liblo.send(OSC_ADDRESS, os.path.join(SCENE_URI, "set"), key, value)
+    liblo.send(bpy.s4b_OSCclient, os.path.join(SCENE_URI, "set"), key, value)
 
 def node_state(nodeType, nodeName, value):
     uri = os.path.join("/satie", nodeType, "state")
-    liblo.send(OSC_ADDRESS, uri, nodeName, value)
+    liblo.send(bpy.s4b_OSCclient, uri, nodeName, value)
 
 def node_event(nodeType, nodeName, eventName, *args):
     uri = os.path.join("/satie", nodeType, "event")
-    liblo.send(OSC_ADDRESS, uri, nodeName, eventName, args)
+    liblo.send(bpy.s4b_OSCclient, uri, nodeName, eventName, args)
 
 def node_set(nodeType, nodeName, *args):
     """
@@ -121,5 +121,16 @@ def node_set(nodeType, nodeName, *args):
     args: array - key, value pairs alternating
     """
     uri = os.path.join("/satie", nodeType, "set")
-    liblo.send(OSC_ADDRESS, uri, nodeName, args)
+    liblo.send(bpy.s4b_OSCclient, uri, nodeName, args)
     
+def node_setvec(nodeType, nodeName, key, *args):
+    """Send a keyword, vector
+
+    nodeType: string
+    nodeName: string
+    key: string
+    *args: tuple of numeric values
+    """
+    uri = os.path.join("/satie", nodeType, "setvec")
+    liblo.send(bpy.s4b_OSCclient, uri, nodeName, key, args)
+
