@@ -22,6 +22,8 @@ from . import control
 bpy.satie_types_list = []
 bpy.satiePropertiesLayouts = {}
 bpy.satieRegisteredTypes = {}
+# plugins by family, i.e. sources or effects
+bpy.satie_plugins = {}
 
 def load():
     # bpy.utils.register_class(SatiePropertiesPanel)
@@ -53,6 +55,7 @@ def load():
                 )
             # FIXME: need to find a way of lading an Array with correct types
             elif aType == "Array":
+                
                 attributes[aName] = StringProperty(
                     name=aName,
                     default=str(aDefault),

@@ -26,6 +26,8 @@ class SatiePropertiesPanel(bpy.types.Panel):
             obj = context.object
             TheCol = self.layout.column(align = True)
             TheCol.prop(context.object, "useSatie")
+            if bpy.satie_plugins:
+                TheCol.prop(context.object, "plugin_family")
             TheCol.prop(context.object, "satie_synth")
             TheCol.prop(context.object, "satieGroup")
             self.layout.separator()
@@ -55,15 +57,23 @@ class SatiePropertiesPanel(bpy.types.Panel):
     # @staticmethod
     def updatePanel(self, value):
         print("update called")
-                                                        
+
+def get_satie_families(self, context):
+    menu = []
+    if bpy.satie_plugins:
+        for key in bpy.satie_plugins.keys():
+            t = tuple([key, key, "..."])
+            menu.append(t)
+        return(menu)
+    else:
+        return(('Waiting...', 'waiting....', ''))
+
 def initObjectProperties():
     bpy.types.Object.useSatie = bpy.props.BoolProperty(
         name = "Use SATIE",
         description = "Assign this object a SATIE sound source",
         default = False
     )
-    
-
 
     bpy.types.Object.satieGroup = bpy.props.StringProperty(
         name = "Group",
@@ -75,6 +85,11 @@ def initObjectProperties():
         name = "Send to SATIE",
         description = "(Un)mute the SATIE instance",
         default = False
+    )
+    bpy.types.Object.plugin_family = bpy.props.EnumProperty(
+        name = "Plugin type",
+        description = "SATIE plugins family",
+        items = get_satie_families
     )
 
 initObjectProperties()

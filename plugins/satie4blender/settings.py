@@ -29,12 +29,19 @@ class SatieComponents(PropertyGroup):
         if properties.active:
             # print("updating types menu", self.satie_synth)
             components.load_synth_types()
-            return(bpy.satie_types_list)
+            plugs_key = self.plugin_family
+            menu = []
+            for attr in bpy.satie_plugins[plugs_key]:
+                name = attr['name']
+                srcName = attr['srcName']
+                descr = attr['description']
+                t = tuple([srcName, name, descr])
+                menu.append(t)
+            return(menu)
 
     def update_components(self, context):
         if properties.active:
             satie_type = str(context.object.satie_synth)
-            print("updating synth menu", self, bpy.satie_types_list[self['satie_synth']][1])
             components.unload()
             components.load_synth_properties(satie_type)
 		

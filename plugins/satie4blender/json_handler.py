@@ -42,12 +42,6 @@ def parse_plugin_list(plugs):
     """
     menu = []
     plugs_json = json.loads(plugs)
-
-    for attr in plugs_json:
-        name = attr['name']
-        srcName = attr['srcName']
-        descr = attr['description']
-        t = tuple([srcName, name, descr])
-        menu.append(t)
+    bpy.satie_plugins = plugs_json
 
     components.set_types_list(menu)
