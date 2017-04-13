@@ -56,7 +56,6 @@ def satie_send(address, msg):
     msg - OSC message
     
     """
-    print("about to send following message", address, msg)
     msg = liblo.Message(address, msg)
     bpy.s4b_OSCserver.send(bpy.s4b_OSCclient, msg)
     #server.recv()
