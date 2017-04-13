@@ -31,13 +31,11 @@ if "bpy" in locals():
     imp.reload(SatieTool)
     imp.reload(SatiePropertiesPanel)
     imp.reload(components)
-    imp.reload(settings)
     imp.reload(osc)
 else:
     from . import SatieTool
     from . import SatiePropertiesPanel
     from . import components
-    from . import settings
     from . import osc
 
 # register SATIE in blender:
@@ -50,8 +48,6 @@ def initialize():
 def register():
     initialize()
     #bpy.utils.register_module(__name__)
-    # register components related to the SATIE properties panel
-    bpy.utils.register_class(settings.SatieComponents)
     # register SATIE properties panel
     bpy.utils.register_class(SatiePropertiesPanel.SatiePropertiesPanel)
     # register SATIE tool shelf panel

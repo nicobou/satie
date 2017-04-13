@@ -19,12 +19,6 @@ from bpy.types import PropertyGroup
 from . import osc
 from . import control
 
-bpy.satie_types_list = []
-bpy.satiePropertiesLayouts = {}
-bpy.satieRegisteredTypes = {}
-# plugins by family, i.e. sources or effects
-bpy.satie_plugins = {}
-
 def load():
     # bpy.utils.register_class(SatiePropertiesPanel)
     print("loading layout")
