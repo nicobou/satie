@@ -128,7 +128,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!45 &23
 Skybox:
   m_ObjectHideFlags: 0
@@ -723,8 +723,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dspState: 1
-  projectName: default
-  projectDir: 
+  rendererLoadFiles: []
   outputGainDB: -10
   outputTrimDB: 0
   dim: 0
@@ -743,7 +742,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c061090e435a4a11a60a64f823fff6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  RendererAddress: 192.168.0.255
+  RendererAddress: 10.10.100.252
   RendererPort: 18032
   useFixedUpdate: 0
   updateRateMs: 30
@@ -871,7 +870,7 @@ MonoBehaviour:
   AssetPath: 
   uri: plugin://default
   PropertyMessages:
-  - trimDB 10
+  - trimDB 12
   - lfoHz 30
   UpdateUsingChangeThresh: 0
   angleThresh: 4
@@ -902,6 +901,9 @@ MonoBehaviour:
   underWaterLpassEffect: 500
   underWaterDistanceEffect: 50
   underWaterIncidenceEffect: 50
+  nfMute: 0
+  nearFieldRadius: 20
+  nearFieldExp: 1
 --- !u!23 &147839054
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1023,6 +1025,9 @@ MonoBehaviour:
   underWaterLpassEffect: 500
   underWaterDistanceEffect: 50
   underWaterIncidenceEffect: 50
+  nfMute: 0
+  nearFieldRadius: 20
+  nearFieldExp: 1
 --- !u!23 &175085640
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1396,6 +1401,9 @@ MonoBehaviour:
   underWaterLpassEffect: 500
   underWaterDistanceEffect: 50
   underWaterIncidenceEffect: 50
+  nfMute: 0
+  nearFieldRadius: 20
+  nearFieldExp: 1
 --- !u!54 &230248109
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1881,6 +1889,9 @@ MonoBehaviour:
   underWaterLpassEffect: 500
   underWaterDistanceEffect: 50
   underWaterIncidenceEffect: 50
+  nfMute: 0
+  nearFieldRadius: 20
+  nearFieldExp: 1
 --- !u!54 &350993848
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2082,7 +2093,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &398148139
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2127,7 +2138,7 @@ Transform:
   - {fileID: 693816189}
   m_Father: {fileID: 0}
   m_RootOrder: 5
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: -90.00001, y: -90, z: 179.99998}
 --- !u!1 &423282879
 GameObject:
   m_ObjectHideFlags: 0
@@ -2187,8 +2198,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Xrpm: 0
-  Yrpm: 60
-  Zrpm: 30
+  Yrpm: 40
+  Zrpm: 0
 --- !u!23 &431297299
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -3134,6 +3145,9 @@ MonoBehaviour:
   underWaterLpassEffect: 500
   underWaterDistanceEffect: 50
   underWaterIncidenceEffect: 50
+  nfMute: 0
+  nearFieldRadius: 20
+  nearFieldExp: 1
 --- !u!23 &737912604
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -3180,7 +3194,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 737912601}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 30, z: 0}
+  m_LocalPosition: {x: 0, y: 100, z: 0}
   m_LocalScale: {x: 100, y: 10, z: 100}
   m_Children: []
   m_Father: {fileID: 0}
@@ -3451,13 +3465,13 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 799610893}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 3
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!1 &894382386
 GameObject:
   m_ObjectHideFlags: 0
@@ -3777,6 +3791,9 @@ MonoBehaviour:
   underWaterLpassEffect: 500
   underWaterDistanceEffect: 50
   underWaterIncidenceEffect: 50
+  nfMute: 0
+  nearFieldRadius: 20
+  nearFieldExp: 1
 --- !u!54 &1003825144
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -4122,6 +4139,9 @@ MonoBehaviour:
   underWaterLpassEffect: 500
   underWaterDistanceEffect: 50
   underWaterIncidenceEffect: 50
+  nfMute: 0
+  nearFieldRadius: 20
+  nearFieldExp: 1
 --- !u!54 &1116815409
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -4945,6 +4965,9 @@ MonoBehaviour:
   underWaterLpassEffect: 500
   underWaterDistanceEffect: 50
   underWaterIncidenceEffect: 50
+  nfMute: 0
+  nearFieldRadius: 20
+  nearFieldExp: 1
 --- !u!54 &1483126319
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -5397,6 +5420,9 @@ MonoBehaviour:
   underWaterLpassEffect: 500
   underWaterDistanceEffect: 50
   underWaterIncidenceEffect: 50
+  nfMute: 0
+  nearFieldRadius: 20
+  nearFieldExp: 1
 --- !u!54 &1551492692
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -5988,6 +6014,9 @@ MonoBehaviour:
   underWaterLpassEffect: 500
   underWaterDistanceEffect: 50
   underWaterIncidenceEffect: 50
+  nfMute: 0
+  nearFieldRadius: 20
+  nearFieldExp: 1
 --- !u!54 &1644861472
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -6410,6 +6439,9 @@ MonoBehaviour:
   underWaterLpassEffect: 500
   underWaterDistanceEffect: 50
   underWaterIncidenceEffect: 50
+  nfMute: 0
+  nearFieldRadius: 20
+  nearFieldExp: 1
 --- !u!54 &1768544726
 Rigidbody:
   m_ObjectHideFlags: 0
