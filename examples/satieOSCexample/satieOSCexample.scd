@@ -61,7 +61,7 @@ if (~satieOsc == nil,{
 
 // add additional files here
 ~utilityFiles = [];
-~utilityFiles.add(~satieDir++"/utils/dacTest.scd");
+~utilityFiles.add(~satieRootPath++"/utils/dacTest.scd");
 
 
 // Locate any .scd files in the project's autoload subdir
