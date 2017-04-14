@@ -22,7 +22,6 @@ from . import osc
 
 class SatieComponents(PropertyGroup):
     def get_current_item(self):
-        print("*******", self)
         return self.satie_synth
         
     def update_types_menu(self, context):

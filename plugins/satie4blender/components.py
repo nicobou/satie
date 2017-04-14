@@ -47,7 +47,7 @@ def load():
                     default=aDefault,
                     update=update_property
                 )
-            # FIXME: need to find a way of lading an Array with correct types
+            # FIXME: need to find a way of loading an Array with correct types
             elif aType == "Array":
                 
                 attributes[aName] = StringProperty(

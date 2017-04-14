@@ -62,10 +62,6 @@ class SatiePropertiesPanel(bpy.types.Panel):
         else:
             self.layout.label('Need SATIE? See toolbox')
 
-    # @staticmethod
-    def updatePanel(self, value):
-        print("update called")
-
     def get_satie_families(self, context):
         menu = []
         if bpy.satie_plugins:
@@ -77,7 +73,6 @@ class SatiePropertiesPanel(bpy.types.Panel):
             return(('Waiting...', 'waiting....', '...'))
 
     def get_current_item(self):
-        print("*******", self)
         return self.satie_synth
         
     def update_types_menu(self, context):
