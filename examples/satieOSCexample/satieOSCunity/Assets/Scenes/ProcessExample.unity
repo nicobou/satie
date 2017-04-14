@@ -126,7 +126,7 @@ GameObject:
   - component: {fileID: 101899084}
   m_Layer: 8
   m_Name: REVERB
-  m_TagString: effect
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -146,9 +146,9 @@ MonoBehaviour:
   nodeEnabled: 1
   isProcess: 0
   AssetPath: unused
-  uri: plugin://busgverb
+  uri: effect://busgverb
   PropertyMessages:
-  - outputDB -4
+  - outputDB -20
   - roomsize 140
   - revtime 3
   - damping .1
@@ -187,6 +187,9 @@ MonoBehaviour:
   underWaterLpassEffect: 500
   underWaterDistanceEffect: 50
   underWaterIncidenceEffect: 50
+  nfMute: 0
+  nearFieldRadius: 20
+  nearFieldExp: 1
 --- !u!23 &101899083
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -7161,7 +7164,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!45 &798987129
 Skybox:
   m_ObjectHideFlags: 0
@@ -7472,6 +7475,9 @@ MonoBehaviour:
   underWaterLpassEffect: 500
   underWaterDistanceEffect: 50
   underWaterIncidenceEffect: 50
+  nfMute: 0
+  nearFieldRadius: 20
+  nearFieldExp: 1
 --- !u!1001 &1116059395
 Prefab:
   m_ObjectHideFlags: 0
@@ -7509,7 +7515,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 100012, guid: 81961fe9a4ba2ed479a4e1c3bd0fb045, type: 2}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 11400004, guid: 81961fe9a4ba2ed479a4e1c3bd0fb045, type: 2}
       propertyPath: m_Enabled
@@ -10817,13 +10823,13 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1357608726}
-  m_LocalRotation: {x: -0.10452837, y: 0, z: 0, w: 0.9945219}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 50, y: 1, z: 50}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 6
-  m_LocalEulerAnglesHint: {x: -12, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1492167259
 GameObject:
   m_ObjectHideFlags: 0
@@ -14021,7 +14027,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1681422700
 Transform:
   m_ObjectHideFlags: 0
@@ -17205,7 +17211,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 11400002, guid: 9f6077388770a453489debeaf0210345, type: 2}
       propertyPath: RendererAddress
-      value: 192.168.0.255
+      value: 10.10.100.252
       objectReference: {fileID: 0}
     - target: {fileID: 114000011499839186, guid: 9f6077388770a453489debeaf0210345,
         type: 2}
@@ -17584,6 +17590,9 @@ MonoBehaviour:
   underWaterLpassEffect: 500
   underWaterDistanceEffect: 50
   underWaterIncidenceEffect: 50
+  nfMute: 0
+  nearFieldRadius: 20
+  nearFieldExp: 1
 --- !u!1 &2018829058
 GameObject:
   m_ObjectHideFlags: 0
