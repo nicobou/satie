@@ -13,7 +13,14 @@
 
 import bpy
 from . import control
+from . import components
 from . import properties
+
+bpy.satie_types_list = []
+bpy.satiePropertiesLayouts = {}
+bpy.satieRegisteredTypes = {}
+# plugins by family, i.e. sources or effects
+bpy.satie_plugins = {}
 
 class SatiePropertiesPanel(bpy.types.Panel):
     bl_space_type = "PROPERTIES"
@@ -26,6 +33,9 @@ class SatiePropertiesPanel(bpy.types.Panel):
             obj = context.object
             TheCol = self.layout.column(align = True)
             TheCol.prop(context.object, "useSatie")
+            if bpy.satie_plugins:
+                TheCol.prop(context.object, "plugin_family")
+            self.layout.separator()
             TheCol.prop(context.object, "satie_synth")
             TheCol.prop(context.object, "satieGroup")
             self.layout.separator()
@@ -33,11 +43,16 @@ class SatiePropertiesPanel(bpy.types.Panel):
             if bpy.satiePropertiesLayouts:
                 for groupName, groupAttributes in bpy.satiePropertiesLayouts.items():
                     # get the instance of the group
-                    propertyGroup = getattr(obj, groupName)
-                    TheCol.label("{} specific props: ".format(groupName))
+                    try:
+                        propertyGroup = getattr(obj, groupName)
+                        TheCol.label("{} specific props: ".format(groupName))
 
-                    for att in groupAttributes:
-                        TheCol.prop(propertyGroup, att["name"])
+                        for att in groupAttributes:
+                            TheCol.prop(propertyGroup, att["name"])
+                    except AttributeError:
+                        # it lost its previous referencem, ignore
+                        pass
+
             else:
                 self.layout.label("------------- nothing to display")
                 self.layout.label(
@@ -47,22 +62,46 @@ class SatiePropertiesPanel(bpy.types.Panel):
         else:
             self.layout.label('Need SATIE? See toolbox')
 
-    # @staticmethod
-    def updatePanel(self, value):
-        print("update called")
-                                                        
-def initObjectProperties():
+    def get_satie_families(self, context):
+        menu = []
+        if bpy.satie_plugins:
+            for key in bpy.satie_plugins.keys():
+                t = tuple([key, key, "..."])
+                menu.append(t)
+            return(menu)
+        else:
+            return(('Waiting...', 'waiting....', '...'))
+
+    def get_current_item(self):
+        return self.satie_synth
+        
+    def update_types_menu(self, context):
+        if properties.active:
+            # print("updating types menu", self.satie_synth)
+            components.load_synth_types()
+            plugs_key = self.plugin_family
+            menu = []
+            if bpy.satie_plugins:
+                for attr in bpy.satie_plugins[plugs_key]:
+                    name = attr['name']
+                    srcName = attr['srcName']
+                    descr = attr['description']
+                    t = tuple([srcName, name, descr])
+                    menu.append(t)
+                return(menu)
+
+    def update_components(self, context):
+        if properties.active:
+            satie_type = str(context.object.satie_synth)
+            components.unload()
+            components.load_synth_properties(satie_type)
+
+# def initObjectProperties():
     bpy.types.Object.useSatie = bpy.props.BoolProperty(
         name = "Use SATIE",
         description = "Assign this object a SATIE sound source",
         default = False
-    )
-    
-    bpy.types.Object.bus = bpy.props.IntProperty(
-        name = "Bus number",
-        description = "Input bus",
-        default = 0,
-        update = control.setInputBus
+        # update = satie_instance
     )
 
     bpy.types.Object.satieGroup = bpy.props.StringProperty(
@@ -76,35 +115,19 @@ def initObjectProperties():
         description = "(Un)mute the SATIE instance",
         default = False
     )
-    bpy.types.Object.state = bpy.props.BoolProperty(
-        name = "Source playing state",
-        description = "Playing state (on, off)",
-        default = False
+    bpy.types.Object.plugin_family = bpy.props.EnumProperty(
+        name = "Plugin type",
+        description = "SATIE plugins family",
+        items = get_satie_families
     )
 
-    bpy.types.Object.hiPass = bpy.props.FloatProperty(
-        name = "High pass",
-        description = "High pass filter",
-        default = 0.5,
-        set = control.setSatieHP
-    )
-    bpy.types.Object.loPass = bpy.props.FloatProperty(
-        name = "Low pass",
-        description = "Low pass filter",
-        default = 15000.00
+    bpy.types.Object.satie_synth = bpy.props.EnumProperty(
+        name = "Sound source",
+        description = "SATIE plugin to use",
+        items = update_types_menu,
+        # get = get_current_item,
+        update = update_components
     )
 
-    bpy.types.Scene.active = bpy.props.BoolProperty(
-        name = "Use Satie",
-        description = "Activate SATIE communication",
-        default = False,
-        # set = control.setSatieSendCtl,
-        # get = control.getSatieSendCtl
-    )
-
-    bpy.types.Scene.SatieSources = bpy.props.EnumProperty(
-        items = [],
-        name = "Sources")
-
-initObjectProperties()
+# initObjectProperties()
 
