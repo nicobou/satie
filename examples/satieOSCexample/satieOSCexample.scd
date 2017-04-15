@@ -106,6 +106,7 @@ s.waitForBoot{
 	~satie.makeSynthDef(\busgverb, \gverb,  [], [], [~listeningFormat], [0]);
 
 	~satie.makeSynthDef(\zkarpluck2P, \zkarpluck2P,   [~satie.aux[~fxBus0]],  [],[~listeningFormat],  [0], \randOffsets1);  // for resonant updated klones
+ 	~satie.makeSynthDef(\zkarpluck1nf, \zkarpluck1,   [~satie.aux[~fxBus0]],  [],[~listeningFormat],  [0], \nearField);  // for resonant updated klones
 
 	// dummy
 	~satie.makeSynthDef(\dummyPlugin, \emptySource,  [], [], [\emptySpat], [0]);    // dummy synthdef, used for new nodes
