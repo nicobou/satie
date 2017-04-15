@@ -1,6 +1,6 @@
 // USES GLOBAL VARIABLES:   ~satie <required> and  ~thisProjectResourcePath <optional>
 
-// this file defines  a process class, which is ONLY used by source nodes that have that have a URI of type:   "process" , e.g:      uri://process  "helloWorld"
+// this file defines  a process class, which is ONLY used by source nodes that have that have a URI of type:   "process" , e.g:      uri://process  "nearField"
 // you can define any number of these process clases, each one, corresponding to a particular type of processing  behavoir you define
 // any number of instances of a given process class can be created
 
@@ -14,11 +14,16 @@
 
 
 // required:  set up class struct
-~helloWorld = Environment[
+~nearField = Environment[
 	// required fields
 	'nodeName' -> \nil,
 	'nodeGroupName' -> \nil,
 	'nodeGroup' -> \nil,
+	'synth'  -> \zkarpluck1,
+	'synthPtr' -> \nil,
+	'nearFieldToggle'  -> 1,   // default to nearField Processing - set to 0 for farField Processing
+	'nearFieldRadius'  -> 8,   // defaults to 8 meter near field radius
+	'nearFieldExp'  -> 2,  // defaults to nonlinear attenuation using  x squared
 
 	// project specific below
 
@@ -26,15 +31,15 @@
 ];
 
 // required: set these variables to the process name, and register process
-~processName = \helloWorld;
-~process = ~helloWorld;
+~processName = \nearField;
+~process = ~nearField;
 ~process.know=true;
 ~satie.makeProcess(~processName, ~process);
 
 
 // required functions
 // required  setup function,  can be extended to suit particular needs of process
-~helloWorld.setup = { | self, nodeName, nodeGroupName, args |
+~nearField.setup = { | self, nodeName, nodeGroupName, args |
 	var thisGroup = ~satie.satieGroups[nodeGroupName.asSymbol] ;
 
 	// required
@@ -42,7 +47,7 @@
 	self.nodeGroupName = nodeGroupName;
 	self.nodeGroup = thisGroup;
 
-	x = args.copy;
+	//x = args.copy;
 
 	// IF there are args, try to parse them and set corresponding environment key value pairs
 	if (args != nil,
@@ -51,7 +56,7 @@
 				{
 					if (  (args.size&1)==1,    // odd length,  bad key value format
 						{
-							warn("helloWorld.setup:  node: %   ignoring args:  expecting key value pair(s)  % \n",  self.nodeName, args);
+							warn("nearField.setup:  node: %   ignoring args:  expecting key value pair(s)  % \n",  self.nodeName, args);
 						},
 						// else arg list good to parse
 						{
@@ -64,14 +69,19 @@
 
 	// add project-specific code below
 
-	if (self.debugFlag != 0, {postf("••helloWorld.setup:  node: %  group: %    args % \n", self.nodeName, self.nodeGroupName, args);});
+	self.put(\synthPtr, ~satie.makeInstance(nodeName.asSymbol, self.synth.asSymbol, self.nodeGroupName));
+
+
+	if (self.debugFlag != 0, {postf("••nearField.setup:  node: %  group: %    args % \n", self.nodeName, self.nodeGroupName, args);});
 };
 
 // required  cleanup function,
-~helloWorld.cleanup = { | self |
+~nearField.cleanup = { | self |
 
 	// add project-specific code below
-	if (self.debugFlag != 0, {  postf("••helloWorld.cleanup: clearing synths in node: % group \n", self.nodeName);});
+	if (self.debugFlag != 0, {  postf("••nearField.cleanup: clearing synths in node: % group \n", self.nodeName);});
+	~satie.cleanInstance(self.nodeName.asSymbol, self.nodeGroupName);
+
 };
 
 // end of required class functions
@@ -96,44 +106,70 @@
 // called on the reception of the message:  'set' key value
 // NOTE:  if this process defines a handler for a particular key (e.g.  process[key] ), satieOSC will instead call that particular handler with the value arg. - see  spread handler example  below
 
-~helloWorld.set =  {| self, key, value |
-	if (self.debugFlag != 0, { postf("••helloWorld.set: key %  value % \n", key, value);});
+~nearField.set =  {| self, key, value |
+	if (self.debugFlag != 0, { postf("••nearField.set: key %  value % \n", key, value);});
+	self.synthPtr.set(key.asSymbol, value);
 };
+
 
 // overrides satieOSC's 'setVec' handler
 // called on the reception of the message:  'setVec' key vector
 // NOTE:  if this process defines a handler for a particular key (e.g.  process[key] ), satieOSC will instead call that particular handler with the vec
 
-~helloWorld.setVec =  {| self, key, vector |
+~nearField.setVec =  {| self, key, vector |
 	if (self.debugFlag != 0, { postf("••nearField.setVec: key %  value % \n", key, vector);});
 	self.synthPtr.set(key.asSymbol, vector);
 };
+
+
 
 // overrides satieOSC's property handler
 // called on the reception of the message:  'property' key value
 // otherwise, satieOSC  will write the key value to this process's environment
 
-~helloWorld.property =  {| self, key, value |
-	if (self.debugFlag != 0, {  postf("••helloWorld.setProperty:  setting key vaue pair:  %:%   to process node's environment \n", key, value,  self.nodeName);});
+~nearField.property =  {| self, key, value |
+	if (self.debugFlag != 0, {  postf("••nearField.setProperty:  setting key vaue pair:  %:%   to process node's environment \n", key, value,  self.nodeName);});
 
 	// project specific code below
 	self.put(key.asSymbol, value);
 };
 
 
+
 // overrides satieOSC's update handler
 // called on the reception of the message:  'update' azi ele gain del lp dist
 // otherwise satieOSC will send the   'update'  message to the node's group
 
-~helloWorld.setUpdate = { | self, aziDeg, eleDeg, gainDB, delayMs, lpHz, dist |
-	if (self.debugFlag != 0, {  postf("••helloWorld.setUpdate: for process node \n", self.nodeName);});
+~nearField.setUpdate = { | self, aziDeg, eleDeg, gainDB, delayMs, lpHz, distance |
+	var dbOffset;
+	var newGainDB;
+	var nfScaler = distance.clip(0.1, self.nearFieldRadius) / self.nearFieldRadius;
+
+
+	if (self.nearFieldToggle == 1,
+		{
+			nfScaler = 1 - nfScaler;
+	});
+
+	nfScaler = nfScaler**self.nearFieldExp;
+	dbOffset = nfScaler.ampdb;
+	newGainDB = gainDB + dbOffset;
+
+	if (self.debugFlag != 0, {  postf("••nearField.setUpdate: for process node  %   dbOffset: %  nfScaler % \n", self.nodeName, dbOffset, nfScaler  );});
+
+	self.synthPtr.set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, newGainDB , \delayMs, delayMs, \lpHz, lpHz);
+
 };
 
 
 // overrides satieOSC's state function
 // called on the reception of the message:  'state'  value
 // otherwise satieOSC will send the  'state' message to the node's group
+/*
+~nearField.state =  {| self, value |
+	if (self.debugFlag != 0, {  postf("••nearField.state: setting state of process node %   to % \n", self.nodeName, value);});
+};*/
 
-~helloWorld.state =  {| self, value |
-	if (self.debugFlag != 0, {  postf("••helloWorld.state: setting state of process node %   to % \n", self.nodeName, value);});
-};
+
+
+
