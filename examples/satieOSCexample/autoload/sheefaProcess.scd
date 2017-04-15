@@ -123,7 +123,8 @@
 //   /satie/process/state      processName  state      -->   hadled by  process[\state]
 //   /satie/process/set         processName  key value  -->  handled by process[key]
 //   /satie/process/set         processName  key value  -->  handled by process[\set]   (unless process[key] is defined)
-//  /satie/process/setvec     processName  key  val1 .... valN      -->   handled by process[key]
+//  /satie/process/setvec     processName  key  [ val1 .... valN ]     -->   handled by process[key]
+//  /satie/process/setvec         processName  key [ val1 .... valN ]  -->  handled by process[\setVec]   (unless process[key] is defined)
 
 
 // overrides satie4Unity's 'set' handler
@@ -210,6 +211,15 @@
 	});
 	self.nodeGroup.run(value);   // change state for all synths in process's group
 };
+
+// overrides satieOSC's 'setVec' handler
+// called on the reception of the message:  'setVec' key vector
+// NOTE:  if this process defines a handler for a particular key (e.g.  process[key] ), satieOSC will instead call that particular handler with the vec
+
+// ~sheefa.setVec =  {| self, key, vector |
+// 	if (self.debugFlag != 0, { postf("••nearField.setVec: key %  value % \n", key, vector);});
+// 	self.synthPtr.set(key.asSymbol, vector);
+// };
 
 
 // Custom key-specific message handlers  can be defiend for  'set'  and 'setvec'  OSC messages
