@@ -10,6 +10,7 @@
 
 ~num_aux_bus = 5;
 ~fxBus0 = 0;  // relative aux bus number that satie will use for this project's synthdef sends to fx synthdefs
+~fxBus1 = 1;  //  ""
 
 
 // used only for debug printing
@@ -106,6 +107,7 @@ s.waitForBoot{
 	~satie.makeSynthDef(\busgverb, \gverb,  [], [], [~listeningFormat], [0]);
 
 	~satie.makeSynthDef(\zkarpluck2P, \zkarpluck2P,   [~satie.aux[~fxBus0]],  [],[~listeningFormat],  [0], \randOffsets1);  // for resonant updated klones
+	~satie.makeSynthDef(\flutter, \default,  [], [ ~satie.aux[~fxBus0], ~satie.aux[~fxBus1]], [~listeningFormat], [0]);
 
 	// dummy
 	~satie.makeSynthDef(\dummyPlugin, \emptySource,  [], [], [\emptySpat], [0]);    // dummy synthdef, used for new nodes
