@@ -20,8 +20,9 @@
 // REQUIRED  GLOBAL VARIABLES  -- used from elsewhere in the environment--
 ~satieRootPath = thisProcess.nowExecutingPath.dirname++ "/..";   //  needed when calling ~satieMaker
 
-~listeningFormat = \stereoListener;    // defaults to stereo    - needed when calling makeSynthDef
+//~listeningFormat = \stereoListener;    // defaults to stereo    - needed when calling makeSynthDef
 
+~listeningFormat = \dodecNF;    // defaults to stereo    - needed when calling makeSynthDef
 
 
 // Evaluate this file to
@@ -47,6 +48,10 @@ if  (thisProcess.argv.size >= 1,
 	{
 
 		switch (thisProcess.argv[0].asString ,
+			"dodecNF",
+			{
+				~listeningFormat = \dodecNF;   // vbap to near field... outputs 20 chanels to soundFlower
+			},
 			"sato",
 			{
 				~listeningFormat = \domeVBAP;
@@ -114,6 +119,17 @@ Platform.case (
 
 		});
 		//  OR iF
+		if (  ( ~listeningFormat == \dodecNF ),
+			{
+
+				if (  ServerOptions.outDevices.indexOfEqual("Soundflower (64ch)") != nil,
+					{
+						postln("AudioOutDev: Dante Virtual Soundcard");
+						~outAudioDev = "Dante Virtual Soundcard";
+				});
+
+
+		});		// OR IF
 		if ( ( ( ~listeningFormat == \quadVBAP)  ||   ( ~listeningFormat == \five1VBAP)  ),
 			{
 
@@ -136,6 +152,10 @@ Platform.case (
 );
 
 switch (~listeningFormat,
+	\dodecNF,
+	{
+		o.numOutputBusChannels = 21;   // 20 channels for vbap output with last channel for aux send of source node.
+	},
 	\domeVBAP,
 	{
 		o.numOutputBusChannels = 32;
