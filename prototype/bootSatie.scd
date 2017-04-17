@@ -154,7 +154,7 @@ Platform.case (
 switch (~listeningFormat,
 	\dodecNF,
 	{
-		o.numOutputBusChannels = 21;   // 20 channels for vbap output with last channel for aux send of source node.
+		o.numOutputBusChannels = 28;   // 20 channels for vbap output  and 8 for object audio streams
 	},
 	\domeVBAP,
 	{

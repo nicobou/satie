@@ -50,7 +50,7 @@
 #X msg 107 98 10.10.100.252;
 #X obj 430 139 t b f;
 #X obj 432 88 tgl 36 0 empty empty NearFieldEnable -40 -16 0 24 -262144
--1 -1 1 1;
+-1 -1 0 1;
 #X obj 398 296 pack 0 0;
 #X msg 398 332 source\$1 nearFieldToggle \$2;
 #X msg 607 209 1 \, 2 \, 3 \, 4 \, 5 \, 6 \, 7 \, 8;
@@ -58,13 +58,15 @@
 #X obj 683 293 pack 0 0;
 #X msg 684 329 source\$1 nearFieldExp \$2;
 #X obj 718 73 nbx 7 36 -1e+37 1e+37 0 0 empty empty XfadeExponent 0
--16 0 24 -262144 -1 -1 1 256;
+-16 0 24 -262144 -1 -1 0 256;
 #X msg 864 218 1 \, 2 \, 3 \, 4 \, 5 \, 6 \, 7 \, 8;
 #X obj 972 145 t b f;
 #X obj 940 302 pack 0 0;
 #X obj 975 82 nbx 7 36 -1e+37 1e+37 0 0 empty empty nearFieldRadius
 0 -16 0 24 -262144 -1 -1 0 256;
 #X msg 941 338 source\$1 nearFieldRadius \$2;
+#X text 33 515 /satie/source/update sourceName AZI ELEV Gain del lpf
+hpf dist;
 #X connect 2 0 39 0;
 #X connect 3 0 40 0;
 #X connect 4 0 1 0;
