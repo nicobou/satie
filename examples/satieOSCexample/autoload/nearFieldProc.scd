@@ -27,7 +27,7 @@
 
 	// project specific below
 
-	'debugFlag' -> 1,
+	'debugFlag' -> 0,
 ];
 
 // required: set these variables to the process name, and register process
