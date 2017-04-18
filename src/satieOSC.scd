@@ -1330,7 +1330,7 @@ for debugguing
 			var exp = satie.nearFieldExp;
 
 
-			if (satie.nearFieldInvert == true,
+			if (satie.nearFieldInvert == false,
 				{
 					nfScaler = 1 - nfScaler;
 			});
