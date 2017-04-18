@@ -511,6 +511,10 @@ for debugguing
 							lpHz = args[6];
 							distance = args[7];  // not used by basic spatializers
 
+							if ( satie.nearFieldRadius > 0,    // if the near field has a value greater than zero, handle this case
+								{  gainDB = gainDB + e.nfClipGainDBoffset(distance)});
+
+
 							thisSynth.set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB, \delayMs, delayMs, \lpHz, lpHz);
 							//postf("sourceUpdateHandler:  update: gain  % \n", gainDB);
 
@@ -560,6 +564,10 @@ for debugguing
 							delayMs = args[5];
 							lpHz = args[6];
 							distance = args[7];  // not used by basic spatializers
+
+						    if ( satie.nearFieldRadius > 0,    // if the near field has a value greater than zero, handle this case
+								{  gainDB = gainDB + e.nfClipGainDBoffset(distance)});
+
 
 							if (myProcess[\setUpdate] == nil,
 								{
@@ -1314,6 +1322,28 @@ for debugguing
 			outVal;
 		};
 
+
+		// returns the corresponding db attenuation offset
+		~nfClipGainDBoffset= { | self, distance |
+			var dbOffset;
+			var nfScaler = distance.clip(0.01, satie.nearFieldRadius) / satie.nearFieldRadius;
+			var exp = satie.nearFieldExp;
+
+
+			if (satie.nearFieldInvert == true,
+				{
+					nfScaler = 1 - nfScaler;
+			});
+
+			nfScaler = nfScaler**exp;
+			dbOffset = nfScaler.ampdb;
+			if (e.debugFlag, {postf("•satieOSC.nfClipGainDBoffset: distance: %  nearFieldRadius: %    nearFieldExp: %     nearFieldInvert  %   DB attenuation offset: % \n",  distance, satie.nearFieldRadius, satie.nearFieldExp, satie.nearFieldInvert, dbOffset)});
+			dbOffset;
+		};
+
+
+
+
 	});   // Environment.make
 
 
@@ -1431,16 +1461,16 @@ for debugguing
 	*/
 
 	e;
-};
+	};
 
 
 
-/*
-for debugguing
+	/*
+	for debugguing
 
-~satieOSC = ~satieOSCProtocol.value(~osc, ~satie);
-~satieOSC.debugFlag = true;
-~satieOSC.debugFlag = false;
-*/
+	~satieOSC = ~satieOSCProtocol.value(~osc, ~satie);
+	~satieOSC.debugFlag = true;
+	~satieOSC.debugFlag = false;
+	*/
 
 )
