@@ -115,6 +115,25 @@ s.waitForBoot{
 	~satie.makeSynthDef(\busgverb, \gverb,  [], [], [~listeningFormat], [0]);
 
 	~satie.makeSynthDef(\zkarpluck2P, \zkarpluck2P,   [~satie.aux[~fxBus0]],  [],[~listeningFormat],  [0], \randOffsets1);  // for resonant updated klones
+
+	~satie.makeSynthDef(\zkpluk1, \zkarpluck1,  [ ~satie.aux[~fxBus0], ~satie.aux[~objBus1]], [], [~listeningFormat],  [0], \randOffsets1);     // sound source that writes to an object bus out
+	~satie.makeSynthDef(\zkpluk2, \zkarpluck1,  [ ~satie.aux[~fxBus0], ~satie.aux[~objBus2]],[],  [~listeningFormat],  [0], \randOffsets1);     // sound source that writes to an object bus out
+	~satie.makeSynthDef(\zkpluk3, \zkarpluck1,  [ ~satie.aux[~fxBus0], ~satie.aux[~objBus3]], [], [~listeningFormat],  [0], \randOffsets1);      // sound source that writes to an object bus out
+	~satie.makeSynthDef(\zkpluk4, \zkarpluck1,  [ ~satie.aux[~fxBus0], ~satie.aux[~objBus4]], [], [~listeningFormat],  [0], \randOffsets1);     // sound source that writes to an object bus out
+	~satie.makeSynthDef(\zkpluk5, \zkarpluck1,  [ ~satie.aux[~fxBus0], ~satie.aux[~objBus5]], [], [~listeningFormat],  [0], \randOffsets1);      // sound source that writes to an object bus out
+	~satie.makeSynthDef(\zkpluk6, \zkarpluck1,   [ ~satie.aux[~fxBus0], ~satie.aux[~objBus6]], [], [~listeningFormat],  [0], \randOffsets1);    // sound source that writes to an object bus out
+	~satie.makeSynthDef(\zkpluk7, \zkarpluck1,   [ ~satie.aux[~fxBus0], ~satie.aux[~objBus7]], [], [~listeningFormat],  [0], \randOffsets1);     // sound source that writes to an object bus out
+	~satie.makeSynthDef(\zkpluk8, \zkarpluck1,  [ ~satie.aux[~fxBus0], ~satie.aux[~objBus8]],[],  [~listeningFormat],  [0], \randOffsets1);     // sound source that writes to an object bus out
+
+
+
+
+
+
+
+
+
+
 	~satie.makeSynthDef(\flutter1, \default,  [], [ ~satie.aux[~fxBus0], ~satie.aux[~objBus1]], [~listeningFormat], [0]);     // sound source that writes to an object bus out
 	~satie.makeSynthDef(\flutter2, \default,  [], [ ~satie.aux[~fxBus0], ~satie.aux[~objBus2]], [~listeningFormat], [0]);     // sound source that writes to an object bus out
 	~satie.makeSynthDef(\flutter3, \default,  [], [ ~satie.aux[~fxBus0], ~satie.aux[~objBus3]], [~listeningFormat], [0]);     // sound source that writes to an object bus out

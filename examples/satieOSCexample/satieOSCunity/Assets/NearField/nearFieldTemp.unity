@@ -128,7 +128,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!45 &23
 Skybox:
   m_ObjectHideFlags: 0
@@ -244,14 +244,13 @@ GameObject:
   - component: {fileID: 9358115}
   - component: {fileID: 9358114}
   - component: {fileID: 9358113}
-  - component: {fileID: 9358112}
   m_Layer: 0
   m_Name: source6
   m_TagString: Untagged
   m_Icon: {fileID: -1376725286, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &9358111
 Transform:
   m_ObjectHideFlags: 0
@@ -265,26 +264,6 @@ Transform:
   m_Father: {fileID: 332174442}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &9358112
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 9358110}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1fba3b7a6b71f43d6b5c91eae3df11ba, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  processName: nearField
-  launchArgs: []
-  events: []
-  parameters:
-  - synth zkarpluck1
-  - debugFlag 0
-  - nearFieldRadius 10
-  - nearFieldExp 3
-  - nearFieldToggle 1
 --- !u!114 &9358113
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -347,7 +326,7 @@ MonoBehaviour:
   nodeEnabled: 1
   isProcess: 0
   AssetPath: 
-  uri: 
+  uri: plugin://zkpluk6
   PropertyMessages:
   - c1 .8
   - c3 6
@@ -474,14 +453,13 @@ GameObject:
   - component: {fileID: 19025517}
   - component: {fileID: 19025516}
   - component: {fileID: 19025515}
-  - component: {fileID: 19025514}
   m_Layer: 0
   m_Name: source7
   m_TagString: Untagged
   m_Icon: {fileID: -1376725286, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &19025513
 Transform:
   m_ObjectHideFlags: 0
@@ -495,26 +473,6 @@ Transform:
   m_Father: {fileID: 1154612849}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &19025514
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 19025512}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1fba3b7a6b71f43d6b5c91eae3df11ba, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  processName: nearField
-  launchArgs: []
-  events: []
-  parameters:
-  - synth zkarpluck1
-  - debugFlag 0
-  - nearFieldRadius 10
-  - nearFieldExp 3
-  - nearFieldToggle 1
 --- !u!114 &19025515
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -577,7 +535,7 @@ MonoBehaviour:
   nodeEnabled: 1
   isProcess: 0
   AssetPath: 
-  uri: 
+  uri: plugin://zkpluk7
   PropertyMessages:
   - c1 .8
   - c3 6
@@ -1059,14 +1017,13 @@ GameObject:
   - component: {fileID: 64252922}
   - component: {fileID: 64252921}
   - component: {fileID: 64252920}
-  - component: {fileID: 64252919}
   m_Layer: 0
   m_Name: source1
   m_TagString: Untagged
   m_Icon: {fileID: -1376725286, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &64252918
 Transform:
   m_ObjectHideFlags: 0
@@ -1080,26 +1037,6 @@ Transform:
   m_Father: {fileID: 1300485953}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &64252919
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 64252917}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1fba3b7a6b71f43d6b5c91eae3df11ba, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  processName: nearField
-  launchArgs: []
-  events: []
-  parameters:
-  - synth zkarpluck1
-  - debugFlag 0
-  - nearFieldRadius 10
-  - nearFieldExp 3
-  - nearFieldToggle 1
 --- !u!114 &64252920
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1162,7 +1099,7 @@ MonoBehaviour:
   nodeEnabled: 1
   isProcess: 0
   AssetPath: 
-  uri: 
+  uri: plugin://zkpluk1
   PropertyMessages:
   - c1 .8
   - c3 6
@@ -1432,7 +1369,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c061090e435a4a11a60a64f823fff6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  RendererAddress: 10.10.100.255
+  RendererAddress: 192.168.0.255
   RendererPort: 18032
   useFixedUpdate: 0
   updateRateMs: 30
@@ -1627,14 +1564,13 @@ GameObject:
   - component: {fileID: 184041436}
   - component: {fileID: 184041435}
   - component: {fileID: 184041434}
-  - component: {fileID: 184041433}
   m_Layer: 0
   m_Name: source4
   m_TagString: Untagged
   m_Icon: {fileID: -1376725286, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &184041432
 Transform:
   m_ObjectHideFlags: 0
@@ -1648,26 +1584,6 @@ Transform:
   m_Father: {fileID: 1848015712}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &184041433
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 184041431}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1fba3b7a6b71f43d6b5c91eae3df11ba, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  processName: nearField
-  launchArgs: []
-  events: []
-  parameters:
-  - synth zkarpluck1
-  - debugFlag 0
-  - nearFieldRadius 10
-  - nearFieldExp 3
-  - nearFieldToggle 1
 --- !u!114 &184041434
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1730,7 +1646,7 @@ MonoBehaviour:
   nodeEnabled: 1
   isProcess: 0
   AssetPath: 
-  uri: 
+  uri: plugin://zkpluk4
   PropertyMessages:
   - c1 .8
   - c3 6
@@ -1928,7 +1844,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &191090086
 Transform:
   m_ObjectHideFlags: 0
@@ -2206,7 +2122,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &332174442
 Transform:
   m_ObjectHideFlags: 0
@@ -2298,7 +2214,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &391579533
 Transform:
   m_ObjectHideFlags: 0
@@ -2414,7 +2330,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &398148139
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2500,9 +2416,8 @@ GameObject:
   - component: {fileID: 423862111}
   - component: {fileID: 423862110}
   - component: {fileID: 423862109}
-  - component: {fileID: 423862113}
   m_Layer: 0
-  m_Name: flutterObj1
+  m_Name: flutterVoice
   m_TagString: Untagged
   m_Icon: {fileID: -1376725286, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
@@ -2537,7 +2452,7 @@ MonoBehaviour:
   nodeEnabled: 1
   isProcess: 0
   AssetPath: 
-  uri: 
+  uri: plugin://flutter1
   PropertyMessages:
   - trimDB 20
   - lfoHz 30
@@ -2627,27 +2542,6 @@ MeshFilter:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 423862107}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
---- !u!114 &423862113
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 423862107}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1fba3b7a6b71f43d6b5c91eae3df11ba, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  processName: nearField
-  launchArgs:
-  - synth flutter1
-  events: []
-  parameters:
-  - 
-  - debugFlag 0
-  - nearFieldRadius 10
-  - nearFieldExp 3
-  - nearFieldToggle 1
 --- !u!1 &442273632
 GameObject:
   m_ObjectHideFlags: 0
@@ -2666,7 +2560,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!64 &442273633
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -2698,7 +2592,7 @@ MonoBehaviour:
   AssetPath: unused
   uri: effect://busgverb inBus 0
   PropertyMessages:
-  - outputDB -6
+  - outputDB -30
   - roomsize 140
   - revtime 3
   - damping .1
@@ -3954,7 +3848,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1154612849
 Transform:
   m_ObjectHideFlags: 0
@@ -3991,7 +3885,6 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 1195211850}
-  - component: {fileID: 1195211849}
   m_Layer: 0
   m_Name: sheefa_group (8)
   m_TagString: Untagged
@@ -3999,36 +3892,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1195211849
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1195211848}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0de419dd33317494fa7396e555f78c0d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  debug: 0
-  nodeEnabled: 1
-  isProcess: 0
-  AssetPath: unused
-  uri: 
-  PropertyMessages:
-  - c1 .8
-  - c3 6
-  - fb 90
-  - trimDB 5
-  UpdateUsingChangeThresh: 0
-  angleThresh: 5
-  movementThresh: 0.05
-  updateRotFlag: 0
-  updatePosFlag: 0
-  nodeName: noName
-  nodeType: source
-  members: []
-  stringToEdit: 
 --- !u!4 &1195211850
 Transform:
   m_ObjectHideFlags: 0
@@ -4051,44 +3914,13 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 1249278652}
-  - component: {fileID: 1249278651}
   m_Layer: 0
   m_Name: sheefa_group (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1249278651
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1249278650}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0de419dd33317494fa7396e555f78c0d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  debug: 0
-  nodeEnabled: 1
-  isProcess: 0
-  AssetPath: unused
-  uri: 
-  PropertyMessages:
-  - c1 .8
-  - c3 6
-  - fb 90
-  - trimDB 5
-  UpdateUsingChangeThresh: 0
-  angleThresh: 5
-  movementThresh: 0.05
-  updateRotFlag: 0
-  updatePosFlag: 0
-  nodeName: noName
-  nodeType: source
-  members: []
-  stringToEdit: 
+  m_IsActive: 0
 --- !u!4 &1249278652
 Transform:
   m_ObjectHideFlags: 0
@@ -4118,7 +3950,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1300485953
 Transform:
   m_ObjectHideFlags: 0
@@ -4583,7 +4415,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1439333367
 Transform:
   m_ObjectHideFlags: 0
@@ -4620,44 +4452,13 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 1478871584}
-  - component: {fileID: 1478871583}
   m_Layer: 0
   m_Name: sheefa_group (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1478871583
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1478871582}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0de419dd33317494fa7396e555f78c0d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  debug: 0
-  nodeEnabled: 1
-  isProcess: 0
-  AssetPath: unused
-  uri: 
-  PropertyMessages:
-  - c1 .8
-  - c3 6
-  - fb 90
-  - trimDB 5
-  UpdateUsingChangeThresh: 0
-  angleThresh: 5
-  movementThresh: 0.05
-  updateRotFlag: 0
-  updatePosFlag: 0
-  nodeName: noName
-  nodeType: source
-  members: []
-  stringToEdit: 
+  m_IsActive: 0
 --- !u!4 &1478871584
 Transform:
   m_ObjectHideFlags: 0
@@ -4703,7 +4504,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Xrpm: 0
-  Yrpm: -40
+  Yrpm: 40
   Zrpm: 0
 --- !u!23 &1491915241
 MeshRenderer:
@@ -4763,14 +4564,14 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1491915239}
-  m_LocalRotation: {x: 0, y: -0.026525844, z: 0, w: 0.99964815}
-  m_LocalPosition: {x: 9.73, y: 1, z: 0.1}
+  m_LocalRotation: {x: 0, y: -0.06888604, z: 0, w: 0.9976246}
+  m_LocalPosition: {x: -10.63, y: 1, z: 0.1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 423862108}
   m_Father: {fileID: 0}
   m_RootOrder: 16
-  m_LocalEulerAnglesHint: {x: 0, y: -3.04, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1497466308
 GameObject:
   m_ObjectHideFlags: 0
@@ -5028,44 +4829,13 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 1537250249}
-  - component: {fileID: 1537250248}
   m_Layer: 0
   m_Name: sheefa_group (7)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1537250248
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1537250247}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0de419dd33317494fa7396e555f78c0d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  debug: 0
-  nodeEnabled: 1
-  isProcess: 0
-  AssetPath: unused
-  uri: 
-  PropertyMessages:
-  - c1 .8
-  - c3 6
-  - fb 90
-  - trimDB 5
-  UpdateUsingChangeThresh: 0
-  angleThresh: 5
-  movementThresh: 0.05
-  updateRotFlag: 0
-  updatePosFlag: 0
-  nodeName: noName
-  nodeType: source
-  members: []
-  stringToEdit: 
+  m_IsActive: 0
 --- !u!4 &1537250249
 Transform:
   m_ObjectHideFlags: 0
@@ -5095,14 +4865,13 @@ GameObject:
   - component: {fileID: 1545244004}
   - component: {fileID: 1545244003}
   - component: {fileID: 1545244002}
-  - component: {fileID: 1545244001}
   m_Layer: 0
   m_Name: source3
   m_TagString: Untagged
   m_Icon: {fileID: -1376725286, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1545244000
 Transform:
   m_ObjectHideFlags: 0
@@ -5116,26 +4885,6 @@ Transform:
   m_Father: {fileID: 391579533}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1545244001
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1545243999}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1fba3b7a6b71f43d6b5c91eae3df11ba, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  processName: nearField
-  launchArgs: []
-  events: []
-  parameters:
-  - synth zkarpluck1
-  - debugFlag 0
-  - nearFieldRadius 10
-  - nearFieldExp 3
-  - nearFieldToggle 1
 --- !u!114 &1545244002
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5198,7 +4947,7 @@ MonoBehaviour:
   nodeEnabled: 1
   isProcess: 0
   AssetPath: 
-  uri: 
+  uri: plugin://zkpluk3
   PropertyMessages:
   - c1 .8
   - c3 6
@@ -5396,14 +5145,13 @@ GameObject:
   - component: {fileID: 1563583871}
   - component: {fileID: 1563583870}
   - component: {fileID: 1563583869}
-  - component: {fileID: 1563583868}
   m_Layer: 0
   m_Name: source2
   m_TagString: Untagged
   m_Icon: {fileID: -1376725286, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1563583867
 Transform:
   m_ObjectHideFlags: 0
@@ -5417,26 +5165,6 @@ Transform:
   m_Father: {fileID: 1439333367}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1563583868
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1563583866}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1fba3b7a6b71f43d6b5c91eae3df11ba, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  processName: nearField
-  launchArgs: []
-  events: []
-  parameters:
-  - synth zkarpluck1
-  - debugFlag 0
-  - nearFieldRadius 10
-  - nearFieldExp 3
-  - nearFieldToggle 1
 --- !u!114 &1563583869
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5499,7 +5227,7 @@ MonoBehaviour:
   nodeEnabled: 1
   isProcess: 0
   AssetPath: 
-  uri: 
+  uri: plugin://zkpluk2
   PropertyMessages:
   - c1 .8
   - c3 6
@@ -5690,44 +5418,13 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 1601127841}
-  - component: {fileID: 1601127840}
   m_Layer: 0
   m_Name: sheefa_group (6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1601127840
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1601127839}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0de419dd33317494fa7396e555f78c0d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  debug: 0
-  nodeEnabled: 1
-  isProcess: 0
-  AssetPath: unused
-  uri: 
-  PropertyMessages:
-  - c1 .8
-  - c3 6
-  - fb 90
-  - trimDB 5
-  UpdateUsingChangeThresh: 0
-  angleThresh: 5
-  movementThresh: 0.05
-  updateRotFlag: 0
-  updatePosFlag: 0
-  nodeName: noName
-  nodeType: source
-  members: []
-  stringToEdit: 
+  m_IsActive: 0
 --- !u!4 &1601127841
 Transform:
   m_ObjectHideFlags: 0
@@ -6049,7 +5746,6 @@ GameObject:
   - component: {fileID: 1644861471}
   - component: {fileID: 1644861476}
   - component: {fileID: 1644861477}
-  - component: {fileID: 1644861478}
   m_Layer: 0
   m_Name: source8
   m_TagString: Untagged
@@ -6086,7 +5782,7 @@ MonoBehaviour:
   nodeEnabled: 1
   isProcess: 0
   AssetPath: 
-  uri: 
+  uri: plugin://zkpluk8
   PropertyMessages:
   - c1 .8
   - c3 6
@@ -6244,26 +5940,6 @@ MonoBehaviour:
     truncate: 0
   TXenable: 1
   messagesPerSecond: 4
---- !u!114 &1644861478
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1644861469}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1fba3b7a6b71f43d6b5c91eae3df11ba, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  processName: nearField
-  launchArgs: []
-  events: []
-  parameters:
-  - synth flutter
-  - debugFlag 0
-  - nearFieldRadius 10
-  - nearFieldExp 3
-  - nearFieldToggle 1
 --- !u!1 &1649028557
 GameObject:
   m_ObjectHideFlags: 0
@@ -6747,7 +6423,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1848015712
 Transform:
   m_ObjectHideFlags: 0
@@ -7003,7 +6679,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2047770022
 Transform:
   m_ObjectHideFlags: 0
@@ -7210,44 +6886,13 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 2067631581}
-  - component: {fileID: 2067631580}
   m_Layer: 0
   m_Name: sheefa_group (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &2067631580
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 2067631579}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0de419dd33317494fa7396e555f78c0d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  debug: 0
-  nodeEnabled: 1
-  isProcess: 0
-  AssetPath: unused
-  uri: 
-  PropertyMessages:
-  - c1 .8
-  - c3 6
-  - fb 90
-  - trimDB 5
-  UpdateUsingChangeThresh: 0
-  angleThresh: 5
-  movementThresh: 0.05
-  updateRotFlag: 0
-  updatePosFlag: 0
-  nodeName: noName
-  nodeType: source
-  members: []
-  stringToEdit: 
+  m_IsActive: 0
 --- !u!4 &2067631581
 Transform:
   m_ObjectHideFlags: 0
@@ -7341,44 +6986,13 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 2088468350}
-  - component: {fileID: 2088468349}
   m_Layer: 0
   m_Name: sheefa_group (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &2088468349
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 2088468348}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0de419dd33317494fa7396e555f78c0d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  debug: 0
-  nodeEnabled: 1
-  isProcess: 0
-  AssetPath: unused
-  uri: 
-  PropertyMessages:
-  - c1 .8
-  - c3 6
-  - fb 90
-  - trimDB 5
-  UpdateUsingChangeThresh: 0
-  angleThresh: 5
-  movementThresh: 0.05
-  updateRotFlag: 0
-  updatePosFlag: 0
-  nodeName: noName
-  nodeType: source
-  members: []
-  stringToEdit: 
+  m_IsActive: 0
 --- !u!4 &2088468350
 Transform:
   m_ObjectHideFlags: 0
@@ -7408,14 +7022,13 @@ GameObject:
   - component: {fileID: 2109943613}
   - component: {fileID: 2109943612}
   - component: {fileID: 2109943611}
-  - component: {fileID: 2109943610}
   m_Layer: 0
   m_Name: source5
   m_TagString: Untagged
   m_Icon: {fileID: -1376725286, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2109943609
 Transform:
   m_ObjectHideFlags: 0
@@ -7429,26 +7042,6 @@ Transform:
   m_Father: {fileID: 191090086}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2109943610
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 2109943608}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1fba3b7a6b71f43d6b5c91eae3df11ba, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  processName: nearField
-  launchArgs: []
-  events: []
-  parameters:
-  - synth zkarpluck1
-  - debugFlag 0
-  - nearFieldRadius 10
-  - nearFieldExp 3
-  - nearFieldToggle 1
 --- !u!114 &2109943611
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7511,7 +7104,7 @@ MonoBehaviour:
   nodeEnabled: 1
   isProcess: 0
   AssetPath: 
-  uri: 
+  uri: plugin://zkpluk5
   PropertyMessages:
   - c1 .8
   - c3 6
