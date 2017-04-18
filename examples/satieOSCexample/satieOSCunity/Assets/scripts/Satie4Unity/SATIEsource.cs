@@ -151,20 +151,20 @@ public class SATIEsource : SATIEnode {
 
 
 
-    public enum nfMuting{
-        noMuting,
-        muteNearField,
-        muteFarField
-    };
-
-    [Header("Near Field Muting")]
-     public nfMuting nfMute = nfMuting.noMuting;
-
-    [Range(0.1f, 100f)]
-    public float nearFieldRadius = 20;  // the radius for Near-Field muting
-
-    [Range(0, 5)]
-    public float nearFieldExp = 1;  // the exponent for the near-field radius transition
+//    public enum nfMuting{
+//        noMuting,
+//        muteNearField,
+//        muteFarField
+//    };
+//
+//    [Header("Near Field Muting")]
+//     public nfMuting nfMute = nfMuting.noMuting;
+//
+//    [Range(0.1f, 100f)]
+//    public float nearFieldRadius = 20;  // the radius for Near-Field muting
+//
+//    [Range(0, 5)]
+//    public float nearFieldExp = 1;  // the exponent for the near-field radius transition
 
 
     private bool _initialized = false;
@@ -793,20 +793,20 @@ public class SATIEsource : SATIEnode {
         }
 
         // will need to optomize 
-        if (nfMute != nfMuting.noMuting)
-        {
-            float nearFieldScaler = Mathf.Clamp(distance, 0, nearFieldRadius) / nearFieldRadius;    // unit value:   == 1 when distance >=  radius,  goes toward 0 as distance aproaches zero
-
-            if (nfMute == nfMuting.muteFarField) nearFieldScaler =  1f - nearFieldScaler;
-
-            nearFieldScaler = Mathf.Pow(nearFieldScaler, nearFieldExp);  // non-linearize 
-            float dbOffset =  20.0f * Mathf.Log10(nearFieldScaler);
-
-            gainDB_ = gainDB_ + dbOffset;
-            if (debug)
-                Debug.Log("dbOffset: "+dbOffset); 
-        }
-
+//        if (nfMute != nfMuting.noMuting)
+//        {
+//            float nearFieldScaler = Mathf.Clamp(distance, 0, nearFieldRadius) / nearFieldRadius;    // unit value:   == 1 when distance >=  radius,  goes toward 0 as distance aproaches zero
+//
+//            if (nfMute == nfMuting.muteFarField) nearFieldScaler =  1f - nearFieldScaler;
+//
+//            nearFieldScaler = Mathf.Pow(nearFieldScaler, nearFieldExp);  // non-linearize 
+//            float dbOffset =  20.0f * Mathf.Log10(nearFieldScaler);
+//
+//            gainDB_ = gainDB_ + dbOffset;
+//            if (debug)
+//                Debug.Log("dbOffset: "+dbOffset); 
+//        }
+//
 
 
         if (!SATIEsetup.updateBlobEnabled)
@@ -1105,19 +1105,19 @@ public class SATIEsource : SATIEnode {
         HpHz = (listener.submergedFlag && underWaterProcessing) ? underWaterHpHz : 1f;
 
         // will need to optomize 
-        if (nfMute != nfMuting.noMuting)
-        {
-            float nearFieldScaler = Mathf.Clamp(distance, 0, nearFieldRadius) / nearFieldRadius;    // unit value:   == 1 when distance >=  radius,  goes toward 0 as distance aproaches zero
-
-            if (nfMute == nfMuting.muteFarField) nearFieldScaler =  1f - nearFieldScaler;
-
-            nearFieldScaler = Mathf.Pow(nearFieldScaler, nearFieldExp);  // non-linearize 
-            float dbOffset =  20.0f * Mathf.Log10(nearFieldScaler);
-
-            gainDB_ = gainDB_ + dbOffset;
-            if (debug)
-                Debug.Log("dbOffset: "+dbOffset); 
-        }
+//        if (nfMute != nfMuting.noMuting)
+//        {
+//            float nearFieldScaler = Mathf.Clamp(distance, 0, nearFieldRadius) / nearFieldRadius;    // unit value:   == 1 when distance >=  radius,  goes toward 0 as distance aproaches zero
+//
+//            if (nfMute == nfMuting.muteFarField) nearFieldScaler =  1f - nearFieldScaler;
+//
+//            nearFieldScaler = Mathf.Pow(nearFieldScaler, nearFieldExp);  // non-linearize 
+//            float dbOffset =  20.0f * Mathf.Log10(nearFieldScaler);
+//
+//            gainDB_ = gainDB_ + dbOffset;
+//            if (debug)
+//                Debug.Log("dbOffset: "+dbOffset); 
+//        }
 
         connParams.Add(azimuth);        // 0
         connParams.Add(elevation);      // 1
