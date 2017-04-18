@@ -1323,6 +1323,7 @@ for debugguing
 		};
 
 
+
 		// returns the corresponding db attenuation offset
 		~nfClipGainDBoffset= { | self, distance |
 			var dbOffset;
