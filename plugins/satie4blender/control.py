@@ -14,9 +14,10 @@
 import bpy
 from . import properties as props
 from . import satie_synth as ss
+from . import osc
 
 def instanceHandler():
-    synths = [obj.id for obj in props.synths]
+    synths = update_synth_list()
     visibleObjs = bpy.context.visible_objects 
     if len(visibleObjs) > 0:
         for o in visibleObjs:
@@ -25,21 +26,52 @@ def instanceHandler():
                     if o.name in synths:
                         pass
                     else:
-                        print("acting on ", o.name, o.satie_synth)
-                        props.synths.append(ss.SatieSynth(o, o.name, o.satie_synth))
+                        print("acting on ", o.name, o.satie_synth, o.satieGroup, o.plugin_family)
+                        print("before: ", props.synths)
+                        synths_add_instance(o.name, o.satie_synth, o.satieGroup)
+                        print("after: ", props.synths)
+                        # props.synths.append(ss.SatieSynth(o, o.name, o.satie_synth))
                 else:
                     print("{}'s satie ID cannot be empty", o.name)
             else:
                 if o.name in synths:
                     print(">>>>>> removing {} ".format(o.name) )
-                    toRemove = [x for x in props.synths if x.id == o.name]
+                    toRemove = [x for x in props.synths['source'] if o.name in synths]
                     for i in toRemove:
-                        i.deleteNode()
-                        props.synths.remove(i)
+                        print("---> to remove", i)
+                        del props.synths['source'][i]
+                        osc.scene_delete_node(i)
+                        # delete_node(i)
+                        # props.synths['source']
+
+def update_synth_list():
+    synths = props.synths['source'].keys()
+    return(synths)
+
+def synths_add_instance(node_name, synth, group):
+    synth_name = synth_name_from_src(synth)
+
+    if group not in props.synths['group']:
+        props.synths['group'].append(group)
+        osc.scene_create_group(group)
+
+    props.synths['source'][node_name] = {
+        'name': node_name,
+        'group': group,
+        'synth': synth_name
+    }
+    osc.scene_create_source(node_name, synth_name)
+
+def delete_node(name):
+    osc.scene_delete_node(name)
+
+def synth_name_from_src(src_name):
+    ret = [x for x in bpy.satie_plugins['sources'] if x['srcName'] == src_name]
+    return(ret[0]['name'])
 
 def satieInstanceCb(scene):
     instanceHandler()
-    [synth.updateAED() for synth in props.synths]
+    # [synth.updateAED() for synth in props.synths]
     
 def cleanCallbackQueue():
     if satieInstanceCb in bpy.app.handlers.scene_update_post:

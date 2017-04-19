@@ -34,27 +34,27 @@ def load():
                     name=aName,
                     default=aDefault,
                     update=update_property
-                )
+                 )
             elif aType == "Float":
                 attributes[aName] = FloatProperty(
                     name=aName,
                     default=aDefault,
                     update=update_property
-                )
+                 )
             elif aType == "String":
                 attributes[aName] = StringProperty(
                     name=aName,
                     default=aDefault,
                     update=update_property
-                )
-            # FIXME: need to find a way of loading an Array with correct types
+                 )
+            # FIXME: need to find a way of lading an Array with correct types
             elif aType == "Array":
                 
                 attributes[aName] = StringProperty(
                     name=aName,
                     default=str(aDefault),
                     update=update_property
-                )
+                 )
             else:
                 raise TypeError("Unsupported type ({}) for {} on {}".format(aType, aName, groupName))
 
@@ -90,7 +90,8 @@ def update_property(self, context):
     owner = context.active_object.name
     for i in self.items():
         control.set_param(owner, i[0], i[1])
-    
+def get_property(self):
+    print("get called on", self)
 
 def load_synth_properties(synth):
     osc.satie_send("/satie/pluginargs", synth)
