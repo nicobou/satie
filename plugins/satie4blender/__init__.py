@@ -28,11 +28,13 @@ bl_info = {
 
 if "bpy" in locals():
     import imp
+    imp.reload(properties)
     imp.reload(SatieTool)
     imp.reload(SatiePropertiesPanel)
     imp.reload(components)
     imp.reload(osc)
 else:
+    from . import properties
     from . import SatieTool
     from . import SatiePropertiesPanel
     from . import components
@@ -44,6 +46,10 @@ import bpy
 
 def initialize():
     print("Initializing SATIE bridge")
+    properties.synths['group'] = ['default']
+    properties.synths['process'] = []
+    properties.synths['source'] = {}
+    print("synths populated:", properties.synths)
 
 def register():
     initialize()
