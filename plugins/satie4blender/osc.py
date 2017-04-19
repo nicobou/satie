@@ -29,8 +29,10 @@ OSC_ADDRESS = liblo.Address(props.destination, props.satie_port)
 
 def init_osc_server():
     bpy.s4b_OSCclient = liblo.Address(props.destination, props.satie_port)
-
-    bpy.s4b_OSCserver = liblo.Server(props.server_port)
+    try:
+        bpy.s4b_OSCserver = liblo.Server(props.server_port)
+    except Exception as e:
+        print("could not create OSC server:", e)
     #msg = liblo.Message("/notify", 1)
     # msg = liblo.Message("/satie/pluginargs", synth)
 
@@ -64,6 +66,7 @@ def satie_send(address, msg):
 def stop_osc_server():
     print("stopping OSC server....")
     bpy.s4b_OSCserver.free()
+    del bpy.s4b_OSCserver
     bpy.s4b_OSCserver = None
     bpy.s4b_OSCclient = None
 
@@ -95,9 +98,12 @@ def scene_create_effect(nodeName, synthdefName, schemaName='plugin', group='defa
     """
     liblo.send(bpy.s4b_OSCclient, SCENE_URI, "createSource", nodeName, "effect://"+synthdefName, group, in_bus)
 
+def scene_delete_node(nodeName):
+    liblo.send(bpy.s4b_OSCclient, SCENE_URI, "deleteNode", nodeName)
+
 def scene_create_group(nodeName, schema='plugin'):
     """Create a group"""
-    liblo.send(bpy.s4b_OSCclient, SCENE_URI, "createGroup", nodeName, "effect://")
+    liblo.send(bpy.s4b_OSCclient, SCENE_URI, "createGroup", nodeName, "{}:".format(schema))
 
 def scene_clear():
     liblo.send(bpy.s4b_OSCclient, SCENE_URI, "clear")
@@ -132,4 +138,3 @@ def node_setvec(nodeType, nodeName, key, *args):
     """
     uri = os.path.join("/satie", nodeType, "setvec")
     liblo.send(bpy.s4b_OSCclient, uri, nodeName, key, args)
-
