@@ -1,10 +1,10 @@
 #N canvas 698 131 1601 980 12;
 #X obj 16 8 cnv 15 850 500 empty empty DomeRenderer 20 12 0 18 -262130
 -66577 0;
-#X obj 131 88 tgl 36 0 empty empty NearFieldEnable -40 -16 0 24 -262144
--1 -1 0 1;
+#X obj 131 88 tgl 36 0 empty empty InvertNearField -40 -16 0 24 -262144
+-1 -1 1 1;
 #X obj 375 77 nbx 7 36 0 1e+37 0 0 empty empty XfadeExponent 0 -16
-0 24 -262144 -1 -1 3 256;
+0 24 -262144 -1 -1 1 256;
 #X obj 387 339 s \$0-toDomeRenderer;
 #X obj 24 536 cnv 15 850 500 empty empty NearFieldRenderer 20 12 0
 18 -262130 -66577 0;
@@ -22,30 +22,28 @@
 #X symbolatom 1007 738 18 0 0 0 - - -, f 18;
 #X msg 1015 677 localhost;
 #X obj 1193 894 OSCtx;
-#X obj 973 932 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 14022
+#X obj 973 932 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 16086
 1;
 #X obj 1194 924 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1
-19700 1;
+15813 1;
 #X obj 972 807 s \$0-toDomeRenderer;
 #X obj 972 868 r \$0-toDomeRenderer;
 #X obj 1191 808 s \$0-toNearFieldRenderer;
 #X obj 1192 862 r \$0-toNearFieldRenderer;
 #X obj 904 14 cnv 15 650 500 empty empty Control 20 12 0 18 -228856
 -66577 0;
-#X obj 185 114 loadbang1 0;
 #X obj 955 77 bng 42 250 50 0 empty empty reset 0 -18 0 24 -262144
 -1 -1;
 #X obj 955 127 s \$0-reset;
 #X obj 185 87 r \$0-reset;
 #X msg 1270 643 symbol localhost;
-#X obj 100 620 tgl 36 0 empty empty NearFieldEnable -40 -16 0 24 -262144
--1 -1 1 1;
+#X obj 100 620 tgl 36 0 empty empty InvertNearField -40 -16 0 24 -262144
+-1 -1 0 1;
 #X obj 344 609 nbx 7 36 0 1e+37 0 0 empty empty XfadeExponent 0 -16
 0 24 -262144 -1 -1 3 256;
 #X obj 573 607 nbx 7 36 0.1 1e+37 0 0 empty empty nearFieldRadius 0
--16 0 24 -262144 -1 -1 1 256;
+-16 0 24 -262144 -1 -1 6 256;
 #X obj 154 619 r \$0-reset;
-#X obj 154 646 loadbang1 1;
 #X obj 398 123 r \$0-reset;
 #X obj 398 150 loadbang1 1;
 #X obj 623 28 r \$0-reset;
@@ -55,7 +53,6 @@
 #X msg 682 464 3;
 #X obj 692 426 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
-#X msg 1309 701 symbol 192.168.0.13;
 #X obj 388 310 OSCprepend /satie/rendererCtl;
 #X msg 129 180 setNearFieldInvert \$1;
 #X floatatom 750 258 5 0 0 0 - - -, f 5;
@@ -71,9 +68,14 @@
 #X msg 549 701 setNearFieldRadius \$1;
 #X obj 336 849 s \$0-toNearFieldRenderer;
 #X obj 611 126 nbx 7 36 0.1 1e+37 0 0 empty empty nearFieldRadius 0
--16 0 24 -262144 -1 -1 0.1 256;
-#X connect 1 0 45 0;
-#X connect 2 0 47 0;
+-16 0 24 -262144 -1 -1 5 256;
+#X obj 185 114 loadbang1 1;
+#X obj 154 646 loadbang1 0;
+#X msg 1309 701 symbol 192.168.0.15;
+#X obj 692 386 r \$0-reset;
+#X msg 644 462 1;
+#X connect 1 0 42 0;
+#X connect 2 0 44 0;
 #X connect 6 0 18 0;
 #X connect 7 0 13 0;
 #X connect 8 0 13 0;
@@ -88,36 +90,40 @@
 #X connect 17 0 19 0;
 #X connect 21 0 6 0;
 #X connect 23 0 17 0;
-#X connect 25 0 1 0;
-#X connect 26 0 27 0;
-#X connect 28 0 25 0;
-#X connect 29 0 10 0;
-#X connect 30 0 52 0;
-#X connect 31 0 54 0;
-#X connect 32 0 56 0;
+#X connect 25 0 26 0;
+#X connect 27 0 56 0;
+#X connect 28 0 10 0;
+#X connect 29 0 49 0;
+#X connect 30 0 51 0;
+#X connect 31 0 53 0;
+#X connect 32 0 57 0;
 #X connect 33 0 34 0;
-#X connect 34 0 30 0;
+#X connect 34 0 2 0;
 #X connect 35 0 36 0;
-#X connect 36 0 2 0;
-#X connect 37 0 38 0;
-#X connect 38 0 58 0;
-#X connect 39 0 32 0;
-#X connect 41 0 31 0;
+#X connect 36 0 55 0;
+#X connect 37 0 31 0;
+#X connect 38 0 55 0;
+#X connect 39 0 30 0;
+#X connect 40 0 39 0;
+#X connect 40 0 37 0;
+#X connect 40 0 38 0;
+#X connect 40 0 60 0;
+#X connect 41 0 3 0;
 #X connect 42 0 41 0;
-#X connect 42 0 39 0;
-#X connect 42 0 40 0;
-#X connect 43 0 10 0;
-#X connect 44 0 3 0;
-#X connect 45 0 44 0;
-#X connect 46 0 49 0;
-#X connect 47 0 44 0;
-#X connect 48 0 13 0;
-#X connect 49 0 44 0;
-#X connect 50 0 44 0;
-#X connect 51 0 57 0;
-#X connect 52 0 51 0;
-#X connect 53 0 55 0;
-#X connect 54 0 51 0;
-#X connect 55 0 51 0;
-#X connect 56 0 51 0;
-#X connect 58 0 50 0;
+#X connect 43 0 46 0;
+#X connect 44 0 41 0;
+#X connect 45 0 13 0;
+#X connect 46 0 41 0;
+#X connect 47 0 41 0;
+#X connect 48 0 54 0;
+#X connect 49 0 48 0;
+#X connect 50 0 52 0;
+#X connect 51 0 48 0;
+#X connect 52 0 48 0;
+#X connect 53 0 48 0;
+#X connect 55 0 47 0;
+#X connect 56 0 1 0;
+#X connect 57 0 29 0;
+#X connect 58 0 10 0;
+#X connect 59 0 40 0;
+#X connect 60 0 2 0;

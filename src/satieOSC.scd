@@ -1323,6 +1323,7 @@ for debugguing
 		};
 
 
+
 		// returns the corresponding db attenuation offset
 		~nfClipGainDBoffset= { | self, distance |
 			var dbOffset;
@@ -1330,7 +1331,7 @@ for debugguing
 			var exp = satie.nearFieldExp;
 
 
-			if (satie.nearFieldInvert == true,
+			if (satie.nearFieldInvert == false,
 				{
 					nfScaler = 1 - nfScaler;
 			});
