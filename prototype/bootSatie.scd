@@ -20,9 +20,9 @@
 // REQUIRED  GLOBAL VARIABLES  -- used from elsewhere in the environment--
 ~satieRootPath = thisProcess.nowExecutingPath.dirname++ "/..";   //  needed when calling ~satieMaker
 
-//~listeningFormat = \stereoListener;    // defaults to stereo    - needed when calling makeSynthDef
+~listeningFormat = \stereoListener;    // defaults to stereo    - needed when calling makeSynthDef
 
-~listeningFormat = \dodecNF;    // defaults to stereo    - needed when calling makeSynthDef
+//~listeningFormat = \dodecNF;    // defaults to stereo    - needed when calling makeSynthDef
 
 
 // Evaluate this file to
