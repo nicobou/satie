@@ -8,37 +8,30 @@
 
 
 
-~num_aux_bus = 9;   // one bus for reverb, and 8 busses for object audio
-//~num_aux_bus = 5;
+~num_aux_bus = 2;   // one bus for reverb, and 8 busses for object audio
 ~fxBus0 = 0;  // relative aux bus number that satie will use for this project's synthdef sends to fx synthdefs
-~objBus1 = 1;  //  ""
-~objBus2 = 2;  //  ""
-~objBus3 = 3;  //  ""
-~objBus4 = 4;  //  ""
-~objBus5 = 5;  //  ""
-~objBus6 = 6;  //  ""
-~objBus7 = 7;  //  ""
-~objBus8 = 8;  //  ""
+~fxBus1 = 0;  // relative aux bus number that satie will use for this project's synthdef sends to fx synthdefs
+
 
 
 // used only for debug printing
-~thisProjectFile = thisProcess.nowExecutingPath.split($/).last;
+~thisProjectName = thisProcess.nowExecutingPath.split($/).last.splitext[0];
 ~thisProjectDir = thisProcess.nowExecutingPath.dirname;
 
-postf("***"++~thisProjectFile++" :  loading project,  using listenerFormat: %  with %  FX busses  \n", ~listeningFormat, ~num_aux_bus);
+postf("***"++~thisProjectName++" :  loading project,  using listenerFormat: %  with %  FX busses  \n", ~listeningFormat, ~num_aux_bus);
 
 
 
 //   REMOVE THIS TEST ONCE THE GLOBALS HAVE BEEN SORTED OUT
 if (~listeningFormat == nil,
 	{
-		error(~thisProjectFile++" : BUG FOUND:  listening format not defined, setting to stereo");
+		error(~thisProjectName++" : BUG FOUND:  listening format not defined, setting to stereo");
 		~listeningFormat = \stereoListener;
 });
 
 if (~satieRootPath == nil,
 	{
-		error(~thisProjectFile++" : BUG FOUND:  ~satieRootPath  not defined, GUESSING.... ");
+		error(~thisProjectName++" : BUG FOUND:  ~satieRootPath  not defined, GUESSING.... ");
 		~satieRootPath = ~thisProjectDir++"/../..";
 });
 
@@ -116,35 +109,6 @@ s.waitForBoot{
 
 	~satie.makeSynthDef(\zkarpluck2P, \zkarpluck2P,   [~satie.aux[~fxBus0]],  [],[~listeningFormat],  [0], \randOffsets1);  // for resonant updated klones
 
-	~satie.makeSynthDef(\zkpluk1, \zkarpluck1,  [ ~satie.aux[~fxBus0], ~satie.aux[~objBus1]], [], [~listeningFormat],  [0], \randOffsets1);     // sound source that writes to an object bus out
-	~satie.makeSynthDef(\zkpluk2, \zkarpluck1,  [ ~satie.aux[~fxBus0], ~satie.aux[~objBus2]],[],  [~listeningFormat],  [0], \randOffsets1);     // sound source that writes to an object bus out
-	~satie.makeSynthDef(\zkpluk3, \zkarpluck1,  [ ~satie.aux[~fxBus0], ~satie.aux[~objBus3]], [], [~listeningFormat],  [0], \randOffsets1);      // sound source that writes to an object bus out
-	~satie.makeSynthDef(\zkpluk4, \zkarpluck1,  [ ~satie.aux[~fxBus0], ~satie.aux[~objBus4]], [], [~listeningFormat],  [0], \randOffsets1);     // sound source that writes to an object bus out
-	~satie.makeSynthDef(\zkpluk5, \zkarpluck1,  [ ~satie.aux[~fxBus0], ~satie.aux[~objBus5]], [], [~listeningFormat],  [0], \randOffsets1);      // sound source that writes to an object bus out
-	~satie.makeSynthDef(\zkpluk6, \zkarpluck1,   [ ~satie.aux[~fxBus0], ~satie.aux[~objBus6]], [], [~listeningFormat],  [0], \randOffsets1);    // sound source that writes to an object bus out
-	~satie.makeSynthDef(\zkpluk7, \zkarpluck1,   [ ~satie.aux[~fxBus0], ~satie.aux[~objBus7]], [], [~listeningFormat],  [0], \randOffsets1);     // sound source that writes to an object bus out
-	~satie.makeSynthDef(\zkpluk8, \zkarpluck1,  [ ~satie.aux[~fxBus0], ~satie.aux[~objBus8]],[],  [~listeningFormat],  [0], \randOffsets1);     // sound source that writes to an object bus out
-
-
-
-
-
-
-
-
-
-
-	~satie.makeSynthDef(\flutter1, \default,  [], [ ~satie.aux[~fxBus0], ~satie.aux[~objBus1]], [~listeningFormat], [0]);     // sound source that writes to an object bus out
-	~satie.makeSynthDef(\flutter2, \default,  [], [ ~satie.aux[~fxBus0], ~satie.aux[~objBus2]], [~listeningFormat], [0]);     // sound source that writes to an object bus out
-	~satie.makeSynthDef(\flutter3, \default,  [], [ ~satie.aux[~fxBus0], ~satie.aux[~objBus3]], [~listeningFormat], [0]);     // sound source that writes to an object bus out
-	~satie.makeSynthDef(\flutter4, \default,  [], [ ~satie.aux[~fxBus0], ~satie.aux[~objBus4]], [~listeningFormat], [0]);     // sound source that writes to an object bus out
-	~satie.makeSynthDef(\flutter5, \default,  [], [ ~satie.aux[~fxBus0], ~satie.aux[~objBus5]], [~listeningFormat], [0]);     // sound source that writes to an object bus out
-	~satie.makeSynthDef(\flutter6, \default,  [], [ ~satie.aux[~fxBus0], ~satie.aux[~objBus6]], [~listeningFormat], [0]);     // sound source that writes to an object bus out
-	~satie.makeSynthDef(\flutter7, \default,  [], [ ~satie.aux[~fxBus0], ~satie.aux[~objBus7]], [~listeningFormat], [0]);     // sound source that writes to an object bus out
-	~satie.makeSynthDef(\flutter8, \default,  [], [ ~satie.aux[~fxBus0], ~satie.aux[~objBus8]], [~listeningFormat], [0]);     // sound source that writes to an object bus out
-
-
-
 
 	// dummy
 	~satie.makeSynthDef(\dummyPlugin, \emptySource,  [], [], [\emptySpat], [0]);    // dummy synthdef, used for new nodes
@@ -152,13 +116,13 @@ s.waitForBoot{
 	s.sync;
 
 	// load project file, and any  utility files
-	if ( ~utilityFIles.size > 0, { postf(~thisProjectFile++" :  loading utility files \n")});
+	if ( ~utilityFIles.size > 0, { postf(~thisProjectName++" :  loading utility files \n")});
 	~utilityFiles.do { |f|  f.postln;  f.load ; s.sync;};
 
 	s.sync;
 
 	// load additional project-specific files from the "autoload" subdir.
-	postf(~thisProjectFile++" :  loading % items in %/autoload subdirectory\n", ~files.size, ~thisProjectDir);
+	postf(~thisProjectName++" :  loading % items in %/autoload subdirectory\n", ~files.size, ~thisProjectDir);
 	~files.do { |f|  f.split.last.postln;  f.load; s.sync;};
 	s.sync;
 
@@ -169,11 +133,11 @@ s.waitForBoot{
 	~myProjectCallback = {   	// receives OSC messages that look like:   /satie/project/myProjectname data1 .... dataN
 		arg msg;
 		var command = msg[1];
-		//postf(~myProjectName++" Project:  command: %, msg: %, \n", command, msg);
+		//postf(~thisProjectName++" Project:  command: %, msg: %, \n", command, msg);
 
 		if (msg.size < 2,
-			{~thisProjectFile++" : myProjectCallback:  empty message".warn;
-				postf(~thisProjectFile++" : myProjectCallback:  Project:  MESS LEN: %", msg.size);
+			{~thisProjectName++" : myProjectCallback:  empty message".warn;
+				postf(~thisProjectName++" : myProjectCallback:  Project:  MESS LEN: %", msg.size);
 
 			},
 			// else
@@ -183,13 +147,13 @@ s.waitForBoot{
 					'setProjectDir',
 					{
 						if ( (msg.size != 3 ) ,
-							{~thisProjectFile++" : myProjectCallback: Project: setProjectDir bad arg count: expecting 'setProjectDir projectDirPath' ".warn;},
+							{~thisProjectName++" : myProjectCallback: Project: setProjectDir bad arg count: expecting 'setProjectDir projectDirPath' ".warn;},
 							// else
 							{
 								~thisProjectResourcePath = msg[2];     // optionally referenced by certain processes
 
 								//e.projectDirectory.postln;
-								postf(~thisProjectFile++" : myProjectCallback: setting project directory to: % \n", ~thisProjectResourcePath);
+								postf(~thisProjectName++" : myProjectCallback: setting project directory to: % \n", ~thisProjectResourcePath);
 							}
 						)
 				})
@@ -198,8 +162,8 @@ s.waitForBoot{
 
 
 	// set up to receive OSC project messages: e.g.  /satie/project/myProjectname data1 .... dataN
-	~osc.removeProjectOSC(~thisProjectFile.asSymbol);   // just in case
-	~osc.makeProjectOSC(~thisProjectFile.asSymbol, ~myProjectCallback);   // now create osc callback for project
+	~osc.removeProjectOSC(~thisProjectName.asSymbol);   // just in case
+	~osc.makeProjectOSC(~thisProjectName.asSymbol, ~myProjectCallback);   // now create osc callback for project
 
 
 /*
