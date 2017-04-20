@@ -27,7 +27,7 @@ b.sendMsg("/satie/scene", "debugFlag", 1);    // activate  debugging printing to
 
 )
 
-b.sendMsg("/satie/scene", "debugFlag", 1);    // optionally deactivate debugging printing to console
+b.sendMsg("/satie/scene", "debugFlag", 0);    // optionally deactivate debugging printing to console
 
 
 
