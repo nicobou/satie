@@ -42,6 +42,10 @@ if  (thisProcess.argv.size >= 1,
 			{
 				~listeningFormat = \domeVBAP;
 			},
+			"dodec",
+			{
+				~listeningFormat = \dodec;
+			},
 			"labo",
 			{
 				~listeningFormat = \labodomeVBAP;
@@ -78,7 +82,7 @@ if  (thisProcess.argv.size >= 1,
 // Only edit this path to point to the sate root if you have moved location of this example project directory to a different level of the satie distribution directory tree
 // by default it is: ~rootSrcPath = ~thisDir++ "/../..";
 
-~rootSrcPath = ~thisDir++ "/../";
+~satieRootPath = ~thisDir++ "/../";
 
 
 // set these flags depending on your environment
@@ -121,6 +125,12 @@ Platform.case (
 
 		});
 		//  OR iF
+		if (   ~listeningFormat == \dodec ,        // special case for near-field demo for IX    (this case should removed eventually)
+			{
+				~outAudioDev = "Dante Virtual Soundcard";    // this may require updating
+				postf("AudioOutDev: %\n", ~outAudioDev);
+		});
+		//  OR iF
 		if ( ( ( ~listeningFormat == \quadVBAP)  ||   ( ~listeningFormat == \five1VBAP)  ),
 			{
 
@@ -143,6 +153,10 @@ Platform.case (
 );
 
 switch (~listeningFormat,
+	\dodec,
+	{
+		o.numOutputBusChannels = 28;   // twenty channels for dodecahedron output plus 8 out busses for object audio
+	},
 	\domeVBAP,
 	{
 		o.numOutputBusChannels = 32;
@@ -198,7 +212,7 @@ if (~meter == nil,  { ~plotTree=s.meter;});
 // Initialize and load  section   ----------------------------------
 (
 // Load SATIE kernel
-(~rootSrcPath ++ "/src/*.scd").pathMatch.do({arg item; item.loadPaths});
+(~satieRootPath ++ "/src/*.scd").pathMatch.do({arg item; item.loadPaths});
 
 
 // specify any other files to be loaded:
