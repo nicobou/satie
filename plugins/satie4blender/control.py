@@ -16,6 +16,8 @@ from . import properties as props
 from . import satie_synth as ss
 from . import osc
 
+bpy.satie_debug = {}
+
 def instanceHandler():
     synths = update_synth_list()
     visibleObjs = bpy.context.visible_objects 
@@ -55,6 +57,8 @@ def synths_add_instance(parent, node_name, synth, group):
         props.synths['group'].append(group)
         osc.scene_create_group(group)
 
+    print("========================================")
+
     s_instance = create_instance(parent, node_name)
     s_instance.group = group
 
@@ -64,6 +68,7 @@ def synths_add_instance(parent, node_name, synth, group):
         'synth': synth_name,
         'instance': s_instance
     }
+    bpy.satie_debug = props.synths
     osc.scene_create_source(node_name, synth_name)
 
 def create_instance(parent, node_name):
@@ -83,6 +88,7 @@ def satieInstanceCb(scene):
     if props.synths['source']:
         [props.synths['source'][s]['instance'].updateAED() for s in props.synths['source']]
         [send_update(props.synths['source'][s]) for s in props.synths['source']]
+        [props.synths['source'][s]['instance'].show_debug() for s in props.synths['source'] if props.synths['source'][s]['instance'].debug == True]
 
 def send_update(s):
     osc.node_update('source', s['instance'].node_name, s['instance'].azi, s['instance'].ele, s['instance'].gain, s['instance'].delay, s['instance'].lowpass, s['instance'].distance)
@@ -131,14 +137,27 @@ def setOSC_destination_port(self, context):
 def setOSC_server_port(self, context):
     port = context.scene.OSC_server_port    
     props.server_port = port
+        
+def set_instance_debug(self, value):
+    props.synths['source'][self.name]['instance'].debug = self.debug_text
 
-def set_param(name, param, value):
-    synths = update_synths()
-    if name in synths:
-        toSet = [s for s in props.synths if s.id == name]
-        for s in toSet:
-            s.set(param, value)
-    
 
-def update_synths():
-    return [obj.id for obj in props.synths]
+"""
+>>> [s for s in bpy.satie_debug['source'] if bpy.satie_debug['source'][s]['instance'].debug == False]
+['Cube']
+
+>>> [bpy.satie_debug['source'][s]['instance'].debug_text() for s in bpy.satie_debug['source'] if bpy.satie_debug['source'][s]['instance'].debug == False]
+<bpy_struct, Object("Cube")>
+[None]
+
+>>> [bpy.satie_debug['source'][s]['instance'].debug_text() for s in bpy.satie_debug['source'] if bpy.satie_debug['source'][s]['instance'].debug == False]
+<bpy_struct, Object("Cube")>
+[None]
+
+>>> [bpy.satie_debug['source'][s]['instance'] for s in bpy.satie_debug['source'] if bpy.satie_debug['source'][s]['instance'].debug == False]
+[<satie4blender.satie_synth.SatieSynth object at 0x7f20a35e3208>]
+
+>>> [bpy.satie_debug['source'][s]['instance'].updateAED() for s in bpy.satie_debug['source'] if bpy.satie_debug['source'][s]['instance'].debug == False]
+[None]
+
+"""
