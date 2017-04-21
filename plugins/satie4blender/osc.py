@@ -120,7 +120,7 @@ def node_event(nodeType, nodeName, eventName, *args):
     liblo.send(bpy.s4b_OSCclient, uri, nodeName, eventName, args)
 
 def node_set(nodeType, nodeName, *args):
-    """
+    """Set property
     nodeType: string - nodeType: source, group, process
     nodeName: string - instance name
     args: array - key, value pairs alternating
@@ -138,3 +138,18 @@ def node_setvec(nodeType, nodeName, key, *args):
     """
     uri = os.path.join("/satie", nodeType, "setvec")
     liblo.send(bpy.s4b_OSCclient, uri, nodeName, key, args)
+
+def node_update(nodeType, nodeName, azimuth, elevation, gain, delay,  lp,  distance):
+    """Update some essential properties
+
+    nodeType: string
+    nodeName: string
+    azimuth: float - horizontal angle - degrees
+    elevation: float - vertical angle - degrees
+    gain: float - decibels
+    delay: int - miliseconds
+    lp: float - low-pass filter frequency - herz
+    distance: float - meters
+    """
+    uri = os.path.join("/satie", nodeType, "update")
+    liblo.send(bpy.s4b_OSCclient, uri, nodeName, azimuth, elevation, gain, delay,  lp,  distance)

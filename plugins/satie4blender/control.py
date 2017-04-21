@@ -28,7 +28,7 @@ def instanceHandler():
                     else:
                         print("acting on ", o.name, o.satie_synth, o.satieGroup, o.plugin_family)
                         print("before: ", props.synths)
-                        synths_add_instance(o.name, o.satie_synth, o.satieGroup)
+                        synths_add_instance(o, o.name, o.satie_synth, o.satieGroup)
                         print("after: ", props.synths)
                         # props.synths.append(ss.SatieSynth(o, o.name, o.satie_synth))
                 else:
@@ -48,19 +48,27 @@ def update_synth_list():
     synths = props.synths['source'].keys()
     return(synths)
 
-def synths_add_instance(node_name, synth, group):
+def synths_add_instance(parent, node_name, synth, group):
     synth_name = synth_name_from_src(synth)
 
     if group not in props.synths['group']:
         props.synths['group'].append(group)
         osc.scene_create_group(group)
 
+    s_instance = create_instance(parent, node_name)
+    s_instance.group = group
+
     props.synths['source'][node_name] = {
         'name': node_name,
         'group': group,
-        'synth': synth_name
+        'synth': synth_name,
+        'instance': s_instance
     }
     osc.scene_create_source(node_name, synth_name)
+
+def create_instance(parent, node_name):
+    satie_instance = ss.SatieSynth(parent, node_name)
+    return(satie_instance)
 
 def delete_node(name):
     osc.scene_delete_node(name)
@@ -72,7 +80,13 @@ def synth_name_from_src(src_name):
 def satieInstanceCb(scene):
     instanceHandler()
     # [synth.updateAED() for synth in props.synths]
-    
+    if props.synths['source']:
+        [props.synths['source'][s]['instance'].updateAED() for s in props.synths['source']]
+        [send_update(props.synths['source'][s]) for s in props.synths['source']]
+
+def send_update(s):
+    osc.node_update('source', s['instance'].node_name, s['instance'].azi, s['instance'].ele, s['instance'].gain, s['instance'].delay, s['instance'].lowpass, s['instance'].distance)
+
 def cleanCallbackQueue():
     if satieInstanceCb in bpy.app.handlers.scene_update_post:
         bpy.app.handlers.scene_update_post.remove(satieInstanceCb)

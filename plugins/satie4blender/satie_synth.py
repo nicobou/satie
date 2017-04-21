@@ -25,53 +25,27 @@ class SatieSynth():
     Object representing a synth in SATIE
     This implementation uses the satieOSC prorocol
     """
-    def __init__(self, parent, id, plugin):
+    def __init__(self, parent, id):
         """
         Params:
         parent - bpy_types.Object
         id - parent's name
         """
-        self.id = id
-        self.synth = plugin
+        self.node_name = id
         self.group = "default"
-        self.oscaddress = liblo.Address(props.destination, props.satie_port)
-        self.oscbaseurl = "/satie"
-        self.oscURI = None
         self.myParent = parent
-        self.selected = False
-        self.playing = False
-        self.setURI()
-        self.createSource()
-        self.play()
-
-    def setURI(self):
-        self.oscURI = os.path.join(self.oscbaseurl, self.group)
-
-    def createSource(self):
-        liblo.send(self.oscaddress, self.oscbaseurl, "create", self.id, self.synth)
-
-    def deleteNode(self):
-        oscURI = os.path.join(self.oscbaseurl, self.group, self.id)
-        liblo.send(self.oscaddress, oscURI, "delete")
-
-    def set(self, prop, val):
-        oscURI = os.path.join(self.oscbaseurl, self.group, self.id)
-        if not val:
-            self.playing = False
-        else:
-            self.playing = True
-        liblo.send(self.oscaddress, oscURI, "set", prop, val)
-
-    def play(self):
-        oscURI = os.path.join(self.oscbaseurl, self.group, self.id)
-        liblo.send(self.oscaddress, oscURI, "set", "t_trig", 1)
-        print("sent play")
+        self.azi = 0
+        self.ele = 0
+        self.gain = -99
+        self.delay = 1
+        self.lowpass = 15000
+        self.highpass = 1
+        self.spread = 1
+        self.distance = 1
                 
     def updateAED(self):
-        oscURI = os.path.join(self.oscbaseurl, self.group, self.id)
-        azi, ele, gain = self._getAED()
-        liblo.send(self.oscaddress, oscURI, "set", "aziDeg", azi, "elevDeg", ele, "gainDB", gain)
-        
+        # oscURI = os.path.join(self.oscbaseurl, self.group, self.id)
+        self.azi, self.ele, self.gain = self._getAED()
         
     def _getLocation(self):
         cam_world_matrix = bpy.data.objects['Camera'].matrix_world
@@ -82,9 +56,8 @@ class SatieSynth():
         return location
 
     def _getParent(self):
-        listener = [o for o in bpy.context.visible_objects if o.name == self.id]
+        listener = [o for o in bpy.context.visible_objects if o.name == self.node_name]
         return listener[0]
-
 
     def _getAED(self):
         distance = self._getLocation()
