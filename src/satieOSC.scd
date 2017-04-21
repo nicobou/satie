@@ -283,6 +283,7 @@ for debugguing
 									var thisGroupName = e.allSourceNodes[nodeName.asSymbol].at(\groupNameSym);  // process nodes have unique groups
 									var thisGroup = e.allGroupNodes[thisGroupName].at(\group).group;
 									var myProcess = e.allSourceNodes[nodeName.asSymbol].at(\process);
+									var matched = false;
 
 									if ( myProcess == nil,
 										{
@@ -290,10 +291,21 @@ for debugguing
 
 										},
 										{  // good to go
-											if ( myProcess[key.asSymbol].class == Function,
+											if ( myProcess[key.asSymbol].class == Function,  // does a specific handler exist for this key ?
 												{
-													myProcess[key.asSymbol].value(myProcess, vector);   // use process's defined message handler for this key
+													matched = true;
+													myProcess[key.asSymbol].value(myProcess, vector);   // use process's specially defined message handler for this key
 												},
+												{
+													// else  nope:  no handler with that name exists.  Check  if a handler named \setVec is defined.
+													if ( myProcess[\setVec].class == Function,
+														{
+															matched = true;
+															myProcess[\setVec].value(myProcess, key, vector);   // use process's \setVec message handler
+													});
+											});
+											//
+											if (matched == false,
 												{
 													// or just update the process's group
 													thisGroup.set(key,vector);
@@ -499,6 +511,10 @@ for debugguing
 							lpHz = args[6];
 							distance = args[7];  // not used by basic spatializers
 
+							if ( satie.nearFieldRadius > 0,    // if the near field has a value greater than zero, handle this case
+								{  gainDB = gainDB + e.nfClipGainDBoffset(distance)});
+
+
 							thisSynth.set(\aziDeg, aziDeg, \eleDeg, eleDeg, \gainDB, gainDB, \delayMs, delayMs, \lpHz, lpHz);
 							//postf("sourceUpdateHandler:  update: gain  % \n", gainDB);
 
@@ -548,6 +564,10 @@ for debugguing
 							delayMs = args[5];
 							lpHz = args[6];
 							distance = args[7];  // not used by basic spatializers
+
+						    if ( satie.nearFieldRadius > 0,    // if the near field has a value greater than zero, handle this case
+								{  gainDB = gainDB + e.nfClipGainDBoffset(distance)});
+
 
 							if (myProcess[\setUpdate] == nil,
 								{
@@ -983,7 +1003,7 @@ for debugguing
 					self.setSynth(sourceName.asSymbol, synthName);
 			});
 
-				postf(">>satieOSC.createSourceNode:  creating %:  uri: %  group: %\n", sourceName, uriString, groupName);
+			postf(">>satieOSC.createSourceNode:  creating %:  uri: %  group: %\n", sourceName, uriString, groupName);
 
 		};
 
@@ -1032,7 +1052,7 @@ for debugguing
 
 					//osc.sourceOSC(groupName.asSymbol, e.['groupCallback']);   // NO NEED TO create OSC callback
 
-						postf(">>satieOSC.createGroup:  creating   %   groupType: %\n", groupName, groupPos);
+					postf(">>satieOSC.createGroup:  creating   %   groupType: %\n", groupName, groupPos);
 
 					group;  // returns groups
 				}
@@ -1051,7 +1071,7 @@ for debugguing
 			type = self.getUriType( uriPath );
 
 
-				if (e.debugFlag, {postf("•satieOSC.setSynth: node: %   uriStr: %  group: %  type: % \n",  nodeName, uriPath,  groupName,  type);});
+			if (e.debugFlag, {postf("•satieOSC.setSynth: node: %   uriStr: %  group: %  type: % \n",  nodeName, uriPath,  groupName,  type);});
 
 			//postf("~setSynth: node: %    NEW: %  CURRENT: % \n", nodeName, pluginName.asSymbol, self.allSourceNodes[nodeName.asSymbol].at(\plugin).asSymbol);
 
@@ -1061,7 +1081,7 @@ for debugguing
 
 
 			if (validPluginName.asSymbol != self.allSourceNodes[nodeName.asSymbol].at(\plugin).asSymbol,
-			{
+				{
 					// replace existing with new plugin
 					var synth;
 
@@ -1168,7 +1188,7 @@ for debugguing
 		// Utility functions    ****************************************
 
 		~getUriName = { |  self, uriPath |
-/*			var stringArray = uriPath.asString.split($ );
+			/*			var stringArray = uriPath.asString.split($ );
 			var charIndex = uriPath.asString.find("://");
 			var temp = uriPath.asString.subStr(charIndex);
 			var uriName = temp.asString.replace("://", "");*/
@@ -1302,6 +1322,28 @@ for debugguing
 			outVal;
 		};
 
+
+		// returns the corresponding db attenuation offset
+		~nfClipGainDBoffset= { | self, distance |
+			var dbOffset;
+			var nfScaler = distance.clip(0.01, satie.nearFieldRadius) / satie.nearFieldRadius;
+			var exp = satie.nearFieldExp;
+
+
+			if (satie.nearFieldInvert == false,
+				{
+					nfScaler = 1 - nfScaler;
+			});
+
+			nfScaler = nfScaler**exp;
+			dbOffset = nfScaler.ampdb;
+			if (e.debugFlag, {postf("•satieOSC.nfClipGainDBoffset: distance: %  nearFieldRadius: %    nearFieldExp: %     nearFieldInvert  %   DB attenuation offset: % \n",  distance, satie.nearFieldRadius, satie.nearFieldExp, satie.nearFieldInvert, dbOffset)});
+			dbOffset;
+		};
+
+
+
+
 	});   // Environment.make
 
 
@@ -1373,7 +1415,7 @@ for debugguing
 
 
 	// DEPRECIATED
-/*
+	/*
 	// sources
 	osc.deleteOSC(\satieSrcProp);  // disconnect any previous handlers
 	osc.newOSC(\satieSrcProp, e['sourceNodeCallback'], "/satie/source/prop");   // connect handler
@@ -1416,19 +1458,19 @@ for debugguing
 	osc.deleteOSC(\satieProcessHpHz);  // disconnect any previous handlers
 	osc.newOSC(\satieProcessHpHz, e['processHpHzHandler'], "/satie/process/hpHz");   // connect handler
 
-*/
+	*/
 
 	e;
-};
+	};
 
 
 
-/*
-for debugguing
+	/*
+	for debugguing
 
-~satieOSC = ~satieOSCProtocol.value(~osc, ~satie);
-~satieOSC.debugFlag = true;
-~satieOSC.debugFlag = false;
-*/
+	~satieOSC = ~satieOSCProtocol.value(~osc, ~satie);
+	~satieOSC.debugFlag = true;
+	~satieOSC.debugFlag = false;
+	*/
 
 )

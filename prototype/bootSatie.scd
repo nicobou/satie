@@ -16,6 +16,15 @@
 // -----------------------------------------------------------
 
 
+
+// REQUIRED  GLOBAL VARIABLES  -- used from elsewhere in the environment--
+~satieRootPath = thisProcess.nowExecutingPath.dirname++ "/..";   //  needed when calling ~satieMaker
+
+~listeningFormat = \stereoListener;    // defaults to stereo    - needed when calling makeSynthDef
+
+//~listeningFormat = \dodecNF;    // defaults to stereo    - needed when calling makeSynthDef
+
+
 // Evaluate this file to
 // 1)  load the items in /src
 // 2) create a satieOSCmaker instance
@@ -25,9 +34,10 @@
 // using the messageHandler, additional satie state can be instantiated, like the basic-renderer or saiteOSC
 
 
+// set this flags depending on your environment
 
-// defaults to stereo
-~listeningFormat = \stereoListener;    // you can also set this to  \domeVBAP  or  \labodomeVBAP  or   \octoVBAP
+~superNovaFlag = true;
+
 
 
 // or specify the listening format via command line args
@@ -38,6 +48,10 @@ if  (thisProcess.argv.size >= 1,
 	{
 
 		switch (thisProcess.argv[0].asString ,
+			"dodecNF",
+			{
+				~listeningFormat = \dodecNF;   // vbap to near field... outputs 20 chanels to soundFlower
+			},
 			"sato",
 			{
 				~listeningFormat = \domeVBAP;
@@ -84,14 +98,6 @@ if  (thisProcess.argv.size >= 1,
 
 ~satieRootPath = ~thisDir++ "/../";
 
-
-// set these flags depending on your environment
-~outAudioDev = nil;
-~superNovaFlag = true;
-
-
-
-// PROBABLY NO NEED TO MODIFY ANYTHING ELSE BELOW  HERE
 
 if ( ~superNovaFlag != nil,
 	{

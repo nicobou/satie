@@ -79,29 +79,39 @@
 
 // Optional Override handlers
 
-// Below are optionally defined message handlers that, if defined, will be called by satie4Unity.
-// They override satie4Unity's corresponding generic handlers, that apply these messages to the processNodes group (or environment, in the case of the  'property' message
-// Satie4Unity provides an override mechanism for the following  messages, which are handled by the corresponding process functions as shown:
+// Below are optionally defined message handlers that, if defined, will be called by satieOSC.
+// They override satieOSC's corresponding generic handlers, that apply these messages to the processNodes group (or environment, in the case of the  'property' message
+// satieOSC provides an override mechanism for the following  messages, which are handled by the corresponding process functions as shown:
 
 //   /satie/process/update   processName   azi ele gdb del lpf dst    -->  handled by process[\update]
 //   /satie/process/property processName  key value  -->  handled by process[\property]
 //   /satie/process/state      processName  state      -->   hadled by  process[\state]
 //   /satie/process/set         processName  key value  -->  handled by process[key]
 //   /satie/process/set         processName  key value  -->  handled by process[\set]   (unless process[key] is defined)
-//  /satie/process/setvec     processName  key  val1 .... valN      -->   handled by process[key]
+//  /satie/process/setvec     processName  key  [ val1 .... valN ]     -->   handled by process[key]
+//  /satie/process/setvec         processName  key [ val1 .... valN ]  -->  handled by process[\setVec]   (unless process[key] is defined)
 
 
-// overrides satie4Unity's 'set' handler
+// overrides satieOSC's 'set' handler
 // called on the reception of the message:  'set' key value
-// NOTE:  if this process defines a handler for a particular key (e.g.  process[key] ), satie4Unity will instead call that particular handler with the value arg. - see  spread handler example  below
+// NOTE:  if this process defines a handler for a particular key (e.g.  process[key] ), satieOSC will instead call that particular handler with the value arg. - see  spread handler example  below
 
 ~helloWorld.set =  {| self, key, value |
 	if (self.debugFlag != 0, { postf("••helloWorld.set: key %  value % \n", key, value);});
 };
 
-// overrides satie4Unity's property handler
+// overrides satieOSC's 'setVec' handler
+// called on the reception of the message:  'setVec' key vector
+// NOTE:  if this process defines a handler for a particular key (e.g.  process[key] ), satieOSC will instead call that particular handler with the vec
+
+~helloWorld.setVec =  {| self, key, vector |
+	if (self.debugFlag != 0, { postf("••nearField.setVec: key %  value % \n", key, vector);});
+	self.synthPtr.set(key.asSymbol, vector);
+};
+
+// overrides satieOSC's property handler
 // called on the reception of the message:  'property' key value
-// otherwise, satie4Unity  will write the key value to this process's environment
+// otherwise, satieOSC  will write the key value to this process's environment
 
 ~helloWorld.property =  {| self, key, value |
 	if (self.debugFlag != 0, {  postf("••helloWorld.setProperty:  setting key vaue pair:  %:%   to process node's environment \n", key, value,  self.nodeName);});
@@ -111,23 +121,19 @@
 };
 
 
-// overrides satie4Unity's update handler
+// overrides satieOSC's update handler
 // called on the reception of the message:  'update' azi ele gain del lp dist
-// otherwise satie4unity will send the   'update'  message to the node's group
+// otherwise satieOSC will send the   'update'  message to the node's group
 
 ~helloWorld.setUpdate = { | self, aziDeg, eleDeg, gainDB, delayMs, lpHz, dist |
 	if (self.debugFlag != 0, {  postf("••helloWorld.setUpdate: for process node \n", self.nodeName);});
 };
 
 
-// overrides satie4Unity's state function
+// overrides satieOSC's state function
 // called on the reception of the message:  'state'  value
-// otherwise satie4unity will send the  'state' message to the node's group
+// otherwise satieOSC will send the  'state' message to the node's group
 
 ~helloWorld.state =  {| self, value |
 	if (self.debugFlag != 0, {  postf("••helloWorld.state: setting state of process node %   to % \n", self.nodeName, value);});
 };
-
-
-
-

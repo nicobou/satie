@@ -1,4 +1,4 @@
-// USES GLOBAL VARIABLES:   ~satie <required> and  ~thisProjectResourcePath <optional>
+// USES GLOBAL VARIABLES:   ~satie <required>
 
 // this file defines  a process class, which is ONLY used by source nodes that have that have a URI of type:   "process" , e.g:      uri://process  "sheefa"
 // you can define any number of these process clases, each one, corresponding to a particular type of processing  behavoir you define
@@ -123,7 +123,8 @@
 //   /satie/process/state      processName  state      -->   hadled by  process[\state]
 //   /satie/process/set         processName  key value  -->  handled by process[key]
 //   /satie/process/set         processName  key value  -->  handled by process[\set]   (unless process[key] is defined)
-//  /satie/process/setvec     processName  key  val1 .... valN      -->   handled by process[key]
+//  /satie/process/setvec     processName  key  [ val1 .... valN ]     -->   handled by process[key]
+//  /satie/process/setvec         processName  key [ val1 .... valN ]  -->  handled by process[\setVec]   (unless process[key] is defined)
 
 
 // overrides satie4Unity's 'set' handler
@@ -210,6 +211,15 @@
 	});
 	self.nodeGroup.run(value);   // change state for all synths in process's group
 };
+
+// overrides satieOSC's 'setVec' handler
+// called on the reception of the message:  'setVec' key vector
+// NOTE:  if this process defines a handler for a particular key (e.g.  process[key] ), satieOSC will instead call that particular handler with the vec
+
+// ~sheefa.setVec =  {| self, key, vector |
+// 	if (self.debugFlag != 0, { postf("••nearField.setVec: key %  value % \n", key, vector);});
+// 	self.synthPtr.set(key.asSymbol, vector);
+// };
 
 
 // Custom key-specific message handlers  can be defiend for  'set'  and 'setvec'  OSC messages

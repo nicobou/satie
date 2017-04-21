@@ -29,6 +29,10 @@
 		~satieSrcPath;
 		// processes
 		~processes = Dictionary.new;
+		// near field attenuation radius -  attenuates all sounds beyond the near field radius around the listener
+		~nearFieldRadius=0;     // disabled when ==  0, othwewise defines the radius for a spherical region of attenuation around the listener
+		~nearFieldExp=1;   // transition quality across the region:   linear transition when == 1, otherwise exponential
+		~nearFieldInvert = false;  // a when == true,  attenuates all sounds within the near field radius around the listener
 
 		~makeSynthDef = {
 			| self,
