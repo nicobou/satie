@@ -59,6 +59,9 @@ class SatiePropertiesPanel(bpy.types.Panel):
                     text="Perhaps there are no synth definitions loaded",
                     icon="QUESTION"
                 )
+            if context.object.useSatie:
+                self.layout.separator()
+                TheCol.prop(context.object, "debug_text")
         else:
             self.layout.label('Need SATIE? See toolbox')
 
@@ -127,6 +130,13 @@ class SatiePropertiesPanel(bpy.types.Panel):
         items = update_types_menu,
         # get = get_current_item,
         update = update_components
+    )
+
+    bpy.types.Object.debug_text = bpy.props.BoolProperty(
+        name = "show debug",
+        description = "show some debugging information in viewport",
+        default = False,
+        update = control.set_instance_debug
     )
 
 # initObjectProperties()

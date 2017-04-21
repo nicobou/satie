@@ -42,12 +42,16 @@ class SatieSynth():
         self.highpass = 1
         self.spread = 1
         self.distance = 1
+        self.debug = False
+        self._debug_text()
+        self.fontCurve = None
+        self.debugTextOb = None
                 
     def updateAED(self):
         # oscURI = os.path.join(self.oscbaseurl, self.group, self.id)
         self.azi, self.ele, self.gain = self._getAED()
         
-    def _getLocation(self):
+    def _get_distance_from_cam(self):
         cam_world_matrix = bpy.data.objects['Camera'].matrix_world
         parent = self._getParent()
         parent_world_matrix = parent.matrix_world
@@ -56,12 +60,24 @@ class SatieSynth():
         return location
 
     def _getParent(self):
-        listener = [o for o in bpy.context.visible_objects if o.name == self.node_name]
-        return listener[0]
+        parent = [o for o in bpy.context.visible_objects if o.name == self.node_name]
+        return parent[0]
 
     def _getAED(self):
-        distance = self._getLocation()
+        distance = self._get_distance_from_cam()
         aed = utils.xyz_to_aed(distance)
         gain = math.log(utils.distance_to_attenuation(aed[2])) * 20
         aed[2] = gain
         return aed
+
+    def _debug_text(self):
+        print("****************************************")
+        self.fontCurve = bpy.data.curves.new(type="FONT",name=self.node_name+"debugText")
+        self.debugTextOb = bpy.data.objects.new(self.node_name+"debugTextOb",self.fontCurve)
+        self.debugTextOb.data.body = "{} Debug".format(self.node_name)
+        bpy.context.scene.objects.link(self.debugTextOb)
+        self.debugTextOb.parent = self.myParent
+        bpy.context.scene.update()
+
+    def show_debug(self):
+        print(self.debugTextOb.data.body)
