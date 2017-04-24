@@ -57,7 +57,6 @@ def synths_add_instance(parent, node_name, synth, group):
         props.synths['group'].append(group)
         osc.scene_create_group(group)
 
-    print("========================================")
 
     s_instance = create_instance(parent, node_name)
     s_instance.group = group
@@ -72,6 +71,7 @@ def synths_add_instance(parent, node_name, synth, group):
     osc.scene_create_source(node_name, synth_name)
 
 def create_instance(parent, node_name):
+    print("========================================")
     satie_instance = ss.SatieSynth(parent, node_name)
     return(satie_instance)
 
