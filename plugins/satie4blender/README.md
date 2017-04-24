@@ -21,11 +21,14 @@ ln -s ${HOME}/src/satie/plugins/satie4blender ${HOME}/.config/blender/scripts/ad
 
 # Example use
 
-The plugin will create a new tab in the Tool Shelf. Click on SATIE tab, expand "SATIE tool" and click the button labelled "SATIE sound source" in order to activate addon's processing of events.
+The plugin will create a new tab in the Tool Shelf. Click on SATIE tab, expand it, if necessary. 
+OSC destination is the IP address of the computer running SuperCollider. The destination OSC port is SATIE's destination port (18032 by default). OSC server is Blender addon's OSC server receiving various types of information from SATIE (6666 by default).
 
-Another panel, called "SATIE proprties" is created in the object properties section 
-Check Use SATIE in order to instantiate a SATIE plugin. 
-ID field is mandatory 
+Click the toggle labeled "Use Satie" in order to activate the OSC processes.
+
+Once SATIE addon is active it will populate SATIE specific properties in the Object Buttons section. Any Blender object can be associated with a SATIE source or effect. "SATIE properties" panel will list plugins by family (source, effect) and will show only the selected family. The sound source menu shows only plugins registered with SATIE (i.e. compiled synthdefs ready for instantiation). Selecting a sound source will also display its parameters.
+
+Toggle "Use SATIE" to instantiate ou destroy selected sound source. 
 
 # Disclaimer
 
