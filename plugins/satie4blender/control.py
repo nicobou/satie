@@ -28,11 +28,7 @@ def instanceHandler():
                     if o.name in synths:
                         pass
                     else:
-                        print("acting on ", o.name, o.satie_synth, o.satieGroup, o.plugin_family)
-                        print("before: ", props.synths)
                         synths_add_instance(o, o.name, o.satie_synth, o.satieGroup)
-                        print("after: ", props.synths)
-                        # props.synths.append(ss.SatieSynth(o, o.name, o.satie_synth))
                 else:
                     print("{}'s satie ID cannot be empty", o.name)
             else:
@@ -40,11 +36,8 @@ def instanceHandler():
                     print(">>>>>> removing {} ".format(o.name) )
                     toRemove = [x for x in props.synths['source'] if o.name in synths]
                     for i in toRemove:
-                        print("---> to remove", i)
                         del props.synths['source'][i]
                         osc.scene_delete_node(i)
-                        # delete_node(i)
-                        # props.synths['source']
 
 def update_synth_list():
     synths = props.synths['source'].keys()
@@ -71,7 +64,6 @@ def synths_add_instance(parent, node_name, synth, group):
     osc.scene_create_source(node_name, synth_name)
 
 def create_instance(parent, node_name):
-    print("========================================")
     satie_instance = ss.SatieSynth(parent, node_name)
     return(satie_instance)
 
@@ -84,7 +76,6 @@ def synth_name_from_src(src_name):
 
 def satieInstanceCb(scene):
     instanceHandler()
-    # [synth.updateAED() for synth in props.synths]
     if props.synths['source']:
         [props.synths['source'][s]['instance'].updateAED() for s in props.synths['source']]
         [send_update(props.synths['source'][s]) for s in props.synths['source']]
@@ -102,28 +93,7 @@ def getSatieSendCtl(self):
 
 def setSatieSendCtl(value):
     props.active = value
-    print(props.active)
 
-def setSatieHP(self, value):
-    print("HighPass ", self.name, value)
-
-def setInputBus(self, value):
-    print("setInputBus called", self.name, self.bus)
-    synths = [obj.id for obj in props.synths]
-    print("we got the following synths: ", synths)
-    if self.name in synths:
-        toSet = [s for s in props.synths if s.id == self.name]
-        for s in toSet:
-            s.set('bus', int(self.bus))
-        
-def setInputBus(self, value):
-    print("setInputBus called", self.name, self.bus)
-    synths = update_synths()
-    print("we got the following synths: ", synths)
-    if self.name in synths:
-        toSet = [s for s in props.synths if s.id == self.name]
-        for s in toSet:
-            s.set('bus', int(self.bus))
         
 def setOSCdestination(self, context):
     print ("setting host to ", context.scene.OSCdestination)
@@ -141,23 +111,3 @@ def setOSC_server_port(self, context):
 def set_instance_debug(self, value):
     props.synths['source'][self.name]['instance'].debug = self.debug_text
 
-
-"""
->>> [s for s in bpy.satie_debug['source'] if bpy.satie_debug['source'][s]['instance'].debug == False]
-['Cube']
-
->>> [bpy.satie_debug['source'][s]['instance'].debug_text() for s in bpy.satie_debug['source'] if bpy.satie_debug['source'][s]['instance'].debug == False]
-<bpy_struct, Object("Cube")>
-[None]
-
->>> [bpy.satie_debug['source'][s]['instance'].debug_text() for s in bpy.satie_debug['source'] if bpy.satie_debug['source'][s]['instance'].debug == False]
-<bpy_struct, Object("Cube")>
-[None]
-
->>> [bpy.satie_debug['source'][s]['instance'] for s in bpy.satie_debug['source'] if bpy.satie_debug['source'][s]['instance'].debug == False]
-[<satie4blender.satie_synth.SatieSynth object at 0x7f20a35e3208>]
-
->>> [bpy.satie_debug['source'][s]['instance'].updateAED() for s in bpy.satie_debug['source'] if bpy.satie_debug['source'][s]['instance'].debug == False]
-[None]
-
-"""

@@ -54,7 +54,6 @@ def useSatie(self, context):
             if osc.osc_rcv_cb not in bpy.app.handlers.scene_update_post:
                 try:
                     bpy.app.handlers.scene_update_post.append(osc.osc_rcv_cb)
-                    print("added osc_rcv callback")
                 except Exception as e:
                     print("could not add osc_rcv_cb to queue:", e)
         else:
