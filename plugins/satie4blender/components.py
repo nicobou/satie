@@ -20,9 +20,6 @@ from . import osc
 from . import control
 
 def load():
-    # bpy.utils.register_class(SatiePropertiesPanel)
-    print("loading layout")
-        
     for groupName, groupAttributes in bpy.satiePropertiesLayouts.items():
         attributes = {}
         for attribute in groupAttributes:
@@ -49,7 +46,6 @@ def load():
                  )
             # FIXME: need to find a way of lading an Array with correct types
             elif aType == "Array":
-                
                 attributes[aName] = StringProperty(
                     name=aName,
                     default=str(aDefault),
@@ -67,15 +63,7 @@ def load():
         # apply to all objects
         setattr(bpy.types.Object, groupName, PointerProperty(type=propertyGroupClass))
 
-        # keep track of it
-        # bpy.satieRegisteredTypes[groupName] = propertyGroupClass
-
-    print("loaded SATIE property panel")
-
 def unload():
-    # bpy.utils.unregister_class(SatiePropertiesPanel)
-
-    print("unloading layout")
     # unregister stores components
     try: 
         for key, val in bpy.satieRegisteredTypes.items():
@@ -90,6 +78,7 @@ def update_property(self, context):
     owner = context.active_object.name
     for i in self.items():
         control.set_param(owner, i[0], i[1])
+        
 def get_property(self):
     print("get called on", self)
 

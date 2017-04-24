@@ -18,8 +18,6 @@ import os
 from . import utils
 from . import properties as props
 
-print("imported satie synth module")
-
 class SatieSynth():
     """
     Object representing a synth in SATIE
@@ -43,12 +41,8 @@ class SatieSynth():
         self.spread = 1
         self.distance = 1
         self.debug = False
-        # self.fontCurve = None
-        # self.debugTextOb = None
-        # self._debug_text()
                 
     def updateAED(self):
-        # oscURI = os.path.join(self.oscbaseurl, self.group, self.id)
         self.azi, self.ele, self.gain = self._getAED()
         
     def _get_distance_from_cam(self):
@@ -71,15 +65,6 @@ class SatieSynth():
         aed[2] = gain
         return aed
 
-    # def _debug_text(self):
-    #     self.fontCurve = bpy.data.curves.new(type="FONT",name=self.node_name+"debugText")
-    #     self.debugTextOb = bpy.data.objects.new(self.node_name+"debugTextOb",self.fontCurve)
-    #     self.debugTextOb.data.body = "distance from cam {}\n".format(self._get_distance_from_cam())
-    #     bpy.context.scene.objects.link(self.debugTextOb)
-    #     self.debugTextOb.parent = self.myParent
-    #     # bpy.context.scene.update()
-
     def show_debug(self):
-        # self.debugTextOb.data.body = "distance from cam {}\n".format(self._get_distance_from_cam())
-        print(self._getAED())
+        print("AED vector", self._getAED())
 

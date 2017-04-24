@@ -80,7 +80,6 @@ class SatiePropertiesPanel(bpy.types.Panel):
         
     def update_types_menu(self, context):
         if properties.active:
-            # print("updating types menu", self.satie_synth)
             components.load_synth_types()
             plugs_key = self.plugin_family
             menu = []

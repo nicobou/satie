@@ -33,11 +33,6 @@ def init_osc_server():
         bpy.s4b_OSCserver = liblo.Server(props.server_port)
     except Exception as e:
         print("could not create OSC server:", e)
-    #msg = liblo.Message("/notify", 1)
-    # msg = liblo.Message("/satie/pluginargs", synth)
-
-    def echo(path, args):
-        print(path, args)
 
     def handle_plugin_properties(path, args):
         json_handler.parse_plugin_properties(args[0])
