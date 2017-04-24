@@ -43,9 +43,9 @@ class SatieSynth():
         self.spread = 1
         self.distance = 1
         self.debug = False
-        self._debug_text()
         self.fontCurve = None
         self.debugTextOb = None
+        self._debug_text()
                 
     def updateAED(self):
         # oscURI = os.path.join(self.oscbaseurl, self.group, self.id)
@@ -71,13 +71,12 @@ class SatieSynth():
         return aed
 
     def _debug_text(self):
-        print("****************************************")
         self.fontCurve = bpy.data.curves.new(type="FONT",name=self.node_name+"debugText")
         self.debugTextOb = bpy.data.objects.new(self.node_name+"debugTextOb",self.fontCurve)
-        self.debugTextOb.data.body = "{} Debug".format(self.node_name)
+        self.debugTextOb.data.body = "distance from cam {}\n".format(self._get_distance_from_cam())
         bpy.context.scene.objects.link(self.debugTextOb)
         self.debugTextOb.parent = self.myParent
-        bpy.context.scene.update()
 
     def show_debug(self):
-        print(self.debugTextOb.data.body)
+        self.debugTextOb.data.body = "distance from cam {}\n".format(self._get_distance_from_cam())
+
