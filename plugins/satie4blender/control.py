@@ -77,7 +77,7 @@ def synth_name_from_src(src_name):
 def satieInstanceCb(scene):
     instanceHandler()
     if props.synths['source']:
-        [props.synths['source'][s]['instance'].updateAED() for s in props.synths['source']]
+        [props.synths['source'][s]['instance'].update() for s in props.synths['source']]
         [send_update(props.synths['source'][s]) for s in props.synths['source']]
         [props.synths['source'][s]['instance'].show_debug() for s in props.synths['source'] if props.synths['source'][s]['instance'].debug == True]
 
