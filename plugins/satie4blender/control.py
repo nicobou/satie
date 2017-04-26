@@ -28,7 +28,7 @@ def instanceHandler():
                     if o.name in synths:
                         pass
                     else:
-                        synths_add_instance(o, o.name, o.satie_synth, o.satieGroup)
+                        synths_add_instance(o, o.name, o.plugin_family, o.satie_synth, o.satieGroup)
                 else:
                     print("{}'s satie ID cannot be empty", o.name)
             else:
@@ -43,9 +43,9 @@ def update_synth_list():
     synths = props.synths['source'].keys()
     return(synths)
 
-def synths_add_instance(parent, node_name, synth, group):
-    synth_name = synth_name_from_src(synth)
-
+def synths_add_instance(parent, node_name, family, synth, group):
+    synth_name = synth_name_from_src(family, synth)
+    
     if group not in props.synths['group']:
         props.synths['group'].append(group)
         osc.scene_create_group(group)
@@ -61,7 +61,10 @@ def synths_add_instance(parent, node_name, synth, group):
         'instance': s_instance
     }
     bpy.satie_debug = props.synths
-    osc.scene_create_source(node_name, synth_name)
+    if family == "sources":
+        osc.scene_create_source(node_name, synth_name, group=group)
+    elif family == "effects":
+        osc.scene_create_effect(node_name, synth_name, group=group)
 
 def create_instance(parent, node_name):
     satie_instance = ss.SatieSynth(parent, node_name)
@@ -70,8 +73,12 @@ def create_instance(parent, node_name):
 def delete_node(name):
     osc.scene_delete_node(name)
 
-def synth_name_from_src(src_name):
-    ret = [x for x in bpy.satie_plugins['sources'] if x['srcName'] == src_name]
+def synth_name_from_src(family, src_name):
+    """
+    @family - source or effect
+    @src_name - name of synthdef
+    """
+    ret = [x for x in bpy.satie_plugins[family] if x['srcName'] == src_name]
     return(ret[0]['name'])
 
 def satieInstanceCb(scene):
