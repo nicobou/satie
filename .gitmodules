@@ -1,0 +1,3 @@
+[submodule "plugins/satie4blender"]
+	path = plugins/satie4blender
+	url = git@gitlab.com:sat-metalab/satie4blender.git
