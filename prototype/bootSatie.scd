@@ -20,7 +20,7 @@
 // REQUIRED  GLOBAL VARIABLES  -- used from elsewhere in the environment--
 ~satieRootPath = thisProcess.nowExecutingPath.dirname++ "/..";   //  needed when calling ~satieMaker
 
-~listeningFormat = \stereoListener;    // defaults to stereo    - needed when calling makeSynthDef
+~listeningFormat = \cubeVBAP;    // defaults to stereo    - needed when calling makeSynthDef
 
 //~listeningFormat = \dodecNF;    // defaults to stereo    - needed when calling makeSynthDef
 
@@ -67,6 +67,10 @@ if  (thisProcess.argv.size >= 1,
 			"octo",
 			{
 				~listeningFormat = \octoVBAP;
+			},
+			"cube",
+			{
+				~listeningFormat = \cubeVBAP;
 			},
 			"mono",
 			{
@@ -172,6 +176,10 @@ switch (~listeningFormat,
 		o.numOutputBusChannels = 24;
 	},
 	\octoVBAP,
+	{
+		o.numOutputBusChannels = 8;
+	},
+	\cubeVBAP,
 	{
 		o.numOutputBusChannels = 8;
 	},
