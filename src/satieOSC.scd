@@ -942,7 +942,8 @@ for debugguing
 			if (groupName == "", { groupName = \default; });   // play it safe: make sure group name is defined
 
 
-			if ( (type == \effect) &&  (groupName == \default), { groupName = \defalutFx;});
+			//
+			if ( (type == \effect) &&  (groupName == \default), { groupName = \defaultFx;});
 
 
 			// check to see if group  exists,  if  not, create it

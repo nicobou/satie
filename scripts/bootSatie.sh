@@ -5,8 +5,49 @@
 # no args defaults to stereo format
 
 
+
+
+
+
 DIR_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-SUPERCOLLIDER_DIR=${DIR_PATH}/../..
+
+OS=`uname -s`
+
+SATIE_DIR=${DIR_PATH}/..
+
+
+
+#  if  $SUPERCOLLIDER poins to a  sclang executable, it will be called, otherwise will launch using default path to sclang
+
+
+if [ "$OS" = "Darwin" ]; then
+    if [ -z  $SUPERCOLLIDER ]  ; then
+    SUPERCOLLIDER_APP=${DIR_PATH}/Applications/SuperCollider.app/Contents/MacOS/sclang
+echo bootSatie.sh:  guessing that supercollider is at:  $SUPERCOLLIDER_APP
+
+else
+SUPERCOLLIDER_APP=$SUPERCOLLIDER/Contents/MacOS/sclang
+fi
+fi
+
+
+if [ "$OS" = "Linux" ]; then
+if [ -z  $SUPERCOLLIDER ]  ; then
+SUPERCOLLIDER_APP=/use/local/bin/sclang
+echo bootSatie.sh:  guessing that supercollider is at:  $SUPERCOLLIDER_APP
+
+else
+SUPERCOLLIDER_APP=$SUPERCOLLIDER
+fi
+fi
+
+
+
+
+
+
+
+
 
 if [ -z  $MY_IP ] ; then
 $MY_IP=localhost
@@ -58,9 +99,10 @@ echo LISTENER FORMAT     = "${LISTENING_FORMAT}"
 
 
 
-echo $SUPERCOLLIDER_DIR/supercollider/build/Install/SuperCollider/SuperCollider.app/Contents/MacOS/sclang $SUPERCOLLIDER_DIR/sc-basic-renderer/$LAUNCH_FILE $LISTENING_FORMAT
+echo $SUPERCOLLIDER_APP $SATIE_DIR/$LAUNCH_FILE $LISTENING_FORMAT
 
-$SUPERCOLLIDER_DIR/supercollider/build/Install/SuperCollider/SuperCollider.app/Contents/MacOS/sclang $SUPERCOLLIDER_DIR/sc-basic-renderer/$LAUNCH_FILE $LISTENING_FORMAT
+$SUPERCOLLIDER_APP $SATIE_DIR/$LAUNCH_FILE $LISTENING_FORMAT
+
 
 exit
 

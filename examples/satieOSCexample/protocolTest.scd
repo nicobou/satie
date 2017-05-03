@@ -1,15 +1,26 @@
 // Tester for satieOSC protocol
 
-
-
-
-// EVALUATE THIS BLOCK FIRST
 (
+// EVALUATE THIS BLOCK FIRST
+
+// GLOBAL:  listeningFormat   can be optionally set here:
+// defaults to:
+// ~listeningFormat = \stereoListener;
+// optional formats:
+//  Uncomment to use a different listening format
+//~listeningFormat = \ambi1;
+//~listeningFormat = \ambi3;
+//~listeningFormat = \domeVBAP;
+//~listeningFormat = \labodomeVBAP;
+//~listeningFormat = \octoVBAP;
+//~listeningFormat = \stereoListener;
+
+(thisProcess.nowExecutingPath.dirname++"/../../prototype/bootSatie.scd").load;
 
 s.waitForBoot {
 
 	// load the satie low level environment
-	(thisProcess.nowExecutingPath.dirname++"/../../prototype/bootSatie.scd").load;
+
 	s.sync;
 
 	// load the project, which will instantiante a basic renderer and all that goes with
@@ -18,16 +29,17 @@ s.waitForBoot {
 };
 
 
-
-
-
-
 b = NetAddr.new("127.0.0.1", 18032);    // connect to satie's RX port
+
+)  // END OF BLOCK
+
+
+
+
+// THEN Evaluate the different sections below
+
 b.sendMsg("/satie/scene", "debugFlag", 1);    // activate  debugging printing to console
-
-)
-
-b.sendMsg("/satie/scene", "debugFlag", 0);    // optionally deactivate debugging printing to console
+b.sendMsg("/satie/scene", "debugFlag", 0);    // deactivate debugging printing to console
 
 
 
@@ -35,7 +47,7 @@ b.sendMsg("/satie/scene", "debugFlag", 0);    // optionally deactivate debugging
 b.sendMsg("/satie/scene", "createSource",  "sheefa", "plugin://default", "default");    // create source
 b.sendMsg("/satie/source/update", "sheefa", 0,0,-3,0,15000,20);   //update spatialiser args:  azimuthRad elevationRad gainDB delayMS  lpHZ  distanceMETERS
 // OR  use the set method to update the same spatialization parameters using several key value pairs
-b.sendMsg("/satie/source/set", "sheefa", "aziDeg", 0, "eleDeg", 0, "gainDB", -6, "delayMs", 0, "lpHz", 15000);
+b.sendMsg("/satie/source/set", "sheefa", "aziDeg", 360.rand, "eleDeg", 0, "gainDB", -6, "delayMs", 0, "lpHz", 15000);
 b.sendMsg("/satie/source/set", "sheefa", "lfoHz", 20.1.rand);    // set a key value pair of the synth
 
 b.sendMsg("/satie/source/state", "sheefa", 0);    // set node state to 0  (pauses synth)
@@ -49,11 +61,11 @@ b.sendMsg("/satie/scene", "clear");    // clear scene
 
 // 1.bis  effects node example  -----------------------------------
 b.sendMsg("/satie/scene", "createSource",  "sheefaDust", "plugin://dust", "default");    // create source node
-b.sendMsg("/satie/source/update", "sheefaDust", 0,0, 10,0,15000,20);   // update spatialiser
+b.sendMsg("/satie/source/update", "sheefaDust", 0,0, -3,0,15000,20);   // update spatialiser
 b.sendMsg("/satie/source/set", "sheefaDust", "density2", 30);    // set param
 
 b.sendMsg("/satie/scene", "createSource",  "sheefaFx", "effect://busgverb inbus 0" );    // create effects node
-b.sendMsg("/satie/source/update", "sheefaFx", 0,0, -10,0,15000,20);   //update spatialiser
+b.sendMsg("/satie/source/update", "sheefaFx", 0,0, -11,0,15000,20);   //update spatialiser
 
 b.sendMsg("/satie/scene", "clear");    // clear scene
 
@@ -78,7 +90,7 @@ b.sendMsg("/satie/group/set", "sheefaGroup", "gainDB", -30);
 // set member node parems using group node
 b.sendMsg("/satie/group/set", "sheefaGroup", "lfoHz", 10.1.rand);
 
- // destroy group members
+// destroy group members
 (
 20.do( {|item|
 	var nodename=("testNode"++"_"++item);
@@ -145,6 +157,7 @@ t = Task({ {
 
 	b.sendMsg("/satie/source/setvec", "sheefaPluck", "note", (55+20.rand), (0.5+0.5.rand), (0.5+0.5.rand));    // set param
 	b.sendMsg("/satie/source/set", "sheefaPluck", "t_trig", 1);    // set param
+	b.sendMsg("/satie/source/update", "sheefaPluck", 360.rand,0, -3,0,15000,20);   //update spatialiser
 
 	0.4.wait; }.loop });
 t.start;

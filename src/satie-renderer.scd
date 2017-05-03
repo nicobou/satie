@@ -72,7 +72,8 @@
 		};
 
 		~makeSatieGroup = { | self, name, addAction = \addToHead |
-			var group = ParGroup.new(addAction: addAction);
+			var group = ParGroup.new(addAction: addAction);  // comment for satie subgrouping    --   add groups to the default  Group(1) group
+//			var group = ParGroup.new(self.defaultSatieGroup, addAction: addAction);   // uncomment for satie subgrouping -  add groups to the satie default subgroup
 			self.satieGroups.put(name.asSymbol, group);
 			self.satieGroupInstances.put(name.asSymbol, Dictionary.new);
 			group;
@@ -154,7 +155,8 @@
 	e.aux = Array.fill(numAudioAux, {arg i; e.auxbus.index + i });
 	e.pluginLoader = ~satiePlugins.value();
 	e.synthDefFactory = ~satieFactory.value();
-	e.defaultSatieGroup = e.makeSatieGroup();
+	e.defaultSatieGroup = e.makeSatieGroup(); // comment for satie subgrouping
+	// e.defaultSatieGroup = ParGroup.new();  // uncomment for satie subgrouping -- creates child group in Group(1)
 	e.satieGroups.put(\default, e.defaultSatieGroup);
 	e.satieGroupInstances.put(\default, Dictionary.new);
 	e.satieSrcPath = satieSrcPath;

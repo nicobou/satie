@@ -97,13 +97,13 @@ s.waitForBoot{
 	postf("generating example project synthdefs for % format \n", ~listeningFormat);
 	~satie.makeSynthDef(\zparticle1, \zparticle1, [], [], [~listeningFormat], [0]);
 	~satie.makeSynthDef(\pink, \PinkSin, [], [],  [~listeningFormat], [0]);
-	~satie.makeSynthDef(\dust, \DustDust,   [], [~satie.aux[~fxBus0]], [~listeningFormat], [0]);
+	~satie.makeSynthDef(\dust, \DustDust,   [], [~satie.aux[~fxBus0]], [~listeningFormat], [0]);  // post-spatializer send
 	~satie.makeSynthDef(\default, \default,  [], [], [~listeningFormat], [0]);
 	~satie.makeSynthDef(\zkarpluck0, \zkarpluck0,  [], [], [~listeningFormat], [0]);
 	~satie.makeSynthDef(\test, \testtone,   [], [], [~listeningFormat], [0]);
 	~satie.makeSynthDef(\pbell1, \pbell1, [], [],  [~listeningFormat], [0]);
-	~satie.makeSynthDef(\zkarpluck1P, \zkarpluck1P,   [~satie.aux[~fxBus0]], [], [~listeningFormat], [0] );   // sends to effects bus, pre-spatializer
-   ~satie.makeSynthDef(\zkarpluck1, \zkarpluck1,  [], [~satie.aux[~fxBus0]], [~listeningFormat], [0] );   // sends to effects bus, post-spatializer
+	~satie.makeSynthDef(\zkarpluck1P, \zkarpluck1P,   [~satie.aux[~fxBus0]], [], [~listeningFormat], [0]);   // sends to effects bus, pre-spatializer
+   ~satie.makeSynthDef(\zkarpluck1, \zkarpluck1,  [], [~satie.aux[~fxBus0]], [~listeningFormat], [0]);   // sends to effects bus, post-spatializer
 	~satie.makeSynthDef(\busreverb, \freeverb,  [], [], [~listeningFormat], [0]);
 	~satie.makeSynthDef(\busgverb, \gverb,  [], [], [~listeningFormat], [0]);
 

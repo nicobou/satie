@@ -17,12 +17,33 @@
 
 
 
-// REQUIRED  GLOBAL VARIABLES  -- used from elsewhere in the environment--
+// DEFINE  GLOBAL VARIABLES  -- used from elsewhere in the environment--
+// it would be good if  listeningFormat could also be a GLOBAL defined before evaluating this file, from say, an example file.
 ~satieRootPath = thisProcess.nowExecutingPath.dirname++ "/..";   //  needed when calling ~satieMaker
 
-~listeningFormat = \stereoListener;    // defaults to stereo    - needed when calling makeSynthDef
 
-//~listeningFormat = \dodecNF;    // defaults to stereo    - needed when calling makeSynthDef
+// allow listeningFormat to be defined prior to evaluation
+if (~listeningFormat == nil,
+    {
+        ~listeningFormat = \stereoListener;    // default listening format
+        //~listeningFormat = \ambi3;
+        //~listeningFormat = \ambi1;
+
+});
+
+
+//~satie.pluginLoader.spatPlugins;
+
+
+
+
+// you can also overwrite the ~listeningFormat with:   \domeVBAP  ,  \labodomeVBAP  ,  \octoVBAP,  \cubeVBAP, \ambi3  , \ambi1  etc.
+// or specify the listening format via command line args
+//          possible arg values:   "sato", "labo", "octo",  "stereo", "mono", "5one", "dodec" , "ambi3",  "ambi1"
+
+
+// set this flags depending on your environment
+~superNovaFlag = true;
 
 
 // Evaluate this file to
@@ -34,61 +55,56 @@
 // using the messageHandler, additional satie state can be instantiated, like the basic-renderer or saiteOSC
 
 
-// set this flags depending on your environment
-
-~superNovaFlag = true;
-
-
-
-// or specify the listening format via command line args
-// possible arg values:   "sato", "labo", "octo",  "stereo", "mono"
-
 
 if  (thisProcess.argv.size >= 1,
-	{
+    {
 
-		switch (thisProcess.argv[0].asString ,
-			"dodecNF",
-			{
-				~listeningFormat = \dodecNF;   // vbap to near field... outputs 20 chanels to soundFlower
-			},
-			"sato",
-			{
-				~listeningFormat = \domeVBAP;
-			},
-			"dodec",
-			{
-				~listeningFormat = \dodec;
-			},
-			"labo",
-			{
-				~listeningFormat = \labodomeVBAP;
-			},
-			"octo",
-			{
-				~listeningFormat = \octoVBAP;
-			},
-			"cube",
-			{
-				~listeningFormat = \cubeVBAP;
-			},
-			"mono",
-			{
-				~listeningFormat = \mono;
-			},
-			"5one",
-			{
-				~listeningFormat = \five1VBAP;
-			},
-			"quad",
-			{
-				~listeningFormat = \quadVBAP;
-			},
-			"stereo",
-			{
-				~listeningFormat = \stereoListener;  	}
-		);
-		postf(" %: main.scd : parsing comand line arg:  setting listening format to %\n", thisProcess, ~listeningFormat);
+        switch (thisProcess.argv[0].asString ,
+           "cube",
+            {
+                ~listeningFormat = \cubeVBAP
+            },
+            "ambi1",
+            {
+                ~listeningFormat = \ambi1;   //  uses bus 100-104 to bus ambi1stOrder sigs to binaural decoder on same bus
+            },
+            "ambi3",
+            {
+                ~listeningFormat = \ambi3;   //  uses bus 100-116 to bus ambi3rdOrder sigs to binaural decoder on same bus
+            },
+            "dodec",
+            {
+                ~listeningFormat = \dodecVBAP;   // vbap to near field... outputs 20 chanels to soundFlower
+            },
+            "sato",
+            {
+                ~listeningFormat = \domeVBAP;
+            },
+            "labo",
+            {
+                ~listeningFormat = \labodomeVBAP;
+            },
+            "octo",
+            {
+                ~listeningFormat = \octoVBAP;
+            },
+            "mono",
+            {
+                ~listeningFormat = \mono;
+            },
+            "5one",
+            {
+                ~listeningFormat = \five1VBAP;
+            },
+            "quad",
+            {
+                ~listeningFormat = \quadVBAP;
+            },
+            "stereo",
+            {
+                ~listeningFormat = \stereoListener;  	}
+        );
+        postf(" %: main.scd : parsing comand line arg:  setting listening format to %\n", thisProcess, ~listeningFormat);
 
 });
 
@@ -103,124 +119,155 @@ if  (thisProcess.argv.size >= 1,
 ~satieRootPath = ~thisDir++ "/../";
 
 
+
+// set these flags depending on your environment
+~outAudioDev = nil;
+
+
+
+// PROBABLY NO NEED TO MODIFY ANYTHING ELSE BELOW  HERE
+
+
 if ( ~superNovaFlag != nil,
-	{
-		Server.supernova;
+    {
+        Server.supernova;
 });
 
 o = Server.local.options;   // default set up options
 o.memSize = (2**21).asInt;        // probably should just leave this the same for everyting
 o.device = nil;  // default
-o.blockSize = 2048;
 o.threads = 8;    // set this to core count
+o.blockSize = 2048;
+
+// adjust blockSize if need be
+if ( ~listeningFormat == \ambi1,
+    {
+        o.blockSize = 64;    // ATK -  needs small buffer sizes or it complains
+});
+
+if ( ~listeningFormat == \ambi3,
+    {
+        o.blockSize = 128;    // ATK -  needs small buffer sizes or it complains
+});
+
+
+
 
 // ~listeningFormat = \five1VBAP;    for debugging testing
 
 Platform.case (
-	\osx, {
-		if (  ( ( ~listeningFormat == \domeVBAP)  ||   ( ~listeningFormat == \labodomeVBAP)  || ( ~listeningFormat == \octoVBAP)  ),
-			{
+    \osx, {
+        if (  ( ( ~listeningFormat == \domeVBAP)  ||   ( ~listeningFormat == \labodomeVBAP)  || ( ~listeningFormat == \octoVBAP)  ),
+            {
 
-				if (  ServerOptions.outDevices.indexOfEqual("HDSPe MADI (23453676)") != nil,
-					{
-						postln("AudioOutDev: HDSPe MADI");
-						~outAudioDev = "HDSPe MADI (23453676)";
-				});
+                if (  ServerOptions.outDevices.indexOfEqual("HDSPe MADI (23453676)") != nil,
+                    {
+                        postln("AudioOutDev: HDSPe MADI");
+                        ~outAudioDev = "HDSPe MADI (23453676)";
+                });
 
-				if (  ServerOptions.outDevices.indexOfEqual("MADIface USB (23635751)") != nil,
-					{
-						postln("AudioOutDev:  MADIface USB");
-						~outAudioDev = "MADIface USB (23635751)";
-				});
+                if (  ServerOptions.outDevices.indexOfEqual("MADIface USB (23635751)") != nil,
+                    {
+                        postln("AudioOutDev:  MADIface USB");
+                        ~outAudioDev = "MADIface USB (23635751)";
+                });
 
-		});
-		//  OR iF
-		if (   ~listeningFormat == \dodec ,        // special case for near-field demo for IX    (this case should removed eventually)
-			{
-				~outAudioDev = "Dante Virtual Soundcard";    // this may require updating
-				postf("AudioOutDev: %\n", ~outAudioDev);
-		});
-		//  OR iF
-		if ( ( ( ~listeningFormat == \quadVBAP)  ||   ( ~listeningFormat == \five1VBAP)  ),
-			{
+        });
+        //  OR iF
+        if (   ~listeningFormat == \dodecVBAP ,        // special case for near-field demo for IX    (this case should removed eventually)
+            {
+                ~outAudioDev = "Dante Virtual Soundcard";    // this may require updating
+                postf("AudioOutDev: %\n", ~outAudioDev);
+        });
+        //  OR iF
+        if ( ( ( ~listeningFormat == \quadVBAP)  ||   ( ~listeningFormat == \five1VBAP)  ),
+            {
 
-				if (  ServerOptions.outDevices.indexOfEqual("MOTU UltraLite mk3 Hybrid") != nil,
-					{
-						postln("AudioOutDev: MOTU UltraLite mk3 Hybrid");
-						~outAudioDev = "MOTU UltraLite mk3 Hybrid";
-				});
-			}, // else
-			{
-				if ( ~listeningFormat == \stereoListener,
-					{
-						// better letting the system set the default device
-						//postln("AudioOutDev: Built-in Output");
-						//~outAudioDev = "Built-in Output";
-						// o.dump;
-				});
-		});
-	}
+                if (  ServerOptions.outDevices.indexOfEqual("MOTU UltraLite mk3 Hybrid") != nil,
+                    {
+                        postln("AudioOutDev: MOTU UltraLite mk3 Hybrid");
+                        ~outAudioDev = "MOTU UltraLite mk3 Hybrid";
+                });
+            }, // else
+            {
+                if ( ~listeningFormat == \stereoListener,
+                    {
+                        // better letting the system set the default device
+                        //postln("AudioOutDev: Built-in Output");
+                        //~outAudioDev = "Built-in Output";
+                        // o.dump;
+                });
+        });
+    }
 );
 
 switch (~listeningFormat,
-	\dodec,
-	{
-		o.numOutputBusChannels = 28;   // twenty channels for dodecahedron output plus 8 out busses for object audio
-	},
-	\domeVBAP,
-	{
-		o.numOutputBusChannels = 32;
-	},
-	\labodomeVBAP,
-	{
-		o.numOutputBusChannels = 24;
-	},
-	\octoVBAP,
-	{
-		o.numOutputBusChannels = 8;
-	},
-	\cubeVBAP,
-	{
-		o.numOutputBusChannels = 8;
-	},
-	\five1VBAP,
-	{
-		o.numOutputBusChannels = 5+1;
-	},
-	\quadVBAP,
-	{
-		o.numOutputBusChannels = 4;
-	},
-	\stereoListener,
-	{
-		o.numOutputBusChannels = 2;
-	}
+    \ambi1,
+    {
+        o.numOutputBusChannels = 2;   // 2 outputs for the binaural rendering -- uses bus 100 to 104 encoded ambisonic bus
+    },
+    \ambi3,
+    {
+        o.numOutputBusChannels = 2;   // 2 outputs for the binaural rendering -- uses bus 100 to 116 encoded ambisonic bus
+    },
+    \dodec,
+    {
+        o.numOutputBusChannels = 28;   // twenty channels for dodecahedron output plus 8 out busses for object audio
+    },
+    \domeVBAP,
+    {
+        o.numOutputBusChannels = 32;
+    },
+    \labodomeVBAP,
+    {
+        o.numOutputBusChannels = 24;
+    },
+    \cubeVBAP,
+    {
+        o.numOutputBusChannels = 8;
+    },
+    \octoVBAP,
+    {
+        o.numOutputBusChannels = 8;
+    },
+    \five1VBAP,
+    {
+        o.numOutputBusChannels = 5+1;
+    },
+    \quadVBAP,
+    {
+        o.numOutputBusChannels = 4;
+    },
+    \stereoListener,
+    {
+        o.numOutputBusChannels = 2;
+    }
 );
 
 Platform.case(
-	\osx, {
-		if ( ~outAudioDev != nil ,
-			{
-				o.device = ~outAudioDev;
-		});
-	},
-	\linux, {
-		postln("We're in linux, o.device nil means default: " ++ o.device);
-	},
-	\windows, {"We're on windows... good luck"}
+    \osx, {
+        if ( ~outAudioDev != nil ,
+            {
+                o.device = ~outAudioDev;
+        });
+    },
+    \linux, {
+        postln("We're in linux, o.device nil means default: " ++ o.device);
+    },
+    \windows, {"We're on windows... good luck"}
 );
 
-postf("AUDIO CONFIGURATION: ");
-postf("\t LISTENING FORMAT:  %   ,    ", ~listeningFormat);
-postf("\t OUTPUT DEVICE:  %    ,     ", o.outDevice);
-postf("\t OUTPUT CHANNELS:  %\n", o.numOutputBusChannels);
+postf("\nAudio Configuration: \n");
+postf("\t listening format:  % \n ", ~listeningFormat);
+postf("\t output device (nil = default):  % \n", o.outDevice);
+postf("\t blockSize:  % \n", o.blockSize);
+postf("\t threadCount:  % \n", o.threads);
+postf("\t memory:  %K \n", (o.memSize*0.001).asInt);
+
+postf("\t output channels:  %\n\n", o.numOutputBusChannels);
 //o.dump
 
 
-// open up GUIs for monitoring
-if (~plotTree == nil,  { ~plotTree=s.plotTree;});
-if (~makeGui == nil,  { ~plotTree=s.makeGui;});
-if (~meter == nil,  { ~plotTree=s.meter;});
 
 
 // Initialize and load  section   ----------------------------------
@@ -231,7 +278,20 @@ if (~meter == nil,  { ~plotTree=s.meter;});
 
 // specify any other files to be loaded:
 
-~startupfiles = [];
+~startupfiles = [~satieRootPath ++ "prototype/ambi1Listener.scd"];
+
+~startupfiles = List.new();
+
+if ( ~listeningFormat == \ambi1,
+    {
+        ~startupfiles.add(~satieRootPath ++ "prototype/ambi1Listener.scd");
+});
+
+if ( ~listeningFormat == \ambi3,
+    {
+        ~startupfiles.add(~satieRootPath ++ "prototype/ambi3Listener.scd");
+});
+
 
 // add additional files here
 //~startupfiles.add(~rootSrcPath++"/utils/dacTest.scd");
@@ -240,59 +300,66 @@ if (~meter == nil,  { ~plotTree=s.meter;});
 // load the additional files
 s.waitForBoot {
 
-	~startupfiles.do { |f|  f.postln;  f.load ; s.sync;};
-	s.sync;
+    ~startupfiles.do { |f|  f.postln;  f.load ; s.sync;};
+    s.sync;
+
+    // open up GUIs for monitoring
+    if (~plotTree == nil,  { ~plotTree=s.plotTree;});
+    if (~makeGui == nil,  { ~makeGui=s.makeGui;});
+    if (~meter == nil,  { ~meter=s.meter;});
+
+    s.sync;
 };
 
 
 // Now set up satie's  osc message handler for file loading
 // instantiate the OSC interface, and set environment variable
 if (~osc == nil,{
-	~osc = ~satieOSCMaker.value();   // create an OSC RX message mapper object receiveing on port 18032 by default
+    ~osc = ~satieOSCMaker.value();   // create an OSC RX message mapper object receiveing on port 18032 by default
 });
 
 // instantiate a renderer OSC control object, and set environment variable
 if (~srCtl == nil,{
-		~srCtl = ~satieRendererCtlMaker.value(~scbr);
-		~osc.removeRendererCtlOSC.value();  // to be safe,  remove any previous OSC  callbacks  (if any)
+    ~srCtl = ~satieRendererCtlMaker.value(~scbr);
+    ~osc.removeRendererCtlOSC.value();  // to be safe,  remove any previous OSC  callbacks  (if any)
 
-		// create OSC callbacks to control audio renderer
-		~osc.makeRendererCtlOSC( ~srCtl['satieRendererCallback'] );  // e.g.  /satie/rendererCtl/setOutputDB -12
+    // create OSC callbacks to control audio renderer
+    ~osc.makeRendererCtlOSC( ~srCtl['satieRendererCallback'] );  // e.g.  /satie/rendererCtl/setOutputDB -12
 });
 
 ~satieFileLoader= {   	// receives OSC messages that look like:   /satie/load filename
-	arg msg;
+    arg msg;
 
-			if ( (msg.size < 2 ) ,
-				{~thisFile++" : satieFileLoader:  message missing filepath".warn;},
-				// else
-				{
-			var filepath = msg[1].asString.standardizePath;   // can handle '~'
+    if ( (msg.size < 2 ) ,
+        {~thisFile++" : satieFileLoader:  message missing filepath".warn;},
+        // else
+        {
+            var filepath = msg[1].asString.standardizePath;   // can handle '~'
 
-					if ( File.exists(filepath) == false,
-						{
-							error(~thisFile++" : satieFileLoader:   "++filepath++" not found, aborting");
-						},
-						// else  file exists, process
-						{
+            if ( File.exists(filepath) == false,
+                {
+                    error(~thisFile++" : satieFileLoader:   "++filepath++" not found, aborting");
+                },
+                // else  file exists, process
+                {
 
-							if (filepath.splitext.last != "scd",
-								{
-									error(~thisFile++" : satieFileLoader: "++filepath++" must be a file of type  '.scd'  ");
-								},
-								// else file type is good. Try to load
-								{
-									s.waitForBoot {
+                    if (filepath.splitext.last != "scd",
+                        {
+                            error(~thisFile++" : satieFileLoader: "++filepath++" must be a file of type  '.scd'  ");
+                        },
+                        // else file type is good. Try to load
+                        {
+                            s.waitForBoot {
 
-										filepath.load;
-										s.sync;
-									}; // waitForBoot
-							});
-					});
-	});
+                                filepath.load;
+                                s.sync;
+                            }; // waitForBoot
+                    });
+            });
+    });
 };
 
-	~osc.deleteOSC(\satieFileLoader);  // disconnect any previous handlers
-	~osc.newOSC(\satieFileLoader, ~satieFileLoader, "/satie/load");   // connect handler
+~osc.deleteOSC(\satieFileLoader);  // disconnect any previous handlers
+~osc.newOSC(\satieFileLoader, ~satieFileLoader, "/satie/load");   // connect handler
 
 )

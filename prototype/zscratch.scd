@@ -5,6 +5,28 @@
 //~dumpNodes.value();
 
 
+n=ParGroup.new(1, \addToTail);
+
+e=~satie.satieGroups[\defalutFx];
+
+
+
+g = ~satie.satieGroups[\default];
+
+d.moveToTail
+
+d.moveToTail(n)
+
+d=~satie.satieGroups[\defaultFx]
+
+	g = ~satie.createGroup(\defaultFx, \addToTail);
+
+ParGroup(1002)
+
+
+~satie.createGroup(\default);
+
+
 
 [(50+30.rand), (0.5+0.5.rand), (0.5+0.5.rand)]
 
@@ -52,11 +74,13 @@ x.routine.class.dumpMethodList
 	~synth.set(\note, [ 60, 1, 1 ] );
 });
 
-~synth = ~satie.satieGroupInstances[\srcNodeSP_group][\srcNodeSP_1]
+~synth = ~satie.satieGroupInstances[\default][\ball_69]
 
 
-~synth.set(\note, [ 60, 1, 1 ] );
+~synth.set(\note, [ 60, 0.9, 0.9 ] );
 ~synth.set(\t_trig, 1);
+
+
 
 
 
@@ -185,10 +209,6 @@ SynthDef(\prayer_bell,  ~function  ).add;
 
 
 ~satie.satieGroups[\whaleBellyScene].set(\note, #[60,0,0]);
-
-~satie.satieGroups[\whaleBellyScene].set(\note, #[60,1,0]);
-
-
 
 ~node = ~satie.satieGroupInstances[\whaleBellyScene][\coreLoopBuff];
 
