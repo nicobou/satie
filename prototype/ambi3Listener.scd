@@ -5,7 +5,7 @@
 // 1.   install CTK composers tool kit quark)
 // Quarks.gui
 
-// or just type:   Quarks.install("Ctk");
+// or just type:   Quarks.install("AmbIEM");
 //
 // Atk.createUserSupportDir;    // installation of date sets is not needed sine the HRTF data is already located in the satie project  in  /utils/ATK
 //Atk.openUserSupportDir;
@@ -43,7 +43,7 @@ if (quarkFound == false,
 				~satieRootPath = Platform.userHomeDir++"/Dropbox/Unity3D/audioRendering/satie";
 		});
 
-		~satieRootPath = Platform.userHomeDir++"/Dropbox/Unity3D/audioRendering/satie";
+		// ~satieRootPath = Platform.userHomeDir++"/Dropbox/Unity3D/audioRendering/satie";
 
 		// AmbIEM binaural ambisonics hybrid
 
@@ -60,7 +60,7 @@ if (quarkFound == false,
 
 		BinAmbi3O.kemarPath_(~satieRootPath++"/utils/hrtf/full");
 		BinAmbi3O.init('1_4_7_4');   // spearker configuration:  1 top,  4 high, 7 ear level, and 4 low
-		BinAmbi3O.bufnums
+
 
 
 
