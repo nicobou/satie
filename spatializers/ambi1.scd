@@ -19,12 +19,14 @@
 // lpHz    hertz
 // spread  units  (0 == directional, ....,  100 == omni)
 
-// writes spatialized output in ambisonic 3rd order format  to global ambisonic outBus
-
-
-// Need a GLOBAL VARIABLE with the decoder AuxBusSend
+// writes spatialized 4-channel output in ambisonic 1st order format  to global ambisonic outBus
+// GLOBAL VARIABLE:  ~ambiBusIndex points to the global ambisonic decoder bus
 
 ~name = \ambi1;
+
+if (~ambiBus  == nil,
+	{warn(~name++": the GLOBAL ~ambiBus is undefined");});
+
 
 ~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP
@@ -36,8 +38,7 @@
 	var sourceSig;
 	var aziRad = aziDeg * 0.01745329251994;
 	var eleRad = eleDeg * 0.01745329251994;
-	//var aziRad = aziDeg * 1;
-	//var eleRad = eleDeg * 1;
+	var ambiBus = ~ambiBus;  // global that is defined at boot time
 
 
 	sourceSig =  LPF.ar(DelayC.ar(
@@ -48,14 +49,9 @@
 	sourceSig = BHiPass.ar(sourceSig, VarLag.kr(hpHz, slewFilter )  );
 
    	ambiVec =   FoaPanB.ar(sourceSig, Lag.kr(aziRad, 0.01),  Lag.kr(eleRad, 0.01) );
-	Out.ar(100, ambiVec);
+	Out.ar(ambiBus, ambiVec);
 
-
-	// KLUGE:    outputs empty stereo and the spatialzied signal so that post-fx sends will work
-	// a better way to provide the post-fx-send is neeed
-	//
-
-	[DC.ar(0.0), DC.ar(0.0), sourceSig]; // empty output to main outs, but a signal available for the post-spatialization send signal
+	sourceSig; // no output to hardware, but the signal will be available for the post-spatialization send signal
 
 };
 

@@ -2,6 +2,7 @@
 
 //  ~listeningFormat SHOULD BE A GLOBAL SATIE ITEM, DEFINED AS SOON AS THE SERVER IS BOOTED
 //  ~satieRootPath    SHOULD BE A GLOBAL SATIE ITEM ,DEFINED AS SOON AS THE SERVER IS BOOTED
+//  ~outBusIndex  SHOULD BE A GLOBAL SATIE ITEM, DEFINED AS SOON AS THE SERVER IS BOOTED
 
 // Optional Definition:   value of this variable can be overwritten via OSC messages from Project
 ~thisProjectResourcePath = thisProcess.nowExecutingPath.dirname++"/satieOSCunity/Assets/StreamingAssets";
@@ -95,23 +96,23 @@ s.waitForBoot{
 	s.sync;
 
 	postf("generating example project synthdefs for % format \n", ~listeningFormat);
-	~satie.makeSynthDef(\zparticle1, \zparticle1, [], [], [~listeningFormat], [0]);
-	~satie.makeSynthDef(\pink, \PinkSin, [], [],  [~listeningFormat], [0]);
-	~satie.makeSynthDef(\dust, \DustDust,   [], [~satie.aux[~fxBus0]], [~listeningFormat], [0]);  // post-spatializer send
-	~satie.makeSynthDef(\default, \default,  [], [], [~listeningFormat], [0]);
-	~satie.makeSynthDef(\zkarpluck0, \zkarpluck0,  [], [], [~listeningFormat], [0]);
-	~satie.makeSynthDef(\test, \testtone,   [], [], [~listeningFormat], [0]);
-	~satie.makeSynthDef(\pbell1, \pbell1, [], [],  [~listeningFormat], [0]);
-	~satie.makeSynthDef(\zkarpluck1P, \zkarpluck1P,   [~satie.aux[~fxBus0]], [], [~listeningFormat], [0]);   // sends to effects bus, pre-spatializer
-   ~satie.makeSynthDef(\zkarpluck1, \zkarpluck1,  [], [~satie.aux[~fxBus0]], [~listeningFormat], [0]);   // sends to effects bus, post-spatializer
-	~satie.makeSynthDef(\busreverb, \freeverb,  [], [], [~listeningFormat], [0]);
-	~satie.makeSynthDef(\busgverb, \gverb,  [], [], [~listeningFormat], [0]);
+	~satie.makeSynthDef(\zparticle1, \zparticle1, [], [], [~listeningFormat], [~outBusIndex]);
+	~satie.makeSynthDef(\pink, \PinkSin, [], [],  [~listeningFormat], [~outBusIndex]);
+	~satie.makeSynthDef(\dust, \DustDust,   [], [~satie.aux[~fxBus0]], [~listeningFormat], [~outBusIndex]);  // post-spatializer send
+	~satie.makeSynthDef(\default, \default,  [], [], [~listeningFormat], [~outBusIndex]);
+	~satie.makeSynthDef(\zkarpluck0, \zkarpluck0,  [], [], [~listeningFormat], [~outBusIndex]);
+	~satie.makeSynthDef(\test, \testtone,   [], [], [~listeningFormat], [~outBusIndex]);
+	~satie.makeSynthDef(\pbell1, \pbell1, [], [],  [~listeningFormat], [~outBusIndex]);
+	~satie.makeSynthDef(\zkarpluck1P, \zkarpluck1P,   [~satie.aux[~fxBus0]], [], [~listeningFormat], [~outBusIndex]);   // sends to effects bus, pre-spatializer
+   ~satie.makeSynthDef(\zkarpluck1, \zkarpluck1,  [], [~satie.aux[~fxBus0]], [~listeningFormat], [~outBusIndex]);   // sends to effects bus, post-spatializer
+	~satie.makeSynthDef(\busreverb, \freeverb,  [], [], [~listeningFormat], [~outBusIndex]);
+	~satie.makeSynthDef(\busgverb, \gverb,  [], [], [~listeningFormat], [~outBusIndex]);
 
-	~satie.makeSynthDef(\zkarpluck2P, \zkarpluck2P,   [~satie.aux[~fxBus0]],  [],[~listeningFormat],  [0], \randOffsets1);  // for resonant updated klones
+	~satie.makeSynthDef(\zkarpluck2P, \zkarpluck2P,   [~satie.aux[~fxBus0]],  [],[~listeningFormat],  [~outBusIndex], \randOffsets1);  // for resonant updated klones
 
 
 	// dummy
-	~satie.makeSynthDef(\dummyPlugin, \emptySource,  [], [], [\emptySpat], [0]);    // dummy synthdef, used for new nodes
+	~satie.makeSynthDef(\dummyPlugin, \emptySource,  [], [], [\emptySpat], [~outBusIndex]);    // dummy synthdef, used for new nodes
 	// be sure the synthDef is compiled on the server
 	s.sync;
 

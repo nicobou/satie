@@ -9,10 +9,8 @@
 
 // USES GLOBALS;
 //   ~satieRootPath
+//   ~ambiBus    // bus with multi-channel ambisonic encoded signal
 
-// USES GLOBALS;
-//   ~satieRootPath
-//   NEEDED:   GLOBAL:   ambi1DecodeBus = 100...104
 
 
 
@@ -42,15 +40,13 @@ if (quarkFound == false,
 		Atk.userSupportDir=~satieRootPath++"/utils/ATK";   // this is need after each boot
 
 		decoder = FoaDecoderKernel.newListen(1002, s);   // create a binaural decoder using listening set 1002
-		ambiBus = Bus.new(\ambi1_bus, 100, 4, s);   // this bus number is hardCoded in the audioSource  -- needs to use a GLOBAL
-
 
 		s.waitForBoot {
 
 			s.sync;
 
 			// Decoding Synth
-			SynthDef(\ambie1HRTF, {arg inBus;
+			SynthDef(\ambie1HRTF, {arg inBus, outChan=0;
 				var foa, out;
 
 				// read in 4 channels (B-format) from inBus
@@ -59,7 +55,7 @@ if (quarkFound == false,
 				// decode to stereo
 				out = FoaDecode.ar(foa, decoder);
 
-				Out.ar(0, out);
+				Out.ar(outChan, out);
 			}).add;
 
 			s.sync;
@@ -67,8 +63,11 @@ if (quarkFound == false,
 			// start the decoder, reading bus ~ambiBus at the \tail of Group(1)
 
 			if (~atkHRTF != nil, {  ~atkHRTF.free; });
-			~atkHRTF = Synth(\ambie1HRTF, [\inBus, ambiBus], 1, \addToTail);
-			postf("ambi1Listener.scd:  Creating AmbIEM Binaural listener, listening on buses: 100 to 104");
+			~atkHRTF = Synth(\ambie1HRTF, [\inBus, ~ambiBus], 1, \addToTail);   // adding to the tail of Group(1)
+
+			s.sync;
+
+			postf("ambi1Listener.scd:  Creating AmbIEM Binaural listener, receiving 4 channel encoded ambisonic signal at buses: %", ~ambiBus);
 
 		};   // end of waitForBoot
 

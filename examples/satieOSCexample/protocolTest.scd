@@ -61,11 +61,11 @@ b.sendMsg("/satie/scene", "clear");    // clear scene
 
 // 1.bis  effects node example  -----------------------------------
 b.sendMsg("/satie/scene", "createSource",  "sheefaDust", "plugin://dust", "default");    // create source node
-b.sendMsg("/satie/source/update", "sheefaDust", 0,0, -3,0,15000,20);   // update spatialiser
+b.sendMsg("/satie/source/update", "sheefaDust", 360.rand,0, -3,0,15000,20);   // update spatialiser
 b.sendMsg("/satie/source/set", "sheefaDust", "density2", 30);    // set param
 
 b.sendMsg("/satie/scene", "createSource",  "sheefaFx", "effect://busgverb inbus 0" );    // create effects node
-b.sendMsg("/satie/source/update", "sheefaFx", 0,0, -11,0,15000,20);   //update spatialiser
+b.sendMsg("/satie/source/update", "sheefaFx", 0,0, -15,0,15000,20);   //update spatialiser
 
 b.sendMsg("/satie/scene", "clear");    // clear scene
 
@@ -153,11 +153,15 @@ b.sendMsg("/satie/source/set", "sheefaPluck", "c1", 0.9, "c3", 5);    // set key
 
 b.sendMsg("/satie/source/set", "sheefaPluck", "fb", 100.rand);    // update fb param
 
+b.sendMsg("/satie/scene", "createSource",  "sheefaFx", "effect://busgverb inbus 0" );    // create effects node
+b.sendMsg("/satie/source/update", "sheefaFx", 0,0, -15,0,15000,20);   //update spatialiser
+
+
 t = Task({ {
 
 	b.sendMsg("/satie/source/setvec", "sheefaPluck", "note", (55+20.rand), (0.5+0.5.rand), (0.5+0.5.rand));    // set param
 	b.sendMsg("/satie/source/set", "sheefaPluck", "t_trig", 1);    // set param
-	b.sendMsg("/satie/source/update", "sheefaPluck", 360.rand,0, -3,0,15000,20);   //update spatialiser
+	b.sendMsg("/satie/source/update", "sheefaPluck", 360.rand,0, -16,0,15000,20);   //update spatialiser
 
 	0.4.wait; }.loop });
 t.start;
@@ -167,6 +171,8 @@ t.start;
 (
 t.stop;
 b.sendMsg("/satie/scene", "deleteNode",  "sheefaPluck");  // delete node
+b.sendMsg("/satie/scene", "deleteNode",  "sheefaFx");  // delete node
+
 )
 
 

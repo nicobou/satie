@@ -20,16 +20,20 @@
 // DEFINE  GLOBAL VARIABLES  -- used from elsewhere in the environment--
 // it would be good if  listeningFormat could also be a GLOBAL defined before evaluating this file, from say, an example file.
 ~satieRootPath = thisProcess.nowExecutingPath.dirname++ "/..";   //  needed when calling ~satieMaker
+~outBusIndex=0;  // used in makeSynthDefs, usually 0, but set to some allocated bus number when using ambisonics listening Format
+~ambiBus;  // multi-channel ambisonic encoded signal bus to decoder
 
 
 // allow listeningFormat to be defined prior to evaluation
 if (~listeningFormat == nil,
-    {
-        ~listeningFormat = \stereoListener;    // default listening format
-        //~listeningFormat = \ambi3;
-        //~listeningFormat = \ambi1;
+	{
+		~listeningFormat = \stereoListener;    // default listening format
+		//~listeningFormat = \ambi3;
+		//~listeningFormat = \ambi1;
 
 });
+
+
 
 
 //~satie.pluginLoader.spatPlugins;
@@ -57,54 +61,54 @@ if (~listeningFormat == nil,
 
 
 if  (thisProcess.argv.size >= 1,
-    {
+	{
 
-        switch (thisProcess.argv[0].asString ,
-           "cube",
-            {
-                ~listeningFormat = \cubeVBAP
-            },
-            "ambi1",
-            {
-                ~listeningFormat = \ambi1;   //  uses bus 100-104 to bus ambi1stOrder sigs to binaural decoder on same bus
-            },
-            "ambi3",
-            {
-                ~listeningFormat = \ambi3;   //  uses bus 100-116 to bus ambi3rdOrder sigs to binaural decoder on same bus
-            },
-            "dodec",
-            {
-                ~listeningFormat = \dodecVBAP;   // vbap to near field... outputs 20 chanels to soundFlower
-            },
-            "sato",
-            {
-                ~listeningFormat = \domeVBAP;
-            },
-            "labo",
-            {
-                ~listeningFormat = \labodomeVBAP;
-            },
-            "octo",
-            {
-                ~listeningFormat = \octoVBAP;
-            },
-            "mono",
-            {
-                ~listeningFormat = \mono;
-            },
-            "5one",
-            {
-                ~listeningFormat = \five1VBAP;
-            },
-            "quad",
-            {
-                ~listeningFormat = \quadVBAP;
-            },
-            "stereo",
-            {
-                ~listeningFormat = \stereoListener;  	}
-        );
-        postf(" %: main.scd : parsing comand line arg:  setting listening format to %\n", thisProcess, ~listeningFormat);
+		switch (thisProcess.argv[0].asString ,
+			"cube",
+			{
+				~listeningFormat = \cubeVBAP
+			},
+			"ambi1",
+			{
+				~listeningFormat = \ambi1;   //  uses bus 100-104 to bus ambi1stOrder sigs to binaural decoder on same bus
+			},
+			"ambi3",
+			{
+				~listeningFormat = \ambi3;   //  uses bus 100-116 to bus ambi3rdOrder sigs to binaural decoder on same bus
+			},
+			"dodec",
+			{
+				~listeningFormat = \dodecVBAP;   // vbap to near field... outputs 20 chanels to soundFlower
+			},
+			"sato",
+			{
+				~listeningFormat = \domeVBAP;
+			},
+			"labo",
+			{
+				~listeningFormat = \labodomeVBAP;
+			},
+			"octo",
+			{
+				~listeningFormat = \octoVBAP;
+			},
+			"mono",
+			{
+				~listeningFormat = \mono;
+			},
+			"5one",
+			{
+				~listeningFormat = \five1VBAP;
+			},
+			"quad",
+			{
+				~listeningFormat = \quadVBAP;
+			},
+			"stereo",
+			{
+				~listeningFormat = \stereoListener;  	}
+		);
+		postf(" %: main.scd : parsing comand line arg:  setting listening format to %\n", thisProcess, ~listeningFormat);
 
 });
 
@@ -129,8 +133,8 @@ if  (thisProcess.argv.size >= 1,
 
 
 if ( ~superNovaFlag != nil,
-    {
-        Server.supernova;
+	{
+		Server.supernova;
 });
 
 o = Server.local.options;   // default set up options
@@ -141,13 +145,13 @@ o.blockSize = 2048;
 
 // adjust blockSize if need be
 if ( ~listeningFormat == \ambi1,
-    {
-        o.blockSize = 64;    // ATK -  needs small buffer sizes or it complains
+	{
+		o.blockSize = 64;    // ATK -  needs small buffer sizes or it complains
 });
 
 if ( ~listeningFormat == \ambi3,
-    {
-        o.blockSize = 128;    // ATK -  needs small buffer sizes or it complains
+	{
+		o.blockSize = 128;    // ATK -  needs small buffer sizes or it complains
 });
 
 
@@ -156,116 +160,107 @@ if ( ~listeningFormat == \ambi3,
 // ~listeningFormat = \five1VBAP;    for debugging testing
 
 Platform.case (
-    \osx, {
-        if (  ( ( ~listeningFormat == \domeVBAP)  ||   ( ~listeningFormat == \labodomeVBAP)  || ( ~listeningFormat == \octoVBAP)  ),
-            {
+	\osx, {
+		if (  ( ( ~listeningFormat == \domeVBAP)  ||   ( ~listeningFormat == \labodomeVBAP)  || ( ~listeningFormat == \octoVBAP)  ),
+			{
 
-                if (  ServerOptions.outDevices.indexOfEqual("HDSPe MADI (23453676)") != nil,
-                    {
-                        postln("AudioOutDev: HDSPe MADI");
-                        ~outAudioDev = "HDSPe MADI (23453676)";
-                });
+				if (  ServerOptions.outDevices.indexOfEqual("HDSPe MADI (23453676)") != nil,
+					{
+						postln("AudioOutDev: HDSPe MADI");
+						~outAudioDev = "HDSPe MADI (23453676)";
+				});
 
-                if (  ServerOptions.outDevices.indexOfEqual("MADIface USB (23635751)") != nil,
-                    {
-                        postln("AudioOutDev:  MADIface USB");
-                        ~outAudioDev = "MADIface USB (23635751)";
-                });
+				if (  ServerOptions.outDevices.indexOfEqual("MADIface USB (23635751)") != nil,
+					{
+						postln("AudioOutDev:  MADIface USB");
+						~outAudioDev = "MADIface USB (23635751)";
+				});
 
-        });
-        //  OR iF
-        if (   ~listeningFormat == \dodecVBAP ,        // special case for near-field demo for IX    (this case should removed eventually)
-            {
-                ~outAudioDev = "Dante Virtual Soundcard";    // this may require updating
-                postf("AudioOutDev: %\n", ~outAudioDev);
-        });
-        //  OR iF
-        if ( ( ( ~listeningFormat == \quadVBAP)  ||   ( ~listeningFormat == \five1VBAP)  ),
-            {
+		});
+		//  OR iF
+		if (   ~listeningFormat == \dodecVBAP ,        // special case for near-field demo for IX    (this case should removed eventually)
+			{
+				~outAudioDev = "Dante Virtual Soundcard";    // this may require updating
+				postf("AudioOutDev: %\n", ~outAudioDev);
+		});
+		//  OR iF
+		if ( ( ( ~listeningFormat == \quadVBAP)  ||   ( ~listeningFormat == \five1VBAP)  ),
+			{
 
-                if (  ServerOptions.outDevices.indexOfEqual("MOTU UltraLite mk3 Hybrid") != nil,
-                    {
-                        postln("AudioOutDev: MOTU UltraLite mk3 Hybrid");
-                        ~outAudioDev = "MOTU UltraLite mk3 Hybrid";
-                });
-            }, // else
-            {
-                if ( ~listeningFormat == \stereoListener,
-                    {
-                        // better letting the system set the default device
-                        //postln("AudioOutDev: Built-in Output");
-                        //~outAudioDev = "Built-in Output";
-                        // o.dump;
-                });
-        });
-    }
+				if (  ServerOptions.outDevices.indexOfEqual("MOTU UltraLite mk3 Hybrid") != nil,
+					{
+						postln("AudioOutDev: MOTU UltraLite mk3 Hybrid");
+						~outAudioDev = "MOTU UltraLite mk3 Hybrid";
+				});
+			}, // else
+			{
+				if ( ~listeningFormat == \stereoListener,
+					{
+						// better letting the system set the default device
+						//postln("AudioOutDev: Built-in Output");
+						//~outAudioDev = "Built-in Output";
+						// o.dump;
+				});
+		});
+	}
 );
 
 switch (~listeningFormat,
-    \ambi1,
-    {
-        o.numOutputBusChannels = 2;   // 2 outputs for the binaural rendering -- uses bus 100 to 104 encoded ambisonic bus
-    },
-    \ambi3,
-    {
-        o.numOutputBusChannels = 2;   // 2 outputs for the binaural rendering -- uses bus 100 to 116 encoded ambisonic bus
-    },
-    \dodec,
-    {
-        o.numOutputBusChannels = 28;   // twenty channels for dodecahedron output plus 8 out busses for object audio
-    },
-    \domeVBAP,
-    {
-        o.numOutputBusChannels = 32;
-    },
-    \labodomeVBAP,
-    {
-        o.numOutputBusChannels = 24;
-    },
-    \cubeVBAP,
-    {
-        o.numOutputBusChannels = 8;
-    },
-    \octoVBAP,
-    {
-        o.numOutputBusChannels = 8;
-    },
-    \five1VBAP,
-    {
-        o.numOutputBusChannels = 5+1;
-    },
-    \quadVBAP,
-    {
-        o.numOutputBusChannels = 4;
-    },
-    \stereoListener,
-    {
-        o.numOutputBusChannels = 2;
-    }
+	\ambi1,
+	{
+		o.numOutputBusChannels = 2;   // 2 outputs for the binaural rendering
+	},
+	\ambi3,
+	{
+		o.numOutputBusChannels = 2;   // 2 outputs for the binaural rendering
+	},
+	\dodec,
+	{
+		o.numOutputBusChannels = 28;   // twenty channels for dodecahedron output plus 8 out busses for object audio
+	},
+	\domeVBAP,
+	{
+		o.numOutputBusChannels = 32;
+	},
+	\labodomeVBAP,
+	{
+		o.numOutputBusChannels = 24;
+	},
+	\cubeVBAP,
+	{
+		o.numOutputBusChannels = 8;
+	},
+	\octoVBAP,
+	{
+		o.numOutputBusChannels = 8;
+	},
+	\five1VBAP,
+	{
+		o.numOutputBusChannels = 5+1;
+	},
+	\quadVBAP,
+	{
+		o.numOutputBusChannels = 4;
+	},
+	\stereoListener,
+	{
+		o.numOutputBusChannels = 2;
+	}
 );
 
 Platform.case(
-    \osx, {
-        if ( ~outAudioDev != nil ,
-            {
-                o.device = ~outAudioDev;
-        });
-    },
-    \linux, {
-        postln("We're in linux, o.device nil means default: " ++ o.device);
-    },
-    \windows, {"We're on windows... good luck"}
+	\osx, {
+		if ( ~outAudioDev != nil ,
+			{
+				o.device = ~outAudioDev;
+		});
+	},
+	\linux, {
+		postln("We're in linux, o.device nil means default: " ++ o.device);
+	},
+	\windows, {"We're on windows... good luck"}
 );
 
-postf("\nAudio Configuration: \n");
-postf("\t listening format:  % \n ", ~listeningFormat);
-postf("\t output device (nil = default):  % \n", o.outDevice);
-postf("\t blockSize:  % \n", o.blockSize);
-postf("\t threadCount:  % \n", o.threads);
-postf("\t memory:  %K \n", (o.memSize*0.001).asInt);
-
-postf("\t output channels:  %\n\n", o.numOutputBusChannels);
-//o.dump
 
 
 
@@ -283,13 +278,13 @@ postf("\t output channels:  %\n\n", o.numOutputBusChannels);
 ~startupfiles = List.new();
 
 if ( ~listeningFormat == \ambi1,
-    {
-        ~startupfiles.add(~satieRootPath ++ "prototype/ambi1Listener.scd");
+	{
+		~startupfiles.add(~satieRootPath ++ "prototype/ambi1Listener.scd");
 });
 
 if ( ~listeningFormat == \ambi3,
-    {
-        ~startupfiles.add(~satieRootPath ++ "prototype/ambi3Listener.scd");
+	{
+		~startupfiles.add(~satieRootPath ++ "prototype/ambi3Listener.scd");
 });
 
 
@@ -300,63 +295,96 @@ if ( ~listeningFormat == \ambi3,
 // load the additional files
 s.waitForBoot {
 
-    ~startupfiles.do { |f|  f.postln;  f.load ; s.sync;};
-    s.sync;
+	//  now that the server is booted, create any needed buses
+switch (~listeningFormat,
+	\ambi1,
+	{
+		~outBusIndex  = Bus.audio(s, 1).index; //  makeSynthDef spatializer outpus are assigned to this dummy bus;  used only for post spatializer fx sending
+		~ambiBus = Bus.audio(s, 4);  // define 4 channel signal bus to accumulate and send the ambisonic encoded  source nodes output to decoder
+	},
+	\ambi3,
+	{
+		~outBusIndex=Bus.audio(s, 1).index; //  makeSynthDef spatializer outpus are assigned to this dummy bus;  used only for post spatializer fx sending
+		~ambiBus = Bus.audio(s, 16); 		// define 16 channel signal bus to accumulate and send the ambisonic encoded  source nodes output to decoder
+});
 
-    // open up GUIs for monitoring
-    if (~plotTree == nil,  { ~plotTree=s.plotTree;});
-    if (~makeGui == nil,  { ~makeGui=s.makeGui;});
-    if (~meter == nil,  { ~meter=s.meter;});
+	s.sync;
 
-    s.sync;
-};
+	~startupfiles.do { |f|  f.postln;  f.load ; s.sync;};
+
+	s.sync;
+
+	// open up GUIs for monitoring
+	if (~plotTree == nil,  { ~plotTree=s.plotTree;});
+	if (~makeGui == nil,  { ~makeGui=s.makeGui;});
+	if (~meter == nil,  { ~meter=s.meter;});
+
+	s.sync;
+
+
+
+postf("\n\nAudio Configuration: \n");
+postf("\t listening format:  % \n ", ~listeningFormat);
+postf("\t output device (nil = default):  % \n", o.outDevice);
+postf("\t blockSize:  % \n", o.blockSize);
+postf("\t threadCount:  % \n", o.threads);
+postf("\t memory:  %K \n", (o.memSize*0.001).asInt);
+postf("\t output channels:  %\n", o.numOutputBusChannels);
+if (~ambiBus != nil, { postf("\t creating %-channel ambisonics signal on bus(%) \n\n", ~ambiBus.numChannels,  ~ambiBus.index    ); });
+
+	s.sync;
+
+};   // end of waitForBoot
+
+
+
 
 
 // Now set up satie's  osc message handler for file loading
 // instantiate the OSC interface, and set environment variable
 if (~osc == nil,{
-    ~osc = ~satieOSCMaker.value();   // create an OSC RX message mapper object receiveing on port 18032 by default
+	~osc = ~satieOSCMaker.value();   // create an OSC RX message mapper object receiveing on port 18032 by default
 });
 
 // instantiate a renderer OSC control object, and set environment variable
 if (~srCtl == nil,{
-    ~srCtl = ~satieRendererCtlMaker.value(~scbr);
-    ~osc.removeRendererCtlOSC.value();  // to be safe,  remove any previous OSC  callbacks  (if any)
+	~srCtl = ~satieRendererCtlMaker.value(~scbr);
+	~osc.removeRendererCtlOSC.value();  // to be safe,  remove any previous OSC  callbacks  (if any)
 
-    // create OSC callbacks to control audio renderer
-    ~osc.makeRendererCtlOSC( ~srCtl['satieRendererCallback'] );  // e.g.  /satie/rendererCtl/setOutputDB -12
+	// create OSC callbacks to control audio renderer
+	~osc.makeRendererCtlOSC( ~srCtl['satieRendererCallback'] );  // e.g.  /satie/rendererCtl/setOutputDB -12
 });
 
 ~satieFileLoader= {   	// receives OSC messages that look like:   /satie/load filename
-    arg msg;
+	arg msg;
 
-    if ( (msg.size < 2 ) ,
-        {~thisFile++" : satieFileLoader:  message missing filepath".warn;},
-        // else
-        {
-            var filepath = msg[1].asString.standardizePath;   // can handle '~'
+	if ( (msg.size < 2 ) ,
+		{~thisFile++" : satieFileLoader:  message missing filepath".warn;},
+		// else
+		{
+			var filepath = msg[1].asString.standardizePath;   // can handle '~'
 
-            if ( File.exists(filepath) == false,
-                {
-                    error(~thisFile++" : satieFileLoader:   "++filepath++" not found, aborting");
-                },
-                // else  file exists, process
-                {
+			if ( File.exists(filepath) == false,
+				{
+					error(~thisFile++" : satieFileLoader:   "++filepath++" not found, aborting");
+				},
+				// else  file exists, process
+				{
 
-                    if (filepath.splitext.last != "scd",
-                        {
-                            error(~thisFile++" : satieFileLoader: "++filepath++" must be a file of type  '.scd'  ");
-                        },
-                        // else file type is good. Try to load
-                        {
-                            s.waitForBoot {
+					if (filepath.splitext.last != "scd",
+						{
+							error(~thisFile++" : satieFileLoader: "++filepath++" must be a file of type  '.scd'  ");
+						},
+						// else file type is good. Try to load
+						{
+							s.waitForBoot {
 
-                                filepath.load;
-                                s.sync;
-                            }; // waitForBoot
-                    });
-            });
-    });
+								filepath.load;
+								s.sync;
+							}; // waitForBoot
+					});
+			});
+	});
 };
 
 ~osc.deleteOSC(\satieFileLoader);  // disconnect any previous handlers
