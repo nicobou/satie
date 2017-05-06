@@ -24,7 +24,7 @@
 
 ```javascript
 
-/satie/projectName setProjectDir   // full path to supercollider resources, such as soundfiles or midi files
+/satie/project/projectName setProjectDir   // full path to supercollider resources, such as soundfiles or midi files
 
 ```
 
