@@ -5,7 +5,7 @@
 
 // GLOBAL:  listeningFormat   can be optionally set here:
 // defaults to:
-// ~listeningFormat = \stereoListener;
+//~listeningFormat = \stereoListener;
 // optional formats:
 //  Uncomment to use a different listening format
 //~listeningFormat = \ambi1;

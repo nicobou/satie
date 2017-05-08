@@ -19,14 +19,9 @@
 // lpHz    hertz
 // spread  units  (0 == directional, ....,  100 == omni)
 
-// writes 16-channel spatialized output in ambisonic 3rd order format  to global ambisonic outBus
-// GLOBAL VARIABLE:  ~ambiBus points to the global ambisonic decoder bus
+// outputs a 16-channel spatialized output in ambisonic 3rd order format
 
 ~name = \ambi3;
-
-if (~ambiBus  == nil,
-	{warn(~name++": the GLOBAL ~ambiBus is undefined");});
-
 
 ~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP
@@ -36,12 +31,8 @@ if (~ambiBus  == nil,
 	var slewFilter = 0.6;
 	var ambiVec;
 	var sourceSig;
-	var aziRad = aziDeg * 0.01745329251994;
+	var aziRad = aziDeg  * 0.01745329251994;
 	var eleRad = eleDeg * 0.01745329251994;
-	var ambiBus = ~ambiBus;  // global that is defined at boot time
-
-
-
 
 	sourceSig =  LPF.ar(DelayC.ar(
 		Lag.kr(gain, slewGain) * in,
@@ -50,11 +41,7 @@ if (~ambiBus  == nil,
 
 	sourceSig = BHiPass.ar(sourceSig, VarLag.kr(hpHz, slewFilter )  );
 
-	//sourceSig = PinkNoise.ar(0.8);
 	ambiVec = PanAmbi3O.ar(sourceSig, Lag.kr(aziRad, 0.01),  Lag.kr(eleRad, 0.01) );
-	Out.ar(ambiBus, ambiVec);
-
-	sourceSig; // no output to hardware, but the signal will be available for the post-spatialization send signal
 
 };
 

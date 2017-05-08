@@ -19,14 +19,9 @@
 // lpHz    hertz
 // spread  units  (0 == directional, ....,  100 == omni)
 
-// writes spatialized 4-channel output in ambisonic 1st order format  to global ambisonic outBus
-// GLOBAL VARIABLE:  ~ambiBusIndex points to the global ambisonic decoder bus
+// outputs a 4-channel spatialized output in ambisonic 3rd order format
 
 ~name = \ambi1;
-
-if (~ambiBus  == nil,
-	{warn(~name++": the GLOBAL ~ambiBus is undefined");});
-
 
 ~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP
@@ -36,9 +31,8 @@ if (~ambiBus  == nil,
 	var slewFilter = 0.6;
 	var ambiVec;
 	var sourceSig;
-	var aziRad = aziDeg * 0.01745329251994;
+	var aziRad = aziDeg *  -0.01745329251994;   // invert azi for compatibility with other satie spatializers
 	var eleRad = eleDeg * 0.01745329251994;
-	var ambiBus = ~ambiBus;  // global that is defined at boot time
 
 
 	sourceSig =  LPF.ar(DelayC.ar(
@@ -49,9 +43,6 @@ if (~ambiBus  == nil,
 	sourceSig = BHiPass.ar(sourceSig, VarLag.kr(hpHz, slewFilter )  );
 
    	ambiVec =   FoaPanB.ar(sourceSig, Lag.kr(aziRad, 0.01),  Lag.kr(eleRad, 0.01) );
-	Out.ar(ambiBus, ambiVec);
-
-	sourceSig; // no output to hardware, but the signal will be available for the post-spatialization send signal
 
 };
 

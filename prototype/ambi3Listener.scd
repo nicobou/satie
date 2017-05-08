@@ -12,7 +12,7 @@
 
 // USES GLOBALS;
 //   ~satieRootPath
-//   ~ambiBus    // bus with multi-channel ambisonic encoded signal
+//   ~outBusIndex    // bus with multi-channel ambisonic encoded signal  --- NEED GLOBAL ENVIRONMENT VARIABLE
 
 
 
@@ -33,9 +33,10 @@ if (quarkFound == false,
 		// else resources are defined, evaluate
 
 
+		//  this will go away once we have the satie global environment sorted out
 		if ( ~satieRootPath == nil,
 			{
-				~satieRootPath = Platform.userHomeDir++"/Dropbox/Unity3D/audioRendering/satie";
+				error("ambi1Listener:  ~satieRootPath undefined, can't continue");   // this should point to the satie root directory
 		});
 
 		BinAmbi3O.kemarPath_(~satieRootPath++"/utils/hrtf/full");
@@ -44,14 +45,23 @@ if (quarkFound == false,
 
 		s.waitForBoot {
 
+			s.sync;
+
 
 			// synthDef  outputs named auxBus on named outputChannel
-			SynthDef(\ambie3HRTF, { arg inBus=100,  outChan=0;
+			SynthDef(\ambie3HRTF, { arg inBus,  outChan=0;
 				var ambiVec;
 				var outsig;
 
 				ambiVec = In.ar(inBus, 16);   // reads the 16 channel encoded ambisonic signal bus
 				outsig =  BinAmbi3O.ar(ambiVec);   // decodes for HRTF
+
+				outsig = BLowShelf.ar(
+					outsig,
+					500,   // freq
+					1.0, // q
+					18 ); // cut/boost
+
 
 				Out.ar(outChan, outsig);
 			}).add;
@@ -61,7 +71,7 @@ if (quarkFound == false,
 
 			// start the decoder, reading bus ~ambiBus at the \tail of Group(1)
 			if (~ambiemHRTF != nil, {  ~ambiemHRTF.free; });
-			~ambiemHRTF = Synth(\ambie3HRTF, [\inBus, ~ambiBus], 1, \addToTail);   // adding to the tail of Group(1)
+			~ambiemHRTF = Synth(\ambie3HRTF, [\inBus, ~outBusIndex], 1, \addToTail);   // adding to the tail of Group(1)
 
 			s.sync;
 
@@ -79,66 +89,5 @@ TO MOVE DECODER TO TAIL OF DSP  evalute the following:
 
 ~ambiemHRTF.moveToTail;
 
-*/
-
-
-
-
-/*
-
-Server.supernova;
-o = Server.local.options;   // default set up options
-o.blockSize = 128;
-
-s.boot;
-
-p = ProxySpace.push;
-f = Platform.userHomeDir++"/Dropbox/Unity3D/audioRendering/satie";
-BinAmbi3O.kemarPath_(f++"/utils/hrtf/full");
-BinAmbi3O.init('1_4_7_4');
-~test = { EnvGen.kr(Env.adsr, Impulse.kr(3)) * PinkNoise.ar(0.8); };
-~enc = { PanAmbi3O.ar(~test.ar, MouseX.kr(-pi, pi), MouseY.kr(-pi, pi)) };
-~bin = { BinAmbi3O.ar(~enc.ar) };
-~bin.play
-
-// a second rendering engine for different output chans
-~bin2 = { BinAmbi3O.ar(~enc.ar) };
-~bin2.playN([2, 3]);
-
-ProxyMixer(p);
-p.pop
-
-*/
-
-
-
-/*		   Alternative binaural configuration
-
-// AmbIEM binaural ambisonics hybrid
-
-// The speaker positions [eleveation],[azimuth]
-// e = [90,40,40,40,40,0,0,0,0,0,0,0,-40,-40,-40,-40];
-// a = [0,45,135,225,315,25,75,130,180,230,285,335,0,90,180,270];
-
-// adjust your path to the Kemar data
-//Kemar.path = "/Applications/SuperCollider/full/";
-// Kemar.path = ~satieRootPath++"utils/hrtf/full";
-// Kemar.initBuffers(a, e, s,0);
-
-
-
-
-// synthDef  outputs named auxBus on named outputChannel
-SynthDef(\amBiPlayerOLD, { arg inChan=100,  outChan=0;
-var ambiVec;
-var decVec;
-var outsig;
-
-ambiVec = In.ar(inChan, 16);
-decVec = DecodeAmbi3O.ar(ambiVec, '1_4_7_4');
-outsig = Kemar.ar(decVec);
-
-Out.ar(outChan, outsig);
-}).add;
 */
 

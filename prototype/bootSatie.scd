@@ -21,7 +21,6 @@
 // it would be good if  listeningFormat could also be a GLOBAL defined before evaluating this file, from say, an example file.
 ~satieRootPath = thisProcess.nowExecutingPath.dirname++ "/..";   //  needed when calling ~satieMaker
 ~outBusIndex=0;  // used in makeSynthDefs, usually 0, but set to some allocated bus number when using ambisonics listening Format
-~ambiBus;  // multi-channel ambisonic encoded signal bus to decoder
 
 
 // allow listeningFormat to be defined prior to evaluation
@@ -299,13 +298,11 @@ s.waitForBoot {
 switch (~listeningFormat,
 	\ambi1,
 	{
-		~outBusIndex  = Bus.audio(s, 1).index; //  makeSynthDef spatializer outpus are assigned to this dummy bus;  used only for post spatializer fx sending
-		~ambiBus = Bus.audio(s, 4);  // define 4 channel signal bus to accumulate and send the ambisonic encoded  source nodes output to decoder
+		~outBusIndex  = Bus.audio(s, 4).index; //  makeSynthDef spatializer outpus are assigned to this bus for decoding  :  GLOBAL ENVIRONMENT VARIABLE NEEDED
 	},
 	\ambi3,
 	{
-		~outBusIndex=Bus.audio(s, 1).index; //  makeSynthDef spatializer outpus are assigned to this dummy bus;  used only for post spatializer fx sending
-		~ambiBus = Bus.audio(s, 16); 		// define 16 channel signal bus to accumulate and send the ambisonic encoded  source nodes output to decoder
+		~outBusIndex=Bus.audio(s, 16).index; //  makeSynthDef spatializer outpus are assigned to this bus for decoding  :  GLOBAL ENVIRONMENT VARIABLE NEEDED
 });
 
 	s.sync;

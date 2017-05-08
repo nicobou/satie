@@ -9,7 +9,7 @@
 
 // USES GLOBALS;
 //   ~satieRootPath
-//   ~ambiBus    // bus with multi-channel ambisonic encoded signal
+//   ~outBusIndex    // bus with multi-channel ambisonic encoded signal  --- NEED GLOBAL ENVIRONMENT VARIABLE
 
 
 
@@ -30,16 +30,16 @@ if (quarkFound == false,
 	},
 	{
 
-		//  this will go away once we have the satie globals sorted out
+		//  this will go away once we have the satie global environment sorted out
 		if ( ~satieRootPath == nil,
 			{
-				~satieRootPath = Platform.userHomeDir++"/Dropbox/Unity3D/audioRendering/satie";
+				error("ambi1Listener:  ~satieRootPath undefined, can't continue");   // this should point to the satie root directory
 		});
 
 
 		Atk.userSupportDir=~satieRootPath++"/utils/ATK";   // this is need after each boot
 
-		decoder = FoaDecoderKernel.newListen(1002, s);   // create a binaural decoder using listening set 1002
+		decoder = FoaDecoderKernel.newListen(1002, s);   // create a binaural decoder using listening set 1002  -  see list of possible id values below
 
 		s.waitForBoot {
 
@@ -63,7 +63,7 @@ if (quarkFound == false,
 			// start the decoder, reading bus ~ambiBus at the \tail of Group(1)
 
 			if (~atkHRTF != nil, {  ~atkHRTF.free; });
-			~atkHRTF = Synth(\ambie1HRTF, [\inBus, ~ambiBus], 1, \addToTail);   // adding to the tail of Group(1)
+			~atkHRTF = Synth(\ambie1HRTF, [\inBus, ~outBusIndex], 1, \addToTail);   // adding to the tail of Group(1)
 
 			s.sync;
 
@@ -76,77 +76,11 @@ if (quarkFound == false,
 )  // end of this local environment
 
 
-
 /*
 TO MOVE DECODER TO TAIL OF DSP  evalute the following:
 
 ~atkHRTF.moveToTail;
 
-*/
-
-
-
-
-/*
-// Test Encoding Synth
-SynthDef(\foaEncode3, {arg outBus, duration = 0.05, theta, phi;
-var src, foa, env;
-
-// our mono source
-src = PinkNoise.ar(-6.dbamp);
-
-// amplitude scaling envelope
-env = EnvGen.kr(
-Env([0, 1, 0], [0.5, 0.5], \sin),
-timeScale: duration,
-doneAction: 2);
-
-// Encode into our foa signal
-foa = FoaPanB.ar(src, theta, phi, env);
-
-Out.ar(outBus, foa);
-}).add;
-
-
-// use a Routine to start many encoded signals at random angles
-Routine.run({
-20.do({
-Synth(\foaEncode3, [\outBus, ambiBus, \theta, pi.rand2, \phi, 0]);
-0.1.wait;
-})
-});
-
-
-*/
-
-/*
-// next we define a synth using FoaPanB, and decoder using FoaDecode
-SynthDef(\foaEncode1, {
-var src, theta, phi, foa, out;
-
-// our source: pink noise
-src = PinkNoise.ar(-6.dbamp);
-
-// theta is our angle on the X-Y plane and phi is our elevation
-// use a MouseX to control theta in real time, from pi to -pi
-theta = MouseX.kr(pi, -pi);
-phi = 0;
-
-// Encode into our foa signal
-foa = FoaPanB.ar(src, theta, phi);
-
-// decode our signal using our decoder defined above
-out = FoaDecode.ar(foa, decoder);
-
-Out.ar(0, out);
-}).add;
-
-
-// play the synth
-a = Synth(\foaEncode1);
-
-//free the synth
-a.free;
 */
 
 // valid newListen id's
