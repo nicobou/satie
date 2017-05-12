@@ -48,19 +48,23 @@ oscsend localhost 18032 /satie/pluginargs s misDrone
 	var str, param, value, type;
 	str = "";
 	param = key.asString.quote;
+	value = ~checkForNil.value(val);
+	type = value.class.asString.quote;
+	str = "{"++~jsonParam.value("name", param)++","++~jsonParam.value("value", value)++","++~jsonParam.value("type",type) ++ "}";
+	~json = ~json ++ str;
+
+};
+
+~checkForNil = {|val|
+	var value;
 	if (val != nil,
 		{
 			value = val;
-
 		},
 		{
 			value = "unused".quote;
 		}
-	);
-	type = value.class.asString.quote;
-	str = "\t{\n\t\t" ++ "name".quote ++ ": " ++ param ++ "," ++ "value".quote ++ ": " ++ value ++ "," ++ "type".quote ++ ":" ++ type ++ "\n\t}\n";
-	~json = ~json ++ str;
-
+	)
 };
 
 ~makeJsonArray = {| item, index |
@@ -116,17 +120,17 @@ oscsend localhost 18032 /satie/pluginargs s misDrone
 	var str, keyName, sName;
 	keyName = key[0].asString.quote;
 	sName = key[1].asString.quote;
-	str = ~jsonParam.value("name")++keyName++",";
-	str = str++~jsonParam.value("srcName")++sName++",";
-	str = str++~jsonParam.value("description")++"Description...".quote;
+	str = ~jsonParam.value("name", keyName)++",";
+	str = str++~jsonParam.value("srcName", sName)++",";
+	str = str++~jsonParam.value("description", "Description...".quote);
 	str = ~jsonBrace.value(str);
 	str;
 };
 
-~jsonParam = {|param|
+~jsonParam = {|param, value|
 	// provide a quoted string representing json param followed by a colon (:)
 	var str;
-	str = param.quote++":";
+	str = param.quote++": "++value.asString;
 };
 
 
@@ -137,19 +141,13 @@ oscsend localhost 18032 /satie/pluginargs s misDrone
 	~satie.effectSynthDef.keysValuesDo({|key, value| effects = effects.add(Array[key, value])});
 	generators.do(~makeGeneratorsJSON);
 	effects.do(~makeEffectsJSON);
-	"    <---".inform;
 	~generatorsJSON = ~generatorsJSON.replace("\}\{", "\}, \{");
 	~generatorsJSON = "["++~generatorsJSON++"]";
-
-	~generatorsJSON = ~jsonParam.value("sources")++~generatorsJSON++",";
-	// ~generatorsJSON.warn;
-	// ~generatorsJSON.asCompileString.inform;
+	~generatorsJSON = ~jsonParam.value("sources", ~generatorsJSON)++",";
 	~effectsJSON = ~effectsJSON.replace("\}\{", "\}, \{");
 	~effectsJSON = "["++~effectsJSON++"]";
-	~effectsJSON = ~jsonParam.value("effects")++~effectsJSON;
-	// ~effectsJSON.warn;
+	~effectsJSON = ~jsonParam.value("effects", ~effectsJSON);
 	~json = "{" ++ ~generatorsJSON++~effectsJSON ++ "}";
-	// ~json.warn;
 	~responder.sendMsg("/plugins", ~json);
 	~effectsJSON = "";
 	~generatorsJSON = "";
@@ -173,11 +171,17 @@ oscsend localhost 18032 /satie/pluginargs s misDrone
 	~json = ~json.replace("}\n\t{", "},\n\t{");
 	~json = "{\n" ++ synth.asString.quote ++ ": \n[" ++ ~json ++ "\n]}\n";
 	~responder.sendMsg("/arguments", ~json);
+	~json;
 	~json = "";
 	nil;
 };
 
+~setResponderAddress = {
+	|msg, time, addr, recvPort|
+	~responder = addr;
+};
+
 OSCdef(\audioplugins, ~getAudioPlugins, '/satie/audioplugins', recvPort: 18032);
 OSCdef(\pluginArgs, ~getPluginArguments, '/satie/pluginargs', recvPort: 18032);
-
+OSCFunc(~setResponderAddress, '/satie/setAddr', recvPort: 18032);
 )
