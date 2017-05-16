@@ -18,6 +18,7 @@ The following messages are recognized by the renderer.
 /satie/rendererCtl setOutputDIM  valueToggle  // DIM renderer output to value
 /satie/rendererCtl setOutputMute  valueToggle  // DIM renderer output to value
 /satie/rendererCtl freeSynths   // clears supercollider's synths
+/satie/rendererCtl setOrientationDeg  azimuthOffset elevationOffset  // to offset the renderer's listener orientation  (nb. only effects panning)
 
 
 ```
