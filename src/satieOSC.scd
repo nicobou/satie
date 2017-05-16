@@ -504,8 +504,8 @@ for debugguing
 						// else
 						{
 							// get values from vector, and write to connectionState
-							aziDeg = args[2];
-							eleDeg= args[3];
+							aziDeg = args[2] + satie.orientationOffsetDeg[0];
+							eleDeg= args[3] + satie.orientationOffsetDeg[1];
 							gainDB = args[4];
 							delayMs = args[5];
 							lpHz = args[6];
@@ -558,8 +558,8 @@ for debugguing
 						// else
 						{
 							// get values from vector, and write to connectionState
-							aziDeg = args[2];
-							eleDeg= args[3];
+							aziDeg = args[2] + satie.orientationOffsetDeg[0];
+							eleDeg= args[3] + satie.orientationOffsetDeg[1];
 							gainDB = args[4];
 							delayMs = args[5];
 							lpHz = args[6];
@@ -665,6 +665,9 @@ for debugguing
 									distanceMeters  = (e.sined2unsignedByte(  dataArray[10]) << 8);
 									distanceMeters =  distanceMeters +  e.sined2unsignedByte(  dataArray[11] );
 									distanceMeters = distanceMeters * 0.01;
+
+									aziDeg = aziDeg  + satie.orientationOffsetDeg[0];
+									eleDeg = eleDeg  + satie.orientationOffsetDeg[1];
 
 									if (e.debugFlag,
 										{
