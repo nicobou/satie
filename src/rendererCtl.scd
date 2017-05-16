@@ -56,6 +56,14 @@
 				// else
 				{
 					switch (command,
+						'setOrientationDeg',
+						{
+							if ( (msg.size < 4 ) ,
+								{"basicRendererCallback: setOrientationDeg missing value".warn;},
+								// else
+								{ ~satie.orientationOffsetDeg = msg[2].asFloat;
+								  ~satie.orientationOffsetDeg = msg[3].asFloat; } );
+						},
 						'setNearFieldRadius',
 						{
 							if ( (msg.size < 3 ) ,

@@ -33,6 +33,9 @@
 		~nearFieldRadius=0;     // disabled when ==  0, othwewise defines the radius for a spherical region of attenuation around the listener
 		~nearFieldExp=1;   // transition quality across the region:   linear transition when == 1, otherwise exponential
 		~nearFieldInvert = false;  // a when == true,  attenuates all sounds within the near field radius around the listener
+		// render listening globals
+		~orientationOffsetDeg= [0, 0];  // values added to azimuth and elevation panning,  useful for ofsetting listener rotation to match output audio display
+
 
 		~makeSynthDef = {
 			| self,
