@@ -50,7 +50,7 @@ oscsend localhost 18032 /satie/pluginargs s misDrone
 	param = key.asString.quote;
 	value = ~checkForNil.value(val);
 	type = value.class.asString.quote;
-	str = "{"++~jsonParam.value("name", param)++","++~jsonParam.value("value", value)++","++~jsonParam.value("type",type) ++ "}";
+	str = "{"++~jsonParam.value("name", param)++","++~jsonParam.value("value", value)++","++~jsonParam.value("type",type) ++ "},";
 	~json = ~json ++ str;
 
 };
@@ -111,7 +111,6 @@ oscsend localhost 18032 /satie/pluginargs s misDrone
 	var str;
 	str = ~toJSON.value(key, val);
 	~effectsJSON = ~effectsJSON ++ str;
-	~effectsJSON.warn;
 
 };
 
@@ -167,8 +166,12 @@ oscsend localhost 18032 /satie/pluginargs s misDrone
 			argnames = ~satie.pluginLoader.effectPlugins[synth].def.keyValuePairsFromArgs;
 		}
 	);
+	// watch out: there is a trailing comma after running the following line
 	argnames.asArray.pairsDo(~makeJsonFromArgnames);
-	~json = ~json.replace("}\n\t{", "},\n\t{");
+	// seems I need to join, else I get "Attempted to write to immutable object" on the next operation
+	~json = ~json.join;
+	// remove the trailing comma
+	~json.removeAt(~json.size - 1);
 	~json = "{\n" ++ synth.asString.quote ++ ": \n[" ++ ~json ++ "\n]}\n";
 	~responder.sendMsg("/arguments", ~json);
 	~json;
