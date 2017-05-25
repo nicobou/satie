@@ -1264,7 +1264,192 @@ x.free; b.free;
 // ~temp = ~uriPath.asString.subStr(~charIndex);
 //
 
+*******************************************************   AMBUZIBBUCS
+
+
+
+p = ProxySpace.push;
+~test = { EnvGen.kr(Env.adsr, Impulse.kr(3)) * PinkNoise.ar(0.8); };
+~elev = {|e=0| e};
+~enc = { PanAmbi3O.ar(~test.ar, MouseX.kr(-pi, pi), ~elev.kr) };
+~dec = { DecodeAmbi3O.ar(~enc.ar, '1_4_7_4') };
+
+~enc.scope
 
 
 
 
+
+
+
+
+
+
+
+
+		BinAmbi3O.kemarPath_(~satieRootPath++"/utils/hrtf/full");
+		BinAmbi3O.init('1_4_7_4');   // spearker configuration:  1 top,  4 high, 7 ear level, and 4 low
+
+(
+// synthDef  outputs named auxBus on named outputChannel
+SynthDef(\sheefa, { arg inBus,  outChan=0;
+	var ambiVec;
+	var outsig;
+	var sound;
+
+	sound = PinkNoise.ar(0.01);
+
+	ambiVec =    PanAmbi3O.ar(sound, -90.degrad,0,'1_4_7_4');
+
+
+
+	outsig =  BinAmbi3O.ar(ambiVec);   // decodes for HRTF
+
+
+	Out.ar( 0, outsig );
+}).add;
+
+)
+
+
+(
+// start the decoder, reading bus ~ambiBus at the \tail of Group(1)
+if (q != nil, {  q.free; });
+q = Synth(\sheefa, [\inBus, ~outBusIndex], 1, \addToTail);   // adding to the tail of Group(1)
+
+
+)
+
+
+
+
+// a ProxySpace example
+p = ProxySpace.push;
+
+
+q="/Users/zack/Dropbox/Unity3D/audioRendering/satie/prototype/.."++"/utils/hrtf/full";
+
+
+BinAmbi3O.kemarPath_(q);
+BinAmbi3O.init('1_4_7_4');
+
+(
+~azi = 45.degrad;
+~ele = 0.degrad;
+
+~px = 0;
+~py = 0;
+~pz = 0;
+)
+~test = { EnvGen.kr(Env.adsr, Impulse.kr(3)) * PinkNoise.ar(0.8); };
+
+
+~enc = { PanAmbi3O.ar(~test.ar, ~azi.kr, ~azi.kr ) };
+
+~rot = { RotateAmbi.ar(~enc.ar, ~px.kr, ~py.kr, ~pz.kr )} ;
+
+~bin = { BinAmbi3O.ar(~enc.ar) };
+~bin.play;
+
+
+~bin.free;
+
+
+p.pop
+
+(
+Server.supernova;
+o = Server.local.options;   // default set up options
+
+		o.blockSize = 512;    // ATK -  needs small buffer sizes or it complains
+
+s.boot;
+
+	// open up GUIs for monitoring
+	if (~plotTree == nil,  { ~plotTree=s.plotTree;});
+	if (~makeGui == nil,  { ~makeGui=s.makeGui;});
+	if (~meter == nil,  { ~meter=s.meter;});
+
+
+)
+
+
+
+
+// a ProxySpace example
+
+(
+p = ProxySpace.push;
+
+// The speaker positions [eleveation],[azimuth]
+e = [90,40,40,40,40,0,0,0,0,0,0,0,-40,-40,-40,-40];
+a = [0,45,135,225,315,25,75,130,180,230,285,335,0,90,180,270];
+
+// adjust your path to the Kemar data
+// this is relative to the SC3 folder
+Kemar.path = "/Users/zack/Dropbox/Unity3D/audioRendering/satie/prototype/.."++"/utils/hrtf/full";
+
+
+
+)
+
+Kemar.initBuffers(a, e, s);
+
+
+
+
+
+
+
+
+
+(
+{
+    var sound;
+    sound = EnvGen.kr(Env.adsr, Impulse.kr(3)) * PinkNoise.ar(0.8);
+    Kemar.ar(
+        DecodeAmbi3O.ar(
+            PanAmbi3O.ar(sound,
+                MouseX.kr(-pi, pi),
+                MouseY.kr(-pi, pi)),
+            '1_4_7_4'
+        )
+    );
+}.play;
+)
+
+
+p.pop
+
+
+
+
+// a ProxySpace example
+p = ProxySpace.push;
+
+v = VBAPSpeakerArray.new(3, [[-22.5, 14.97], [22.5, 14.97], [-67.5, 14.97], [67.5, 14.97], [-112.5, 14.97], [112.5, 14.97], [-157.5, 14.97], [157.5, 14.97], [-45, 0], [45, 0], [-90, 0], [90, 0], [-135, 0], [135, 0], [0, 0], [180, 0]]); // zig zag partial dome
+b = Buffer.loadCollection(s, v.getSetsAndMatrices);
+
+
+
+~test = { EnvGen.kr(Env.adsr, Impulse.kr(3)) * PinkNoise.ar(0.8); };
+
+~enc = { PanAmbi3O.ar(~test.ar, MouseX.kr(-pi, pi), MouseY.kr(-pi, pi)) };
+~dec = { DecodeAmbi3O.ar(~enc.ar, '1_4_7_4') };
+
+
+
+//~pink = { NumChannels.ar( PinkNoise.ar(0.8), 16); };
+
+~pink = {  PinkNoise.ar(0.8); };
+
+~vsig = { VBAP.ar(16, ~pink, b.bufnum, LFSaw.kr(0.5, 0).range(-180, 180) * -1, SinOsc.kr(3, 0).range(0, 14.97), 0); };
+
+
+
+~sines = { SinOsc.ar([100,200,300,400,500,600,700,800,900, 1000, 10,20,30,40,50,60],0,0.2); };
+
+~bin = { Kemar.ar(  ~vsig.ar )    };
+~bin.stop;
+
+p.pop

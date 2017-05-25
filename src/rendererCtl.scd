@@ -61,8 +61,8 @@
 							if ( (msg.size < 4 ) ,
 								{"basicRendererCallback: setOrientationDeg missing value".warn;},
 								// else
-								{ ~satie.orientationOffsetDeg = msg[2].asFloat;
-								  ~satie.orientationOffsetDeg = msg[3].asFloat; } );
+								{ ~satie.orientationOffsetDeg[0] = msg[2].asFloat;
+									~satie.orientationOffsetDeg[1] = msg[3].asFloat; } );
 						},
 						'setNearFieldRadius',
 						{

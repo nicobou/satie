@@ -26,8 +26,8 @@
 // allow listeningFormat to be defined prior to evaluation
 if (~listeningFormat == nil,
 	{
-		~listeningFormat = \stereoListener;    // default listening format
-		//~listeningFormat = \ambi3;
+		//~listeningFormat = \stereoListener;    // default listening format
+		~listeningFormat = \ambi3;
 		//~listeningFormat = \ambi1;
 
 });
