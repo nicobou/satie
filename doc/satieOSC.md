@@ -1,13 +1,27 @@
 # Inbound OSC Messages
+## SATIE System Messages
+All SATIE messages are received on port 18032
+```
+/satie/audioplugins
+```
+Responds with a JSON string containing lists of uninstantiated audio objects (synthdefs) that are managed by SATIE. Top level keys represent "families" of objects (sources, effects, processes).
+```
+/satie/pluginargs pluginName
+```
+Responds with a JSON string containing properties, their types and default values for the selected synthdef.
+
+```
+/satie/setAddr
+```
+Will reset the OSC destination to which SATIE will send messages. The *host:port* will be taken from the originating message. Please note, that not all OSC implementations allow sending and receving on the port. Consult your implementation's documentation. This has been tested with python-liblo.
+
+See `${SATIE_DIR}/prototype/satieTypeDiscovery/set_addr_query_responder.py` for an example usage.
 ## Scene Messages
-
-
 
 ```javascript
 
 // experimental
 /satie/load filename    // loads and evaluates file in supercollider.  Filename must be a full file path to a file located on the audiorendering machine
-
 
 /satie/scene createSource  nodeName  URI<plugin://synthdefName groupName<opt>   // default groupName = 'default'
 /satie/scene createSource  nodeName  URI<effect://synthdefName  optionalArgs: inbus N >   groupName<opt>   // defaults:  groupName = 'defaultFx',  inbus = 0
@@ -16,7 +30,6 @@
 /satie/scene deleteNode nodeName
 /satie/scene clear
 /satie/scene/set keyword value   // to set scene parameters like 'debugFlag 1'
-
 
 
 ```
