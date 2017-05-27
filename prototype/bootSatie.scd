@@ -26,9 +26,10 @@
 // allow listeningFormat to be defined prior to evaluation
 if (~listeningFormat == nil,
 	{
-		//~listeningFormat = \stereoListener;    // default listening format
-		~listeningFormat = \ambi3;
+		~listeningFormat = \stereoListener;    // default listening format
+		//~listeningFormat = \ambi3;
 		//~listeningFormat = \ambi1;
+		//~listeningFormat = \_1474_VBAP;
 
 });
 
@@ -40,7 +41,7 @@ if (~listeningFormat == nil,
 
 
 
-// you can also overwrite the ~listeningFormat with:   \domeVBAP  ,  \labodomeVBAP  ,  \octoVBAP,  \cubeVBAP, \ambi3  , \ambi1  etc.
+// you can also overwrite the ~listeningFormat with:   \domeVBAP  ,  \labodomeVBAP  ,  \octoVBAP,  \cubeVBAP, \ambi3  , \_1474_VBAP, \ambi1  etc.
 // or specify the listening format via command line args
 //          possible arg values:   "sato", "labo", "octo",  "stereo", "mono", "5one", "dodec" , "ambi3",  "ambi1"
 
@@ -73,11 +74,15 @@ if  (thisProcess.argv.size >= 1,
 			},
 			"ambi3",
 			{
-				~listeningFormat = \ambi3;   //  uses bus 100-116 to bus ambi3rdOrder sigs to binaural decoder on same bus
+				~listeningFormat = \ambi3;   //  uses 16-channel dynamically assigned bus for ambisonics binaural decoder
+			},
+			"1474",
+			{
+				~listeningFormat = \_1474_VBAP;   // vbap multi out  signal to binaural mixDown
 			},
 			"dodec",
 			{
-				~listeningFormat = \dodecVBAP;   // vbap to near field... outputs 20 chanels to soundFlower
+				~listeningFormat = \dodecVBAP;   // vbap to near field... outputs 20 chanels to output stream  (soundFlower, dante etc.)
 			},
 			"sato",
 			{
@@ -148,7 +153,7 @@ if ( ~listeningFormat == \ambi1,
 		o.blockSize = 64;    // ATK -  needs small buffer sizes or it complains
 });
 
-if ( ~listeningFormat == \ambi3,
+if (  (~listeningFormat == \ambi3) ||  (~listeningFormat == \_1474_VBAP ),
 	{
 		o.blockSize = 128;    // ATK -  needs small buffer sizes or it complains
 });
@@ -160,7 +165,7 @@ if ( ~listeningFormat == \ambi3,
 
 Platform.case (
 	\osx, {
-		if (  ( ( ~listeningFormat == \domeVBAP)  ||   ( ~listeningFormat == \labodomeVBAP)  || ( ~listeningFormat == \octoVBAP)  ),
+		if (  ( ( ~listeningFormat == \domeVBAP)  ||   ( ~listeningFormat == \labodomeVBAP)  || ( ~listeningFormat == \octoVBAP) ||  (~listeningFormat == \_1474_VBAP ) ),
 			{
 
 				if (  ServerOptions.outDevices.indexOfEqual("HDSPe MADI (23453676)") != nil,
@@ -177,9 +182,11 @@ Platform.case (
 
 		});
 		//  OR iF
-		if (   ~listeningFormat == \dodecVBAP ,        // special case for near-field demo for IX    (this case should removed eventually)
+		if (   ~listeningFormat == \dodecVBAP ,  // special case for near-field demo for IX    (this case should removed eventually)
 			{
-				~outAudioDev = "Dante Virtual Soundcard";    // this may require updating
+				// ~outAudioDev = "Dante Virtual Soundcard";    // for network streaming
+				~outAudioDev = "Soundflower (64ch)";    // for inter-application bussing
+
 				postf("AudioOutDev: %\n", ~outAudioDev);
 		});
 		//  OR iF
@@ -213,11 +220,15 @@ switch (~listeningFormat,
 	{
 		o.numOutputBusChannels = 2;   // 2 outputs for the binaural rendering
 	},
-	\dodec,
+	\dodecVBAP,
 	{
 		o.numOutputBusChannels = 28;   // twenty channels for dodecahedron output plus 8 out busses for object audio
 	},
-	\domeVBAP,
+	\_1474_VBAP,
+	{
+		o.numOutputBusChannels = 16;   // sixteen channels for VBAP 1_4_7_4  output
+	},
+   \domeVBAP,
 	{
 		o.numOutputBusChannels = 32;
 	},
@@ -272,7 +283,7 @@ Platform.case(
 
 // specify any other files to be loaded:
 
-~startupfiles = [~satieRootPath ++ "prototype/ambi1Listener.scd"];
+//~startupfiles = [~satieRootPath ++ "prototype/ambi1Listener.scd"];
 
 ~startupfiles = List.new();
 
@@ -284,6 +295,11 @@ if ( ~listeningFormat == \ambi1,
 if ( ~listeningFormat == \ambi3,
 	{
 		~startupfiles.add(~satieRootPath ++ "prototype/ambi3Listener.scd");
+});
+
+if ( ~listeningFormat == \_1474_VBAP,
+	{
+		~startupfiles.add(~satieRootPath ++ "prototype/1474Listener.scd");
 });
 
 
@@ -299,6 +315,10 @@ switch (~listeningFormat,
 	\ambi1,
 	{
 		~outBusIndex  = Bus.audio(s, 4).index; //  makeSynthDef spatializer outpus are assigned to this bus for decoding  :  GLOBAL ENVIRONMENT VARIABLE NEEDED
+	},
+	\_1474_VBAP,
+	{
+		~outBusIndex  = Bus.audio(s, 16).index; //  makeSynthDef spatializer outpus are assigned to this bus for decoding  :  GLOBAL ENVIRONMENT VARIABLE NEEDED
 	},
 	\ambi3,
 	{

@@ -1,0 +1,249 @@
+#N canvas 483 36 895 534 12;
+#X obj 17 10 cnv 15 800 500 empty empty display_RX_renderer_messages
+20 12 0 18 -262130 -66577 0;
+#X obj 59 81 loadbang;
+#X obj 550 70 OSCparse /satie/*/set;
+#X obj 550 28 t a a;
+#X obj 627 194 anyreg sheefa;
+#X obj 548 147 t b;
+#X obj 733 440 p;
+#X obj 515 211 t a a;
+#X obj 592 377 anyreg sheefa;
+#X obj 513 330 t b;
+#X obj 605 439 p;
+#X obj 515 253 OSCparse /satie/*/property;
+#X obj 754 319 OSCrx 18032;
+#X msg 72 183 connect localhost 18032;
+#X obj 72 230 s \$0-toOSCout;
+#X msg 81 121 10.10.100.252;
+#N canvas 0 22 450 300 old 0;
+#X msg 322 212 1 \, 2 \, 3 \, 4 \, 5 \, 6 \, 7 \, 8;
+#X obj 583 429 OSCprepend /satie/process/property;
+#X obj 585 470 s \$0-toOSCout;
+#X obj 430 139 t b f;
+#X obj 432 88 tgl 36 0 empty empty NearFieldEnable -40 -16 0 24 -262144
+-1 -1 0 1;
+#X obj 398 296 pack 0 0;
+#X msg 398 332 source\$1 nearFieldToggle \$2;
+#X msg 607 209 1 \, 2 \, 3 \, 4 \, 5 \, 6 \, 7 \, 8;
+#X obj 715 136 t b f;
+#X obj 683 293 pack 0 0;
+#X msg 684 329 source\$1 nearFieldExp \$2;
+#X obj 718 73 nbx 7 36 -1e+37 1e+37 0 0 empty empty XfadeExponent 0
+-16 0 24 -262144 -1 -1 0 256;
+#X msg 864 218 1 \, 2 \, 3 \, 4 \, 5 \, 6 \, 7 \, 8;
+#X obj 972 145 t b f;
+#X obj 940 302 pack 0 0;
+#X obj 975 82 nbx 7 36 -1e+37 1e+37 0 0 empty empty nearFieldRadius
+0 -16 0 24 -262144 -1 -1 0 256;
+#X msg 941 338 source\$1 nearFieldRadius \$2;
+#X connect 0 0 5 0;
+#X connect 1 0 2 0;
+#X connect 3 0 0 0;
+#X connect 3 1 5 1;
+#X connect 4 0 3 0;
+#X connect 5 0 6 0;
+#X connect 6 0 1 0;
+#X connect 7 0 9 0;
+#X connect 8 0 7 0;
+#X connect 8 1 9 1;
+#X connect 9 0 10 0;
+#X connect 10 0 1 0;
+#X connect 11 0 8 0;
+#X connect 12 0 14 0;
+#X connect 13 0 12 0;
+#X connect 13 1 14 1;
+#X connect 14 0 16 0;
+#X connect 15 0 13 0;
+#X connect 16 0 1 0;
+#X restore 69 378 pd old;
+#N canvas 78 44 1631 1091 RendererCtlMessages 0;
+#X text 779 18 // experimental \; \; /satie/load filename // loads
+and evaluates file in supercollider. Filename must be a full file path
+to a file located on the audiorendering machine \; \; /satie/rendererCtl
+setNearFieldRadius valueDist // disabled when == 0 \, othwewise defines
+the radius of a spherical region of attenuation around the listener
+\; /satie/rendererCtl setNearFieldExp valueExponent // transition quality
+across the region: linear transition when == 1 \, otherwise exponential
+transition \; /satie/rendererCtl nearFieldInvert valueToggle //when
+== true \, attenuates sounds WITHIN the near field radius around the
+listener \, when == false \, attenuates sounds OUTSIDE of the near
+field radius around the listener \; /satie/rendererCtl setOutputDB
+valueDB // set renderer output to value \; /satie/rendererCtl setOutputTrimDB
+valueDB // set renderer output trim to value \; /satie/rendererCtl
+setOutputDIM valueToggle // DIM renderer output to value \; /satie/rendererCtl
+setOutputMute valueToggle // DIM renderer output to value \; /satie/rendererCtl
+freeSynths // clears supercollider's synths \; /satie/rendererCtl setOrientationDeg
+azimuthOffset elevationOffset \;;
+#X obj 372 94 s \$0-toOSCout;
+#X obj 372 61 OSCprepend /satie/rendererCtl;
+#X obj 366 436 s \$0-toRenderer;
+#X obj 372 33 r \$0-toRenderer;
+#X obj 446 260 s \$0-toRenderer;
+#X obj 445 206 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
+1;
+#X msg 446 230 setOutputMute \$1;
+#X obj 369 238 vsl 15 128 -99 18 0 0 empty empty db 0 -9 0 10 -262144
+-1 -1 8300 1;
+#X floatatom 368 380 5 0 0 0 - - -, f 5;
+#X msg 367 406 setOutputDB \$1;
+#X obj 79 387 s \$0-toRenderer;
+#X obj 51 101 vsl 15 128 -180 180 0 0 empty empty azi 0 -9 0 10 -262144
+-1 -1 9900 1;
+#X floatatom 50 243 5 0 0 0 - - -, f 5;
+#X msg 80 357 setOrientationDeg \$1 \$2;
+#X obj 80 327 hotpack2 0 0;
+#X msg 106 123 0;
+#X msg 177 112 180;
+#X obj 135 204 * 5;
+#X obj 49 276 t b f;
+#X msg 52 557 /satie/source/update sheefa 0 0 -3 0 15000 20;
+#X msg 74 509 /satie/scene createSource sheefa plugin://default default
+;
+#X msg 120 593 /satie/scene deleteNode sheefa;
+#X obj 84 708 s \$0-toOSCout;
+#X msg 162 658 /satie/scene debugFlag \$1;
+#X obj 186 637 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
+1;
+#X obj 834 874 s \$0-toRenderer;
+#X msg 834 840 setNearFieldRadius \$1;
+#X msg 733 771 setNearFieldExp \$1;
+#X msg 603 716 nearFieldInvert \$1;
+#X obj 827 523 tgl 44 0 \$0-nearFieldInvert \$0-nearFieldInvert-set
+nearFieldInvert 0 -20 0 18 -262144 -1 -1 0 1;
+#X obj 603 677 sharedVal \$0-nearFieldInvert;
+#X obj 733 743 sharedVal \$0-setNearFieldExp;
+#X obj 928 553 nbx 7 32 0 1e+37 0 0 \$0-setNearFieldExp \$0-setNearFieldExp-set
+setNearFieldExp 0 -20 0 24 -262144 -1 -1 13 256;
+#X obj 1020 626 nbx 7 32 0 1e+37 0 0 \$0-setNearFieldRadius \$0-setNearFieldRadius-set
+setNearFieldRadius 0 -20 0 24 -262144 -1 -1 169 256;
+#X obj 831 809 sharedVal \$0-setNearFieldRadius;
+#X obj 1227 865 s \$0-toRenderer;
+#X msg 1228 835 setOrientationDeg \$1 \$2;
+#X obj 1228 805 hotpack2 0 0;
+#X obj 1229 738 sharedVal \$0-aziOffset;
+#X obj 1293 622 nbx 5 32 -99999 1e+37 0 0 \$0-aziOffset \$0-aziOffset-set
+aziOffset 0 -20 0 24 -262144 -1 -1 0 256;
+#X obj 1448 614 nbx 5 32 -99999 1e+37 0 0 \$0-eleOffset \$0-eleOffset-set
+eleOffset 0 -20 0 24 -262144 -1 -1 4 256;
+#X obj 1322 771 sharedVal \$0-eleOffset;
+#X obj 177 818 s \$0-toOSCout;
+#X obj 177 794 OSCprepend /satie/rendererCtl;
+#X msg 177 765 setGainDb -30;
+#X connect 2 0 1 0;
+#X connect 4 0 2 0;
+#X connect 6 0 7 0;
+#X connect 7 0 5 0;
+#X connect 8 0 9 0;
+#X connect 9 0 10 0;
+#X connect 10 0 3 0;
+#X connect 12 0 13 0;
+#X connect 13 0 19 0;
+#X connect 14 0 11 0;
+#X connect 15 0 14 0;
+#X connect 16 0 18 0;
+#X connect 17 0 18 0;
+#X connect 18 0 13 0;
+#X connect 19 0 20 0;
+#X connect 19 1 15 0;
+#X connect 20 0 23 0;
+#X connect 21 0 23 0;
+#X connect 22 0 23 0;
+#X connect 24 0 23 0;
+#X connect 25 0 24 0;
+#X connect 27 0 26 0;
+#X connect 28 0 26 0;
+#X connect 29 0 26 0;
+#X connect 31 0 29 0;
+#X connect 32 0 28 0;
+#X connect 35 0 27 0;
+#X connect 37 0 36 0;
+#X connect 38 0 37 0;
+#X connect 39 0 38 0;
+#X connect 42 0 38 1;
+#X connect 44 0 43 0;
+#X connect 45 0 44 0;
+#X restore 72 286 pd RendererCtlMessages;
+#N canvas 0 22 450 300 rendererMessages 0;
+#X obj 767 846 OSCtx;
+#X msg 780 548 sourceB gainDB -11 aziDeg -90;
+#X msg 1054 769 /satie/scene clear;
+#X msg 532 781 sourceB spread 0;
+#X obj 523 887 OSCprepend /satie/group/set;
+#X msg 583 818 pluck1_group amp 1;
+#X msg 847 616 srcNode_14 trimDB 30;
+#X msg 467 614 srcNode_0 sheefa 1 cunt 2;
+#X msg 492 674 srcNode_d0 sheefa 1 cunt 2;
+#X obj 449 755 OSCprepend /satie/process/property;
+#X obj 805 743 OSCparse /satie/*/property;
+#X obj 880 826 r \$0-toOSCout;
+#X obj 1306 780 s \$0-toOSCout;
+#X obj 1307 746 OSCprepend /satie/process/setvec;
+#X msg 1307 649 srcNode_0 note 50 1 1;
+#X msg 1254 582 srcNode_0 t_trig 1;
+#X msg 799 1015 /satie/source/setvec sourceA note 60 1 1;
+#X obj 1216 1114 metro 100;
+#X msg 841 1100 /satie/source/set sourceA t_trig 1;
+#X obj 1146 1000 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1
+0 1;
+#X floatatom 1182 1025 5 0 0 0 - - -, f 5;
+#X msg 758 1141 /satie/source/set sourceA t_trig 0;
+#X obj 1138 1109 delay 50;
+#X msg 1066 853 /satie/load /Users/zack/src/balljam/satieProject/balljam.scd
+;
+#X msg 1104 913 /satie/load /Users/zack/Dropbox/Unity3D/audioRendering/sc/sc-basic-renderer/examples/satieOSCexample/satieOSCexample.scd
+;
+#X obj 768 682 OSCprepend /satie/process/set;
+#X text 32 445 /satie/source/update sourceName AZI ELEV Gain del lpf
+hpf dist;
+#X connect 1 0 25 0;
+#X connect 2 0 0 0;
+#X connect 3 0 4 0;
+#X connect 4 0 0 0;
+#X connect 5 0 4 0;
+#X connect 6 0 25 0;
+#X connect 7 0 9 0;
+#X connect 8 0 9 0;
+#X connect 9 0 0 0;
+#X connect 11 0 0 0;
+#X connect 13 0 12 0;
+#X connect 14 0 13 0;
+#X connect 15 0 13 0;
+#X connect 16 0 0 0;
+#X connect 17 0 18 0;
+#X connect 17 0 22 0;
+#X connect 18 0 0 0;
+#X connect 19 0 17 0;
+#X connect 20 0 17 1;
+#X connect 21 0 0 0;
+#X connect 23 0 0 0;
+#X connect 24 0 0 0;
+#X connect 25 0 0 0;
+#X restore 71 336 pd rendererMessages;
+#N canvas 743 189 400 351 GUI 0;
+#X obj 23 43 tgl 44 0 \$0-nearFieldInvert \$0-nearFieldInvert-set nearFieldInvert
+0 -20 0 18 -262144 -1 -1 0 1;
+#X obj 124 73 nbx 7 32 0 1e+37 0 0 \$0-setNearFieldExp \$0-setNearFieldExp-set
+setNearFieldExp 0 -20 0 24 -262144 -1 -1 0 256;
+#X obj 129 157 nbx 7 32 0 1e+37 0 0 \$0-setNearFieldRadius \$0-setNearFieldRadius-set
+setNearFieldRadius 0 -20 0 24 -262144 -1 -1 0 256;
+#X obj 20 231 nbx 5 32 -99999 1e+37 0 0 \$0-aziOffset \$0-aziOffset-set
+aziOffset 0 -20 0 24 -262144 -1 -1 0 256;
+#X obj 163 231 nbx 5 32 -99999 1e+37 0 0 \$0-eleOffset \$0-eleOffset-set
+eleOffset 0 -20 0 24 -262144 -1 -1 0 256;
+#X restore 132 377 pd GUI;
+#X connect 1 0 13 0;
+#X connect 2 0 5 0;
+#X connect 2 1 7 0;
+#X connect 3 0 2 0;
+#X connect 3 1 4 0;
+#X connect 5 0 4 0;
+#X connect 7 0 11 0;
+#X connect 7 1 8 0;
+#X connect 8 0 10 0;
+#X connect 9 0 8 0;
+#X connect 11 0 9 0;
+#X connect 11 1 6 0;
+#X connect 12 0 6 0;
+#X connect 13 0 14 0;
+#X connect 15 0 13 0;
