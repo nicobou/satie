@@ -72,7 +72,7 @@
 
 ~vbuf20 = Buffer.loadCollection(s, ~spk20.getSetsAndMatrices);
 
-~name = \dodecNF;
+~name = \dodecVBAP;
 
 
 ~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1 |

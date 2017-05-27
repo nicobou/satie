@@ -19,7 +19,6 @@
 (   // start of this local environment
 
 var quarkFound = false;
-var ambiBus;
 
 Quarks.installed.size.do( {|item|
 	if (Quarks.installed[item].name == "AmbIEM", { quarkFound = true;});
@@ -27,7 +26,7 @@ Quarks.installed.size.do( {|item|
 
 if (quarkFound == false,
 	{
-		error("ambi3Listener.scd: missing AmbIEM Quark,  Can't Continue.  Try:  Quarks.install(\"AmbIEM\")");
+		error("1474Listener.scd: missing AmbIEM Quark,  Can't Continue.  Try:  Quarks.install(\"AmbIEM\")");
 	},
 	{
 		// else resources are defined, evaluate
@@ -36,11 +35,20 @@ if (quarkFound == false,
 		//  this will go away once we have the satie global environment sorted out
 		if ( ~satieRootPath == nil,
 			{
-				error("ambi1Listener:  ~satieRootPath undefined, can't continue");   // this should point to the satie root directory
+				error("1474Listener:  ~satieRootPath undefined, can't continue");   // this should point to the satie root directory
 		});
 
-		BinAmbi3O.kemarPath_(~satieRootPath++"/utils/hrtf/full");
-		BinAmbi3O.init('1_4_7_4');   // spearker configuration:  1 top,  4 high, 7 ear level, and 4 low
+		// the famous 1_4_7_4  sixteen channel speaker configuration:  1 top, 4 upper, 7 ear-level, 4 below
+		// a VBAP spatializer feeds to this inBus
+		// The speaker positions [eleveation],[azimuth]
+		e = [90,40,40,40,40,0,0,0,0,0,0,0,-40,-40,-40,-40];
+		a = [0,45,135,225,315,25,75,130,180,230,285,335,0,90,180,270];
+
+		// adjust your path to the Kemar data
+		// this is relative to the SC3 folder
+		Kemar.path = "/Users/zack/Dropbox/Unity3D/audioRendering/satie/prototype/.."++"/utils/hrtf/full";
+		Kemar.initBuffers(a, e, s);
+
 
 
 		s.waitForBoot {
@@ -49,18 +57,21 @@ if (quarkFound == false,
 
 
 			// synthDef  outputs named auxBus on named outputChannel
-			SynthDef(\ambie3HRTF, { arg inBus,  outChan=0;
-				var ambiVec;
+			SynthDef(\_1474_to_binaural, { arg inBus,  outChan=0;
+				var sigVec;
 				var outsig;
 
-				ambiVec = In.ar(inBus, 16);   // reads the 16 channel encoded ambisonic signal bus
-				outsig =  BinAmbi3O.ar(ambiVec);   // decodes for HRTF
+				sigVec = In.ar(inBus, 16);   // reads the 16 channel spatiaized
+				outsig =  Kemar.ar( sigVec);
+
 
 				outsig = BLowShelf.ar(
-					outsig,
-					500,   // freq
-					1.0, // q
-					18 ); // cut/boost
+				 	outsig,
+				 	500,   // freq
+				 	1.0, // q
+				 18 ); // cut/boost
+
+
 
 
 				Out.ar(outChan, outsig);
@@ -70,12 +81,14 @@ if (quarkFound == false,
 			s.sync;
 
 			// start the decoder, reading bus ~ambiBus at the \tail of Group(1)
-			if (~ambiemHRTF != nil, {  ~ambiemHRTF.free; });
-			~ambiemHRTF = Synth(\ambie3HRTF, [\inBus, ~outBusIndex], 1, \addToTail);   // adding to the tail of Group(1)
+			if (~vbap2binaural != nil, {  ~vbap2binaural.free; });
+			~vbap2binaural = Synth(\_1474_to_binaural, [\inBus, ~outBusIndex], 1, \addToTail);   // adding to the tail of Group(1)
+
+			~vbap2binaural.set(\outChan, 0);
 
 			s.sync;
 
-			postf("ambi3Listener.scd:  Creating AmbIEM Binaural listener, receiving 16 channel encoded ambisonic signal at buses: %", ~outBusIndex);
+			postf("1474Listener.scd:  Creating AmbIEM Binaural listener, receiving 16 channel VBAP signal at buses: %", ~outBusIndex);
 
 		};  // end of wait for boot
 
