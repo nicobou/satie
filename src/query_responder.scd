@@ -133,9 +133,10 @@ oscsend localhost 18032 /satie/pluginargs s misDrone
 };
 
 
-~getAudioPlugins = {
+~getAudioPlugins = { | msg , time, addr, recvPort|
 	// get present synthdefs and send them via OSC as json object
 	var keys, generators, effects;
+	~setResponderAddress.value(addr);
 	~satie.generatorSynthDef.keysValuesDo({|key, value| generators = generators.add(Array[key, value])});
 	~satie.effectSynthDef.keysValuesDo({|key, value| effects = effects.add(Array[key, value])});
 	generators.do(~makeGeneratorsJSON);
@@ -156,6 +157,7 @@ oscsend localhost 18032 /satie/pluginargs s misDrone
 ~getPluginArguments = { | msg , time, addr, recvPort|
 	// get synth definition arguments and send them as json object
 	var synth, argnames;
+	~setResponderAddress.value(addr);
 	synth = msg[1];
 	if (~satie.pluginLoader.audioPlugins.keys.includes(synth.asSymbol),
 		{
@@ -179,9 +181,11 @@ oscsend localhost 18032 /satie/pluginargs s misDrone
 	nil;
 };
 
+
 ~setResponderAddress = {
-	|msg, time, addr, recvPort|
+	|addr|
 	~responder = addr;
+	postf("Sending responses to: %\n", addr);
 };
 
 OSCdef(\audioplugins, ~getAudioPlugins, '/satie/audioplugins', recvPort: 18032);
