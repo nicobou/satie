@@ -1453,3 +1453,135 @@ b = Buffer.loadCollection(s, v.getSetsAndMatrices);
 ~bin.stop;
 
 p.pop
+
+
+*******************
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+// spat input args:
+// aziDeg degrees (-180 to 180)
+// elevDeg   degrees (-180 to 180)
+// gainDB  decibels
+// delaySec  seconds
+// lpHz    hertz
+// spread  units  (0 == directional, ....,  100 == omni)
+
+// dome speaker layout
+
+
+
+/* speaker positions used by ambIEM
+https://github.com/supercollider-quarks/AmbIEM/blob/master/Classes/DecodeAmbi.sc
+
+azi: [0,45,135,225,315,25,75,130,180,230,285,335,0,90,180,270]
+elev: [90,40,40,40,40,0,0,0,0,0,0,0,-40,-40,-40,-40],
+
+*/
+
+
+~speakerConfig1474 = [
+[0 , 90 ],  // top
+[45 , 40 ], // upper
+[135 , 40 ],
+[-135 , 40 ],
+[-45 , 40 ],
+[25 , 0 ],   // middle
+[75 , 0  ],
+[130 , 0  ],
+[180 , 0  ],
+[-130 , 0 ],
+[-75 , 0 ],
+[-25 , 0 ],
+[0 , -40  ],  // lower
+[90 , -40  ],
+[180 , -40  ],
+[-90 , -40 ]];
+
+
+
+
+~spk16 = VBAPSpeakerArray.new(3, ~speakerConfig1474);
+
+
+
+~vbuf16 = Buffer.loadCollection(s, ~spk16.getSetsAndMatrices);
+
+~name = \_1474_VBAP;
+
+(
+
+~function = {|  aziDeg = 25, eleDeg = 0, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1, rotAzi=0 |
+	var gain= gainDB.dbamp;   // convert gainDB to gainAMP
+	var delay = delayMs * 0.001;    // convert to seconds
+	var slewDelay = 0.3; //  note: this needs to be improved ... smoother
+	var slewGain = 0.1;
+	var slewFilter = 0.6;
+	var slewPanning = 0.030;
+	var panWeights;
+	var outsig, sigvec, rotVec;
+
+
+
+
+	panWeights = VBAP.kr(numChans: ~spk16.numSpeakers,
+		in: 1.0,
+		bufnum: ~vbuf16.bufnum,
+		azimuth: aziDeg,
+		elevation: eleDeg,
+		spread: spread );
+
+	   sigvec = PinkNoise.ar(1)  * Lag.kr(panWeights, 0.030);
+
+	Out.ar(~outBusIndex,sigvec);
+
+	//sigvec.scope;
+
+	// rotVec = VBAP.ar(16, sigvec[0], ~vbuf16.bufnum, ~speakerConfig1474[ 0][0]  + rotAzi,   ~speakerConfig1474[ 0][1] );
+	// rotVec =  rotVec + VBAP.ar(16, sigvec[1], ~vbuf16.bufnum, ~speakerConfig1474[ 1][0]  + rotAzi,   ~speakerConfig1474[ 1][1] );
+	// rotVec =  rotVec + VBAP.ar(16, sigvec[2], ~vbuf16.bufnum, ~speakerConfig1474[ 2][0]  + rotAzi,   ~speakerConfig1474[ 2][1] );
+	// rotVec =  rotVec + VBAP.ar(16, sigvec[3], ~vbuf16.bufnum, ~speakerConfig1474[ 3][0]  + rotAzi,   ~speakerConfig1474[ 3][1] );
+	// rotVec =  rotVec + VBAP.ar(16, sigvec[4], ~vbuf16.bufnum, ~speakerConfig1474[ 4][0]  + rotAzi,   ~speakerConfig1474[ 4][1] );
+	// rotVec =  rotVec + VBAP.ar(16, sigvec[5], ~vbuf16.bufnum, ~speakerConfig1474[ 5][0]  + rotAzi,   ~speakerConfig1474[ 5][1] );
+	// rotVec = rotVec + VBAP.ar(16, sigvec[6], ~vbuf16.bufnum, ~speakerConfig1474[ 6 ][0]  + rotAzi,   ~speakerConfig1474[ 6][1] );
+	// rotVec = rotVec + VBAP.ar(16, sigvec[7], ~vbuf16.bufnum, ~speakerConfig1474[ 7 ][0]  + rotAzi,   ~speakerConfig1474[ 7][1] );
+	// rotVec = rotVec + VBAP.ar(16, sigvec[8], ~vbuf16.bufnum, ~speakerConfig1474[ 8 ][0]  + rotAzi,   ~speakerConfig1474[ 8][1] );
+	// rotVec = rotVec + VBAP.ar(16, sigvec[9], ~vbuf16.bufnum, ~speakerConfig1474[ 9 ][0]  + rotAzi,   ~speakerConfig1474[ 8][1] );
+	// rotVec = rotVec + VBAP.ar(16, sigvec[10], ~vbuf16.bufnum, ~speakerConfig1474[ 10 ][0]  + rotAzi,   ~speakerConfig1474[ 10][1] );
+	// rotVec = rotVec + VBAP.ar(16, sigvec[11], ~vbuf16.bufnum, ~speakerConfig1474[ 11 ][0]  + rotAzi,   ~speakerConfig1474[ 11][1] );
+	// rotVec = rotVec + VBAP.ar(16, sigvec[12], ~vbuf16.bufnum, ~speakerConfig1474[ 12 ][0]  + rotAzi,  ~speakerConfig1474[ 12][1] );
+	// rotVec = rotVec + VBAP.ar(16, sigvec[13], ~vbuf16.bufnum, ~speakerConfig1474[ 13 ][0]  + rotAzi,  ~speakerConfig1474[13][1] );
+	// rotVec = rotVec + VBAP.ar(16, sigvec[14], ~vbuf16.bufnum, ~speakerConfig1474[ 14 ][0]  + rotAzi,   ~speakerConfig1474[ 14][1] );
+	// rotVec = rotVec + VBAP.ar(16, sigvec[15], ~vbuf16.bufnum, ~speakerConfig1474[ 15 ][0]  + rotAzi,   ~speakerConfig1474[ 15][1] );
+	//
+	// Out.ar(0,rotVec);
+};
+
+
+SynthDef(\sheefa, ~function ).add;
+)
+
+x = Synth.new( \sheefa ); // create the synth
+
+x.set(\aziDeg,  180);
+x.set(\aziDeg,  25);
+x.set(\eleDeg, 0);
+
+x.set(\rotAzi,  180);
+x.free;
+
+
+)
+
+

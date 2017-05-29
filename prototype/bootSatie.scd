@@ -29,7 +29,7 @@ if (~listeningFormat == nil,
 		~listeningFormat = \stereoListener;    // default listening format
 		//~listeningFormat = \ambi3;
 		//~listeningFormat = \ambi1;
-		//~listeningFormat = \_1474_VBAP;
+		~listeningFormat = \_1474_VBAP;
 
 });
 
@@ -170,44 +170,51 @@ Platform.case (
 
 				if (  ServerOptions.outDevices.indexOfEqual("HDSPe MADI (23453676)") != nil,
 					{
-						postln("AudioOutDev: HDSPe MADI");
 						~outAudioDev = "HDSPe MADI (23453676)";
 				});
 
 				if (  ServerOptions.outDevices.indexOfEqual("MADIface USB (23635751)") != nil,
 					{
-						postln("AudioOutDev:  MADIface USB");
 						~outAudioDev = "MADIface USB (23635751)";
 				});
 
 		});
-		//  OR iF
+
+		//   iF
 		if (   ~listeningFormat == \dodecVBAP ,  // special case for near-field demo for IX    (this case should removed eventually)
 			{
-				// ~outAudioDev = "Dante Virtual Soundcard";    // for network streaming
-				~outAudioDev = "Soundflower (64ch)";    // for inter-application bussing
-
-				postf("AudioOutDev: %\n", ~outAudioDev);
+				if (  ServerOptions.outDevices.indexOfEqual("Soundflower (64ch)") != nil,
+					{
+						// ~outAudioDev = "Dante Virtual Soundcard";    // for network streaming
+						~outAudioDev = "Soundflower (64ch)";    // for inter-application bussing
+				});
 		});
-		//  OR iF
+
+
+		//   iF
+		if (   ~listeningFormat == \_1474_VBAP ,  // special case for near-field
+			{
+				if (~outAudioDev == nil,
+					{
+						if (  ServerOptions.outDevices.indexOfEqual("Soundflower (64ch)") != nil,
+							{
+								// ~outAudioDev = "Dante Virtual Soundcard";    // for network streaming
+								~outAudioDev = "Soundflower (64ch)";    // for inter-application bussing
+						});
+				});
+		});
+
+
+		//   iF
 		if ( ( ( ~listeningFormat == \quadVBAP)  ||   ( ~listeningFormat == \five1VBAP)  ),
 			{
 
 				if (  ServerOptions.outDevices.indexOfEqual("MOTU UltraLite mk3 Hybrid") != nil,
 					{
-						postln("AudioOutDev: MOTU UltraLite mk3 Hybrid");
 						~outAudioDev = "MOTU UltraLite mk3 Hybrid";
 				});
-			}, // else
-			{
-				if ( ~listeningFormat == \stereoListener,
-					{
-						// better letting the system set the default device
-						//postln("AudioOutDev: Built-in Output");
-						//~outAudioDev = "Built-in Output";
-						// o.dump;
-				});
 		});
+		postf("AudioOutDev: %\n", ~outAudioDev);
 	}
 );
 
@@ -228,7 +235,7 @@ switch (~listeningFormat,
 	{
 		o.numOutputBusChannels = 16;   // sixteen channels for VBAP 1_4_7_4  output
 	},
-   \domeVBAP,
+	\domeVBAP,
 	{
 		o.numOutputBusChannels = 32;
 	},
@@ -311,19 +318,19 @@ if ( ~listeningFormat == \_1474_VBAP,
 s.waitForBoot {
 
 	//  now that the server is booted, create any needed buses
-switch (~listeningFormat,
-	\ambi1,
-	{
-		~outBusIndex  = Bus.audio(s, 4).index; //  makeSynthDef spatializer outpus are assigned to this bus for decoding  :  GLOBAL ENVIRONMENT VARIABLE NEEDED
-	},
-	\_1474_VBAP,
-	{
-		~outBusIndex  = Bus.audio(s, 16).index; //  makeSynthDef spatializer outpus are assigned to this bus for decoding  :  GLOBAL ENVIRONMENT VARIABLE NEEDED
-	},
-	\ambi3,
-	{
-		~outBusIndex=Bus.audio(s, 16).index; //  makeSynthDef spatializer outpus are assigned to this bus for decoding  :  GLOBAL ENVIRONMENT VARIABLE NEEDED
-});
+	switch (~listeningFormat,
+		\ambi1,
+		{
+			~outBusIndex  = Bus.audio(s, 4).index; //  makeSynthDef spatializer outpus are assigned to this bus for decoding  :  GLOBAL ENVIRONMENT VARIABLE NEEDED
+		},
+		\_1474_VBAP,
+		{
+			~outBusIndex  = Bus.audio(s, 16).index; //  makeSynthDef spatializer outpus are assigned to this bus for decoding  :  GLOBAL ENVIRONMENT VARIABLE NEEDED
+		},
+		\ambi3,
+		{
+			~outBusIndex=Bus.audio(s, 16).index; //  makeSynthDef spatializer outpus are assigned to this bus for decoding  :  GLOBAL ENVIRONMENT VARIABLE NEEDED
+	});
 
 	s.sync;
 
@@ -340,14 +347,14 @@ switch (~listeningFormat,
 
 
 
-postf("\n\nAudio Configuration: \n");
-postf("\t listening format:  % \n ", ~listeningFormat);
-postf("\t output device (nil = default):  % \n", o.outDevice);
-postf("\t blockSize:  % \n", o.blockSize);
-postf("\t threadCount:  % \n", o.threads);
-postf("\t memory:  %K \n", (o.memSize*0.001).asInt);
-postf("\t output channels:  %\n", o.numOutputBusChannels);
-if (~ambiBus != nil, { postf("\t creating %-channel ambisonics signal on bus(%) \n\n", ~ambiBus.numChannels,  ~ambiBus.index    ); });
+	postf("\n\nAudio Configuration: \n");
+	postf("\t listening format:  % \n ", ~listeningFormat);
+	postf("\t output device (nil = default):  % \n", o.outDevice);
+	postf("\t blockSize:  % \n", o.blockSize);
+	postf("\t threadCount:  % \n", o.threads);
+	postf("\t memory:  %K \n", (o.memSize*0.001).asInt);
+	postf("\t output channels:  %\n", o.numOutputBusChannels);
+	if (~ambiBus != nil, { postf("\t creating %-channel ambisonics signal on bus(%) \n\n", ~ambiBus.numChannels,  ~ambiBus.index    ); });
 
 	s.sync;
 
