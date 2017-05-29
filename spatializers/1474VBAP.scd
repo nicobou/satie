@@ -31,7 +31,8 @@ elev: [90,40,40,40,40,0,0,0,0,0,0,0,-40,-40,-40,-40],
 
 */
 
-~spk16 = VBAPSpeakerArray.new(3, [
+// note, this is a global variable, used by specialized listeners to decode the output format.
+~speakerConfig1474 = [
 [0 , 90 ],  // top
 [45 , 40 ], // upper
 [135 , 40 ],
@@ -47,7 +48,11 @@ elev: [90,40,40,40,40,0,0,0,0,0,0,0,-40,-40,-40,-40],
 [0 , -40  ],  // lower
 [90 , -40  ],
 [180 , -40  ],
-[-90 , -40 ]]);
+[-90 , -40 ]];
+
+
+
+~spk16 = VBAPSpeakerArray.new(3, ~speakerConfig1474 );
 
 
 
