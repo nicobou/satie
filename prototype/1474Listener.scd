@@ -14,15 +14,10 @@
 //   ~satieRootPath
 //   ~outBusIndex    // bus with multi-channel ambisonic encoded signal  --- NEED GLOBAL ENVIRONMENT VARIABLE
 
-
-
-
 (
 // start of this local environment
 
 var quarkFound = false;
-var vbapSpeakerArray;
-var vbapBuffer;
 
 // Set this value to the number of near field speakers you are using
 ~the1474PlayerCount = 8;   // default.  This will generate 8 listeners, evenly separated on the unit circle by 360/8 == 45 degrees
@@ -39,20 +34,16 @@ if (quarkFound == false,
 	{
 		// else resources are defined, evaluate
 
-
 		//  this will go away once we have the satie global environment sorted out
 		if ( ~satieRootPath == nil,
 			{
 				error("1474Listener:  ~satieRootPath undefined, can't continue");   // this should point to the satie root directory
 		});
-		// used also by corresponding spatializer
-		// the famous 1_4_7_4  sixteen channel speaker configuration:  1 top, 4 upper, 7 ear-level, 4 below
-		// a VBAP spatializer feeds to this inBus
-		// The speaker positions [eleveation],[azimuth]
-		e = [90,40,40,40,40,0,0,0,0,0,0,0,-40,-40,-40,-40];
-		a = [0,45,135,225,315,25,75,130,180,230,285,335,0,90,180,270];
 
-		// the aboves, represented using an array of azi,elev pairs
+		// the famous 1_4_7_4  sixteen channel speaker configuration:  1 top, 4 upper, 7 ear-level, 4 below
+		// a VBAP spatializer feeds with this configuration to this inBus
+		// Below, the speaker positions [azimuth, elevation] of the configuration
+
 		~speakerConfig1474 = [
 			[0 , 90 ],  // top
 			[45 , 40 ], // upper
@@ -71,14 +62,22 @@ if (quarkFound == false,
 			[180 , -40  ],
 			[-90 , -40 ]];
 
-		// adjust your path to the Kemar data
-		// this is relative to the SC3 folder
-		Kemar.path = "/Users/zack/Dropbox/Unity3D/audioRendering/satie/prototype/.."++"/utils/hrtf/full";
-		Kemar.initBuffers(a, e, s);
+		BinAmbi3O.kemarPath_(~satieRootPath++"/utils/hrtf/full");
+		BinAmbi3O.init('1_4_7_4');   // spearker configuration:  1 top,  4 high, 7 ear level, and 4 low
 
-		vbapSpeakerArray = VBAPSpeakerArray.new(3, ~speakerConfig1474 );
-		vbapBuffer = Buffer.loadCollection(s, vbapSpeakerArray.getSetsAndMatrices);
+		// generate parGroups for supernova use
+		if (~parGroups == nil,
+			{
+				~parGroups = Array.new(16);
+				16.do( {|item|
+					~parGroups.add( ParGroup(1,\addToTail));
+				});
+		});
 
+		~speakerConfig1474Rad = Array.new(16);    // translate the configuration in radians for ambIEM
+		~speakerConfig1474.size.do( {|item|
+			~speakerConfig1474Rad.add([~speakerConfig1474[item][0].degrad, ~speakerConfig1474[item][1].degrad]);
+		});
 
 		s.waitForBoot {
 
@@ -87,33 +86,32 @@ if (quarkFound == false,
 			// synthDef  outputs named auxBus on named outputChannel
 			SynthDef(\_1474_to_binaural, { arg inBus,  outChan=0, rotAziDeg=0;
 				var sigVec, rotVec;
+
+				var ambiVec;
+				var rotAziRad = rotAziDeg*0.017453292519943;
 				var outsig;
 
 				sigVec = In.ar(inBus, 16);   // reads the 16 channel spatiaized audio bus
 
-				// send each channel of the signal to a corresponding vbap and accumulates a 16-channel output
-				rotVec = VBAP.ar(16, sigVec[0], vbapBuffer.bufnum, ~speakerConfig1474[ 0][0]  + rotAziDeg,   ~speakerConfig1474[ 0][1] );
-				rotVec =  rotVec + VBAP.ar(16, sigVec[1], vbapBuffer.bufnum, ~speakerConfig1474[ 1][0]  + rotAziDeg,   ~speakerConfig1474[ 1][1] );
-				rotVec =  rotVec + VBAP.ar(16, sigVec[2], vbapBuffer.bufnum, ~speakerConfig1474[ 2][0]  + rotAziDeg,   ~speakerConfig1474[ 2][1] );
-				rotVec =  rotVec + VBAP.ar(16, sigVec[3], vbapBuffer.bufnum, ~speakerConfig1474[ 3][0]  + rotAziDeg,   ~speakerConfig1474[ 3][1] );
-				rotVec =  rotVec + VBAP.ar(16, sigVec[4], vbapBuffer.bufnum, ~speakerConfig1474[ 4][0]  + rotAziDeg,   ~speakerConfig1474[ 4][1] );
-				rotVec =  rotVec + VBAP.ar(16, sigVec[5], vbapBuffer.bufnum, ~speakerConfig1474[ 5][0]  + rotAziDeg,   ~speakerConfig1474[ 5][1] );
-				rotVec = rotVec + VBAP.ar(16, sigVec[6], vbapBuffer.bufnum, ~speakerConfig1474[ 6 ][0]  + rotAziDeg,   ~speakerConfig1474[ 6][1] );
-				rotVec = rotVec + VBAP.ar(16, sigVec[7], vbapBuffer.bufnum, ~speakerConfig1474[ 7 ][0]  + rotAziDeg,   ~speakerConfig1474[ 7][1] );
-				rotVec = rotVec + VBAP.ar(16, sigVec[8], vbapBuffer.bufnum, ~speakerConfig1474[ 8 ][0]  + rotAziDeg,   ~speakerConfig1474[ 8][1] );
-				rotVec = rotVec + VBAP.ar(16, sigVec[9], vbapBuffer.bufnum, ~speakerConfig1474[ 9 ][0]  + rotAziDeg,   ~speakerConfig1474[ 8][1] );
-				rotVec = rotVec + VBAP.ar(16, sigVec[10], vbapBuffer.bufnum, ~speakerConfig1474[ 10 ][0]  + rotAziDeg,   ~speakerConfig1474[ 10][1] );
-				rotVec = rotVec + VBAP.ar(16, sigVec[11], vbapBuffer.bufnum, ~speakerConfig1474[ 11 ][0]  + rotAziDeg,   ~speakerConfig1474[ 11][1] );
-				rotVec = rotVec + VBAP.ar(16, sigVec[12], vbapBuffer.bufnum, ~speakerConfig1474[ 12 ][0]  + rotAziDeg,  ~speakerConfig1474[ 12][1] );
-				rotVec = rotVec + VBAP.ar(16, sigVec[13], vbapBuffer.bufnum, ~speakerConfig1474[ 13 ][0]  + rotAziDeg,  ~speakerConfig1474[13][1] );
-				rotVec = rotVec + VBAP.ar(16, sigVec[14], vbapBuffer.bufnum, ~speakerConfig1474[ 14 ][0]  + rotAziDeg,   ~speakerConfig1474[ 14][1] );
-				rotVec = rotVec + VBAP.ar(16, sigVec[15], vbapBuffer.bufnum, ~speakerConfig1474[ 15 ][0]  + rotAziDeg,   ~speakerConfig1474[ 15][1] );
+				// send each channel of the signal to a corresponding ambisonics panner and accumulate a 16-channel ambisonics signal
+				ambiVec = PanAmbi3O.ar(sigVec[0], ~speakerConfig1474Rad[ 0][0] + rotAziRad,   ~speakerConfig1474Rad[ 0][1] );
+				ambiVec = ambiVec + PanAmbi3O.ar(sigVec[1], ~speakerConfig1474Rad[ 1 ][0] + rotAziRad,   ~speakerConfig1474Rad[ 1 ][1] );
+				ambiVec = ambiVec + PanAmbi3O.ar(sigVec[2], ~speakerConfig1474Rad[ 2 ][0] + rotAziRad,   ~speakerConfig1474Rad[ 2 ][1] );
+				ambiVec = ambiVec + PanAmbi3O.ar(sigVec[3], ~speakerConfig1474Rad[ 3 ][0] + rotAziRad,   ~speakerConfig1474Rad[ 3 ][1] );
+				ambiVec = ambiVec + PanAmbi3O.ar(sigVec[4], ~speakerConfig1474Rad[ 4 ][0] + rotAziRad,   ~speakerConfig1474Rad[ 4 ][1] );
+				ambiVec = ambiVec + PanAmbi3O.ar(sigVec[5], ~speakerConfig1474Rad[ 5 ][0] + rotAziRad,   ~speakerConfig1474Rad[ 5 ][1] );
+				ambiVec = ambiVec + PanAmbi3O.ar(sigVec[6], ~speakerConfig1474Rad[ 6 ][0] + rotAziRad,   ~speakerConfig1474Rad[ 6 ][1] );
+				ambiVec = ambiVec + PanAmbi3O.ar(sigVec[7], ~speakerConfig1474Rad[ 7 ][0] + rotAziRad,   ~speakerConfig1474Rad[ 7 ][1] );
+				ambiVec = ambiVec + PanAmbi3O.ar(sigVec[8], ~speakerConfig1474Rad[ 8 ][0] + rotAziRad,   ~speakerConfig1474Rad[ 8 ][1] );
+				ambiVec = ambiVec + PanAmbi3O.ar(sigVec[9], ~speakerConfig1474Rad[ 9 ][0] + rotAziRad,   ~speakerConfig1474Rad[ 9 ][1] );
+				ambiVec = ambiVec + PanAmbi3O.ar(sigVec[10], ~speakerConfig1474Rad[ 10 ][0] + rotAziRad,   ~speakerConfig1474Rad[ 10 ][1] );
+				ambiVec = ambiVec + PanAmbi3O.ar(sigVec[11], ~speakerConfig1474Rad[ 11 ][0] + rotAziRad,   ~speakerConfig1474Rad[ 11 ][1] );
+				ambiVec = ambiVec + PanAmbi3O.ar(sigVec[12], ~speakerConfig1474Rad[ 12 ][0] + rotAziRad,   ~speakerConfig1474Rad[ 12 ][1] );
+				ambiVec = ambiVec + PanAmbi3O.ar(sigVec[13], ~speakerConfig1474Rad[ 13 ][0] + rotAziRad,   ~speakerConfig1474Rad[ 13 ][1] );
+				ambiVec = ambiVec + PanAmbi3O.ar(sigVec[14], ~speakerConfig1474Rad[ 14 ][0] + rotAziRad,   ~speakerConfig1474Rad[ 14 ][1] );
+				ambiVec = ambiVec + PanAmbi3O.ar(sigVec[15], ~speakerConfig1474Rad[ 15 ][0] + rotAziRad,   ~speakerConfig1474Rad[ 15 ][1] );
 
-				//rotVec.scope;
-
-				outsig =  Kemar.ar( rotVec);   // convert to binaural
-
-
+				outsig =  BinAmbi3O.ar(ambiVec);   // decodes for HRTF
 				outsig = BLowShelf.ar(
 					outsig,
 					500,   // freq
@@ -123,11 +121,11 @@ if (quarkFound == false,
 				Out.ar(outChan, outsig);
 			}).add;
 
-
 			s.sync;
 
-			// GENERATE N  OUTPUT PLAYERS
-			// clean the player array if need be
+			// GENERATE  N  OUTPUT LISTENERS
+
+			// 1.  clean the player array if need be
 			if (~vbap2binauralPlayers!=nil,
 				{
 					~vbap2binauralPlayers.size.do( {|item|
@@ -138,17 +136,16 @@ if (quarkFound == false,
 				// else its the first time,  create dictionary and ParGroup
 				{
 					~vbap2binauralPlayers = Dictionary.new;
-					~vbap2binauralGroup = ParGroup(1,\addToTail);    // run the players in the context of a parallell group for supernova
 			});
 
-			// generate N players
+			// 2.  generate N players
 			~the1474PlayerCount.do( {|item|
 				var itemName = "item"++item;
 				var azimuthDelta = 360/~the1474PlayerCount;
 				~vbap2binauralPlayers.put(itemName.asSymbol,
 					Synth(\_1474_to_binaural,
 						[\inBus, ~outBusIndex, \rotAziDeg, item*azimuthDelta, \outChan, item*2],
-						~vbap2binauralGroup ));
+						~parGroups[item] ));
 
 				postf("1474Listener: creating 1474 player with offset: %  on output % \n", item*azimuthDelta, item*2);
 			});
@@ -164,20 +161,32 @@ if (quarkFound == false,
 )   // end of local environment
 
 
-
 /*
 
+~vbap2binauralGroup2 = ParGroup(1,\addToTail);    // run the players in the context of a parallell group for supernova
+
+
+a=Synth(\_1474_to_binaural, [\inBus, ~outBusIndex, \rotAziDeg, 0, \outChan,0], ~vbap2binauralGroup );
+
+a.free
+
+
+b=Synth(\_1474_to_binaural, [\inBus, ~outBusIndex, \rotAziDeg, 0, \outChan,2], 1, \addToTail   );
+b=Synth(\_1474_to_binaural, [\inBus, ~outBusIndex, \rotAziDeg, 0, \outChan,2], ~vbap2binauralGroup2 );
+
+b.free
 
 ~the1474PlayerCount = 4;   // default
 
 ~vbap2binauralPlayers.at(\item0).set(\rotAziDeg, 155);
 ~vbap2binauralPlayers.at(\item0).set(\rotAziDeg, 0);
 
-*/
 
 
 
-/*
+
+
+
 TO MOVE DECODER TO TAIL OF DSP  evalute the following:
 
 ~ambiemHRTF.moveToTail;
