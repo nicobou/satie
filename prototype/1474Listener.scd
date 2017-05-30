@@ -147,7 +147,7 @@ if (quarkFound == false,
 						[\inBus, ~outBusIndex, \rotAziDeg, item*azimuthDelta, \outChan, item*2],
 						~parGroups[item] ));
 
-				postf("1474Listener: creating 1474 player with offset: %  on output % \n", item*azimuthDelta, item*2);
+				postf("1474Listener: creating 1474 player with offset: %  on output % \n", item*azimuthDelta, item*2+1);
 			});
 
 			s.sync;
