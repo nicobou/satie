@@ -20,7 +20,7 @@
 var quarkFound = false;
 
 // Set this value to the number of near field speakers you are using
-~the1474PlayerCount = 8;   // default.  This will generate 8 listeners, evenly separated on the unit circle by 360/8 == 45 degrees
+~the1474PlayerCount = 4;   // default.  This will generate 8 listeners, evenly separated on the unit circle by 360/8 == 45 degrees
 
 
 Quarks.installed.size.do( {|item|

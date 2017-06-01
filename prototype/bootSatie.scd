@@ -29,7 +29,7 @@ if (~listeningFormat == nil,
 		~listeningFormat = \stereoListener;    // default listening format
 		//~listeningFormat = \ambi3;
 		//~listeningFormat = \ambi1;
-		~listeningFormat = \_1474_VBAP;
+		~listeningFormat = \domeVBAP;
 
 });
 
@@ -293,6 +293,8 @@ Platform.case(
 //~startupfiles = [~satieRootPath ++ "prototype/ambi1Listener.scd"];
 
 ~startupfiles = List.new();
+
+~startupfiles.add(~satieRootPath++"/utils/dacTest.scd");
 
 if ( ~listeningFormat == \ambi1,
 	{
