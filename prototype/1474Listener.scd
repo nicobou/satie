@@ -118,6 +118,15 @@ if (quarkFound == false,
 					1.0, // q
 					18 ); // cut/boost
 
+
+
+/*				outsig = BPeakEQ.ar(
+					outsig,
+					eqHz,   // center frequeency
+					1, // rq
+					eqDB); // attenuation*/
+
+
 				Out.ar(outChan, outsig);
 			}).add;
 
