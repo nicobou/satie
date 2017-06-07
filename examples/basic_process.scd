@@ -15,14 +15,14 @@
 Exception.debug = true;
 Server.supernova;
 o = Server.local.options;
-o.numOutputBusChannels = 2;
+o.numOutputBusChannels = 8;
 o.memSize = 2**20;
-o.blockSize = 2048;
+o.blockSize = 1024;
 s.waitForBoot {
 	~rootSrcPath = thisProcess.nowExecutingPath.dirname ++ "/..";
 	(~rootSrcPath ++ "/src/*.scd").pathMatch.do({arg item; item.loadPaths});
 	~satie = ~satieMaker.value(numAudioAux: 0, satieSrcPath: ~rootSrcPath);
-	~satie.makeSynthDef(\string, \zkarpluck1, [], [], [\stereoPanner], [0], \defaultMapper, []);
+	~satie.makeSynthDef(\string, \zkarpluck1, [], [], [\cubeVBAP], [0], \defaultMapper, []);
 	s.sync;
 	s.meter;
 	s.plotTree;
@@ -31,14 +31,11 @@ s.waitForBoot {
 )
 
 
-
 (
 //process definition
 ~env = Environment.make({
-	~aziDeg = 0;
 	~routine;
 	~makeRoutine = { |self |
-		self.aziDeg = 0;
 		self.routine = Routine {
 			// Here the routine creates sound objects without deleting them util the routine is stopped.
 			loop { arg item;
@@ -51,13 +48,14 @@ s.waitForBoot {
 					\t_trig, 1,
 					\gainDB, rrand(-40, -30),
 					\note, [note, 1, 0.5],
-				\aziDeg, self.aziDeg);
+					\aziDeg, rrand(-180,180),
+					\eleDeg, rrand(-90,90)
+				);
 				0.5.wait;
 			}
 		};
 	};
 	~start = { | self | self.routine.play; };
-	~setAzideg = {| self, aziDeg | self.aziDeg = aziDeg; }
 });
 )
 
@@ -67,17 +65,4 @@ s.waitForBoot {
 // invoke specific process functions
 ~process.makeRoutine;
 ~process.start;
-
-(
-// change azimut from UI
-w=Window.new("basic process", Rect(30, 30, 400, 130)).front;
-
-w.view.decorator=FlowLayout(w.view.bounds);
-w.view.decorator.gap=8@2;
-
-h = EZRanger(w, 380@20, "azi", ControlSpec(-180, 180, \lin, 0.1), initVal:[-10, 10],
-	action: {|sl|
-		~process.setAzideg(rrand(sl.value[0], sl.value[1]))
-		});
-)
 
