@@ -29,7 +29,7 @@ if (~listeningFormat == nil,
 		~listeningFormat = \stereoListener;    // default listening format
 		//~listeningFormat = \ambi3;
 		//~listeningFormat = \ambi1;
-		~listeningFormat = \domeVBAP;
+		//~listeningFormat = \domeVBAP;
 
 });
 
