@@ -48,19 +48,23 @@ oscsend localhost 18032 /satie/pluginargs s misDrone
 	var str, param, value, type;
 	str = "";
 	param = key.asString.quote;
+	value = ~checkForNil.value(val);
+	type = value.class.asString.quote;
+	str = "{"++~jsonParam.value("name", param)++","++~jsonParam.value("value", value)++","++~jsonParam.value("type",type) ++ "},";
+	~json = ~json ++ str;
+
+};
+
+~checkForNil = {|val|
+	var value;
 	if (val != nil,
 		{
 			value = val;
-
 		},
 		{
 			value = "unused".quote;
 		}
-	);
-	type = value.class.asString.quote;
-	str = "\t{\n\t\t" ++ "name".quote ++ ": " ++ param ++ "," ++ "value".quote ++ ": " ++ value ++ "," ++ "type".quote ++ ":" ++ type ++ "\n\t}\n";
-	~json = ~json ++ str;
-
+	)
 };
 
 ~makeJsonArray = {| item, index |
@@ -78,7 +82,7 @@ oscsend localhost 18032 /satie/pluginargs s misDrone
 			str = item.asString.quote;
 		},
 		{ format("% not found in effects", item).warn}
-	);
+		);
 	// TODO: separate generators and effects into two different json objects
 	~json = ~json ++ str;
 
@@ -107,7 +111,6 @@ oscsend localhost 18032 /satie/pluginargs s misDrone
 	var str;
 	str = ~toJSON.value(key, val);
 	~effectsJSON = ~effectsJSON ++ str;
-	~effectsJSON.warn;
 
 };
 
@@ -116,40 +119,35 @@ oscsend localhost 18032 /satie/pluginargs s misDrone
 	var str, keyName, sName;
 	keyName = key[0].asString.quote;
 	sName = key[1].asString.quote;
-	str = ~jsonParam.value("name")++keyName++",";
-	str = str++~jsonParam.value("srcName")++sName++",";
-	str = str++~jsonParam.value("description")++"Description...".quote;
+	str = ~jsonParam.value("name", keyName)++",";
+	str = str++~jsonParam.value("srcName", sName)++",";
+	str = str++~jsonParam.value("description", "Description...".quote);
 	str = ~jsonBrace.value(str);
 	str;
 };
 
-~jsonParam = {|param|
+~jsonParam = {|param, value|
 	// provide a quoted string representing json param followed by a colon (:)
 	var str;
-	str = param.quote++":";
+	str = param.quote++": "++value.asString;
 };
 
 
-~getAudioPlugins = {
+~getAudioPlugins = { | msg , time, addr, recvPort|
 	// get present synthdefs and send them via OSC as json object
 	var keys, generators, effects;
+	~setResponderAddress.value(addr);
 	~satie.generatorSynthDef.keysValuesDo({|key, value| generators = generators.add(Array[key, value])});
 	~satie.effectSynthDef.keysValuesDo({|key, value| effects = effects.add(Array[key, value])});
 	generators.do(~makeGeneratorsJSON);
 	effects.do(~makeEffectsJSON);
-	"    <---".inform;
 	~generatorsJSON = ~generatorsJSON.replace("\}\{", "\}, \{");
 	~generatorsJSON = "["++~generatorsJSON++"]";
-
-	~generatorsJSON = ~jsonParam.value("sources")++~generatorsJSON++",";
-	// ~generatorsJSON.warn;
-	// ~generatorsJSON.asCompileString.inform;
+	~generatorsJSON = ~jsonParam.value("sources", ~generatorsJSON)++",";
 	~effectsJSON = ~effectsJSON.replace("\}\{", "\}, \{");
 	~effectsJSON = "["++~effectsJSON++"]";
-	~effectsJSON = ~jsonParam.value("effects")++~effectsJSON;
-	// ~effectsJSON.warn;
+	~effectsJSON = ~jsonParam.value("effects", ~effectsJSON);
 	~json = "{" ++ ~generatorsJSON++~effectsJSON ++ "}";
-	// ~json.warn;
 	~responder.sendMsg("/plugins", ~json);
 	~effectsJSON = "";
 	~generatorsJSON = "";
@@ -159,6 +157,7 @@ oscsend localhost 18032 /satie/pluginargs s misDrone
 ~getPluginArguments = { | msg , time, addr, recvPort|
 	// get synth definition arguments and send them as json object
 	var synth, argnames;
+	~setResponderAddress.value(addr);
 	synth = msg[1];
 	if (~satie.pluginLoader.audioPlugins.keys.includes(synth.asSymbol),
 		{
@@ -169,15 +168,27 @@ oscsend localhost 18032 /satie/pluginargs s misDrone
 			argnames = ~satie.pluginLoader.effectPlugins[synth].def.keyValuePairsFromArgs;
 		}
 	);
+	// watch out: there is a trailing comma after running the following line
 	argnames.asArray.pairsDo(~makeJsonFromArgnames);
-	~json = ~json.replace("}\n\t{", "},\n\t{");
+	// seems I need to join, else I get "Attempted to write to immutable object" on the next operation
+	~json = ~json.join;
+	// remove the trailing comma
+	~json.removeAt(~json.size - 1);
 	~json = "{\n" ++ synth.asString.quote ++ ": \n[" ++ ~json ++ "\n]}\n";
 	~responder.sendMsg("/arguments", ~json);
+	~json;
 	~json = "";
 	nil;
 };
 
+
+~setResponderAddress = {
+	|addr|
+	~responder = addr;
+	postf("Sending responses to: %\n", addr);
+};
+
 OSCdef(\audioplugins, ~getAudioPlugins, '/satie/audioplugins', recvPort: 18032);
 OSCdef(\pluginArgs, ~getPluginArguments, '/satie/pluginargs', recvPort: 18032);
-
+OSCFunc(~setResponderAddress, '/satie/setAddr', recvPort: 18032);
 )
