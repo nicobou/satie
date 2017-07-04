@@ -12,7 +12,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 SatieConfiguration {
-	var server;
+	var <server;
 	var <>listeningFormat;
 	var numAudioAux;
 	var outBusIndex;

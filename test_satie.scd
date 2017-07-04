@@ -20,8 +20,9 @@ s = Server.supernova.local;
 ~satie.satieRoot;
 ~satie.configure_(s, "stereo");
 ~satie.satieConfiguration.options.blockSize = 1024;
-s.reboot();
+// s.reboot();
 s.waitForBoot({
+	~satie.renderer.makeSatieGroup(\default);
 	s.meter;
 	s.makeGui;
 	s.plotTree;
@@ -36,13 +37,29 @@ s.waitForBoot({
 	.postln;
 }
 )
-
+~satie.renderer.makeSatieGroup()
 ~satie.renderer.makeSatieGroup(\default);
 ~satie.renderer.makeSatieGroup(\synths);
 
 ~satie.renderer.makeSynthDef(\boo, \misDrone, [], [], [\stereoListener], [0]);
 ~satie.renderer.makeSynthDef(\test, \testtone, [], [], [\stereoListener], [0]);
-~satie.renderer.makeInstance(\synth, \boo, group: \synths );
+~drone = ~satie.renderer.makeInstance(\synth, \boo );
 ~satie.renderer.makeInstance(\test, \test, group: \default );
 
-~satie.renderer.groups
+~satie.renderer.groups.includesKey(\synth)
+~satie.renderer.groupInstances
+
+
+~drone.set(\freq, 40, \gainDB, 0)
+
+
+(
+20.do( { arg item;
+	var nodename=("testNode"++"_"++item).asSymbol;
+	var synth;
+	synth = ~satie.renderer.makeInstance(nodename.asSymbol, \boo, \default);
+	synth.set(\gainDB, rrand(-90, -38), \sfreq, rrand(100, 1000));
+});
+)
+
+s.initTree
