@@ -45,6 +45,8 @@ SatieConfiguration {
 		"New configuration: \nRoot: %\nSpat: %\nPlugins: %, %, %".format(
 			this.satieRoot, spat, this.audioPlugins, this.fxPlugins, this.spatPlugins, this.mapperPlugins
 		).postln;
+
+
 	}
 
 	handleListening_ { arg format;

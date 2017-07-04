@@ -29,6 +29,8 @@ Satie {
 	var <>spatPlugins;
 	var <>mapperPlugins;
 
+	var <renderer;
+
 	*new{|server|
 		^super.new.init(server);
 	}
@@ -44,6 +46,8 @@ Satie {
 		fxPlugins = satieConfiguration.fxPlugins;
 		spatPlugins = satieConfiguration.spatPlugins;
 		mapperPlugins = satieConfiguration.mapperPlugins;
+
+		renderer = SatieRenderer.new(satieConfiguration);
 	}
 
 	configure {

@@ -21,8 +21,11 @@ s = Server.supernova.local;
 ~satie.configure_(s, "stereo");
 ~satie.satieConfiguration.options.blockSize = 1024;
 s.reboot();
-s.meter;
-s.
+s.waitForBoot({
+	s.meter;
+	s.makeGui;
+	s.plotTree;
+})
 // ~satie.satieConfiguration;
 )
 
@@ -34,7 +37,12 @@ s.
 }
 )
 
-~satie.audioPlugins.keysValuesDo(~printem);
-~satie.fxPlugins.keysValuesDo(~printem);
-~satie.spatPlugins.keysValuesDo(~printem);
-~satie.mapperPlugins.keysValuesDo(~printem);
+~satie.renderer.makeSatieGroup(\default);
+~satie.renderer.makeSatieGroup(\synths);
+
+~satie.renderer.makeSynthDef(\boo, \misDrone, [], [], [\stereoListener], [0]);
+~satie.renderer.makeSynthDef(\test, \testtone, [], [], [\stereoListener], [0]);
+~satie.renderer.makeInstance(\synth, \boo, group: \synths );
+~satie.renderer.makeInstance(\test, \test, group: \default );
+
+~satie.renderer.groups
