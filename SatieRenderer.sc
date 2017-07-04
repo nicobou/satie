@@ -26,8 +26,11 @@ SatieRenderer {
 		groupInstances = Dictionary.new();
 		generators = IdentityDictionary.new();
 		effects = IdentityDictionary.new();
-		groupInstances.put(\default, Dictionary.new);
-		this.makeSatieGroup(\default);
+		// TODO:
+		// for some reason, we need to create the default group explicitly elsewhere, probably some timing or synchronicity
+		// needs to be figured out.
+		// satieConfig.server.doWhenBooted(this.makeSatieGroup(\default), onFailure: {"server did not boot".warning;});
+		// this.makeSatieGroup(\default);
 	}
 
 	makeSynthDef {|
@@ -41,7 +44,7 @@ SatieRenderer {
 		synthArgs = #[]|
 
 		var dico;
-		if(nil != satieConfig.audioPlugins.at(srcName),
+		if(satieConfig.audioPlugins.at(srcName) != nil,
 			{
 				dico = satieConfig.audioPlugins;
 				generators.add(id.asSymbol -> srcName.asSymbol);
@@ -74,10 +77,33 @@ SatieRenderer {
 		^synth;
 	}
 
+	makeKamikaze {| name, synthDefName, group = \default, synthArgs = #[] |
+		var synth = Synth(synthDefName ++ "_kamikaze", args: synthArgs, target: groups[group], addAction: \addToHead);
+		^synth;
+	}
+
 	makeSatieGroup { |  name, addAction = \addToHead |
-		var group = ParGroup.new(addAction: addAction);
+		var group;
+		"Creating group %".format(name).postln;
+		group = ParGroup.new(addAction: addAction);
 		groups.put(name.asSymbol, group);
 		groupInstances.put(name.asSymbol, Dictionary.new);
 		^group;
+	}
+
+	killSatieGroup { | name |
+		groups[name].free;
+		groupInstances[name].free;
+		groups.removeAt(name);
+		groupInstances.removeAt(name);
+	}
+
+	cleanInstance {|name, group = \default |
+		groupInstances[group][name].free();
+		groupInstances[group].removeAt(name);
+	}
+
+	pauseInstance {|name, group = \default |
+		groupInstances[group][name].release();
 	}
 }
