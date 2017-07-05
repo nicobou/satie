@@ -59,14 +59,14 @@ SatieRenderer {
 
 		SatieFactory.makeSynthDef(
 			id,
-			dico.at(srcName).function,
+			dico.at(srcName).getSrc,
 			srcPreToBusses,
 			srcPostToBusses,
 			spatSymbolArray.collect({|item, i|
-				satieConfig.spatPlugins.at(item).function
+				satieConfig.spatPlugins.at(item).getSrc
 			}),
 			firstOutputIndexes,
-			satieConfig.mapperPlugins.at(paramsMapper).function,
+			satieConfig.mapperPlugins.at(paramsMapper).getSrc,
 			synthArgs
 		);
 	}
