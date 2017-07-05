@@ -16,10 +16,9 @@
 
 (
 s = Server.supernova.local;
-~satie = Satie.new(s);
-~satie.satieRoot;
-~satie.configure_(s, "stereo");
-~satie.satieConfiguration.options.blockSize = 1024;
+~satieConfiguration = SatieConfiguration.new(s, "stereo");
+~satieConfiguration.serverOptions.blockSize = 1024;
+~satie = Satie.new(~satieConfiguration);
 // s.reboot();
 s.waitForBoot({
 	~satie.makeSatieGroup(\default);
@@ -30,14 +29,6 @@ s.waitForBoot({
 	s.plotTree;
 })
 // ~satie.satieConfiguration;
-)
-
-(
-~printem = {|k, v|
-	"%:\nName: %\nDescription: %\nsource%\n".format(
-		k, v.getName, v.getDescription, v.getSrc.asCompileString)
-	.postln;
-}
 )
 
 // create another group

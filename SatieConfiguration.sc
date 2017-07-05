@@ -20,7 +20,7 @@ SatieConfiguration {
 
 	var <satieRoot;
 	var <spat;
-	var <options;
+	var <serverOptions;
 	var debug = true;
 	// Plugins needed by the renderer
 	var <>audioPlugins;
@@ -29,13 +29,13 @@ SatieConfiguration {
 	var <>mapperPlugins;
 
 	*new {| server, listeningFormat = "stereo", numAudioAux = 0, outBusIndex = 0, startupFiles = #[] |
-		server = server ? Server.default;
+		server = server ? Server.supernova;
 		^super.newCopyArgs(server, listeningFormat, numAudioAux, outBusIndex, startupFiles).init;
 	}
 
 	init{
 		satieRoot = this.class.filenameSymbol.asString.dirname;
-		options = server.options;
+		serverOptions = server.options;
 		this.spatializer_(listeningFormat);
 		// load plugins
 		audioPlugins = SatiePlugins.new(satieRoot++"/audiosources/*.scd");
@@ -54,71 +54,71 @@ SatieConfiguration {
 			"dodecNF",
 			{
 				spat  = \dodecNF;   // vbap to near field... outputs 20 chanels to soundFlower
-				options.numOutputBusChannels = 28;
+				serverOptions.numOutputBusChannels = 28;
 			},
 			"sato",
 			{
 				spat  = \domeVBAP;
-				options.numOutputBusChannels = 32;
+				serverOptions.numOutputBusChannels = 32;
 			},
 			"dodec",
 			{
 				spat  = \dodec;
-				options.numOutputBusChannels = 28;
+				serverOptions.numOutputBusChannels = 28;
 			},
 			"labo",
 			{
 				spat  = \labodomeVBAP;
-				options.numOutputBusChannels = 24;
+				serverOptions.numOutputBusChannels = 24;
 			},
 			"octo",
 			{
 				spat  = \octoVBAP;
-				options.numOutputBusChannels = 8;
+				serverOptions.numOutputBusChannels = 8;
 			},
 			"cube",
 			{
 				spat  = \cubeVBAP;
-				options.numOutputBusChannels = 8;
+				serverOptions.numOutputBusChannels = 8;
 			},
 			"mono",
 			{
 				spat  = \mono;
-				options.numOutputBusChannels = 1;
+				serverOptions.numOutputBusChannels = 1;
 			},
 			"5one",
 			{
 				spat  = \five1VBAP;
-				options.numOutputBusChannels = 6;
+				serverOptions.numOutputBusChannels = 6;
 			},
 			"quad",
 			{
 				spat  = \quadVBAP;
-				options.numOutputBusChannels = 4;
+				serverOptions.numOutputBusChannels = 4;
 			},
 			"stereo",
 			{
 				spat  = \stereoListener;
-				options.numOutputBusChannels = 2;
+				serverOptions.numOutputBusChannels = 2;
 			},
 			"ambi1",
 			{
 				spat = \ambi1;
-				options.numOutputBusChannels = 2;
-				options.blockSize = 64;    // ATK -  needs small buffer sizes or it complains
+				serverOptions.numOutputBusChannels = 2;
+				serverOptions.blockSize = 64;    // ATK -  needs small buffer sizes or it complains
 				"  - (Re)setting blocksize to 64, ATK requires small buffer sizes".warn;
 			},
 			"ambi3",
 			{
 				spat = \ambi3;
-				options.numOutputBusChannels = 2;
-				options.blockSize = 128;    // ATK -  needs small buffer sizes or it complains
+				serverOptions.numOutputBusChannels = 2;
+				serverOptions.blockSize = 128;    // ATK -  needs small buffer sizes or it complains
 				"  - (Re)setting blocksize to 128, ATK requires small buffer sizes".warn;
 			},
 			"1474",
 			{
 				spat = \_1474_VBAP;
-				options.numOutputBusChannels = 16;
+				serverOptions.numOutputBusChannels = 16;
 			}
 		);
 		"debug is %".format(debug).postln;

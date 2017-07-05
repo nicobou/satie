@@ -13,8 +13,6 @@
 
 + Satie {
 
-
-
 	initRenderer {
 		groups = Dictionary.new();
 		groupInstances = Dictionary.new();

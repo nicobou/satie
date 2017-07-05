@@ -39,11 +39,11 @@ Satie {
 		^super.new.init(server);
 	}
 
-	init {|server|
+	init {|satieConfiguration|
 		"    - server: %".format(server).postln;
 		//(satieRoot ++ "/src/*.scd").pathMatch.do({arg item; item.loadPaths});
-		this.satieConfiguration = SatieConfiguration.new(this.server);
-		options = this.satieConfiguration.options;
+		this.satieConfiguration = satieConfiguration;
+		options = this.satieConfiguration.serverOptions;
 		satieRoot = satieConfiguration.satieRoot;
 		debug = satieConfiguration.debug;
 		audioPlugins = satieConfiguration.audioPlugins;
@@ -53,12 +53,15 @@ Satie {
 		this.initRenderer();
 	}
 
-	configure {
-		^satieConfiguration;
-	}
-
-	configure_ { | server, listeningFormat = "stereo", numAudioAux = 0, outBusIndex = 0, startupFiles = #[] |
-		server = server ? Server.default;
-		satieConfiguration = SatieConfiguration.new(server, listeningFormat, numAudioAux, outBusIndex, startupFiles);
+	initRenderer {
+		groups = Dictionary.new();
+		groupInstances = Dictionary.new();
+		generators = IdentityDictionary.new();
+		effects = IdentityDictionary.new();
+		// TODO:
+		// for some reason, we need to create the default group explicitly elsewhere, probably some timing or synchronicity
+		// needs to be figured out.
+		// satieConfiguration.server.doWhenBooted(this.makeSatieGroup(\default), onFailure: {"server did not boot".warning;});
+		// this.makeSatieGroup(\default);
 	}
 }
