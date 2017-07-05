@@ -29,7 +29,11 @@ Satie {
 	var <>spatPlugins;
 	var <>mapperPlugins;
 
-	var <renderer;
+	/*    RENDERER     */
+	// compiled definitions
+	var generators, effects;
+	// instantiated
+	var <groups, <groupInstances;
 
 	*new{|server|
 		^super.new.init(server);
@@ -46,8 +50,7 @@ Satie {
 		fxPlugins = satieConfiguration.fxPlugins;
 		spatPlugins = satieConfiguration.spatPlugins;
 		mapperPlugins = satieConfiguration.mapperPlugins;
-
-		renderer = SatieRenderer.new(satieConfiguration);
+		this.initRenderer();
 	}
 
 	configure {

@@ -11,15 +11,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-SatieRenderer {
-	var <satieConfig;
-
-	var <groups, <groupInstances, generators, effects;
++ Satie {
 
 
-	*new {|satieConfig|
-		^super.newCopyArgs(satieConfig).initRenderer;
-	}
 
 	initRenderer {
 		groups = Dictionary.new();
@@ -29,7 +23,7 @@ SatieRenderer {
 		// TODO:
 		// for some reason, we need to create the default group explicitly elsewhere, probably some timing or synchronicity
 		// needs to be figured out.
-		// satieConfig.server.doWhenBooted(this.makeSatieGroup(\default), onFailure: {"server did not boot".warning;});
+		// satieConfiguration.server.doWhenBooted(this.makeSatieGroup(\default), onFailure: {"server did not boot".warning;});
 		// this.makeSatieGroup(\default);
 	}
 
@@ -44,13 +38,13 @@ SatieRenderer {
 		synthArgs = #[]|
 
 		var dico;
-		if(satieConfig.audioPlugins.at(srcName) != nil,
+		if(satieConfiguration.audioPlugins.at(srcName) != nil,
 			{
-				dico = satieConfig.audioPlugins;
+				dico = satieConfiguration.audioPlugins;
 				generators.add(id.asSymbol -> srcName.asSymbol);
 			},
 			{
-				dico = satieConfig.fxPlugins;
+				dico = satieConfiguration.fxPlugins;
 				effects.add(id.asSymbol -> srcName.asSymbol);
 			}
 		);
@@ -63,10 +57,10 @@ SatieRenderer {
 			srcPreToBusses,
 			srcPostToBusses,
 			spatSymbolArray.collect({|item, i|
-				satieConfig.spatPlugins.at(item).getSrc
+				satieConfiguration.spatPlugins.at(item).getSrc
 			}),
 			firstOutputIndexes,
-			satieConfig.mapperPlugins.at(paramsMapper).getSrc,
+			satieConfiguration.mapperPlugins.at(paramsMapper).getSrc,
 			synthArgs
 		);
 	}
