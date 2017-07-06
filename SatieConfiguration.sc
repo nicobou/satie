@@ -16,7 +16,6 @@ SatieConfiguration {
 	var <>listeningFormat;
 	var numAudioAux;
 	var outBusIndex;
-	var startupFiles;
 
 	var <satieRoot;
 	var <spat;
@@ -28,25 +27,27 @@ SatieConfiguration {
 	var <>spatPlugins;
 	var <>mapperPlugins;
 
-	*new {| server, listeningFormat = "stereo", numAudioAux = 0, outBusIndex = 0, startupFiles = #[] |
+	*new {| server, listeningFormat = "stereo", numAudioAux = 0, outBusIndex = 0|
 		server = server ? Server.supernova;
-		^super.newCopyArgs(server, listeningFormat, numAudioAux, outBusIndex, startupFiles).init;
+		^super.newCopyArgs(server, listeningFormat, numAudioAux, outBusIndex).init;
 	}
 
 	init{
 		satieRoot = this.class.filenameSymbol.asString.dirname;
 		serverOptions = server.options;
-		this.spatializer_(listeningFormat);
+		this.handleListening_(listeningFormat);
 		// load plugins
 		audioPlugins = SatiePlugins.new(satieRoot++"/audiosources/*.scd");
 		fxPlugins = SatiePlugins.new(satieRoot++"/effects/*.scd");
 		spatPlugins = SatiePlugins.new(satieRoot++"/spatializers/*.scd");
 		mapperPlugins = SatiePlugins.new(satieRoot++"/mappers/*.scd");
-		"New configuration: \nRoot: %\nSpat: %\nPlugins: %, %, %".format(
-			this.satieRoot, spat, this.audioPlugins, this.fxPlugins, this.spatPlugins, this.mapperPlugins
-		).postln;
-
-
+		if (debug,
+			{
+				"New configuration: \nRoot: %\nSpat: %\nPlugins: %, %, %".format(
+					satieRoot, spat, audioPlugins, fxPlugins, spatPlugins, mapperPlugins
+				).postln;
+			}
+		);
 	}
 
 	handleListening_ { arg format;
@@ -78,7 +79,7 @@ SatieConfiguration {
 			},
 			"cube",
 			{
-				spat  = \cubeVBAP;
+				spat  = \cube;
 				serverOptions.numOutputBusChannels = 8;
 			},
 			"mono",
@@ -121,18 +122,8 @@ SatieConfiguration {
 				serverOptions.numOutputBusChannels = 16;
 			}
 		);
-		"debug is %".format(debug).postln;
-		// if (debug, {"yea".postln});
 		if (debug, {
 			postln("%: setting listening format to %\n".format(this.class, format));
-		})
-	}
-
-		spatializer {
-		^spat
-	}
-
-	spatializer_ { arg newSpat;
-		this.handleListening_(newSpat);
+		});
 	}
 }

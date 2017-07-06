@@ -18,16 +18,4 @@ SatiePlugin {
 		description = description ? "Description missing"
 		^super.newCopyArgs(name, description, function);
 	}
-
-	getName {
-		^name;
-	}
-
-	getDescription {
-		^description;
-	}
-
-	getSrc {
-		^function;
-	}
 }

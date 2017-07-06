@@ -12,7 +12,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 SatiePlugins : Dictionary {
-	var srcpath;
 
 	*new {|path|
 		^super.new.init(path);

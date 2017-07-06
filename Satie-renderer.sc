@@ -41,14 +41,14 @@
 
 		SatieFactory.makeSynthDef(
 			id,
-			dico.at(srcName).getSrc,
+			dico.at(srcName).function,
 			srcPreToBusses,
 			srcPostToBusses,
 			spatSymbolArray.collect({|item, i|
-				satieConfiguration.spatPlugins.at(item).getSrc
+				satieConfiguration.spatPlugins.at(item).function
 			}),
 			firstOutputIndexes,
-			satieConfiguration.mapperPlugins.at(paramsMapper).getSrc,
+			satieConfiguration.mapperPlugins.at(paramsMapper).function,
 			synthArgs
 		);
 	}

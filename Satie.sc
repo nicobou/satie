@@ -16,13 +16,13 @@
  *
  */
 Satie {
-
+	var <>satieConfiguration;
 	var <server;
 	var options;
 	var <>spat;
 	var <>debug = true;
 	var <satieRoot;
-	var <>satieConfiguration;
+
 	// Plugins needed by the renderer
 	var <>audioPlugins;
 	var <>fxPlugins;
@@ -35,25 +35,18 @@ Satie {
 	// instantiated
 	var <groups, <groupInstances;
 
-	*new{|server|
-		^super.new.init(server);
+	*new {|satieConfiguration|
+		^super.newCopyArgs(satieConfiguration).initRenderer;
 	}
 
-	init {|satieConfiguration|
-		"    - server: %".format(server).postln;
-		//(satieRoot ++ "/src/*.scd").pathMatch.do({arg item; item.loadPaths});
-		this.satieConfiguration = satieConfiguration;
-		options = this.satieConfiguration.serverOptions;
+	initRenderer {
+		options = satieConfiguration.serverOptions;
 		satieRoot = satieConfiguration.satieRoot;
 		debug = satieConfiguration.debug;
 		audioPlugins = satieConfiguration.audioPlugins;
 		fxPlugins = satieConfiguration.fxPlugins;
 		spatPlugins = satieConfiguration.spatPlugins;
 		mapperPlugins = satieConfiguration.mapperPlugins;
-		this.initRenderer();
-	}
-
-	initRenderer {
 		groups = Dictionary.new();
 		groupInstances = Dictionary.new();
 		generators = IdentityDictionary.new();
