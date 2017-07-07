@@ -31,7 +31,7 @@ Satie {
 
 	/*    RENDERER     */
 	// compiled definitions
-	var generators, effects;
+	var generators, effects, <processes;
 	// instantiated
 	var <groups, <groupInstances;
 
@@ -51,6 +51,7 @@ Satie {
 		groupInstances = Dictionary.new();
 		generators = IdentityDictionary.new();
 		effects = IdentityDictionary.new();
+		processes = Dictionary.new();
 		// TODO:
 		// for some reason, we need to create the default group explicitly elsewhere, probably some timing or synchronicity
 		// needs to be figured out.
