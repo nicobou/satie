@@ -49,13 +49,3 @@ s.waitForBoot({
 	~satie.cleanInstance(("testNode"++"_"++item).asSymbol);
 });
 )
-
-
-
-
-Quarks.uninstall("satie-quark");
-
-~path = PathName.new("/home/mis/src/satie-quark/src")
-~rootPath = ~path.parentPath
-~plugins = ~rootPath+/+PathName.new("plugins")
-~plugins.fullPath++"/audiosources/*scd"
