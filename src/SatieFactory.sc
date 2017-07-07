@@ -52,17 +52,7 @@ SatieFactory {
 					Out.ar(firstOutputIndexArray.wrapAt(i), out.at(i));
 				}
 		}).add;
-	}
 
-	*makeDummySynth{|name|
-		SynthDef(name, {| sfreq = 200 |
-			PinkNoise.ar() + FSinOsc.ar(sfreq)
-		}).add;
-	}
 
-	*makeSD{|name, src, synthArgs|
-		SynthDef(name, {|out = 0|
-			Out.ar(out, SynthDef.wrap(src, prependArgs: synthArgs));
-		}).add;
 	}
 }
