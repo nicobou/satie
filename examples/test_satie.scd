@@ -18,6 +18,7 @@
 s = Server.supernova.local;
 ~satieConfiguration = SatieConfiguration.new(s, "stereo");
 ~satieConfiguration.serverOptions.blockSize = 1024;
+~satieConfiguration.debug = false;
 ~satie = Satie.new(~satieConfiguration);
 // s.reboot();
 s.waitForBoot({

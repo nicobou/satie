@@ -36,8 +36,11 @@
 				effects.add(id.asSymbol -> srcName.asSymbol);
 			}
 		);
-
-		"params mapper %".format(paramsMapper).postln;
+		if (satieConfiguration.debug,
+			{
+				"params mapper %".format(paramsMapper).postln;
+			}
+		);
 
 		SatieFactory.makeSynthDef(
 			id,

@@ -16,11 +16,12 @@ SatieConfiguration {
 	var <>listeningFormat;
 	var numAudioAux;
 	var outBusIndex;
+	var <>debug = false;
 
 	var <satieRoot;
 	var <spat;
 	var <serverOptions;
-	var debug = true;
+
 	// Plugins needed by the renderer
 	var <>audioPlugins;
 	var <>fxPlugins;
@@ -33,7 +34,15 @@ SatieConfiguration {
 	}
 
 	init{
-		satieRoot = this.class.filenameSymbol.asString.dirname;
+		var thisPath, pluginsPath;
+
+		// the path of this class
+		thisPath = PathName.new(this.class.filenameSymbol.asString.dirname);
+		// the root of the SATIE quark
+		satieRoot = thisPath.parentPath;
+		// polugins
+		pluginsPath = satieRoot+/+PathName("plugins");
+		pluginsPath = pluginsPath.fullPath;
 		serverOptions = server.options;
 		this.handleListening_(listeningFormat);
 		// load plugins
@@ -48,6 +57,15 @@ SatieConfiguration {
 				).postln;
 			}
 		);
+		audioPlugins = SatiePlugins.new(pluginsPath++"/audiosources/*.scd");
+		fxPlugins = SatiePlugins.new(pluginsPath++"/effects/*.scd");
+		spatPlugins = SatiePlugins.new(pluginsPath++"/spatializers/*.scd");
+		mapperPlugins = SatiePlugins.new(pluginsPath++"/mappers/*.scd");
+		if (debug, {
+			"New configuration: \nRoot: %\nSpat: %\nPlugins: %, %, %".format(
+				this.satieRoot, spat, this.audioPlugins, this.fxPlugins, this.spatPlugins, this.mapperPlugins
+			).postln;
+		});
 	}
 
 	handleListening_ { arg format;
