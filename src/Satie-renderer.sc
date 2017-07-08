@@ -96,7 +96,6 @@
 		this.removeProcess(processName);
 		inform("satieProcessManager: registering process environment: "++processName);
 		processes.put(processName.asSymbol, env);
-		"   -> processes dico %".format(processes).postln;
 		env.know = true;
 		^env;
 	}
