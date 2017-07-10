@@ -91,4 +91,36 @@
 	pauseInstance {|name, group = \default |
 		groupInstances[group][name].release();
 	}
+
+	makeProcess { | processName, env |
+		this.removeProcess(processName);
+		inform("satieProcessManager: registering process environment: "++processName);
+		processes.put(processName.asSymbol, env);
+		env.know = true;
+		^env;
+	}
+
+	removeProcess { | processName |
+		if (  processes.includesKey(processName.asSymbol),
+			{
+				warn("un-registering process environment: "++processName);
+				// FIXME check if free is needed
+				processes.removeAt(processName.asSymbol);
+		});
+	}
+
+	cloneProcess { | processName |
+		var processClone = nil;
+
+		if (processes.includesKey(processName.asSymbol),
+			{
+				var temp = processes.at(processName.asSymbol);
+				processClone = temp.copy;
+			},
+			{
+				warn("undefined process environment: "++processName);
+				processClone = nil;
+		});
+		^processClone;
+	}
 }

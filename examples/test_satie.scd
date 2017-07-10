@@ -25,6 +25,7 @@ s.waitForBoot({
 	~satie.makeSatieGroup(\default);
 	~satie.makeSynthDef(\boo, \misDrone, [], [], [\stereoListener], [0]);
 	~satie.makeSynthDef(\test, \testtone, [], [], [\stereoListener], [0]);
+	~satie.makeSynthDef(\string, \zkarpluck1, [], [], [\stereoListener], [0]);
 	s.meter;
 	s.makeGui;
 	s.plotTree;
@@ -40,7 +41,7 @@ s.waitForBoot({
 20.do( { arg item;
 	var nodename=("testNode"++"_"++item).asSymbol;
 	var synth;
-	synth = ~satie.makeInstance(nodename.asSymbol, \test, \default);
+	synth = ~satie.makeInstance(nodename.asSymbol, \boo, \default);
 	synth.set(\gainDB, rrand(-90, -38), \sfreq, rrand(100, 1000));
 });
 )
@@ -49,3 +50,46 @@ s.waitForBoot({
 	~satie.cleanInstance(("testNode"++"_"++item).asSymbol);
 });
 )
+
+
+(
+//process definition
+~env = Environment.make({
+	~routine;
+	~makeRoutine = { |self |
+		self.routine = Routine {
+			// Here the routine creates sound objects without deleting them util the routine is stopped.
+			loop { arg item;
+				var nodename=("testNode"++"_"++item).asSymbol;
+				var synth;
+				var note;
+				var elev = Prand([-90, -60, 30, 0, 90]).asStream;
+				note = rrand(60, 63);
+				synth = ~satie.makeKamikaze(nodename.asSymbol, \string);
+				synth.set(
+					\t_trig, 1,
+					\gainDB, rrand(-40, -30),
+					\note, [note, 1, 0.5],
+					\aziDeg, rrand(-180,180),
+					\spread, 0,
+					\eleDeg, elev.next
+				);
+				0.5.wait;
+			}
+		};
+	};
+	~start = { | self | self.routine.play; };
+});
+)
+
+
+// will call init
+~process = ~satie.makeProcess(\testProcess, ~env);
+
+// invoke specific process functions
+~process.makeRoutine;
+~process.start;
+
+~satie.processes[\testProcess].makeRoutine
+~satie.processes[\testProcess].start
+~satie.groups
