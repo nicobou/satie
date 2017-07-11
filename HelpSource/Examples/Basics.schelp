@@ -1,0 +1,49 @@
+TITLE:: SATIE basics
+summary:: basic SATIE tutorial with examples
+
+Section:: First steps
+
+code::
+(
+// define a server
+s = Server.supernova.local;
+// instantiate a SatieConfiguration. Here we will use a stereo spacializer
+~satieConfiguration = SatieConfiguration.new(s, "stereo");
+// Change SuperCpllider's block size
+~satieConfiguration.serverOptions.blockSize = 1024;
+// instantiate SATIE renderer and pass it the configuration
+~satie = Satie.new(~satieConfiguration);
+s.waitForBoot({
+        // create a default group
+	~satie.makeSatieGroup(\default);
+        // define some synths
+	~satie.makeSynthDef(\boo, \misDrone, [], [], [~satieConfiguration.spat], [0]);
+	~satie.makeSynthDef(\test, \testtone, [], [], [~satieConfiguration.spat], [0]);
+	~satie.makeSynthDef(\string, \zkarpluck1, [], [], [~satieConfiguration.spat], [0]);
+        // display some information
+	s.meter;
+	s.makeGui;
+	s.plotTree;
+})
+)
+::
+
+The above is somewhat a minimum to get SATIE running. Now, let's make some noise:
+
+code::
+(
+/*   create some test sound instances in the default group  */
+20.do( { arg item;
+	var nodename=("testNode"++"_"++item).asSymbol;
+	var synth;
+	synth = ~satie.makeInstance(nodename.asSymbol, \boo, \default);
+	synth.set(\gainDB, rrand(-90, -38), \sfreq, rrand(100, 1000));
+});
+)
+
+( /*   clean test instances    */
+20.do( { |item|
+	~satie.cleanInstance(("testNode"++"_"++item).asSymbol);
+});
+)
+::

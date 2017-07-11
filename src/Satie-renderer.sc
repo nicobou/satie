@@ -13,8 +13,6 @@
 
 + Satie {
 
-
-
 	makeSynthDef {|
 		id,
 		srcName,

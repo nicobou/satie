@@ -2,7 +2,7 @@
   name: "Satie",
   summary: "Spatial Audio Toolkit for Immersive Environments",
   version: "1.0.0",
-  schelp: "Satie",
+  schelp: "HelpSource/Overview/SATIE-Overview.schelp",
   dependencies: ["AmbIEM", "Ctk"],
   url: "https://gitlab.com/sat-metalab/SATIE-quark",
   since: "2016",

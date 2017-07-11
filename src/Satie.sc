@@ -38,7 +38,7 @@ Satie {
 	*new {|satieConfiguration|
 		^super.newCopyArgs(satieConfiguration).initRenderer;
 	}
-
+	// Private method
 	initRenderer {
 		options = satieConfiguration.serverOptions;
 		satieRoot = satieConfiguration.satieRoot;

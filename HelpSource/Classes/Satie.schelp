@@ -1,0 +1,211 @@
+TITLE:: Satie
+summary:: The main SATIE renderer
+categories:: Libraries>SATIE
+related:: Overview/SATIE-Overview, Classes/SatieConfiguration, Classes/SatiePlugin, Classes/SatieFactory
+
+DESCRIPTION::
+This is the main entry class into the SATIE audio rendering system. It depends on Supernova engine and relies on  LINK::Classes/SatieConfiguration::
+
+
+CLASSMETHODS::
+
+METHOD:: new
+Creates a new Satie renderer
+
+ARGUMENT:: satieConfiguration
+LINK::Classes/SatieConfiguration::
+
+INSTANCEMETHODS::
+
+METHOD:: satieRoot
+The directory on user's file system from where SATIE is instantiated. This class variable is computed automatically by LINK::Classes/SatieConfiguration:: and is taken into account by plugin definition loaders. 
+
+returns:: Root path of SATIE installation
+
+METHOD:: makeInstance
+Instantiate a compiled synthdef (audio source or effect)
+
+ARGUMENT:: name
+Symbol: a unique name by which the audio source or effect will be recognizable by SATIE
+
+ARGUMENT:: synthDefName
+Symbol: the name of the synth definition (see link::Classes/Satie#-makeSynthDef:: below)
+
+ARGUMENT:: group
+Symbol: the name of the group to place the audio source or effect in.
+
+ARGUMENT:: synthArgs
+Array: Synth properties to be taken intio account at instantiation time. All settable synth properties can be manipulated via the standard set message provided by link::Classes/Synth:: instance. 
+
+returns:: a link::Classes/Synth::
+
+METHOD:: fxPlugins
+a dictionary containing effects plugins definitions
+
+returns:: link::Classes/SatiePlugins::
+
+METHOD:: cloneProcess
+Clone a process
+
+ARGUMENT:: processName
+The name of the process
+
+returns:: a clone of the process
+
+(see the discussion of processes in  LINK::Examples/Processes::)
+
+METHOD:: makeKamikaze
+Instantiate a shadow of the audio source of effect. See LINK::Examples/Kamikaze:: for a discussion of Kamikaze. See link::Classes/Satie#-makeSynthDef:: above for the description of arguments.
+
+returns:: link::Classes/Synth::
+
+METHOD:: makeSatieGroup
+A SATIE group is a dictionary that holds references to instantiated audio objects. It is particularly useful for changing properties on many objects with one message.
+
+ARGUMENT:: name
+Symbol: the group's name
+
+ARGUMENT:: addAction
+defines where this group will placed within the chain  of existing groups. 
+
+returns:: link::Classes/ParGroup::
+
+METHOD:: cleanInstance
+Remove the synth instance (audio source or effect)
+
+ARGUMENT:: name
+Symbol: name of the instance
+
+ARGUMENT:: group
+Symbol: from which group
+
+This method does not return.
+
+METHOD:: spat
+Instance variable that holds the name of the curently used spatializer.
+
+returns:: Symbol
+
+METHOD:: server
+Holds the server instance.
+
+returns:: SuperCollider server
+
+METHOD:: makeProcess
+(describe method here)
+
+ARGUMENT:: processName
+Instantiate a process. See the discussion on processes in LINK::Examples/Processes::
+
+ARGUMENT:: env
+String: the Environment source (see LINK::Examples/Processes::)
+
+returns:: link::Classes/Environment::
+
+METHOD:: processes
+Keeps track of processes. Read only.
+
+returns:: link::Classes/Dictionary::
+
+METHOD:: groups
+Keeps track of groups. Read only.
+
+returns:: link::Classes/Dictionary::
+
+METHOD:: groupInstances
+(describe method here)
+
+returns:: (describe returnvalue here)
+
+METHOD:: killSatieGroup
+(describe method here)
+
+ARGUMENT:: name
+(describe argument here)
+
+returns:: (describe returnvalue here)
+
+METHOD:: pauseInstance
+(describe method here)
+
+ARGUMENT:: name
+(describe argument here)
+
+ARGUMENT:: group
+(describe argument here)
+
+returns:: (describe returnvalue here)
+
+METHOD:: mapperPlugins
+(describe method here)
+
+returns:: (describe returnvalue here)
+
+METHOD:: debug
+(describe method here)
+
+returns:: (describe returnvalue here)
+
+METHOD:: spatPlugins
+(describe method here)
+
+returns:: (describe returnvalue here)
+
+METHOD:: audioPlugins
+(describe method here)
+
+returns:: (describe returnvalue here)
+
+METHOD:: initRenderer
+(describe method here)
+
+returns:: (describe returnvalue here)
+
+METHOD:: makeSynthDef
+(describe method here)
+
+ARGUMENT:: id
+(describe argument here)
+
+ARGUMENT:: srcName
+(describe argument here)
+
+ARGUMENT:: srcPreToBusses
+(describe argument here)
+
+ARGUMENT:: srcPostToBusses
+(describe argument here)
+
+ARGUMENT:: spatSymbolArray
+(describe argument here)
+
+ARGUMENT:: firstOutputIndexes
+(describe argument here)
+
+ARGUMENT:: paramsMapper
+(describe argument here)
+
+ARGUMENT:: synthArgs
+(describe argument here)
+
+returns:: (describe returnvalue here)
+
+METHOD:: satieConfiguration
+(describe method here)
+
+returns:: (describe returnvalue here)
+
+METHOD:: removeProcess
+(describe method here)
+
+ARGUMENT:: processName
+(describe argument here)
+
+returns:: (describe returnvalue here)
+
+
+EXAMPLES::
+
+code::
+(some example code)
+::
