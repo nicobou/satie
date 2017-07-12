@@ -11,23 +11,28 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+/*       Spatializer plugin definition 
+
+	Each spatializer plugin should define the following global variables:
+    ~name: (symbol) name of the spatializer
+	~description: (string) a short description
+	~numChannels: (int) number of channels
+	~function: the definition of the spatializer
+	
+	where function should use the following input arguments:
+
+	in 
+	aziDeg degrees (-180 to 180)
+	elevDeg   degrees (-180 to 180)
+	gainDB  decibels
+	delaySec  seconds
+	lpHz    hertz
+	spread  units  (0 == directional, ....,  100 == omni)
+*/
+
 ~name = \monoSpat;
-// was  ~function = {|in = 0, vol, delay, azi, ele |
-
-// note:  need to add smoothing for all parameters
-// note:  spread: not implemented yet -- note:  0 = full spread, 1 = normal, > 1 = narrower
-// note:  update vector:  azimuthRADIANS elevationRADIANS gainDB delayMS lpHZ
-
-// spat input args:
-// aziDeg degrees (-180 to 180)
-// elevDeg   degrees (-180 to 180)
-// gainDB  decibels
-// delaySec  seconds
-// lpHz    hertz
-// spread  units  (0 == directional, ....,  100 == omni)
-
-
-
+~description = "mono spat";
+~numChannels = 1;
 
 ~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP

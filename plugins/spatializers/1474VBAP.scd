@@ -11,17 +11,30 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-// spat input args:
-// aziDeg degrees (-180 to 180)
-// elevDeg   degrees (-180 to 180)
-// gainDB  decibels
-// delaySec  seconds
-// lpHz    hertz
-// spread  units  (0 == directional, ....,  100 == omni)
+/*       Spatializer plugin definition 
 
+	Each spatializer plugin should define the following global variables:
+    ~name: (symbol) name of the spatializer
+	~description: (string) a short description
+	~numChannels: (int) number of channels
+	~function: the definition of the spatializer
+	
+	where function should use the following input arguments:
+
+	in 
+	aziDeg degrees (-180 to 180)
+	elevDeg   degrees (-180 to 180)
+	gainDB  decibels
+	delaySec  seconds
+	lpHz    hertz
+	spread  units  (0 == directional, ....,  100 == omni)
+*/
 // dome speaker layout
 
 
+~name = \_1474_VBAP;
+~description = "16 channel dome (IEM)";
+~numChannels = 16;
 
 /* speaker positions used by ambIEM
 https://github.com/supercollider-quarks/AmbIEM/blob/master/Classes/DecodeAmbi.sc
@@ -50,17 +63,8 @@ elev: [90,40,40,40,40,0,0,0,0,0,0,0,-40,-40,-40,-40],
 [180 , -40  ],
 [-90 , -40 ]];
 
-
-
 ~spk16 = VBAPSpeakerArray.new(3, ~speakerConfig1474 );
-
-
-
-
 ~vbuf16 = Buffer.loadCollection(s, ~spk16.getSetsAndMatrices);
-
-~name = \_1474_VBAP;
-
 
 ~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP

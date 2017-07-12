@@ -11,15 +11,28 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-// spat input args:
-// aziDeg degrees (-180 to 180)
-// elevDeg   degrees (-180 to 180)
-// gainDB  decibels
-// delaySec  seconds
-// lpHz    hertz
-// spread  units  (0 == directional, ....,  100 == omni)
+/*       Spatializer plugin definition 
 
-// dome speaker layout
+	Each spatializer plugin should define the following global variables:
+    ~name: (symbol) name of the spatializer
+	~description: (string) a short description
+	~numChannels: (int) number of channels
+	~function: the definition of the spatializer
+	
+	where function should use the following input arguments:
+
+	in 
+	aziDeg degrees (-180 to 180)
+	elevDeg   degrees (-180 to 180)
+	gainDB  decibels
+	delaySec  seconds
+	lpHz    hertz
+	spread  units  (0 == directional, ....,  100 == omni)
+*/
+
+~name = \domeVBAP;
+~description = "31 channel sphere (SAT dome)";
+~numChannels = 31;
 
 // layout for domes developed by olie
 // ~spk31 = VBAPSpeakerArray.new(3, [
@@ -28,9 +41,6 @@
 // 	[0, 22.5], [30, 22.5], [60, 22.5], [90, 22.5], [120, 22.5], [150, 22.5], [180, 22.5], [-150, 22.5], [-120, 22.5], [-90, 22.5], [-60, 22.5], [-30, 22.5],
 // 	[0, 0], [30, 0], [60, 0], [90, 0], [120, 0], [150, 0], [180, 0], [-150, 0], [-120, 0], [-90, 0], [-60, 0], [-30, 0],
 // ]);
-
-
-
 // layout for domes developed by z
 
 ~spk31 =  VBAPSpeakerArray.new(3, [
@@ -39,14 +49,7 @@
 	[7.5, 20], [37.5, 20], [67.5, 20], [97.5, 20], [127.5, 20], [157.5, 20], [-172.5, 20], [-142.5, 20], [-112.5, 20], [-82.5, 20], [-52.5, 20], [-22.5, 20],
 [7.5, -15], [37.5, -15], [67.5, -15], [97.5, -15], [127.5, -15], [157.5, -15], [-172.5, -15], [-142.5, -15], [-112.5, -15], [-82.5, -15], [-52.5, -15], [-22.5, -15] ]);
 
-
-//  ~vbuf31.dump;
-//  ~spk31.dump;
-
 ~vbuf31 = Buffer.loadCollection(s, ~spk31.getSetsAndMatrices);
-
-~name = \domeVBAP;
-
 
 ~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP

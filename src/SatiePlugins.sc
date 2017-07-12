@@ -13,22 +13,39 @@
 
 SatiePlugins : Dictionary {
 
-	*new {|path|
-		^super.new.init(path);
+	*newAudio {|path|
+		^super.new.audioPath(path);
 	}
 
-	init {arg path;
-		this.appendPath(path);
+	*newSpat {|path|
+		^super.new.spatializerPath(path);
 	}
+
 
 	/*
 	*  Append plugins from path
 	*/
-	appendPath { arg path;
-
+	audioPath { arg path;
 		path.pathMatch.do{arg item;
 			item.loadPaths;
 			this.add(~name.asSymbol -> SatiePlugin.new(~name, ~description, ~function));
 		};
+
+	}
+
+	spatializerPath { arg path;
+		path.pathMatch.do{arg item;
+			item.loadPaths;
+			this.add(~name.asSymbol -> SpatializerPlugin.new(~name, ~description, ~function, ~numChannels));
+		};
+
+
+	}
+
+	showPlugins {
+		// post the key and associated plugin description
+		"\n- Showing plugins for %".format(this.inspect).postln;
+		this.keysValuesDo{|key, value| "% -> %".format(key, value.description.asString.quote).postln;};
+		"----".postln;
 	}
 }
