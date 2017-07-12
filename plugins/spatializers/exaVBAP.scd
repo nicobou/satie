@@ -11,19 +11,31 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-// spat input args:
-// aziDeg degrees (-180 to 180)
-// elevDeg   degrees (-180 to 180)
-// gainDB  decibels
-// delaySec  seconds
-// lpHz    hertz
-// spread  units  (0 == directional, ....,  100 == omni)
+/*       Spatializer plugin definition 
 
-~spk6 = VBAPSpeakerArray.new(2, [0, 60, 120, 180, -120, -60]); // 8 channel ring
+	Each spatializer plugin should define the following global variables:
+    ~name: (symbol) name of the spatializer
+	~description: (string) a short description
+	~numChannels: (int) number of channels
+	~function: the definition of the spatializer
+	
+	where function should use the following input arguments:
 
-~vbuf6 = Buffer.loadCollection(s, ~spk6.getSetsAndMatrices);
+	in 
+	aziDeg degrees (-180 to 180)
+	elevDeg   degrees (-180 to 180)
+	gainDB  decibels
+	delaySec  seconds
+	lpHz    hertz
+	spread  units  (0 == directional, ....,  100 == omni)
+*/
 
 ~name = \exaVBAP;
+~description = "6 channel ring (2D)";
+~numChannels = 6;
+
+~spk6 = VBAPSpeakerArray.new(2, [0, 60, 120, 180, -120, -60]); // 8 channel ring
+~vbuf6 = Buffer.loadCollection(s, ~spk6.getSetsAndMatrices);
 
 ~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP

@@ -11,15 +11,31 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-// spat input args:
-// aziDeg degrees (-180 to 180)
-// elevDeg   degrees (-180 to 180)
-// gainDB  decibels
-// delaySec  seconds
-// lpHz    hertz
-// spread  units  (0 == directional, ....,  100 == omni)
+/*       Spatializer plugin definition 
+
+	Each spatializer plugin should define the following global variables:
+    ~name: (symbol) name of the spatializer
+	~description: (string) a short description
+	~numChannels: (int) number of channels
+	~function: the definition of the spatializer
+	
+	where function should use the following input arguments:
+
+	in 
+	aziDeg degrees (-180 to 180)
+	elevDeg   degrees (-180 to 180)
+	gainDB  decibels
+	delaySec  seconds
+	lpHz    hertz
+	spread  units  (0 == directional, ....,  100 == omni)
+*/
 
 // labodome speaker layout
+
+~name = \labodomeVBAP;
+~description = "24 channel speaker layout on a sphere (minidome at the SAT)";
+~numChannels = 24;
+
 ~spk24 = VBAPSpeakerArray.new(3, [
 [0, 90],
 [0, 60], [45, 60], [90, 60], [135, 60], [180, 60], [-135, 60], [-90, 60], [-45, 60],
@@ -27,8 +43,6 @@
 [0, -15], [45, -15], [90, -15], [135, -15], [-135, -10], [-90, -10], [-45, -10],]);
 
 ~vbuf24 = Buffer.loadCollection(s, ~spk24.getSetsAndMatrices);
-
-~name = \labodomeVBAP;
 
 ~function = { | in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP

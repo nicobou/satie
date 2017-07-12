@@ -11,23 +11,36 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-// spat input args:
-// aziDeg degrees (-180 to 180)
-// elevDeg   degrees (-180 to 180)
-// gainDB  decibels
-// delaySec  seconds
-// lpHz    hertz
-// spread  units  (0 == directional, ....,  100 == omni)
+/*       Spatializer plugin definition 
 
-// Octo 3D speaker layout
+	Each spatializer plugin should define the following global variables:
+    ~name: (symbol) name of the spatializer
+	~description: (string) a short description
+	~numChannels: (int) number of channels
+	~function: the definition of the spatializer
+	
+	where function should use the following input arguments:
+
+	in 
+	aziDeg degrees (-180 to 180)
+	elevDeg   degrees (-180 to 180)
+	gainDB  decibels
+	delaySec  seconds
+	lpHz    hertz
+	spread  units  (0 == directional, ....,  100 == omni)
+*/
+
+// this layout has been replaced by cube layout. This cube does not work very well in VBAP
+
+~name = \cubeVBAP;
+~description = "8 channel cube (VBAP)";
+~numChannels = 8;
 
 ~spkcube = VBAPSpeakerArray.new(3, [
 	[-45, 30],[45, 30],[135, 30],[-135, 30],
 	[-45, -60],[45, -60],[135, -60],[-135, -60]]); // 8 channel cube
 
 ~vbufCube = Buffer.loadCollection(s, ~spkcube.getSetsAndMatrices);
-
-~name = \cubeVBAP;
 
 ~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP

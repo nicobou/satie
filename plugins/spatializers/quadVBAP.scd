@@ -11,25 +11,35 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-// spat input args:
-// aziDeg degrees (-180 to 180)
-// elevDeg   degrees (-180 to 180)
-// gainDB  decibels
-// delaySec  seconds
-// lpHz    hertz
-// spread  units  (0 == directional, ....,  100 == omni)
 
-// Octo 2D speaker layout
-// ~spk8 = VBAPSpeakerArray.new(2, [-45, 45, 135, -135, 0, 90, 180, -90]); // 8 channel ring
-// ~spk8 = VBAPSpeakerArray.new(2, [-40, 0, 40, 70, 140, 180, -140, -70]); // 8 channel ring
-~spk4 = VBAPSpeakerArray.new(2, [-45, 45, 135, -135]); // 8 channel ring
-// {[-45, 45, 135, -135, 0, 90, 180, -90].do({|ang| x.set(\azi, ang); 1.wait; }) }.fork;
+/*       Spatializer plugin definition 
+
+	Each spatializer plugin should define the following global variables:
+    ~name: (symbol) name of the spatializer
+	~description: (string) a short description
+	~numChannels: (int) number of channels
+	~function: the definition of the spatializer
+	
+	where function should use the following input arguments:
+
+	in 
+	aziDeg degrees (-180 to 180)
+	elevDeg   degrees (-180 to 180)
+	gainDB  decibels
+	delaySec  seconds
+	lpHz    hertz
+	spread  units  (0 == directional, ....,  100 == omni)
+*/
 
 
-
-~vbuf4 = Buffer.loadCollection(s, ~spk4.getSetsAndMatrices);
 
 ~name = \quadVBAP;
+~description = "4 channel ring (2D)";
+~numChannels = 4;
+
+
+~spk4 = VBAPSpeakerArray.new(2, [-45, 45, 135, -135]); // 8 channel ring
+~vbuf4 = Buffer.loadCollection(s, ~spk4.getSetsAndMatrices);
 
 ~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP

@@ -11,16 +11,30 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+/*       Spatializer plugin definition 
+
+	Each spatializer plugin should define the following global variables:
+    ~name: (symbol) name of the spatializer
+	~description: (string) a short description
+	~numChannels: (int) number of channels
+	~function: the definition of the spatializer
+	
+	where function should use the following input arguments:
+
+	in 
+	aziDeg degrees (-180 to 180)
+	elevDeg   degrees (-180 to 180)
+	gainDB  decibels
+	delaySec  seconds
+	lpHz    hertz
+	spread  units  (0 == directional, ....,  100 == omni)
+*/
+
 
 ~name = \stereoListener;
+~description = "A stereo panner";
+~numChannels = 2;
 
-// spat input args:
-// aziDeg degrees (-180 to 180)
-// elevDeg   degrees (-180 to 180)
-// gainDB  decibels
-// delaySec  seconds
-// lpHz    hertz
-// spread  units  (0 == directional, ....,  100 == omni)
 
 ~function = {|in = 0, aziDeg = 0, eleDeg = 0, gainDB = -99, delayMs = 1, lpHz = 22050, hpHz = 0.5, spread = 1 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP
