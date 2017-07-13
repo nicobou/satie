@@ -21,6 +21,7 @@ z.remove;  // when done, you need to clean up the OSCresponderNode
 
 SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 */
+
 // uses a delay of two blocks to avoid transient mangulation by supernova
 
 
@@ -41,7 +42,7 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 //  6 channel mapping  :   sampAzi:    -180 to 180  degrees
 // amp scales the whole thing
 // initializes to note-on playing state
-
+~description = "6 channels looper";
 ~function = { | bufnum=0, glide=0.2, loopRel=0, startPosSecs=0, trimDB=0, startLoop=0, endLoopSecs=99999, ipol=2, curve=0, attackMs=0.01, releaseSecs=1, warp=5, transp=0, sampAzi=0, sampSpr=0,  amp=1, clipBoostDB = 0, note = #[60, 1, 1] |
 
 

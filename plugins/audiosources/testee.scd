@@ -11,17 +11,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-~randFreq = { |baseFreq = 50, octave = 1, t|
-	var ratio, ret;
-	ratio = t.ratios.choose;
-	postf("randFreq excuting ratio %\n", ratio );
-	ret = baseFreq * octave * ratio;
-	postf("returning frequency: %\n", ret);
-	ret;
+/*       Audio plugin definition 
 
-};
+	Each audio plugin should define the following global variables:
+    ~name: (symbol) name of the spatializer
+	~description: (string) a short description
+	~function: the actual definition of the plugin
+	
+*/
 
 ~name = \testee;
+~descrioption = "a droney sound";
 ~function = {
 var tri = Array.with(
 		1-LFTri.ar((SinOsc.kr(0.001)+1)*1000),

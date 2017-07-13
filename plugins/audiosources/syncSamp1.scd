@@ -13,11 +13,17 @@
 // };
 //
 
+/*       Audio plugin definition 
 
-// Play a sample buffer using global synchronization index
+	Each audio plugin should define the following global variables:
+    ~name: (symbol) name of the spatializer
+	~description: (string) a short description
+	~function: the actual definition of the plugin
+	
+*/
 
- ~name = \syncSamp1;
-
+~name = \syncSamp1;
+~description = "Play a sample buffer using global synchronization index";
 
 // args:   midiPitch60 == no transposition,  force & incidence  between -1 and 1
 // pitch disabled

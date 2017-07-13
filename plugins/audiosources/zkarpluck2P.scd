@@ -11,17 +11,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/* debugging
-OSCFunc.trace(true);    // show OSC RX
-OSCFunc.trace(false);
+/*       Audio plugin definition 
 
-z = OSCresponderNode(s.addr, '/tr', { |time, resp, msg| msg.postln }).add;
-
-z.remove;  // when done, you need to clean up the OSCresponderNode
-
-SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
+	Each audio plugin should define the following global variables:
+    ~name: (symbol) name of the spatializer
+	~description: (string) a short description
+	~function: the actual definition of the plugin
+	
 */
-
 
 // DESIGNED FOR  KAMIKAZI KLONES
 
@@ -39,7 +36,7 @@ fB	 ??  Inharmonicity factor.
 //freq: 440, amp: 0.5, gate: 1, pos: 0.14, c1: 1, c3: 30, inp: 0, release: 0.1)
 
 ~name = \zkarpluck2P;
-
+~description = "Plucked string physical model for kamikaze clones";
 ~function = {  | t_trig=0, trimDB = -10, c1 = 1, c3=20, fb = 2, randTrigMaxMs = 10000 , note = #[60, 1, 0.5] , i_blockDelay = 2  |   // note: pitch force incidence
 	var env,inp,son;
 	var pos, hfqLoss, idecay, lpassFq;
