@@ -11,6 +11,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+/*       Audio plugin definition 
+
+	Each audio plugin should define the following global variables:
+    ~name: (symbol) name of the spatializer
+	~description: (string) a short description
+	~function: the actual definition of the plugin
+	
+*/
+
 /* debugging
 OSCFunc.trace(true);    // show OSC RX
 OSCFunc.trace(false);
@@ -31,7 +40,7 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 
 ~name = \sndBuffer2;
 // note:  bufnum must be first arg !!
-
+~description = "Sound buffer playback";
 ~function = { | bufnum=0, glide=0.2, loopRel=0, startPosSecs=0, trimDB=0, startLoop=0, endLoop=99999999, ipol=2, curve=0, attackMs=0.01, releaseSecs=1, warp=5, transp=0, note = #[60, 0, 0] |
 
 

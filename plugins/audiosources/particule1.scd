@@ -11,26 +11,19 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/* debugging
-OSCFunc.trace(true);    // show OSC RX
-OSCFunc.trace(false);
+/*       Audio plugin definition 
 
-o = OSCresponderNode(s.addr, '/tr', { |time, resp, msg| msg.postln }).add;
-o.remove;  // when done, you need to clean up the OSCresponderNode
-
-SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
-
-s.scope
-
+	Each audio plugin should define the following global variables:
+    ~name: (symbol) name of the spatializer
+	~description: (string) a short description
+	~function: the actual definition of the plugin
+	
 */
-//o= nil;
 
-//enable this for debugging
-//if (o == nil, {o = OSCresponderNode(s.addr, '/tr', { |time, resp, msg| msg.postln }).add; });
 
 
 ~name = \particule1;
-
+~description = "a particule";
 ~function = {| t_trig = 0, attackDB = -100,  decayMs = 1000, force = 0.75, incidence = 0.75,  pitch = 60, i_blockDelay = 2 |
 	var outsig, z,ampScaler, hfqRolloffAmp, outGainBias;
 	var freqscale, excitationSig, attackSecs,excitationAmp;
@@ -196,3 +189,20 @@ if (~makeGui == nil,  { ~plotTree=s.makeGui;});
 if (~meter == nil,  { ~plotTree=s.meter;});
 
 */
+
+/* debugging
+OSCFunc.trace(true);    // show OSC RX
+OSCFunc.trace(false);
+
+o = OSCresponderNode(s.addr, '/tr', { |time, resp, msg| msg.postln }).add;
+o.remove;  // when done, you need to clean up the OSCresponderNode
+
+SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
+
+s.scope
+
+*/
+//o= nil;
+
+//enable this for debugging
+//if (o == nil, {o = OSCresponderNode(s.addr, '/tr', { |time, resp, msg| msg.postln }).add; });

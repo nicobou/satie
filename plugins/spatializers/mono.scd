@@ -31,7 +31,7 @@
 */
 
 ~name = \monoSpat;
-~description = "mono spat";
+~description = "Mono spat";
 ~numChannels = 1;
 
 ~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1 |

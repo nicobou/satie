@@ -11,24 +11,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/* debugging
- OSCFunc.trace(true);    // show OSC RX
- OSCFunc.trace(false);
+/*       Audio plugin definition 
 
-o = OSCresponderNode(s.addr, '/tr', { |time, resp, msg| msg.postln }).add;
-o.remove;  // when done, you need to clean up the OSCresponderNode
-
-SendTrig.kr(Impulse.kr(1), 0, gate);  //  in synthdef
-
+	Each audio plugin should define the following global variables:
+    ~name: (symbol) name of the spatializer
+	~description: (string) a short description
+	~function: the actual definition of the plugin
+	
 */
-
-// code is based on the synthdef:  \prayer_bell, by "wondersluyter" (http://sccode.org/wondersluyter)
-// canabilised by Zack Settel
-// params:
-// t_trig;   0:1
-// delayscale: 0:n
-// i_doneAction: 0=stay alive, 1 = pause when done, 2 = kill when done...
-// note:  midi-Pitch, amplitude (unit factor),  incidence (0:1)
 
 
 
@@ -38,7 +28,7 @@ SendTrig.kr(Impulse.kr(1), 0, gate);  //  in synthdef
 //  muteSecs:   mutes output and sets the decay to zero and then scales back to normal  during the first muteSecs of the synth's life
 
 ~name = \pbell1;
-
+~description = "a variant of a synthesized bell (unstable)";
 // note:  midiPitch  Unit-Incidence Unit-Amplitude  (positive values between 0 and 1)
 ~function = { |outbus, decayscale = 0.2, i_doneAction = 0,  trimDB=0,  muteSecs = 10,  note = #[60, 0, 0], t_trig= -1 |
 
@@ -283,3 +273,23 @@ k.action_({ |ez| (  ~ballSet.set(\decayscale, (ez.value)))});
 };
 
 */
+
+/* debugging
+ OSCFunc.trace(true);    // show OSC RX
+ OSCFunc.trace(false);
+
+o = OSCresponderNode(s.addr, '/tr', { |time, resp, msg| msg.postln }).add;
+o.remove;  // when done, you need to clean up the OSCresponderNode
+
+SendTrig.kr(Impulse.kr(1), 0, gate);  //  in synthdef
+
+*/
+
+// code is based on the synthdef:  \prayer_bell, by "wondersluyter" (http://sccode.org/wondersluyter)
+// canabilised by Zack Settel
+// params:
+// t_trig;   0:1
+// delayscale: 0:n
+// i_doneAction: 0=stay alive, 1 = pause when done, 2 = kill when done...
+// note:  midi-Pitch, amplitude (unit factor),  incidence (0:1)
+

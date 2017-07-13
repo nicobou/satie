@@ -6,17 +6,21 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+/*       Audio plugin definition 
 
+	Each audio plugin should define the following global variables:
+    ~name: (symbol) name of the spatializer
+	~description: (string) a short description
+	~function: the actual definition of the plugin
+	
+*/
 
-// Play a sample buffer
-
-// uses a delay of two blocks to avoid transient mangulation by supernova
-
-
-// args:   midiPitch60 == no transposition,  force & incidence  between -1 and 1
 
 
 ~name = \zPsamp1;
+~description = "Play a sample buffer";
+// uses a delay of two blocks to avoid transient mangulation by supernova
+// args:   midiPitch60 == no transposition,  force & incidence  between -1 and 1
 ~function = { | bufnum = 0, loop = 0, startPos=0, t_trig=0, trimDB=0,  note = #[60, 1, 0.7]  |
 
 	var freq = note[0].midicps;

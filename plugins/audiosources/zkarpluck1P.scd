@@ -11,16 +11,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/* debugging
- OSCFunc.trace(true);    // show OSC RX
- OSCFunc.trace(false);
+/*       Audio plugin definition 
 
-o = OSCresponderNode(s.addr, '/tr', { |time, resp, msg| msg.postln }).add;
-
-o.remove;  // when done, you need to clean up the OSCresponderNode
-
-SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
-
+	Each audio plugin should define the following global variables:
+    ~name: (symbol) name of the spatializer
+	~description: (string) a short description
+	~function: the actual definition of the plugin
+	
 */
 
 
@@ -40,7 +37,7 @@ fB	 ??  Inharmonicity factor.
 //freq: 440, amp: 0.5, gate: 1, pos: 0.14, c1: 1, c3: 30, inp: 0, release: 0.1)
 
 ~name = \zkarpluck1P;
-
+~description = "a variant of plucked string for resonant, continuously updasted particles";
 ~function = {  | t_trig=0, c1 = 1, c3=20, fb = 2, randTrigMaxMs = 10000 , note = #[60, 1, 0.5]  |   // note: pitch force incidence
 	var env,inp,son;
 	var freq;
@@ -248,4 +245,16 @@ Pbind(
 
 */
 
+
+/* debugging
+ OSCFunc.trace(true);    // show OSC RX
+ OSCFunc.trace(false);
+
+o = OSCresponderNode(s.addr, '/tr', { |time, resp, msg| msg.postln }).add;
+
+o.remove;  // when done, you need to clean up the OSCresponderNode
+
+SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
+
+*/
 

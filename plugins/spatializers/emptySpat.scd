@@ -31,7 +31,7 @@
 */
 
 ~name = \emptySpat;
-~description = "no spat. Expect nothing.";
+~description = "No spat. Expect nothing.";
 ~numChannels = 0;
 
 
