@@ -1,7 +1,7 @@
 TITLE:: SatieConfiguration
 summary:: (put short description here)
 categories:: Libraries
-related:: Classes/SomeRelatedClass, Reference/SomeRelatedStuff, etc.
+related:: Overview/SATIE-Overview, Classes/Satie
 
 DESCRIPTION::
 This class configures SATIE. It also provides access to the server options.
