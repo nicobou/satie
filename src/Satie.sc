@@ -30,6 +30,9 @@ Satie {
 	var <>mapperPlugins;
 
 	/*    RENDERER     */
+	// buses
+	var <auxbus;
+	var <aux;
 	// compiled definitions
 	var generators, effects, <processes;
 	// instantiated
@@ -52,6 +55,8 @@ Satie {
 		generators = IdentityDictionary.new();
 		effects = IdentityDictionary.new();
 		processes = Dictionary.new();
+		auxbus = Bus.audio(satieConfiguration.server, satieConfiguration.numAudioAux);
+		aux = Array.fill(satieConfiguration.numAudioAux, {arg i; auxbus.index + i});
 		// TODO:
 		// for some reason, we need to create the default group explicitly elsewhere, probably some timing or synchronicity
 		// needs to be figured out.
