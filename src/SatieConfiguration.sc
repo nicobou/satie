@@ -14,7 +14,7 @@
 SatieConfiguration {
 	var <server;
 	var <>listeningFormat;
-	var numAudioAux;
+	var <numAudioAux;
 	var outBusIndex;
 	var <>debug = false;
 
