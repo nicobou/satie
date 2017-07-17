@@ -20,7 +20,7 @@
 	
 */
 
-~name = \Limiter;\
+~name = \Limiter;
 ~description = "A simple limiter";
 
 ~function = { arg in, level=0.7, dur=0.01, outputDB=0;
