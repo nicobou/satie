@@ -1,6 +1,6 @@
 TITLE:: Satie
 summary:: The main SATIE renderer
-categories:: Libraries>SATIE
+categories:: Libraries
 related:: Overview/SATIE-Overview, Classes/SatieConfiguration, Classes/SatiePlugin, Classes/SatieFactory
 
 DESCRIPTION::
@@ -18,7 +18,7 @@ LINK::Classes/SatieConfiguration::
 INSTANCEMETHODS::
 
 METHOD:: satieRoot
-The directory on user's file system from where SATIE is instantiated. This class variable is computed automatically by LINK::Classes/SatieConfiguration:: and is taken into account by plugin definition loaders. 
+The directory on user's file system from where SATIE is instantiated. This class variable is computed automatically by LINK::Classes/SatieConfiguration:: and is taken into account by plugin definition loaders.
 
 returns:: Root path of SATIE installation
 
@@ -35,7 +35,7 @@ ARGUMENT:: group
 Symbol: the name of the group to place the audio source or effect in.
 
 ARGUMENT:: synthArgs
-Array: Synth properties to be taken intio account at instantiation time. All settable synth properties can be manipulated via the standard set message provided by link::Classes/Synth:: instance. 
+Array: Synth properties to be taken intio account at instantiation time. All settable synth properties can be manipulated via the standard set message provided by link::Classes/Synth:: instance.
 
 returns:: a link::Classes/Synth::
 
@@ -66,7 +66,7 @@ ARGUMENT:: name
 Symbol: the group's name
 
 ARGUMENT:: addAction
-defines where this group will placed within the chain  of existing groups. 
+defines where this group will placed within the chain  of existing groups.
 
 returns:: link::Classes/ParGroup::
 

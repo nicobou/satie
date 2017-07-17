@@ -1,15 +1,17 @@
 TITLE:: SATIE basics
 summary:: basic SATIE tutorial with examples
-
+categories:: Libraries
 Section:: First steps
+
+SATIE depends and takes advantage of parrallel processing provided by supernova server. Before using it, we need create a configuration. The configuration will typically define the number of speakers and their layout, number of effect busses to use etc. We can also configure the supernova server options, which are held in serverOptions variable. We will also define which audio "plugins" (audio sources and effects) we will use (more on the format of plugins in link::Overview/Plugins::). SATIE will prepare the synthdefs on the server and later we will be able to control their life cycle.
 
 code::
 (
-// define a server
+// define a server, SATIE needs it
 s = Server.supernova.local;
-// instantiate a SatieConfiguration. Here we will use a stereo spacializer
-~satieConfiguration = SatieConfiguration.new(s, "stereo");
-// Change SuperCpllider's block size
+// instantiate a SatieConfiguration. Here we will use a stereo spatializer
+~satieConfiguration = SatieConfiguration.new(s, \stereoListener);
+// Change SuperCollider's block size (jack server's blocksize must be multiple of this value)
 ~satieConfiguration.serverOptions.blockSize = 1024;
 // instantiate SATIE renderer and pass it the configuration
 ~satie = Satie.new(~satieConfiguration);
@@ -17,9 +19,8 @@ s.waitForBoot({
         // create a default group
 	~satie.makeSatieGroup(\default);
         // define some synths
-	~satie.makeSynthDef(\boo, \misDrone, [], [], [~satieConfiguration.spat], [0]);
-	~satie.makeSynthDef(\test, \testtone, [], [], [~satieConfiguration.spat], [0]);
-	~satie.makeSynthDef(\string, \zkarpluck1, [], [], [~satieConfiguration.spat], [0]);
+	~satie.makeSynthDef(\boo, \misDrone, [], [], [~satieConfiguration.listeningFormat], [0]);
+	~satie.makeSynthDef(\test, \testtone, [], [], [~satieConfiguration.listeningFormat], [0]);
         // display some information
 	s.meter;
 	s.makeGui;
@@ -28,7 +29,11 @@ s.waitForBoot({
 )
 ::
 
-The above is somewhat a minimum to get SATIE running. Now, let's make some noise:
+~satie.spatPlugins.showPlugins
+
+The above is somewhat a minimum to get SATIE running. We are using 2 audio producing plugins: misDrone and testtone, both are identified in the SATIE system as "boo" and "test" respectively.
+We will use this simple configuration for the examples that follow.
+Now, let's make some noise. We can create instances of synths and pass them some initial arguments.
 
 code::
 (
@@ -36,10 +41,57 @@ code::
 20.do( { arg item;
 	var nodename=("testNode"++"_"++item).asSymbol;
 	var synth;
-	synth = ~satie.makeInstance(nodename.asSymbol, \boo, \default);
+	synth = ~satie.makeInstance(nodename.asSymbol, \boo, \default, synthArgs: [\dur: 500]);
 	synth.set(\gainDB, rrand(-90, -38), \sfreq, rrand(100, 1000));
 });
 )
+::
+
+We can set properties to the entire group:
+
+code::
+(
+~satie.groups[\default].set(\gainDB, -90);
+~satie.groups[\default].set(\gainDB, -65, \freq, 220);
+)
+::
+
+We can also control each instance individually:
+
+code::
+// Set random frequency to each instance
+(
+20.do( {|item|
+	var nodename=("testNode"++"_"++item);
+	~satie.groupInstances[\default][nodename.asSymbol].set(\freq, rrand(200, 2000));
+});
+)
+
+// Set different gain level to each instance
+(
+20.do( {|item|
+	var nodename=("testNode"++"_"++item);
+	~satie.groupInstances[\default][nodename.asSymbol].set(\gainDB, rrand(-100, -40));
+});
+)
+
+::
+
+And of course we can do all that in one message:
+
+code::
+(
+20.do( {|item|
+	var nodename=("testNode"++"_"++item);
+	~satie.groupInstances[\default][nodename.asSymbol].set(
+		\freq, rrand(200, 2000),
+		\gainDB, rrand(-50, -10),
+		\aziDeg, rrand(-90, 90));
+});
+)
+::
+
+code::
 
 ( /*   clean test instances    */
 20.do( { |item|
@@ -47,3 +99,44 @@ code::
 });
 )
 ::
+
+Section:: Groups
+
+Groups allow updating properties of sound objects in bulk.
+
+code::
+(
+// create a new group
+~satie.makeSatieGroup(\synths);
+// add some synths to the group and give them random frequencies, loudness and position
+20.do( { arg item;
+	var nodename=("test_tone"++"_"++item).asSymbol;
+	var synth;
+	synth = ~satie.makeInstance(nodename.asSymbol, \test, \synths, synthArgs: [
+		\sfreq, rrand(200, 800),
+		\gainDB, rrand(-60, -30),
+		\azideg, rrand(-90, 90)]);
+});
+)
+// set volume of all objects
+~satie.groups[\synths].set(\gainDB, -60);
+
+// set frequency of all objects
+~satie.groups[\synths].set(\sfreq, 360);
+
+// add another instance of a synth to the group
+~satie.makeInstance(\solo, \boo, \synths, [\gainDB, -20]);
+
+// set parameters of one instance
+~satie.groupInstances[\synths][\solo].set(\freq, 800);
+
+// clean instance
+~satie.cleanInstance(\solo, \synths);
+
+// delete the group and all its children
+~satie.killSatieGroup(\synths);
+::
+
+Go back to link::Overview/SATIE-Overview::
+
+Next Section: link::Examples/Effects::

@@ -19,7 +19,6 @@ SatieConfiguration {
 	var <>debug = false;
 
 	var <satieRoot;
-	var <spat;
 	var <serverOptions;
 
 	// Plugins needed by the renderer
@@ -51,7 +50,7 @@ SatieConfiguration {
 		mapperPlugins = SatiePlugins.newAudio(pluginsPath++"/mappers/*.scd");
 		if (debug, {
 			"New configuration: \nRoot: %\nSpat: %\nPlugins: %, %, %".format(
-				this.satieRoot, spat, this.audioPlugins, this.fxPlugins, this.spatPlugins, this.mapperPlugins
+				this.satieRoot, listeningFormat, this.audioPlugins, this.fxPlugins, this.spatPlugins, this.mapperPlugins
 			).postln;
 		});
 		this.handleSpatFormat(listeningFormat.asSymbol);
@@ -59,7 +58,6 @@ SatieConfiguration {
 
 	handleSpatFormat { arg format;
 		var thisPlugin = this.spatPlugins[format.asSymbol];
-		spat = thisPlugin.name;
 		serverOptions.numOutputBusChannels = thisPlugin.numChannels;
 		if (debug, {
 			postln("%: setting listening format to %\n".format(this.class, format));
