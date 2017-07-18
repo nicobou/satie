@@ -36,7 +36,7 @@ s.waitForBoot({
 // making two trigered sound source
 (
 ~satie.makeInstance(\test_src, \string_with_effects);
-~satie.satieGroups[\default].set(\gainDB, -20);
+~satie.groups[\default].set(\gainDB, -20);
 
 ~satie.groupInstances[\default][\test_src].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
 )
@@ -58,6 +58,6 @@ s.waitForBoot({
 ~satie.groupInstances[\defaultFx][\rev_post].set(\in, ~satie.aux[1]);  // attached to source Post bus
 ~satie.groupInstances[\defaultFx][\rev_post].set(\mix, 1 /*wet only*/, \room, 0.9, \damp, 1, \aziDeg, 180/*right*/, \gainDB, 0);
 // listen: post reverb is on the right
-~satie.groupInstances[\default][\test_src].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
+~satie.groupInstances[\default][\test_src].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5, \aziDeg, 130);
 )
 
