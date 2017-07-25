@@ -15,13 +15,14 @@ s = Server.supernova.local;
 ~satieConfiguration.serverOptions.blockSize = 1024;
 // instantiate SATIE renderer and pass it the configuration
 ~satie = Satie.new(~satieConfiguration);
+~satie.boot();
 s.waitForBoot({
-        // create a default group
-	~satie.makeSatieGroup(\default);
-        // define some synths
+	// create a default group
+	// ~satie.makeSatieGroup(\default);
+	// define some synths
 	~satie.makeSynthDef(\boo, \misDrone, [], [], [~satieConfiguration.listeningFormat], [0]);
 	~satie.makeSynthDef(\test, \testtone, [], [], [~satieConfiguration.listeningFormat], [0]);
-        // display some information
+	// display some information
 	s.meter;
 	s.makeGui;
 	s.plotTree;

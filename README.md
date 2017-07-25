@@ -6,3 +6,22 @@ Its aim is to facilitate using 3D space in audio music/audio composition and aut
 
 SATIE is built with SuperCollider, an audio programming environment and language and is controlled via OSC. See instructions for [installing SuperCollider 3.8](INSTALL-SC.md). 
 
+## Directory structure
+
+SATIE internal plugins:
+- audiosources:  sound sources (like file player)
+- effects:       effect (like reverb)
+- spatializers:  spatialization (like stereo)
+- mappers:       mapper
+
+other:
+- doc:           documentation
+- examples:      some example uses
+- src:           SATIE implementation
+- protocols:     OSC protocols
+- utils:         diagnostics and other tools
+- plugins:       implementation of SATIE client in other softwares (like Blender)
+
+## Sponsors
+
+This project is made possible thanks to the Society for Arts and Technologies. [SAT](http://www.sat.qc.ca/) and to the Ministère du Développement économique, de l'Innovation et de l'Exportation du Québec (MEIE).
