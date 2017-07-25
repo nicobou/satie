@@ -17,7 +17,6 @@
  */
 Satie {
 	var <>satieConfiguration;
-	var <server;
 	var options;
 	var <>spat;
 	var <>debug = true;
@@ -38,6 +37,8 @@ Satie {
 	// instantiated
 	var <groups, <groupInstances;
 
+	var osc;
+
 	*new {|satieConfiguration|
 		^super.newCopyArgs(satieConfiguration).initRenderer;
 	}
@@ -57,10 +58,12 @@ Satie {
 		processes = Dictionary.new();
 		auxbus = Bus.audio(satieConfiguration.server, satieConfiguration.numAudioAux);
 		aux = Array.fill(satieConfiguration.numAudioAux, {arg i; auxbus.index + i});
-		// TODO:
-		// for some reason, we need to create the default group explicitly elsewhere, probably some timing or synchronicity
-		// needs to be figured out.
-		// satieConfiguration.server.doWhenBooted(this.makeSatieGroup(\default), onFailure: {"server did not boot".warning;});
-		// this.makeSatieGroup(\default);
+		osc = SatieOSC(this);
+	}
+
+	boot {
+		satieConfiguration.server.boot;
+		satieConfiguration.server.doWhenBooted({this.makeSatieGroup(\default, \addToHead)});
+		satieConfiguration.server.doWhenBooted({this.makeSatieGroup(\defaultFx, \addToTail)});
 	}
 }
