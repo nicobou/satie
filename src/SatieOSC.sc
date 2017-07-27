@@ -101,9 +101,49 @@ SatieOSC {
 								}
 						)},
 						'createProcess',
-						{"create process, not implemented yet".postln;},
+						{
+							if (satie.satieConfiguration.debug,
+								{postf("•satieOSC.coreCallback: createProcess:  command: %, messLen: %   msg: %, \n", command, msg.size, msg);});
+							if ( (msg.size < 3 ) ,
+								{"satieOSC.coreCallback:  createProcess message missing values".warn;
+									postf("createProcess MESS LEN: %", msg.size);
+
+								},
+								// else
+								{
+									var sourceName = msg[2];
+									var uriName = "";
+									var groupName = "";
+
+									if (msg.size > 3,
+										{
+											uriName = msg[3];
+									});
+
+									if (msg.size > 4,
+										{
+											groupName = msg[4];
+									});
+									this.createProcess(sourceName, uriName, groupName);
+							});
+						},
 						'deleteNode',
-						{"delete Node, not implemented yet".postln;},
+						{
+							if ( (msg.size < 3 ) ,
+								{"satieOSC.coreCallback:  deleteNode message missing values".warn;},
+								// else
+								{
+									var nodeName = msg[2];
+									// "~coreCallback: OSCrx deleteNode CALLED ".warn;
+									
+									if (allGroupNodes.includesKey(nodeName.asSymbol),
+										{   this.removeGroup(nodeName);  },
+										// else
+										{
+											this.deleteSource(nodeName);   });
+								}
+							)
+						},
 						'debugFlag',
 						{"create audio, not implemented yet".postln;},
 						'clear',
@@ -111,6 +151,62 @@ SatieOSC {
 					)
 			});
 		}
+	}
+
+	removeGroup { | groupName |
+		if ( allGroupNodes.includesKey(groupName.asSymbol) ,
+			{
+				//  No OP  ~clearGroupNode.value(groupName.asSymbol);
+				if (satie.satieCongifuration.debug, {postf("•satieOSC.removeGroup:  group node: % \n",  groupName);});
+				allGroupNodes.removeAt(groupName.asSymbol);     // remove node from global dictionary
+			});
+	}
+
+	deleteSource { | nodeName |
+		if ( allSourceNodes.includesKey(nodeName.asSymbol) ,
+			{
+				this.clearSourceNode(nodeName.asSymbol);
+				allSourceNodes.removeAt(nodeName.asSymbol);     // remove node from global dictionary
+			});
+	}
+
+	clearSourceNode {  | nameSym |
+		var node = allSourceNodes[nameSym];
+		//var connectionName = node.at(\connectionName);
+		var nodeKeys = node.keys;
+		var thisGroupName = allSourceNodes[nameSym].at(\groupNameSym);
+
+		// is this a process node?
+		if ( allSourceNodes[nameSym].at(\process) != nil,
+			{
+				var groupSym =  allSourceNodes[nameSym].at(\groupNameSym);
+
+				var myProcess = allSourceNodes[nameSym].at(\process);
+
+				myProcess.cleanup();   // frees any state the process may have created, i.e. synths
+
+				//  IF THE SYNTH IS NOT CLEANED FROM THE NODE TREE, DO THE SAME AS THE REGULAR SOURCE CASE BELOW
+				satie.cleanInstance(nameSym,thisGroupName );
+
+				// now delete group
+				this.removeGroup(groupSym); //
+				satie.killSatieGroup(groupSym);   // kill the group, since it was unique to this source
+			},
+			// else  its just a regular source
+			{
+				var synth = satie.groupInstances[thisGroupName][nameSym];
+				satie.cleanInstance(nameSym,thisGroupName );
+				//synth.free;    // to make sure it gets cleaned from the node tree
+				if (satie.satieConfiguration.debug, {postf("•satieOSC.clearSourceNode: delete  node  % in group %\n", nameSym, thisGroupName);});
+
+			});
+
+		//  clear node's local dictionary
+		// probably this is unnecessary
+		nodeKeys.do { | key |
+			//postf("removing node keys:  node: %   key %  \n",  nameSym, key);
+			node.removeAt(key);
+		};
 	}
 
 	createSource {| sourceName, uriPath , groupName = \default |
