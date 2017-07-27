@@ -6,17 +6,18 @@ We start with setting up SATIE:
 code::
 (
 s = Server.supernova.local;
-~satieConfiguration = SatieConfiguration.new(s, "stereo");
+~satieConfiguration = SatieConfiguration.new(s, \stereoListener);
 ~satieConfiguration.serverOptions.blockSize = 1024;
 ~satieConfiguration.debug = false;
 ~satie = Satie.new(~satieConfiguration);
-// s.reboot();
+~satie.boot();
 s.waitForBoot({
-	~satie.makeSatieGroup(\default);
-	~satie.makeSynthDef(\boo, \misDrone, [], [], [~satieConfiguration.spat], [0]);
-	~satie.makeSynthDef(\test, \testtone, [], [], [~satieConfiguration.spat], [0]);
-	~satie.makeSynthDef(\string, \zkarpluck1, [], [], [~satieConfiguration.spat], [0]);
-	s.meter;
+	~satie.makeSynthDef(\boo, \misDrone, [], [], [~satieConfiguration.listeningFormat], [0]);
+	~satie.makeSynthDef(\test, \testtone, [], [], [~satieConfiguration.listeningFormat], [0]);
+	~satie.makeSynthDef(\string, \zkarpluck1, [], [], [~satieConfiguration.listeningFormat], [0]);
+	// dummy
+	~satie.makeSynthDef(\dummyPlugin, \emptySource,  [], [], [~satieConfiguration.listeningFormat], [0]);    // dummy synthdef, used for new nodes
+	// be sure the synthDef is compiled on the server	s.meter;
 	s.makeGui;
 	s.plotTree;
 })

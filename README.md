@@ -24,4 +24,4 @@ other:
 
 ## Sponsors
 
-This project is made possible thanks to the Society for Arts and Technologies. [SAT](http://www.sat.qc.ca/) and to the Ministère du Développement économique, de l'Innovation et de l'Exportation du Québec (MEIE).
+This project is made possible thanks to the Society for Arts and Technologies. [SAT](http://www.sat.qc.ca/) and to the Ministère de l'Économie, de la Science et de l'Innovation (MESI) du Québec
