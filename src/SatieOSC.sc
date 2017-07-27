@@ -408,7 +408,8 @@ SatieOSC {
 		type = this.getUriType( uriPath );
 
 
-		if (satie.satieConfiguration.debug, {postf("•satieOSC.setSynth: node: %   uriStr: %  group: %  type: % \n",  nodeName, uriPath,  groupName,  type);});
+		if (satie.satieConfiguration.debug,
+			{postf("•satieOSC.setSynth: node: %   uriStr: %  group: %  type: % \n",  nodeName, uriPath,  groupName,  type);});
 
 		// NEED A REAL SYNTH DEF CHECK HERE- set the \dummyPlugin if it fails
 		if ( validPluginName.asString == "", { validPluginName = \dummyPlugin; });
@@ -454,5 +455,18 @@ SatieOSC {
 		uriSynth = uriName[0].asString.split($/)[2];
 
 		^uriSynth.asString;
+	}
+
+	clearScene {
+		var nodelist = allSourceNodes.keys;
+		"clearScene called".warn;
+
+		// first flush all nodes
+		allSourceNodes.keysDo { |key |
+			clearSourceNode(key);
+		};
+
+		allSourceNodes.clear();
+		allSourceNodes.size;
 	}
 }
