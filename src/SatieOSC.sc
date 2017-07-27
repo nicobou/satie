@@ -54,7 +54,8 @@ SatieOSC {
 				{
 					switch (command,
 						'createSource',
-						{if (satie.satieConfiguration.debug, {postf("•satieOSC.coreCallback: command: %, messLen: %   msg: %, \n", command, msg.size, msg);});
+						{if (satie.satieConfiguration.debug,
+							{postf("•satieOSC.coreCallback: command: %, messLen: %   msg: %, \n", command, msg.size, msg);});
 
 							if ( (msg.size < 3 ) ,
 								{"satieOSC.coreCallback:  createSource message missing values".warn;
@@ -156,7 +157,6 @@ SatieOSC {
 	removeGroup { | groupName |
 		if ( allGroupNodes.includesKey(groupName.asSymbol) ,
 			{
-				//  No OP  ~clearGroupNode.value(groupName.asSymbol);
 				if (satie.satieCongifuration.debug, {postf("•satieOSC.removeGroup:  group node: % \n",  groupName);});
 				allGroupNodes.removeAt(groupName.asSymbol);     // remove node from global dictionary
 			});
@@ -172,7 +172,6 @@ SatieOSC {
 
 	clearSourceNode {  | nameSym |
 		var node = allSourceNodes[nameSym];
-		//var connectionName = node.at(\connectionName);
 		var nodeKeys = node.keys;
 		var thisGroupName = allSourceNodes[nameSym].at(\groupNameSym);
 
@@ -196,9 +195,8 @@ SatieOSC {
 			{
 				var synth = satie.groupInstances[thisGroupName][nameSym];
 				satie.cleanInstance(nameSym,thisGroupName );
-				//synth.free;    // to make sure it gets cleaned from the node tree
-				if (satie.satieConfiguration.debug, {postf("•satieOSC.clearSourceNode: delete  node  % in group %\n", nameSym, thisGroupName);});
-
+				if (satie.satieConfiguration.debug,
+					{postf("•satieOSC.clearSourceNode: delete  node  % in group %\n", nameSym, thisGroupName);});
 			});
 
 		//  clear node's local dictionary
