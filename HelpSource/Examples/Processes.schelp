@@ -53,17 +53,22 @@ code::
 			}
 		};
 	};
+
+
+	~setup = { | self | self.makeRoutine; self.start; };
+	~cleanup = { | self | self.routine.stop; self.routine.reset;}
+	
 	~start = { | self | self.routine.play; };
 });
 )
 ::
 
 code::(
-// will call init
-~process = ~satie.makeProcess(\testProcess, ~env);
+	// will call
+	~process = ~satie.makeProcess(\testProcess, ~env);
 )
 ::
-
+~process.setup.value();
 code::
 (
 // invoke specific process functions
