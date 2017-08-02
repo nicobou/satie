@@ -53,12 +53,11 @@ code::
 			}
 		};
 	};
+	~start = { | self | self.routine.reset; self.routine.play };
 
-
+	// setup and cleanup methods are mandatory, particularly for use via OSC
 	~setup = { | self | self.makeRoutine; self.start; };
-	~cleanup = { | self | self.routine.stop; self.routine.reset;}
-	
-	~start = { | self | self.routine.play; };
+	~cleanup = { | self | self.routine.stop;};
 });
 )
 ::
@@ -74,6 +73,7 @@ code::
 // invoke specific process functions
 ~process.makeRoutine;
 ~process.start;
+~process.cleanup;
 )
 ::
 
@@ -82,5 +82,21 @@ code::
 (
 ~satie.processes[\testProcess].makeRoutine
 ~satie.processes[\testProcess].start
+)
+::
+
+And we can also use it remotely, via OSC:
+
+code::
+(
+// connect to satie's RX port
+b = NetAddr.new("127.0.0.1", 18032);
+
+// create process node - unique group will be automatically generated for each created
+b.sendMsg("/satie/scene", "createProcess",  "myProcess", "process://testProcess" );
+
+// remove it
+b.sendMsg("/satie/scene", "deleteNode", "myProcess");
+
 )
 ::
