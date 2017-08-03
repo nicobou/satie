@@ -25,7 +25,7 @@ s.waitForBoot({
 )
 ::
 
-And we define the process. The process needs to be encapsulated in an environment and must implement soft::setup:: and soft::cleanup:: methods. These methods are being used 
+And we define the process. The process needs to be encapsulated in an environment and must implement soft::setup:: and soft::cleanup:: methods. These methods are being used in OSC handlers.
 
 code::
 (
@@ -63,12 +63,14 @@ code::
 )
 ::
 
-code::(
-	// will call
-	~process = ~satie.makeProcess(\testProcess, ~env);
-)
-::
+code::
+// register the process with SATIE
+~process = ~satie.makeProcess(\testProcess, ~env);
+// setup will will execute it automatically
 ~process.setup.value();
+// stop the process
+~process.cleanup;
+::
 code::
 (
 // invoke specific process functions
@@ -86,8 +88,9 @@ code::
 )
 ::
 
-And we can also use it remotely, via OSC:
-
+And, of course, we use it remotely, via OSC:
+note::
+soft::createProcess:: handler automatically executes soft::setup:: method. Similarly, soft::deleteNode:: handler automatically executes soft::cleanup:: method. See the link::Examples/OSC:: and link::Classes/OSC:: for more information ::
 code::
 (
 // connect to satie's RX port
