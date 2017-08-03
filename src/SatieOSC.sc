@@ -157,7 +157,7 @@ SatieOSC {
 	removeGroup { | groupName |
 		if ( allGroupNodes.includesKey(groupName.asSymbol) ,
 			{
-				if (satie.satieCongifuration.debug, {postf("•satieOSC.removeGroup:  group node: % \n",  groupName);});
+				if (satie.satieConfiguration.debug, {postf("•satieOSC.removeGroup:  group node: % \n",  groupName);});
 				allGroupNodes.removeAt(groupName.asSymbol);     // remove node from global dictionary
 			});
 	}
@@ -181,6 +181,7 @@ SatieOSC {
 				var groupSym =  allSourceNodes[nameSym].at(\groupNameSym);
 
 				var myProcess = allSourceNodes[nameSym].at(\process);
+				"found a process %".format(allSourceNodes[nameSym].at(\process)).postln;
 
 				myProcess.cleanup();   // frees any state the process may have created, i.e. synths
 
@@ -195,6 +196,7 @@ SatieOSC {
 			{
 				var synth = satie.groupInstances[thisGroupName][nameSym];
 				satie.cleanInstance(nameSym,thisGroupName );
+				"this is not a process".postln;
 				if (satie.satieConfiguration.debug,
 					{postf("•satieOSC.clearSourceNode: delete  node  % in group %\n", nameSym, thisGroupName);});
 			});
@@ -262,7 +264,7 @@ SatieOSC {
 		var type;
 		~uriString = uriString;
 
-		// MAKE SURE URI STRING IS VALID -- if not, will post warning and be set to plugin://dummyPlugin
+		// MAKE SURE URI STRING IS VALID -- if not, will post warning
 		uriString = this.checkUri(sourceName, uriString);
 
 		type = this.getUriType(uriString);
@@ -319,7 +321,6 @@ SatieOSC {
 		if ( ( (type != \plugin) &&  (type != \effect) ),
 			{
 				error("satieOSC.createSourceNode: BUG FOUND IN CODE:   BAD URI  " );
-				this.setSynth(sourceName.asSymbol, \dummyPlugin);
 			},
 			// else  // path format ok, proceed
 			{
@@ -339,9 +340,8 @@ SatieOSC {
 		//uriString.postln;
 		if ( (type != \plugin) && (type != \effect),
 			{
-				error("~checkUri:  node: %  bad URI: % , using default: plugin://dummyPlugin \n", nodeName, uriString);
-
-				"plugin://dummyPlugin"
+				error("~checkUri:  node: %  bad URI: % , using default: \n", nodeName, uriString);
+				^nil;
 			},
 			{
 				^uriString;
@@ -410,10 +410,6 @@ SatieOSC {
 
 		if (satie.satieConfiguration.debug,
 			{postf("•satieOSC.setSynth: node: %   uriStr: %  group: %  type: % \n",  nodeName, uriPath,  groupName,  type);});
-
-		// NEED A REAL SYNTH DEF CHECK HERE- set the \dummyPlugin if it fails
-		if ( validPluginName.asString == "", { validPluginName = \dummyPlugin; });
-
 
 		if (validPluginName.asSymbol != allSourceNodes[nodeName.asSymbol].at(\plugin).asSymbol,
 			{

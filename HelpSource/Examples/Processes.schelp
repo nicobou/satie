@@ -18,8 +18,6 @@ s = Server.supernova.local;
 ~satie.boot();
 s.waitForBoot({
 	~satie.makeSynthDef(\string, \zkarpluck1, [], [], [~satieConfiguration.listeningFormat], [0]);
-	// dummy
-	~satie.makeSynthDef(\dummyPlugin, \emptySource,  [], [], [~satieConfiguration.listeningFormat], [0]);    // dummy synthdef, used for new nodes
 	// be sure the synthDef is compiled on the server	s.meter;
 	s.makeGui;
 	s.plotTree;
