@@ -1,7 +1,12 @@
 TITLE:: Processes
-summary:: Introductino to SATIE processes
-categories:: Libraries
-We start with setting up SATIE:
+summary:: Introduction to SATIE processes
+categories:: Libraries>SATIE
+
+Processes allow more complex behaviors while limiting OSC communications between 3D engine and SATIE server. Processes are arbitrary routines and could be associated with particle systems, granular-type sound events, patterns, sequences, but are not limited to generating sound (or other events) could also be used for introspection, tracking of various interaction or sound features and reporting.
+
+SECTION::Simple process example
+
+We start with setting up SATIE. The synths that will be used by the process must be compiled on the server:
 
 code::
 (
@@ -12,8 +17,6 @@ s = Server.supernova.local;
 ~satie = Satie.new(~satieConfiguration);
 ~satie.boot();
 s.waitForBoot({
-	~satie.makeSynthDef(\boo, \misDrone, [], [], [~satieConfiguration.listeningFormat], [0]);
-	~satie.makeSynthDef(\test, \testtone, [], [], [~satieConfiguration.listeningFormat], [0]);
 	~satie.makeSynthDef(\string, \zkarpluck1, [], [], [~satieConfiguration.listeningFormat], [0]);
 	// dummy
 	~satie.makeSynthDef(\dummyPlugin, \emptySource,  [], [], [~satieConfiguration.listeningFormat], [0]);    // dummy synthdef, used for new nodes
@@ -24,7 +27,7 @@ s.waitForBoot({
 )
 ::
 
-And we define the process
+And we define the process. The process needs to be encapsulated in an environment and must implement soft::setup:: and soft::cleanup:: methods. These methods are being used 
 
 code::
 (
