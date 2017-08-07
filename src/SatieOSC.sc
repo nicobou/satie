@@ -146,12 +146,26 @@ SatieOSC {
 							)
 						},
 						'debugFlag',
-						{"create audio, not implemented yet".postln;},
+						{
+							this.setDebug(msg)
+						},
 						'clear',
-						{"clear, not implemented yet".postln;};
+						{
+							this.clearScene();
+						};
 					)
 			});
 		}
+	}
+
+	setDebug { | msg |
+		msg.postln;
+		if ((msg.size < 3),
+			{"% wrong number of arguments".format(this.class.getBackTrace).warn},
+			{
+				satie.satieConfiguration.debug = msg[2].asInt.asBoolean;
+			}
+		)
 	}
 
 	removeGroup { | groupName |
@@ -463,5 +477,85 @@ SatieOSC {
 
 		allSourceNodes.clear();
 		allSourceNodes.size;
+	}
+
+	// handles /satie/nodetype/state  nodeName flag
+	setState { | args |
+		var type = args[0].asString.split[2].asSymbol;
+
+		if ( satie.satieConfiguration.debug,
+			{
+				postf("•satieOSC.setStateHandler: % \n", args);
+			});
+
+		// verify message
+		if (  ( args.size != 3)  ,
+			{
+				error("satieOSCProtocol.setStateHandler: bad messafe length: expects oscAddress nodeName val % \n", args);
+			}, // else args good
+			{
+				var nodeName  = args[1];
+				var value = args[2];
+				var targetNode = nil;
+				var state;
+
+				if ( value == 0 , { state = false}, {state = true});
+
+				switch(type,
+					'source',
+					{
+						if ( allSourceNodes.includesKey(nodeName.asSymbol) == true,
+							{
+								targetNode = allSourceNodes[nodeName.asSymbol].at(\synth);
+								if ( targetNode == nil,
+									{
+										error("satieOSCProtocol.setStateHandler:  source node: "++nodeName++"  BUG FOUND: undefined SYNTH  \n");
+									}, // else good to go
+									{
+										targetNode.run(state);
+									});
+							},
+							{
+								error("satieOSCProtocol.setStateHandler:  source node: "++nodeName++"  is undefined \n");
+							}); // else node exists,  process event
+					},
+					'group',
+					{
+						if (  allGroupNodes.includesKey (nodeName.asSymbol) == true,
+							{
+								targetNode = allGroupNodes[nodeName.asSymbol].at(\group).group;
+								targetNode.run(state);
+							},
+							{   // else no group
+								error("satieOSCProtocol.setStateHandler:  group node: "++nodeName++"  is undefined \n");
+							});
+					},
+					'process',
+					{
+						if ( allSourceNodes.includesKey(nodeName.asSymbol) == true,
+							{
+								var thisGroupName = allSourceNodes[nodeName.asSymbol].at(\groupNameSym);  // process nodes have unique groups
+								var thisGroup = allGroupNodes[thisGroupName].at(\group).group;
+								var myProcess = allSourceNodes[nodeName.asSymbol].at(\process);
+
+								if ( myProcess == nil,
+									{
+										error("satieOSCProtocol.setStateHandler:  process node: "++nodeName++"  BUG FOUND: undefined process  \n");
+									},
+									{  // good to go
+										if ( myProcess[\state].class == Function,     // does the process implement the \state handler
+											{
+												myProcess[\state].value(myProcess, state);   // yes, call it
+											},
+											{
+												thisGroup.run(state);   // or just update the process's group
+											});
+									});
+							},
+							{  // else error
+								error("satieOSCProtocol.setStateHandler:  process node: "++nodeName++"  is undefined \n");
+							});
+					});
+			});
 	}
 }
