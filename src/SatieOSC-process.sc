@@ -85,7 +85,6 @@
 							// send URI's argsString to setup without any error checking
 
 							myProcess[\setup].value(myProcess, sourceName.asSymbol, cloneGroupName.asSymbol, argList );   // set the state of the process
-							this.setSynth(sourceName.asSymbol, "");  // sets dummy plugin as placeholder
 
 							postf(">>satieOSC.createProcessNode: creating: %,  with  process:  %   and arglist: % \n", sourceName, processName, argList);
 
