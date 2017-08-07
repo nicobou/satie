@@ -196,7 +196,6 @@ SatieOSC {
 			{
 				var synth = satie.groupInstances[thisGroupName][nameSym];
 				satie.cleanInstance(nameSym,thisGroupName );
-				"this is not a process".postln;
 				if (satie.satieConfiguration.debug,
 					{postf("•satieOSC.clearSourceNode: delete  node  % in group %\n", nameSym, thisGroupName);});
 			});
