@@ -49,7 +49,12 @@ SatieOSC {
 			var command = msg[1];
 			if (msg.size < 3,
 				{
-					Log(\coreHandler).error("createSource message missing values");
+					switch (command,
+						'clear',
+						{
+							this.clearScene();
+						};
+					);
 				},
 				{
 					switch (command,
@@ -148,10 +153,6 @@ SatieOSC {
 						'debugFlag',
 						{
 							this.setDebug(msg)
-						},
-						'clear',
-						{
-							this.clearScene();
 						};
 					)
 			});
@@ -472,7 +473,7 @@ SatieOSC {
 
 		// first flush all nodes
 		allSourceNodes.keysDo { |key |
-			clearSourceNode(key);
+			this.clearSourceNode(key);
 		};
 
 		allSourceNodes.clear();
