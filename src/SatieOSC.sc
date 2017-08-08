@@ -17,10 +17,6 @@ SatieOSC {
 		allSourceNodes = Dictionary();
 		allGroupNodes = Dictionary();
 		this.newOSC(\satieScene, this.coreHandler, "/satie/scene");
-		Log(this.class).formatter = {
-			|item, log|
-			"%.%: %".format(log.name, log.level, item.string);
-		}
 	}
 
 	/*      create a new OSC definition*/
@@ -256,7 +252,6 @@ SatieOSC {
 		// type://name (i.e. plugin://DustDust, file://<path>
 
 		// check URI name to make sure its valid
-		Log(\getUriType).warning("got %".format(uriPath));
 
 		if (uriPath.asString.contains("://") == false,
 			{
