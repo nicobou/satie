@@ -52,8 +52,8 @@
 			if (allSourceNodes.includesKey(nodeName.asSymbol),
 				{
 					var thisGroupName = allSourceNodes[nodeName.asSymbol].at(\groupNameSym);  // process nodes have unique groups
-					var thisGroup = allGroupNodes[thisGroupName].at(\group).group;
-					var myProcess = allSourceNodes[nodeName.asSymbol].at(\process);
+					var thisGroup = this.getGroupNode(thisGroupName, \group);
+					var myProcess = this.getSourceNode(nodeName, \process);
 					if (myProcess == nil,
 						{
 							"→    %: process node; % - BUG? undefined process".format(
@@ -75,9 +75,9 @@
 			var targetNode;
 
 			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
-			if (allSourceNodes.includesKey(nodeName.asSymbol),
+			if (allGroupNodes.includesKey(nodeName.asSymbol),
 				{
-					targetNode = allSourceNodes[nodeName.asSymbol].at(\group);
+					targetNode = this.getGroupNode(nodeName, \group);
 					this.nodeSet(targetNode, props);
 				},
 				{
@@ -96,7 +96,7 @@
 			if (satie.satieConfiguration.debug, {"→ %: message: %".format(this.class.getBackTrace, args).postln});
 			if (allSourceNodes.includesKey(nodeName.asSymbol),
 				{
-					targetNode = allSourceNodes[nodeName.asSymbol].at(\synth);
+					targetNode = this.getSourceNode(nodeName, \synth);
 					if (targetNode == nil,
 						{
 							error("%: source node: % - bug: undefined synth".format(this.class.getBackTrace, targetNode));
