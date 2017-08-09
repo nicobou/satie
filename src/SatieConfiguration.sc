@@ -27,6 +27,9 @@ SatieConfiguration {
 	var <>spatPlugins;
 	var <>mapperPlugins;
 
+	// other options
+	var <>orientationOffsetDeg;
+
 	*new {| server, listeningFormat = \stereoListener, numAudioAux = 0, outBusIndex = 0|
 		server = server ? Server.supernova;
 		^super.newCopyArgs(server, listeningFormat, numAudioAux, outBusIndex).init;
@@ -54,6 +57,7 @@ SatieConfiguration {
 			).postln;
 		});
 		this.handleSpatFormat(listeningFormat.asSymbol);
+		orientationOffsetDeg = [0, 0];
 	}
 
 	handleSpatFormat { arg format;
