@@ -16,7 +16,15 @@ SatieOSC {
 		" + %".format(satie.satieConfiguration.server).postln;
 		allSourceNodes = Dictionary();
 		allGroupNodes = Dictionary();
+		// scene level handler
 		this.newOSC(\satieScene, this.coreHandler, "/satie/scene");
+		// set command handlers
+		this.newOSC(\satieSrcSet, this.setSrcHandler, "/satie/source/set");
+		this.newOSC(\satieGroupSet, this.setGroupHandler, "/satie/group/set");
+		this.newOSC(\satieProcSet, this.setProcHandler, "/satie/process/set");
+		this.newOSC(\satieSrcUpdate, this.updateSrcHandler, "/satie/source/update");
+		// this.newOSC(\satieGroupUpdate, this.updateGroupHandler, "/satie/process/update");
+		// this.newOSC(\satieSrcUpdate, this.updateSrcHandler, "/satie/process/update");
 	}
 
 	/*      create a new OSC definition*/
