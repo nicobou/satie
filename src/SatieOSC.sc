@@ -29,7 +29,6 @@ SatieOSC {
 
 	/*      create a new OSC definition*/
 	newOSC { | id, cb, path = \default |
-		"newOSC called".postln;
 		OSCdef(id.asSymbol, cb, path, recvPort: oscPort);
 	}
 
@@ -299,7 +298,7 @@ SatieOSC {
 				postf("~satieOSC.createSourceNode:   source:%    group:  % undefined,  creating  group  \n", sourceName, groupName);
 				if (type == \effect,
 					{
-						thiscreateGroup(groupName.asSymbol, \addToTail);
+						this.createGroup(groupName.asSymbol, \addToTail);
 					},
 					{
 						this.createGroup(groupName.asSymbol);
@@ -441,7 +440,6 @@ SatieOSC {
 				});
 
 				sourceNode.put(\plugin, validPluginName.asSymbol);
-
 
 				if ( ( type == \effect) ,
 					{

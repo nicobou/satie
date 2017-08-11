@@ -36,4 +36,50 @@
 		)
 	}
 
+	// check if inBus specified:
+	// uriPath eg: effect://reverb inBus 2
+	getFxInBus { | uriPath |
+		var auxBus = 0;  //default bus
+
+		var argList = this.getUriArgs(uriPath);
+
+		// if there are two args, and the first arg is the keyword "inBus"then try to set the effect's \in param to the second arg
+		if (argList.size > 1,
+			{
+				if (argList[0].asString == "inBus",
+					{
+						auxBus = argList[1].asInt.clip(0, satie.aux.size - 1);
+					});
+			});
+		auxBus;  // returns auxBus for effects node
+	}
+
+	getUriArgs { | uriPath |
+		var temp,charIndex, processName;
+		var argsString = "";
+		var stringArray;
+		var rawArgVec = nil;
+		var argList = List[];
+		var argsArray;
+
+		stringArray = uriPath.asString.split($ );
+
+		if (stringArray.size < 2,
+			{
+				[];
+			},
+			{
+				argsArray = uriPath.asString.split($ );
+				argsArray.removeAt(0);
+				// make list of items in argString
+				argsArray.do( { arg item;
+					if ( item != "",
+						{
+							argList.add(item);
+						});
+				}
+				)
+			}
+		);
+	}
 }
