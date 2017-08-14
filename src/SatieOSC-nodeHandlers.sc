@@ -12,7 +12,7 @@
 
 			if (allSourceNodes.includesKey(nodeName.asSymbol) == false,
 				{
-					"%: node % not found, could be abug.".format(this.class.getBackTrace, nodeName).error;
+					"%: node % not found, could be a bug.".format(this.class.getBackTrace, nodeName).error;
 				},
 				{
 					thisSynth = this.getSourceNode(nodeName, \synth);
