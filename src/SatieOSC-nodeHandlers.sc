@@ -1,46 +1,92 @@
 + SatieOSC {
 
-	test {
-		"boo".postln;
-	}
-
 	updateSrcHandler {
 		^{ | args |
 			var nodeName = args[1];
 			var aziDeg, eleDeg, gainDB, delayMs, lpHz, distance;
 			var thisSynth;
-
-			if (allSourceNodes.includesKey(nodeName.asSymbol) == false,
-				{
-					"%: node % not found, could be a bug.".format(this.class.getBackTrace, nodeName).error;
-				},
+			"    *****".postln;
+			
+			if (args.size != 8,
+				{"→    %: message missing values".format(args).warn},
 				{
 					thisSynth = this.getSourceNode(nodeName, \synth);
-					"this Synth is: %".format(thisSynth).postln;
+					this.updateNode(thisSynth, args);
+				}
+			)
+		}
+	}
 
-					if (args.size != 8,
-						{"→    %: message missing values".warn},
+	updateGroupHandler {
+		^{ | args |
+			var nodeName = args[1];
+			var aziDeg, eleDeg, gainDB, delayMs, lpHz, distance;
+			var thisGroup;
+
+			if (args.size != 8,
+				{"→    %: message missing values".format(args).warn},
+				{
+					thisGroup = this.getGroupNode(nodeName, \group);
+					this.updateNode(thisGroup, args);
+				}
+			);
+		}
+	}
+
+	updateProcHandler {
+		^{ | args |
+			var nodeName = args[1];
+			var thisGroupName, thisGroup, myProcess;
+
+			if (args.size != 8,
+				{"→    %: message missing values".format(args).warn},
+				{
+					thisGroupName = allGroupNodes[nodeName.asSymbol].at(\groupNameSym);
+					thisGroup = this.getGroupNode(nodeName, \group);
+					myProcess = allSourceNodes[nodeName.asSymbol].at(\process);
+					if (myProcess == nil, {
+						"%: process node %: BUG FOUND: undefined process"
+						.format(this.class.getBackTrace, nodeName).error}
+					);
+					if (myProcess[\setUpdate] == nil,
 						{
-							// get values from vector, and write to connectionState
+							this.updateNode(thisGroup, args);
+						},
+						{
+							var aziDeg, eleDeg, gainDB, delayMs, lpHz, distance;
 							aziDeg = args[2] + satie.satieConfiguration.orientationOffsetDeg[0];
 							eleDeg= args[3] + satie.satieConfiguration.orientationOffsetDeg[1];
 							gainDB = args[4];
 							delayMs = args[5];
 							lpHz = args[6];
 							distance = args[7];  // not used by basic spatializers
-
-							thisSynth.set(
-								\aziDeg, aziDeg,
-								\eleDeg, eleDeg,
-								\gainDB, gainDB,
-								\delayMs, delayMs,
-								\lpHz, lpHz
-							);
+							myProcess[\setUpdate].value(myProcess, aziDeg, eleDeg, gainDB, delayMs, lpHz, distance);
 						}
+					
 					);
 				}
-			)
-		}
+			);
+		};
+	}
+
+
+	// for sources and groups
+	updateNode { | node, args |
+		var aziDeg, eleDeg, gainDB, delayMs, lpHz, distance;
+		// get values from vector
+		aziDeg = args[2] + satie.satieConfiguration.orientationOffsetDeg[0];
+		eleDeg= args[3] + satie.satieConfiguration.orientationOffsetDeg[1];
+		gainDB = args[4];
+		delayMs = args[5];
+		lpHz = args[6];
+		distance = args[7];  // not used by basic spatializers
+		node.set(
+			\aziDeg, aziDeg,
+			\eleDeg, eleDeg,
+			\gainDB, gainDB,
+			\delayMs, delayMs,
+			\lpHz, lpHz
+		);
 	}
 
 	setProcHandler {
@@ -114,7 +160,11 @@
 	}
 
 	nodeSet { | targetNode, props |
-		if (satie.satieConfiguration.debug, {"→ %:\n    → targetNode: %\n     →properties: % ".format(this.class.getBackTrace, targetNode, props).postln});
+		if (satie.satieConfiguration.debug,
+			{"→ %:\n    → targetNode: %\n     →properties: % ".
+				format(this.class.getBackTrace, targetNode, props).postln
+			}
+		);
 
 		props.pairsDo({|prop, val|
 			switch(prop,
@@ -143,71 +193,77 @@
 			)
 		})
 	}
-	// setMessageHandler { 	| args |
-	// 		var type = args[0].asString.split[2].asSymbol;
-	// 		var nodeName  = args[1];
-	// 		var props = args.copyRange(2, args.size - 1);
-	// 		var targetNode;
 
-	// 		if (e.debugFlag, { postf("•satieOSCProtocol.setMessHandler:  mess: %\n", args); });
+	setVecHandler {
+		^{ | args |
+			var type = args[0].asString.split[2].asSymbol;
 
-	// 		// verify data
-	// 		if (  (  ( (props.size&1)==1) || (props.size == 0) ),
-	// 			{
-	// 				error("satieOSCProtocol.setMessHandler: BAD ARGS: "++props);
-	// 			}, // else args good
-	// 			{
-	// 				switch(type,
-	// 					'source',
-	// 					{
-	// 						if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == true,
-	// 							{
-	// 								targetNode = e.allSourceNodes[nodeName.asSymbol].at(\synth);
-	// 								if ( targetNode == nil,
-	// 									{
-	// 										error("satieOSCProtocol.setMessHandler:  source node: "++nodeName++"  BUG FOUND: undefined SYNTH  \n");
-	// 									},   // else good to go
-	// 									{
-	// 										e.nodeSet( props, targetNode);
-	// 								});
-	// 							},
-	// 							{
-	// 								error("satieOSCProtocol.setMessHandler:  source node: "++nodeName++"  is undefined \n");
-	// 						}); // else node exists,  process event
-	// 					},
-	// 					'group',
-	// 					{
-	// 						if ( e.allGroupNodes.includesKey (nodeName.asSymbol) == true,
-	// 							{
-	// 								targetNode = e.allGroupNodes[nodeName.asSymbol].at(\group).group;
-	// 								e.nodeSet( props, targetNode);
-	// 							},
-	// 							{   // else no group
-	// 								error("satieOSCProtocol.setMessHandler:  group node: "++nodeName++"  is undefined \n");
-	// 						});
-	// 					},
-	// 					'process',
-	// 					{
-	// 						if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == true,
-	// 							{
-	// 								var thisGroupName = e.allSourceNodes[nodeName.asSymbol].at(\groupNameSym);  // process nodes have unique groups
-	// 								var thisGroup = e.allGroupNodes[thisGroupName].at(\group).group;
-	// 								var myProcess = e.allSourceNodes[nodeName.asSymbol].at(\process);
 
-	// 								if ( myProcess == nil,
-	// 									{
-	// 										error("satieOSCProtocol.setMessHandler:  process node: "++nodeName++"  BUG FOUND: undefined process  \n");
+			if (satie.satieConfiguration.debug, { postf("•satieOSCProtocol.setvecMessHandler:  mess: %\n", args); });
 
-	// 									},
-	// 									{  // good to go
-	// 										e.processSet( props, myProcess, thisGroup);
-	// 								});
+			// verify data
+			if (  ( args.size < 3)  ,
+				{
+					error("satieOSCProtocol.setVecHandler: bad message length: expects oscAddress key data1 or more \n"++args);
+				}, // else args good
+				{
+					var nodeName  = args[1];
+					var key = args[2];
+					var vector = args.copyRange(3, args.size - 1);
+					var targetNode = nil;
 
-	// 							},
-	// 							{  // else error
-	// 								error("satieOSCProtocol.setMessHandler:  process node: "++nodeName++"  is undefined \n");
-	// 						});
-	// 				});
-	// 		});
-	// 	};
+					switch(type,
+						'source',
+						{
+							targetNode = this.getSourceNode(nodeName, \synth);
+							targetNode.set(key, vector);
+						},
+						'group',
+						{
+							targetNode = this.getGroupNode(nodeName, \group);
+							targetNode.set(key, vector);
+						},
+						'process',
+						{
+							if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == true,
+								{
+									var thisGroupName = e.allSourceNodes[nodeName.asSymbol].at(\groupNameSym);  // process nodes have unique groups
+									var thisGroup = e.allGroupNodes[thisGroupName].at(\group).group;
+									var myProcess = e.allSourceNodes[nodeName.asSymbol].at(\process);
+									var matched = false;
+
+									if ( myProcess == nil,
+										{
+											error("satieOSCProtocol.setVecHandler:  process node: "++nodeName++"  BUG FOUND: undefined process  \n");
+
+										},
+										{  // good to go
+											if ( myProcess[key.asSymbol].class == Function,  // does a specific handler exist for this key ?
+												{
+													matched = true;
+													myProcess[key.asSymbol].value(myProcess, vector);   // use process's specially defined message handler for this key
+												},
+												{
+													// else  nope:  no handler with that name exists.  Check  if a handler named \setVec is defined.
+													if ( myProcess[\setVec].class == Function,
+														{
+															matched = true;
+															myProcess[\setVec].value(myProcess, key, vector);   // use process's \setVec message handler
+														});
+												});
+											//
+											if (matched == false,
+												{
+													// or just update the process's group
+													thisGroup.set(key,vector);
+												});
+										});
+								},
+								{  // else error
+									error("satieOSCProtocol.setVecHandler:  process node: "++nodeName++"  is undefined \n");
+								});
+						});
+				});
+		}
+	}
 }
