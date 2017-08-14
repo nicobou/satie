@@ -51,7 +51,7 @@
 						auxBus = argList[1].asInt.clip(0, satie.aux.size - 1);
 					});
 			});
-		auxBus;  // returns auxBus for effects node
+		^auxBus;  // returns auxBus for effects node
 	}
 
 	getUriArgs { | uriPath |
