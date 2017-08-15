@@ -42,7 +42,7 @@
 				{"→    %: message missing values".format(args).warn},
 				{
 					thisGroupName = allGroupNodes[nodeName.asSymbol].at(\groupNameSym);
-					thisGroup = this.getGroupNode(nodeName, \group);
+					thisGroup = this.getGroupNode(thisGroupName, \group);
 					myProcess = allSourceNodes[nodeName.asSymbol].at(\process);
 					if (myProcess == nil, {
 						"%: process node %: BUG FOUND: undefined process"
@@ -106,7 +106,7 @@
 								this.class.getBackTrace, nodeName);
 						},
 						{
-							this.processSet (myProcess, props, thisGroup);
+							this.processSet (myProcess, props);
 						}
 					)
 				}
@@ -194,6 +194,52 @@
 		})
 	}
 
+	processSet { | process, props |
+		var value;
+		var keyHandler = nil;
+		var setHandler = nil;
+
+		if (satie.satieConfiguration.debug, {
+			"%: %".format(this.class.getBackTrace, props);
+		});
+
+		props.pairsDo({|prop, val|
+			switch(prop,
+				'hpHz',
+				{
+					var halfSrate = 0.5 * satie.server.sampleRate;
+					value = clip(val, 1, halfSrate );
+				},
+				'spread',
+				{
+					// invert and scale the spread value (usually an exp) to work with SATIE's VBAP-based spatializer (or others)
+					var spread = 100 *  ( 1 - (clip(val,0,1)));  //
+					value = spread;
+				},
+				'in',
+				{
+					value = satie.aux[val.asInt];
+				},
+				{
+					"%: running default set, args: \n     prop: %\n     value: % ".format(
+						this.class.getBackTrace, prop, val
+					).postln;
+					value = val;
+				}
+			);
+
+			if (process[\set].class == Function,
+				{
+					process[\set].value(prop, val);
+				},
+				{
+					"%: % does not implement a setter".format(this.class.getBackTrace, process).postln;
+				}
+			)
+
+		})
+	}
+
 	setVecHandler {
 		^{ | args |
 			var type = args[0].asString.split[2].asSymbol;
@@ -225,11 +271,11 @@
 						},
 						'process',
 						{
-							if ( e.allSourceNodes.includesKey(nodeName.asSymbol) == true,
+							if ( allSourceNodes.includesKey(nodeName.asSymbol) == true,
 								{
-									var thisGroupName = e.allSourceNodes[nodeName.asSymbol].at(\groupNameSym);  // process nodes have unique groups
-									var thisGroup = e.allGroupNodes[thisGroupName].at(\group).group;
-									var myProcess = e.allSourceNodes[nodeName.asSymbol].at(\process);
+									var thisGroupName = allSourceNodes[nodeName.asSymbol].at(\groupNameSym);  // process nodes have unique groups
+									var thisGroup = this.getGroupNode(thisGroupName, \group);
+									var myProcess = allSourceNodes[nodeName.asSymbol].at(\process);
 									var matched = false;
 
 									if ( myProcess == nil,

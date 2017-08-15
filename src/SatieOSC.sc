@@ -25,6 +25,9 @@ SatieOSC {
 		this.newOSC(\satieSrcUpdate, this.updateSrcHandler, "/satie/source/update");
 		this.newOSC(\satieGroupUpdate, this.updateGroupHandler, "/satie/group/update");
 		this.newOSC(\satieProcUpdate, this.updateProcHandler, "/satie/process/update");
+		this.newOSC(\satieSrcSetVec, this.setVecHandler, "/satie/source/setvec");
+		this.newOSC(\satieGroupSetVec, this.setVecHandler, "/satie/group/setvec");
+		this.newOSC(\satieProcSetVec, this.setVecHandler, "/satie/process/setvec");
 	}
 
 	/*      create a new OSC definition*/
