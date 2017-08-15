@@ -102,8 +102,6 @@ b.sendMsg("/satie/scene", "debugFlag", 0);    // deactivate debugging printing t
 )
 // create process node - unique group will be automatically generated for each created
 b.sendMsg("/satie/scene", "createProcess",  "myProcess", "process://testProcess" );
-b.sendMsg("/satie/process/update", "myProcess", 0,0, -6,0,15000,20);
-b.sendMsg("/satie/process/set", "myProcess", "spread", 30); 
 // remove it
 b.sendMsg("/satie/scene", "deleteNode", "myProcess");
 
