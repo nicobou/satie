@@ -41,7 +41,12 @@
 			if (args.size != 8,
 				{"→    %: message missing values".format(args).warn},
 				{
-					thisGroupName = allGroupNodes[nodeName.asSymbol].at(\groupNameSym);
+					if (satie.satieConfiguration.debug,
+						{
+							"%: args: %".format(this.class.getBackTrace, args).postln;
+						}
+					);
+					thisGroupName = allSourceNodes[nodeName.asSymbol].at(\groupNameSym);
 					thisGroup = this.getGroupNode(thisGroupName, \group);
 					myProcess = allSourceNodes[nodeName.asSymbol].at(\process);
 					if (myProcess == nil, {
@@ -50,6 +55,12 @@
 					);
 					if (myProcess[\setUpdate] == nil,
 						{
+							if (satie.satieConfiguration.debug,
+								{
+									"%: no setUpdate on % so we update group % with args %".
+									format(this.class.getBackTrace, myProcess, thisGroup, args).postln;
+								}
+							);
 							this.updateNode(thisGroup, args);
 						},
 						{
@@ -62,7 +73,6 @@
 							distance = args[7];  // not used by basic spatializers
 							myProcess[\setUpdate].value(myProcess, aziDeg, eleDeg, gainDB, delayMs, lpHz, distance);
 						}
-					
 					);
 				}
 			);
@@ -230,7 +240,7 @@
 
 			if (process[\set].class == Function,
 				{
-					process[\set].value(prop, val);
+					process[\set].value(process, prop, val);
 				},
 				{
 					"%: % does not implement a setter".format(this.class.getBackTrace, process).postln;
