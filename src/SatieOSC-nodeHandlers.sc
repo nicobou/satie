@@ -5,11 +5,11 @@
 			var nodeName = args[1];
 			var aziDeg, eleDeg, gainDB, delayMs, lpHz, distance;
 			var thisSynth;
-			"    *****".postln;
-			
 			if (args.size != 8,
 				{"→    %: message missing values".format(args).warn},
 				{
+					if (satie.satieConfiguration.debug,
+						{"→    %: message: %".format(this.class.getBackTrace, args).postln});
 					thisSynth = this.getSourceNode(nodeName, \synth);
 					this.updateNode(thisSynth, args);
 				}
@@ -84,6 +84,7 @@
 	updateNode { | node, args |
 		var aziDeg, eleDeg, gainDB, delayMs, lpHz, distance;
 		// get values from vector
+		if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
 		aziDeg = args[2] + satie.satieConfiguration.orientationOffsetDeg[0];
 		eleDeg= args[3] + satie.satieConfiguration.orientationOffsetDeg[1];
 		gainDB = args[4];
@@ -180,7 +181,7 @@
 			switch(prop,
 				'hpHz',
 				{
-					var halfSrate = 0.5 * satie.server.sampleRate;
+					var halfSrate = 0.5 * satie.satieConfiguration.server.sampleRate;
 
 					targetNode.set(\hpHz ,  clip(val, 1, halfSrate ));
 				},
@@ -217,7 +218,7 @@
 			switch(prop,
 				'hpHz',
 				{
-					var halfSrate = 0.5 * satie.server.sampleRate;
+					var halfSrate = 0.5 * satie.satieConfiguration.server.sampleRate;
 					value = clip(val, 1, halfSrate );
 				},
 				'spread',
