@@ -16,16 +16,22 @@ SatieOSC {
 		" + %".format(satie.satieConfiguration.server).postln;
 		allSourceNodes = Dictionary();
 		allGroupNodes = Dictionary();
+		// scene level handler
 		this.newOSC(\satieScene, this.coreHandler, "/satie/scene");
-		Log(this.class).formatter = {
-			|item, log|
-			"%.%: %".format(log.name, log.level, item.string);
-		}
+		// set command handlers
+		this.newOSC(\satieSrcSet, this.setSrcHandler, "/satie/source/set");
+		this.newOSC(\satieGroupSet, this.setGroupHandler, "/satie/group/set");
+		this.newOSC(\satieProcSet, this.setProcHandler, "/satie/process/set");
+		this.newOSC(\satieSrcUpdate, this.updateSrcHandler, "/satie/source/update");
+		this.newOSC(\satieGroupUpdate, this.updateGroupHandler, "/satie/group/update");
+		this.newOSC(\satieProcUpdate, this.updateProcHandler, "/satie/process/update");
+		this.newOSC(\satieSrcSetVec, this.setVecHandler, "/satie/source/setvec");
+		this.newOSC(\satieGroupSetVec, this.setVecHandler, "/satie/group/setvec");
+		this.newOSC(\satieProcSetVec, this.setVecHandler, "/satie/process/setvec");
 	}
 
 	/*      create a new OSC definition*/
 	newOSC { | id, cb, path = \default |
-		"newOSC called".postln;
 		OSCdef(id.asSymbol, cb, path, recvPort: oscPort);
 	}
 
@@ -49,7 +55,12 @@ SatieOSC {
 			var command = msg[1];
 			if (msg.size < 3,
 				{
-					Log(\coreHandler).error("createSource message missing values");
+					switch (command,
+						'clear',
+						{
+							this.clearScene();
+						};
+					);
 				},
 				{
 					switch (command,
@@ -146,12 +157,22 @@ SatieOSC {
 							)
 						},
 						'debugFlag',
-						{"create audio, not implemented yet".postln;},
-						'clear',
-						{"clear, not implemented yet".postln;};
+						{
+							this.setDebug(msg)
+						};
 					)
 			});
 		}
+	}
+
+	setDebug { | msg |
+		msg.postln;
+		if ((msg.size < 3),
+			{"% wrong number of arguments".format(this.class.getBackTrace).warn},
+			{
+				satie.satieConfiguration.debug = msg[2].asInt.asBoolean;
+			}
+		)
 	}
 
 	removeGroup { | groupName |
@@ -241,7 +262,6 @@ SatieOSC {
 		// type://name (i.e. plugin://DustDust, file://<path>
 
 		// check URI name to make sure its valid
-		Log(\getUriType).warning("got %".format(uriPath));
 
 		if (uriPath.asString.contains("://") == false,
 			{
@@ -281,7 +301,7 @@ SatieOSC {
 				postf("~satieOSC.createSourceNode:   source:%    group:  % undefined,  creating  group  \n", sourceName, groupName);
 				if (type == \effect,
 					{
-						thiscreateGroup(groupName.asSymbol, \addToTail);
+						this.createGroup(groupName.asSymbol, \addToTail);
 					},
 					{
 						this.createGroup(groupName.asSymbol);
@@ -424,7 +444,6 @@ SatieOSC {
 
 				sourceNode.put(\plugin, validPluginName.asSymbol);
 
-
 				if ( ( type == \effect) ,
 					{
 						inBus = this.getFxInBus(uriPath);
@@ -458,10 +477,90 @@ SatieOSC {
 
 		// first flush all nodes
 		allSourceNodes.keysDo { |key |
-			clearSourceNode(key);
+			this.clearSourceNode(key);
 		};
 
 		allSourceNodes.clear();
 		allSourceNodes.size;
+	}
+
+	// handles /satie/nodetype/state  nodeName flag
+	setState { | args |
+		var type = args[0].asString.split[2].asSymbol;
+
+		if ( satie.satieConfiguration.debug,
+			{
+				postf("•satieOSC.setStateHandler: % \n", args);
+			});
+
+		// verify message
+		if (  ( args.size != 3)  ,
+			{
+				error("satieOSCProtocol.setStateHandler: bad messafe length: expects oscAddress nodeName val % \n", args);
+			}, // else args good
+			{
+				var nodeName  = args[1];
+				var value = args[2];
+				var targetNode = nil;
+				var state;
+
+				if ( value == 0 , { state = false}, {state = true});
+
+				switch(type,
+					'source',
+					{
+						if ( allSourceNodes.includesKey(nodeName.asSymbol) == true,
+							{
+								targetNode = this.getSourceNode(nodeName, \synth);
+								if ( targetNode == nil,
+									{
+										error("satieOSCProtocol.setStateHandler:  source node: "++nodeName++"  BUG FOUND: undefined SYNTH  \n");
+									}, // else good to go
+									{
+										targetNode.run(state);
+									});
+							},
+							{
+								error("satieOSCProtocol.setStateHandler:  source node: "++nodeName++"  is undefined \n");
+							}); // else node exists,  process event
+					},
+					'group',
+					{
+						if (  allGroupNodes.includesKey (nodeName.asSymbol) == true,
+							{
+								targetNode = allGroupNodes[nodeName.asSymbol].at(\group).group;
+								targetNode.run(state);
+							},
+							{   // else no group
+								error("satieOSCProtocol.setStateHandler:  group node: "++nodeName++"  is undefined \n");
+							});
+					},
+					'process',
+					{
+						if ( allSourceNodes.includesKey(nodeName.asSymbol) == true,
+							{
+								var thisGroupName = allSourceNodes[nodeName.asSymbol].at(\groupNameSym);  // process nodes have unique groups
+								var thisGroup = allGroupNodes[thisGroupName].at(\group).group;
+								var myProcess = this.getSourceNode(nodeName, \process);
+
+								if ( myProcess == nil,
+									{
+										error("satieOSCProtocol.setStateHandler:  process node: "++nodeName++"  BUG FOUND: undefined process  \n");
+									},
+									{  // good to go
+										if ( myProcess[\state].class == Function,     // does the process implement the \state handler
+											{
+												myProcess[\state].value(myProcess, state);   // yes, call it
+											},
+											{
+												thisGroup.run(state);   // or just update the process's group
+											});
+									});
+							},
+							{  // else error
+								error("satieOSCProtocol.setStateHandler:  process node: "++nodeName++"  is undefined \n");
+							});
+					});
+			});
 	}
 }
