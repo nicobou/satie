@@ -1,5 +1,5 @@
 TITLE:: Advanced use of process
-summary:: A more complex use of proces
+summary:: A more complex use of process
 categories:: Libraries>SATIE
 
 Go back to link::Overview/SATIE-Overview:: previous: link::Examples/ProcessComplex::  
@@ -110,7 +110,7 @@ b.sendMsg("/satie/scene", "createProcess",  "myProcess", "process://testProcess"
 
 // and send it some messages
 b.sendMsg("/satie/process/update", "myProcess", 60,0, rrand(-10,-06),0,15000,20);
-b.sendMsg("/satie/process/set", "myProcess", "noteLow", 60, "noteHi", 63); 
+ b.sendMsg("/satie/process/set", "myProcess", "noteLow", 60, "noteHi", 63); 
 b.sendMsg("/satie/process/set", "myProcess", "noteLow", 40, "noteHi", 45); 
 // remove it
 b.sendMsg("/satie/scene", "deleteNode", "myProcess");
