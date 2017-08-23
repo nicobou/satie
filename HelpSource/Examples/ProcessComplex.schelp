@@ -66,7 +66,9 @@ code::
 		self[key] = prop;
 	};
 	// let's define an update method for process as well.
-
+	setUpdate = { | self, aziDeg, eleDeg, gainDB, delayMs, lpHz, distance  |
+		"process %".format([aziDeg, eleDeg, gainDB, delayMs, lpHz, distance]).postln;
+	};
 });
 )
 ::
