@@ -40,7 +40,7 @@ Satie {
 	var osc;
 
 	// introspection
-	var introspection;
+	var <inspector;
 
 	*new {|satieConfiguration|
 		^super.newCopyArgs(satieConfiguration).initRenderer;
@@ -62,12 +62,17 @@ Satie {
 		auxbus = Bus.audio(satieConfiguration.server, satieConfiguration.numAudioAux);
 		aux = Array.fill(satieConfiguration.numAudioAux, {arg i; auxbus.index + i});
 		osc = SatieOSC(this);
-		introspection = SatieIntrospection(this);
+		inspector = SatieIntrospection.new(this);
 	}
 
 	boot {
 		satieConfiguration.server.boot;
 		satieConfiguration.server.doWhenBooted({this.makeSatieGroup(\default, \addToHead)});
 		satieConfiguration.server.doWhenBooted({this.makeSatieGroup(\defaultFx, \addToTail)});
+	}
+
+	logPoint { |ctx|
+		" - %".format(ctx).postln;
+		^ctx.getBackTrace;
 	}
 }
