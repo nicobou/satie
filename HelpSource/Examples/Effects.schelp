@@ -31,8 +31,8 @@ s.waitForBoot({
 ::
 
 
-// ******* spatialized effects  (read audio from a bus) ***
-
+section::Spatialized effects (read audio from a bus)
+code::
 // making two trigered sound source
 (
 ~satie.makeInstance(\test_src, \string_with_effects);
@@ -60,4 +60,4 @@ s.waitForBoot({
 // listen: post reverb is on the right
 ~satie.groupInstances[\default][\test_src].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5, \aziDeg, 130);
 )
-
+::
