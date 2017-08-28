@@ -88,7 +88,7 @@ SatieIntrospection {
 
 
 	/* *****
-	*	queries about instantiated synths & effects
+	*	queries about compiled synths & effects
 	*
 	*/
 
@@ -111,6 +111,10 @@ SatieIntrospection {
 		instances.add(\synths -> this.getGenerators());
 		instances.add(\effects -> this.getEffects());
 		^instances;
+	}
+
+	getInstancesJSON {
+		^ToJSON.stringify(this.getInstances);
 	}
 
 	getInstanceInfo { | id |

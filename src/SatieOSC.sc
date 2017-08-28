@@ -1,21 +1,24 @@
 SatieOSC {
 	var satie;
 	var <rootURI;
-	var <>oscPort;
+	var <>oscServerPort;
+	var <>oscClientPort;
 
 	// private
 	var allSourceNodes;
 	var allGroupNodes;
+	var responder;
 
-	*new { | satieContext, rootPath = "/satie", port = 18032|
-		^super.newCopyArgs(satieContext, rootPath, port).initOSC;
+	*new { | satieContext, rootPath = "/satie", serverPort = 18032, clientPort = 18060 |
+		^super.newCopyArgs(satieContext, rootPath, serverPort, clientPort).initOSC;
 	}
 
 	initOSC {
-		" - satie: %\n - rootURI: %\n - port: %".format(satie, rootURI, oscPort).postln;
+		" - satie: %\n - rootURI: %\n - port: %".format(satie, rootURI, oscServerPort).postln;
 		" + %".format(satie.satieConfiguration.server).postln;
 		allSourceNodes = Dictionary();
 		allGroupNodes = Dictionary();
+		responder = NetAddr("localhost", this.oscClientPort);
 		// scene level handler
 		this.newOSC(\satieScene, this.coreHandler, "/satie/scene");
 		// set command handlers
@@ -28,11 +31,13 @@ SatieOSC {
 		this.newOSC(\satieSrcSetVec, this.setVecHandler, "/satie/source/setvec");
 		this.newOSC(\satieGroupSetVec, this.setVecHandler, "/satie/group/setvec");
 		this.newOSC(\satieProcSetVec, this.setVecHandler, "/satie/process/setvec");
+		this.newOSC(\audioplugins, this.getAudioPlugins, "/satie/audioplugins");
+		this.newOSC(\pluginArgs, this.getPluginArguments, "/satie/pluginargs");
 	}
 
 	/*      create a new OSC definition*/
 	newOSC { | id, cb, path = \default |
-		OSCdef(id.asSymbol, cb, path, recvPort: oscPort);
+		OSCdef(id.asSymbol, cb, path, recvPort: oscServerPort);
 	}
 
 	deleteOSC {|id|
