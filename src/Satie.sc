@@ -33,11 +33,14 @@ Satie {
 	var <auxbus;
 	var <aux;
 	// compiled definitions
-	var generators, effects, <processes;
+	var <generators, <effects, <processes;
 	// instantiated
 	var <groups, <groupInstances;
 
 	var osc;
+
+	// introspection
+	var <inspector;
 
 	*new {|satieConfiguration|
 		^super.newCopyArgs(satieConfiguration).initRenderer;
@@ -59,11 +62,17 @@ Satie {
 		auxbus = Bus.audio(satieConfiguration.server, satieConfiguration.numAudioAux);
 		aux = Array.fill(satieConfiguration.numAudioAux, {arg i; auxbus.index + i});
 		osc = SatieOSC(this);
+		inspector = SatieIntrospection.new(this);
 	}
 
 	boot {
 		satieConfiguration.server.boot;
 		satieConfiguration.server.doWhenBooted({this.makeSatieGroup(\default, \addToHead)});
 		satieConfiguration.server.doWhenBooted({this.makeSatieGroup(\defaultFx, \addToTail)});
+	}
+
+	logPoint { |ctx|
+		" - %".format(ctx).postln;
+		^ctx.getBackTrace;
 	}
 }
