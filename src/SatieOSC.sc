@@ -9,6 +9,7 @@ SatieOSC {
 	var allGroupNodes;
 	var responder;
 
+	// TODO satieContext must be an array in order to duplicate message forwarding to sc server
 	*new { | satieContext, rootPath = "/satie", serverPort = 18032, clientPort = 18060 |
 		^super.newCopyArgs(satieContext, rootPath, serverPort, clientPort).initOSC;
 	}
