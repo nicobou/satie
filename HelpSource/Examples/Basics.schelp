@@ -30,8 +30,6 @@ s.waitForBoot({
 )
 ::
 
-~satie.spatPlugins.showPlugins
-
 The above is somewhat a minimum to get SATIE running. We are using 2 audio producing plugins: misDrone and testtone, both are identified in the SATIE system as "boo" and "test" respectively.
 We will use this simple configuration for the examples that follow.
 Now, let's make some noise. We can create instances of synths and pass them some initial arguments.

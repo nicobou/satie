@@ -18,8 +18,6 @@ list::
 
 SECTION:: Basic workflow
 
-NOTE:: SATIE works only with Supernova audio server. ::
-
 SUBSECTION:: Configure the SATIE environment
 First step is to configure the the SATIE environment with link::Classes/SatieConfiguration:: and it should take place before booting the server.
 
@@ -27,9 +25,13 @@ code::
 (
 s = Server.supernova.local;
 // pass the server to the configuration and define some options
-~satieConfiguration = SatieConfiguration.new(s, "stereo");
+~satieConfiguration = SatieConfiguration.new(s, \stereoListener);
 // s.options are exposed via the instance variable serverOptions of the SatieConfiguration class
 ~satieConfiguration.serverOptions.blockSize = 1024;
+
+// now we can boot SATIE
+~satie = Satie.new(~satieConfiguration);
+~satie.boot();
 )
 ::
 
@@ -37,7 +39,7 @@ SUBSECTION:: Load some audio sources
 Once the server is booted, we can define the synthdefs. See LINK::Classes/SatiePlugin:: for the description of the plugin format.
 
 code::
-~satie.makeSynthDef(\test, \testtone, [], [], [~satieConfiguration.spat], [0]);
+~satie.makeSynthDef(\test, \testtone, [], [], [~satieConfiguration.listeningFormat], [0]);
 ::
 
 SUBSECTION:: Use it
@@ -45,7 +47,7 @@ One can use it either directly from SuperCollider or by sending it OSC messages.
 
 
 SECTION:: Examples
-Below are some examples of use cases and functionality of SATIE. They are arranged progressively, from simple to more complex.f
+The examples below show various facets of SATIE's functionality.
 DEFINITIONLIST::
 ## LINK::Examples/Basics::
 || Progressive examples of SATIE functionnality, how to use it from scide.
