@@ -9,13 +9,6 @@ Its aim is to facilitate using 3D space in audio music/audio composition and aut
 
 For more information visit https://gitlab.com/sat-metalab/SATIE-quark
 
-© Société des art technologiques [SAT]
-list::
-        ## Nicolas Bouillot - TELETYPE::nbouillot@sat.qc.ca::
-        ## Michal Seta -  TELETYPE::mseta@sat.qc.ca::
-        ## Zack Settel - TELETYPE::zack@sat.qc.ca::
-::
-
 SECTION:: Basic workflow
 
 SUBSECTION:: Configure the SATIE environment

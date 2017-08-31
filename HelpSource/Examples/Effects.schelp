@@ -1,6 +1,9 @@
 TITLE:: Effects
 Summary:: Introducing effects and effect busses
-categories:: Libraries>SATEI
+categories:: Libraries>SATIE
+
+
+
 section:: Configuration
 
 code::
@@ -64,5 +67,5 @@ code::
 
 Go back to link::Overview/SATIE-Overview::
 
-Previous Section: link::Examples/Effects::
+Previous Section: link::Examples/Basics::
 Next Section: link::Examples/Kamikaze::

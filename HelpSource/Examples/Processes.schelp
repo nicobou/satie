@@ -104,6 +104,11 @@ b.sendMsg("/satie/scene", "debugFlag", 0);    // deactivate debugging printing t
 b.sendMsg("/satie/scene", "createProcess",  "myProcess", "process://testProcess" );
 // remove it
 b.sendMsg("/satie/scene", "deleteNode", "myProcess");
-
-
 ::
+
+
+Go back to link::Overview/SATIE-Overview::
+
+Previous Section: link::Examples/Kamikaze::
+
+Next Section: link::Examples/ProcessComplex::
