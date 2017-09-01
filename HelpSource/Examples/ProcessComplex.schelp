@@ -116,5 +116,9 @@ b.sendMsg("/satie/process/set", "myProcess", "noteLow", 60, "noteHi", 63);
 b.sendMsg("/satie/process/set", "myProcess", "noteLow", 40, "noteHi", 45); 
 // remove it
 b.sendMsg("/satie/scene", "deleteNode", "myProcess");
-
 ::
+
+Go back to link::Overview/SATIE-Overview::
+
+Previous Section: link::Examples/Processes::
+

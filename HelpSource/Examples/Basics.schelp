@@ -1,6 +1,7 @@
 TITLE:: SATIE basics
 summary:: basic SATIE tutorial with examples
 categories:: Libraries
+
 Section:: First steps
 
 SATIE depends and takes advantage of parrallel processing provided by supernova server. Before using it, we need create a configuration. The configuration will typically define the number of speakers and their layout, number of effect busses to use etc. We can also configure the supernova server options, which are held in serverOptions variable. We will also define which audio "plugins" (audio sources and effects) we will use (more on the format of plugins in link::Overview/Plugins::). SATIE will prepare the synthdefs on the server and later we will be able to control their life cycle.
@@ -29,8 +30,6 @@ s.waitForBoot({
 })
 )
 ::
-
-~satie.spatPlugins.showPlugins
 
 The above is somewhat a minimum to get SATIE running. We are using 2 audio producing plugins: misDrone and testtone, both are identified in the SATIE system as "boo" and "test" respectively.
 We will use this simple configuration for the examples that follow.
@@ -103,7 +102,7 @@ code::
 
 Section:: Groups
 
-Groups allow updating properties of sound objects in bulk.
+Groups facilitate updating properties of sound objects in bulk. SATIE creates two groups automatically: soft::default:: and soft::defaultFX::. All SATIE synth and effect instances will be placed in the respective group. User can create additional groups.
 
 code::
 (
@@ -136,6 +135,8 @@ code::
 
 // delete the group and all its children
 ~satie.killSatieGroup(\synths);
+
+
 ::
 
 Go back to link::Overview/SATIE-Overview::

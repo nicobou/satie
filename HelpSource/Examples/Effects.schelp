@@ -1,6 +1,9 @@
 TITLE:: Effects
 Summary:: Introducing effects and effect busses
 categories:: Libraries>SATIE
+
+
+
 section:: Configuration
 
 code::
@@ -61,3 +64,8 @@ code::
 ~satie.groupInstances[\default][\test_src].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5, \aziDeg, 130);
 )
 ::
+
+Go back to link::Overview/SATIE-Overview::
+
+Previous Section: link::Examples/Basics::
+Next Section: link::Examples/Kamikaze::
