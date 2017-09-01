@@ -15,7 +15,7 @@ SatieConfiguration {
 	var <server;
 	var <>listeningFormat;
 	var <numAudioAux;
-	var outBusIndex;
+	var <outBusIndex;
 	var <>debug = false;
 
 	var <satieRoot;
@@ -26,11 +26,12 @@ SatieConfiguration {
 	var <>fxPlugins;
 	var <>spatPlugins;
 	var <>mapperPlugins;
+	var <>postprocessorPlugins;
 
 	// other options
 	var <>orientationOffsetDeg;
 
-	*new {| server, listeningFormat = \stereoListener, numAudioAux = 0, outBusIndex = 0|
+	*new {| server, listeningFormat = #[\stereoListener, \stereoListener], numAudioAux = 0, outBusIndex = #[0]|
 		server = server ? Server.supernova;
 		^super.newCopyArgs(server, listeningFormat, numAudioAux, outBusIndex).init;
 	}
@@ -51,18 +52,21 @@ SatieConfiguration {
 		fxPlugins = SatiePlugins.newAudio(pluginsPath++"/effects/*.scd");
 		spatPlugins = SatiePlugins.newSpat(pluginsPath++"/spatializers/*.scd");
 		mapperPlugins = SatiePlugins.newAudio(pluginsPath++"/mappers/*.scd");
+		postprocessorPlugins = SatiePlugins.newAudio(pluginsPath++"/postprocessors/*.scd");
 		if (debug, {
-			"New configuration: \nRoot: %\nSpat: %\nPlugins: %, %, %".format(
-				this.satieRoot, listeningFormat, this.audioPlugins, this.fxPlugins, this.spatPlugins, this.mapperPlugins
+			"New configuration: \nRoot: %\nSpat: %\nPlugins: %, %, %, %".format(
+				this.satieRoot, listeningFormat, this.audioPlugins, this.fxPlugins, this.spatPlugins, this.mapperPlugins, this.postprocessorPlugins
 			).postln;
 		});
-		this.handleSpatFormat(listeningFormat.asSymbol);
+		this.handleSpatFormat(listeningFormat);
 		orientationOffsetDeg = [0, 0];
 	}
 
 	handleSpatFormat { arg format;
-		var thisPlugin = this.spatPlugins[format.asSymbol];
-		serverOptions.numOutputBusChannels = thisPlugin.numChannels;
+		serverOptions.numOutputBusChannels = 0;
+		format.do { arg item, i;
+			serverOptions.numOutputBusChannels = serverOptions.numOutputBusChannels + this.spatPlugins[item.asSymbol].numChannels;
+		};
 		if (debug, {
 			postln("%: setting listening format to %\n".format(this.class, format));
 		});

@@ -12,12 +12,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-~name = \basicPostProcess;
-~description = "hehe";
-~numChannels = 1;
+~name = \limiter;
+~description = "hard limiter";
 
-~function = {|in = 0, myparam = 0 |
-
-in;
-
+~function = {|in = 0, limitDB = 0 |
+var limit = limitDB.dbamp;
+Limiter.ar(in, limit);
 };

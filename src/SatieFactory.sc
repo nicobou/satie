@@ -13,7 +13,6 @@
 
 SatieFactory {
 
-	     // TODO add postprocessors
 	*makeSynthDef{|
 		name,
 		src,

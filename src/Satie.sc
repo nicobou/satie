@@ -27,6 +27,7 @@ Satie {
 	var <>fxPlugins;
 	var <>spatPlugins;
 	var <>mapperPlugins;
+	var <>postprocessorPlugins;
 
 	/*    RENDERER     */
 	// buses
@@ -42,9 +43,38 @@ Satie {
 	// introspection
 	var <inspector;
 
+	// mastering spatialisation. one unique synth is generater per spatializer
+	var <postProcessors;
+	var postProcGroup;
+
 	*new {|satieConfiguration|
 		^super.newCopyArgs(satieConfiguration).initRenderer;
 	}
+
+	// public method
+	replacePostProcessor{ | pipeline, outputIndex = 0, spatializerNumber = 0, defaultArgs = #[] |
+		satieConfiguration.server.doWhenBooted({
+			var postprocname = "satie_post_processor_"++spatializerNumber;
+			SynthDef(postprocname,
+				{
+					var previousSynth = SynthDef.wrap({
+						In.ar(satieConfiguration.outBusIndex[spatializerNumber],
+							this.spatPlugins[satieConfiguration.listeningFormat[spatializerNumber]].numChannels
+						);
+					});
+					// collecting spatializers
+					pipeline.do { arg item;
+						previousSynth = SynthDef.wrap(postprocessorPlugins.at(item).function, prependArgs: [previousSynth]);
+					};
+					ReplaceOut.ar(outputIndex, previousSynth);
+			}).add;
+			satieConfiguration.server.sync;
+			postProcessors.at(postprocname.asSymbol).free();
+			postProcessors.put(postprocname.asSymbol, Synth(postprocname.asSymbol, args: defaultArgs, target: postProcGroup));
+		});
+	}
+
+
 	// Private method
 	initRenderer {
 		options = satieConfiguration.serverOptions;
@@ -54,6 +84,8 @@ Satie {
 		fxPlugins = satieConfiguration.fxPlugins;
 		spatPlugins = satieConfiguration.spatPlugins;
 		mapperPlugins = satieConfiguration.mapperPlugins;
+		postprocessorPlugins = satieConfiguration.postprocessorPlugins;
+		postProcessors = Dictionary.new();
 		groups = Dictionary.new();
 		groupInstances = Dictionary.new();
 		generators = IdentityDictionary.new();
@@ -69,10 +101,15 @@ Satie {
 		satieConfiguration.server.boot;
 		satieConfiguration.server.doWhenBooted({this.makeSatieGroup(\default, \addToHead)});
 		satieConfiguration.server.doWhenBooted({this.makeSatieGroup(\defaultFx, \addToTail)});
+		satieConfiguration.server.doWhenBooted({this.makePostProcGroup()});
 	}
 
 	logPoint { |ctx|
 		" - %".format(ctx).postln;
 		^ctx.getBackTrace;
+	}
+
+	makePostProcGroup {
+		postProcGroup = ParGroup(1,\addToTail);
 	}
 }
