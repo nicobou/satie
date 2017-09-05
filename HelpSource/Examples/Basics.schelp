@@ -11,7 +11,7 @@ code::
 // define a server, SATIE needs it
 s = Server.supernova.local;
 // instantiate a SatieConfiguration. Here we will use a stereo spatializer
-~satieConfiguration = SatieConfiguration.new(s, \stereoListener);
+~satieConfiguration = SatieConfiguration.new(s, [\stereoListener]);
 // Change SuperCollider's block size (jack server's blocksize must be multiple of this value)
 ~satieConfiguration.serverOptions.blockSize = 1024;
 // instantiate SATIE renderer and pass it the configuration
