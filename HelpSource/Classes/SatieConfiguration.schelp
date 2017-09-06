@@ -63,12 +63,12 @@ Get/set options
 returns:: supernova.options
 
 METHOD:: mapperPlugins
-Instance variable for mapper plugins.
+Instance variable holds mapper plugins.
 
 returns:: Dictionary
 
 METHOD:: audioPlugins
-Instance variable for audio plugins
+Instance variable holds audio plugins
 
 returns:: Dictionary
 
@@ -76,14 +76,14 @@ METHOD:: debug
 Print SATIE debug messages
 
 METHOD:: spatPlugins
-Instance variable for spatializer plugins
+Instance variable hold spatializer plugins
 
 returns:: Dictionary
 
 METHOD:: listeningFormat
-Spatializer in use
+Spatializer(s) in use
 
-returns:: Symbol
+returns:: Array
 
 METHOD:: satieRoot
 Absolute path to the SATIE installation
@@ -103,5 +103,5 @@ code::
 // define a server, SATIE needs it
 s = Server.supernova.local;
 // instantiate a SatieConfiguration. Here we will use a stereo spatializer
-~satieConfiguration = SatieConfiguration.new(s, \stereoListener);
+~satieConfiguration = SatieConfiguration.new(s, [\stereoListener]);
 ::
