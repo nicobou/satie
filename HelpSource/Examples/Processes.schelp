@@ -13,13 +13,13 @@ We start with setting up SATIE. The synths that will be used by the process must
 code::
 (
 s = Server.supernova.local;
-~satieConfiguration = SatieConfiguration.new(s, \stereoListener);
+~satieConfiguration = SatieConfiguration.new(s, [\stereoListener]);
 ~satieConfiguration.serverOptions.blockSize = 1024;
 ~satieConfiguration.debug = false;
 ~satie = Satie.new(~satieConfiguration);
 ~satie.boot();
 s.waitForBoot({
-	~satie.makeSynthDef(\string, \zkarpluck1, [], [], [~satieConfiguration.listeningFormat], [0]);
+	~satie.makeSynthDef(\string, \zkarpluck1, [], [], ~satieConfiguration.listeningFormat, [0]);
 	// be sure the synthDef is compiled on the server	s.meter;
 	s.makeGui;
 	s.plotTree;

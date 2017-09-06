@@ -52,10 +52,10 @@ The name of the process
 
 returns:: a clone of the process
 
-(see the discussion of processes in  LINK::Examples/Processes::)
+(see an example of processes in LINK::Examples/Processes::)
 
 METHOD:: makeKamikaze
-Instantiate a shadow of the audio source of effect. See LINK::Examples/Kamikaze:: for a discussion of Kamikaze. See link::Classes/Satie#-makeSynthDef:: above for the description of arguments.
+Instantiate a shadow of the audio source of effect. See LINK::Examples/Kamikaze:: for an example of Kamikaze. See link::Classes/Satie#-makeSynthDef:: above for the description of arguments.
 
 returns:: link::Classes/Synth::
 
@@ -92,10 +92,10 @@ Holds the server instance.
 returns:: SuperCollider server
 
 METHOD:: makeProcess
-(describe method here)
+Creates a process. See link::Examples/Processes:: for an example about processes.
 
 ARGUMENT:: processName
-Instantiate a process. See the discussion on processes in LINK::Examples/Processes::
+Name of process as Symbol. See link::Examples/Processes:: for an example about processes.
 
 ARGUMENT:: env
 String: the Environment source (see LINK::Examples/Processes::)
@@ -103,53 +103,48 @@ String: the Environment source (see LINK::Examples/Processes::)
 returns:: link::Classes/Environment::
 
 METHOD:: processes
-Keeps track of processes. Read only.
+A dictionary of processes. Read only.
 
 returns:: link::Classes/Dictionary::
 
 METHOD:: groups
-Keeps track of groups. Read only.
+A dictionary of groups. Read only.
 
 returns:: link::Classes/Dictionary::
 
 METHOD:: groupInstances
-(describe method here)
+A dictionary of instances, per group. Read only.
 
-returns:: (describe returnvalue here)
+returns:: link::Classes/Dictionary::
 
 METHOD:: killSatieGroup
-(describe method here)
+Remove a SATIE group.
 
 ARGUMENT:: name
-(describe argument here)
-
-returns:: (describe returnvalue here)
+Symbol: the name of the group.
 
 METHOD:: pauseInstance
-(describe method here)
+Stop processing an instance but do not destroy it (sends it release() message).
 
 ARGUMENT:: name
-(describe argument here)
+Symbol: the name of the instance.
 
 ARGUMENT:: group
-(describe argument here)
+Symbol: the name of the group.
 
-returns:: (describe returnvalue here)
+This method does not return.
 
 METHOD:: mapperPlugins
-(describe method here)
 
-returns:: (describe returnvalue here)
+returns:: a link::Classes/Dictionary:: of mapper plugins
 
 METHOD:: debug
-(describe method here)
 
-returns:: (describe returnvalue here)
+returns:: link::Classes/SatieConfiguration##debug::
 
 METHOD:: spatPlugins
-(describe method here)
 
-returns:: (describe returnvalue here)
+returns:: link::Classes/SatieConfiguration##spatPlugins::
 
 METHOD:: audioPlugins
 (describe method here)

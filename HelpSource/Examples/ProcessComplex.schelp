@@ -10,13 +10,13 @@ We init SATIE as usual:
 code::
 (
 s = Server.supernova.local;
-~satieConfiguration = SatieConfiguration.new(s, \stereoListener);
+~satieConfiguration = SatieConfiguration.new(s, [\stereoListener]);
 ~satieConfiguration.serverOptions.blockSize = 1024;
 ~satieConfiguration.debug = false;
 ~satie = Satie.new(~satieConfiguration);
 ~satie.boot();
 s.waitForBoot({
-	~satie.makeSynthDef(\string, \zkarpluck1, [], [], [~satieConfiguration.listeningFormat], [0]);
+	~satie.makeSynthDef(\string, \zkarpluck1, [], [], ~satieConfiguration.listeningFormat, [0]);
 	// be sure the synthDef is compiled on the server	s.meter;
 	s.makeGui;
 	s.plotTree;
@@ -66,7 +66,7 @@ code::
 		self[key] = prop;
 	};
 	// let's define an update method for process as well.
-	setUpdate = { | self, aziDeg, eleDeg, gainDB, delayMs, lpHz, distance  |
+	~setUpdate = { | self, aziDeg, eleDeg, gainDB, delayMs, lpHz, distance  |
 		"process %".format([aziDeg, eleDeg, gainDB, delayMs, lpHz, distance]).postln;
 	};
 });
@@ -82,12 +82,10 @@ code::
 ~process.cleanup;
 ::
 code::
-(
 // invoke specific process functions
 ~process.makeRoutine;
 ~process.start;
 ~process.cleanup;
-)
 ::
 
 We can also/alternatively access processes via SATIE's dictionaries

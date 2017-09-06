@@ -11,7 +11,7 @@ code::
 // define a server, SATIE needs it
 s = Server.supernova.local;
 // instantiate a SatieConfiguration. Here we will use a stereo spatializer
-~satieConfiguration = SatieConfiguration.new(s, \stereoListener, numAudioAux: 2);
+~satieConfiguration = SatieConfiguration.new(s, [\stereoListener], numAudioAux: 2);
 // Change SuperCollider's block size (jack server's blocksize must be multiple of this value)
 ~satieConfiguration.serverOptions.blockSize = 1024;
 // instantiate SATIE renderer and pass it the configuration
@@ -21,9 +21,9 @@ s.waitForBoot({
 	~satie.makeSatieGroup(\default);
 	~satie.makeSatieGroup(\defaultFx, addAction: \addToTail);
 	// define some synths
-	~satie.makeSynthDef(\string_with_effects, \zkarpluck1, [~satie.aux[0]], [~satie.aux[1]], [~satieConfiguration.listeningFormat], [0]);
+	~satie.makeSynthDef(\string_with_effects, \zkarpluck1, [~satie.aux[0]], [~satie.aux[1]], ~satieConfiguration.listeningFormat, [0]);
 	// spatialized reverb effect (input will be set at creation):
-	~satie.makeSynthDef(\busreverb, \freeverb, [], [], [~satieConfiguration.listeningFormat], [0]);
+	~satie.makeSynthDef(\busreverb, \freeverb, [], [], ~satieConfiguration.listeningFormat, [0]);
 	// display some information
 	s.meter;
 	s.makeGui;
