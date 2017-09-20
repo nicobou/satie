@@ -39,6 +39,23 @@ Array: Synth properties to be taken intio account at instantiation time. All set
 
 returns:: a link::Classes/Synth::
 
+METHOD:: replacePostProcessor
+Replaces post-processor pipeline at the output of the spatializer.
+
+ARGUMENT:: pipeline
+a list of symbols representing the post-processor names. See link::Classes/Plugins:: and link::Examples/Plugins:: for more information on SATIE plugins
+
+ARGUMENT:: outputIndex
+Output channel index from which this post-processor will take effect, default 0
+
+ARGUMENT:: spatializerNumber
+Index number of the spatializer to which the post-process will be attached. Default 0
+
+ARGUMENT:: defaultArgs
+An array of arguments, if any
+
+
+
 METHOD:: fxPlugins
 a dictionary containing effects plugins definitions
 
@@ -198,9 +215,28 @@ ARGUMENT:: processName
 
 returns:: (describe returnvalue here)
 
-
 EXAMPLES::
-
+Post-processor example
 code::
-(some example code)
+(
+// prepare the server
+s = Server.supernova.local;
+~satieConfiguration = SatieConfiguration.new(s, [\stereoListener]);
+~satieConfiguration.serverOptions.blockSize = 1024;
+~satie = Satie.new(~satieConfiguration);
+~satie.boot();
+s.waitForBoot({
+    // create a default group
+    // ~satie.makeSatieGroup(\default);
+    // define some synths
+    ~satie.makeSynthDef(\boo, \misDrone, [], [], ~satieConfiguration.listeningFormat, [0]);
+    ~satie.makeSynthDef(\test, \testtone, [], [], ~satieConfiguration.listeningFormat, [0]);
+    // display some information
+    s.meter;
+    s.makeGui;
+    s.plotTree;
+});
+)
+// add post-process
+~satie.replacePostProcessor([\limiter], 0, 0);
 ::
