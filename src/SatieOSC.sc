@@ -461,7 +461,8 @@ SatieOSC {
 					// else
 					{
 						synth = satie.makeInstance(nodeName.asSymbol, validPluginName.asSymbol, groupName.asSymbol);
-				});
+					});
+				synth.register(); // register with NodeWatcher for testing
 				sourceNode.put(\synth, synth);
 			},
 			{
@@ -527,6 +528,7 @@ SatieOSC {
 										}, // else good to go
 										{
 											targetNode.run(state);
+											targetNode.register(); // register with NodeWatcher, for state checking
 										});
 								},
 								{
@@ -539,6 +541,8 @@ SatieOSC {
 								{
 									targetNode = allGroupNodes[nodeName.asSymbol].at(\group).group;
 									targetNode.run(state);
+									targetNode.register(); // register with NodeWatcher, for state checking
+
 								},
 								{   // else no group
 									error("satieOSCProtocol.setStateHandler:  group node: "++nodeName++"  is undefined \n");
@@ -563,6 +567,7 @@ SatieOSC {
 												},
 												{
 													thisGroup.run(state);   // or just update the process's group
+													// thisGroup.register(); // TODO: is this relevant for processes?
 												});
 										});
 								},

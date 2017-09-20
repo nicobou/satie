@@ -30,10 +30,11 @@ ToJSON {
 		{ obj === true } { ^"true" }
 		{ obj === false } { ^"false" }
 		{ obj.isNumber } {
-			if (obj.isNaN || obj === inf || obj === (-inf),
-				{ ^"null"},
-				{ ^obj.asString }
-			);
+			case
+			{obj.isNaN } { ^"null"}
+			{obj == inf } { ^"null"}
+			{obj == (-inf)} { ^"null"}
+			{ ^obj.asString }
 		}
 		{ obj.isKindOf(SequenceableCollection) } {
 			^"[ % ]".format(this.fromArray(obj));
