@@ -6,7 +6,7 @@
   dependencies: #[
 					"AmbIEM",
 					"Ctk",
-					"https://github.com/djiamnot/Log.quark.git"
+          "UnitTest"
 ],
   url: "https://gitlab.com/sat-metalab/SATIE-quark",
   since: "2016",
