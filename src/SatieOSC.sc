@@ -36,6 +36,7 @@ SatieOSC {
 		this.newOSC(\satieProcSetVec, this.setVecHandler, "/satie/process/setvec");
 		this.newOSC(\audioplugins, this.getAudioPlugins, "/satie/audioplugins");
 		this.newOSC(\pluginArgs, this.getPluginArguments, "/satie/pluginargs");
+		this.newOSC(\satieLoadFile, this.loadFile, "/satie/load");
 	}
 
 	/*      create a new OSC definition*/
@@ -155,7 +156,7 @@ SatieOSC {
 								{
 									var nodeName = msg[2];
 									// "~coreCallback: OSCrx deleteNode CALLED ".warn;
-									
+
 									if (allGroupNodes.includesKey(nodeName.asSymbol),
 										{   this.removeGroup(nodeName);  },
 										// else
@@ -491,6 +492,40 @@ SatieOSC {
 
 		allSourceNodes.clear();
 		allSourceNodes.size;
+	}
+
+	// receives OSC messages that look like:   /satie/load filename
+	loadFile {
+		^{ | msg |
+			"SatieOSC : satieFileLoader called".postln;
+			if ( (msg.size < 2 ) ,
+				{"SatieOSC : satieFileLoader:  message missing filepath".warn;},
+				// else
+				{
+					var filepath = msg[1].asString.standardizePath;   // can handle '~'
+
+					if ( File.exists(filepath) == false,
+						{
+							error("SatieOSC: satieFileLoader:   "++filepath++" not found, aborting");
+						},
+						// else  file exists, process
+						{
+
+							if (filepath.splitext.last != "scd",
+								{
+									error("SatieOSC : satieFileLoader: "++filepath++" must be a file of type  '.scd'  ");
+								},
+								// else file type is good. Try to load
+								{
+									satie.satieConfiguration.server.waitForBoot {
+
+										filepath.load;
+										satie.satieConfiguration.server.sync;
+									}; // waitForBoot
+							});
+					});
+			});
+		}
 	}
 
 	// handles /satie/nodetype/state  nodeName flag
