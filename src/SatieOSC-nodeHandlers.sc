@@ -193,9 +193,6 @@
 					targetNode.set(prop, satie.aux[val.asInt]);
 				},
 				{
-/*					"%: running default set, args: \n     prop: %\n     value: % ".format(
-						this.class.getBackTrace, prop, val
-					).postln;*/
 					targetNode.set(prop, val);
 				}
 			)
