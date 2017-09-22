@@ -38,7 +38,7 @@ Satie {
 	// instantiated
 	var <groups, <groupInstances;
 
-	var osc;
+	var <osc;
 
 	// introspection
 	var <inspector;

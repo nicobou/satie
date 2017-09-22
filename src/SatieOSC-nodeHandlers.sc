@@ -170,12 +170,9 @@
 		}
 	}
 
-	nodeSet { | targetNode, props |
-		if (satie.satieConfiguration.debug,
-			{"→ %:\n    → targetNode: %\n     →properties: % ".
-				format(this.class.getBackTrace, targetNode, props).postln
-			}
-		);
+	nodeSet {| targetNode, props |
+
+		if (satie.satieConfiguration.debug, {"→ %:\n    → targetNode: %\n     →properties: % ".format(this.class.getBackTrace, targetNode, props).postln});
 
 		props.pairsDo({|prop, val|
 			switch(prop,
@@ -196,9 +193,9 @@
 					targetNode.set(prop, satie.aux[val.asInt]);
 				},
 				{
-					"%: running default set, args: \n     prop: %\n     value: % ".format(
+/*					"%: running default set, args: \n     prop: %\n     value: % ".format(
 						this.class.getBackTrace, prop, val
-					).postln;
+					).postln;*/
 					targetNode.set(prop, val);
 				}
 			)

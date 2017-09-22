@@ -247,8 +247,8 @@ SatieOSC {
 			// else create new node
 			{
 				var type;
-				" -- got type %".format(type).postln;
 				type = this.getUriType(uriPath);
+				//" SatieOSC.createSource: -- got type %".format(type).postln;
 
 				if (  (type == \plugin)  ||  (type== \effect),
 					{
