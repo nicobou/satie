@@ -1,0 +1,54 @@
+TITLE:: SATIE Plugins
+summary:: Writing audio plugins for SATIE
+categories:: Libraries>SATIE
+related:: Overview/SATIE-Overview, Classes/Satie, Classes/SatiePlugin, Classes/SpatializerPlugin
+
+DESCRIPTION::
+
+SATIE plugins are SynthDef definitions, without the code::Out:: method.
+
+All SATIE plugins (audiosources, effects, mappers, postprocessors, spatializers) reside in the plugin directory within the SATIE tree. Other plugins can be added from, arbitrary location, by adding to the appropriate doctionaries (see SatiePlugins and SatieConfiguration).
+Every plugin should follow the following format:
+code::
+// Mandatory "fields" of a plugin:
+
+// name
+~name = \pluginName;
+// description
+~description = "Short description of plugin's purpose or functionality";
+// function definition
+~function = {| sfreq = 200 |
+    // note, that the plugin should not contain Out uGen. 
+    FSinOsc.ar(sfreq)
+};
+::
+Each plugin resides in its own .scd file. Each field is a global variable which gets consumed by the plugin loader, one at a time.
+
+SECTION:: Working with plugins on-the-fly
+ANCHOR::onthefly
+
+Sometimes, especially when developing new instruments, it is desirable to just doodle on a scratchpad without the need of saving a loading files off the disk. link::Classes/SatiePlugins#addAudioPlugin:: allows for loading a plugin defined in an environment, mimicking the above plugin creation guidelines:
+
+code::
+// prepare SATIE in the usual way
+(
+s = Server.supernova.local;
+~satieConfiguration = SatieConfiguration.new(s, [\stereoListener], numAudioAux: 2);
+~satieConfiguration.serverOptions.blockSize = 1024;
+~satieConfiguration.debug = false;
+~satie = Satie.new(~satieConfiguration);
+~satie.boot();
+)
+// synth definition
+~instr = Environment.make({
+	~name = \simpleOSC;
+	~description = "test instrument";
+	~function = {| sfreq = 200|
+		SinOsc.ar(sfreq)
+	};
+});
+// add it to the list of registered plugins
+~satie.audioPlugins.addAudioPlugin(~instr);
+// compile the synthdef for use with SATIE
+~satie.makeSynthDef(\mySound, \simpleOSC, [], [~satie.aux[0]], ~satieConfiguration.listeningFormat, [0]);
+::
