@@ -24,7 +24,9 @@
 			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
 
 			if ( (args.size < 3 ) ,
-				{"basicRendererCallback: setOrientationDeg: bad arg count: expects 2 args:  azimuth and  elevation".warn;},
+				{
+					"→    %: message: bad arg count: expects 2 values:  azimuth and  elevation".format(this.class.getBackTrace).error
+				},
 				// else
 				{
 					satie.satieConfiguration.orientationOffsetDeg[0] = args[1].asFloat;
@@ -32,37 +34,114 @@
 			})
 		}
 	}
+
+
+	setOutputDBHandler {
+		^{ | args |
+
+			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
+
+			if ( (args.size < 2 ) ,
+				{
+					"→    %: message: bad arg count: expects 1 value:  outputDB".format(this.class.getBackTrace).error
+				},
+				// else
+				{
+					outputDB = args[1].asFloat;
+					satie.satieConfiguration.server.volume = outputTrimDB + outputDB;
+			})
+		}
+	}
+
+	setOutputDBTrimHandler {
+		^{ | args |
+
+			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
+
+			if ( (args.size < 2 ) ,
+				{
+					"→    %: message: bad arg count: expects 1 value:  outputDBTrim".format(this.class.getBackTrace).error
+				},
+				// else
+				{
+					outputTrimDB = args[1].asFloat;
+					satie.satieConfiguration.server.volume = outputTrimDB + outputDB;
+			})
+		}
+	}
+
+	setOutputMuteHandler {
+		^{ | args |
+
+			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
+
+			if ( (args.size < 2 ) ,
+				{
+					"→    %: message: bad arg count: expects 1 value:  muteFlag".format(this.class.getBackTrace).error
+				},
+				// else
+				{
+					if (args [1] > 0,
+						{satie.satieConfiguration.server.volume.mute;},
+						// else
+						{satie.satieConfiguration.server.volume.unmute;} );  // full muting implmentation
+
+			})
+		}
+	}
+
+	setOutputDimHandler {
+		^{ | args |
+
+			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
+
+			if ( (args.size < 2 ) ,
+				{
+					"→    %: message: bad arg count: expects 1 value:  dimFlag".format(this.class.getBackTrace).error
+				},
+				// else
+				{
+
+					if (args [1] > 0,
+						{  satie.satieConfiguration.server.volume = -30;  },
+						// else
+						{  satie.satieConfiguration.server.volume =  outputDB + outputTrimDB;   });
+
+			})
+		}
+	}
+
+		freeSynthsHandler {
+		^{ | args |
+
+			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
+
+			if ( (args.size < 2 ) ,
+				{
+					"→    %: message: bad arg count: expects 1 symbol:  groupName".format(this.class.getBackTrace).error
+				},
+				// else
+				{
+					var groupName = args [1].asSymbol;
+
+					if ( satie.groups[groupName] != nil,
+						{
+							satie.groups[groupName].freeAll;
+							postf("SatieOSC.freeSynthsHandler: freeing all synths in % group/n", groupName);
+					});
+
+			});
+		}
+	}
+
+
+
+
 }
 
 
+/*    THE REMAINING HOOKS RELATE TO THE NEAR FIELD PROCESSING, AND NEED TO BE REDEPLOYED IN SATIE
 
-/*
-
-// ~satieRendererCallback = { "satieRendererCallback called".inform };
-satieRendererCallback = {
-arg msg;
-var command = msg[1];
-
-if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, msg).postln});
-
-
-
-if (msg.size < 2,
-{"~basicRendererCallback: empty message".warn;
-postf("basicRendererCallback MESS LEN: %", msg.size);
-
-},
-// else
-{
-switch (command,
-'setOrientationDeg',
-{
-if ( (msg.size < 4 ) ,
-{"basicRendererCallback: setOrientationDeg missing value".warn;},
-// else
-{ satie.orientationOffsetDeg[0] = msg[2].asFloat;
-satie.orientationOffsetDeg[1] = msg[3].asFloat; } );
-},
 'setNearFieldRadius',
 {
 if ( (msg.size < 3 ) ,
@@ -84,76 +163,8 @@ if ( (msg.size < 3 ) ,
 // else
 { ~satie.nearFieldExp = msg[2].asFloat; } );
 },
-'setOutputTrimDB',
-{
-if ( (msg.size < 3 ) ,
-{"basicRendererCallback: setOutputTrimDB missing value".warn;},
-// else
-{
-e.outputTrimDB = msg[2];
-e.volume.volume = e.outputTrimDB + e.outputDB;
-}
-)
-},
-'setOutputDB',
-{
-if ( (msg.size < 3 ) ,
-{"basicRendererCallback: setOutputDB missing value".warn;},
-// else
-{
-e.outputDB = msg[2];
-e.volume.volume = e.outputTrimDB + e.outputDB;
-}
-)
-},
-'setOutputDIM',
-{
-if ( (msg.size < 3 ) ,
-{"basicRendererCallback: setOutputMute missing value".warn;
-// postf("CREATESOURCE MESS LEN: %", msg.size);
 
-},
-// else
-{
-if (msg [2] > 0,
-{  e.volume.volume = -30;  },
-// else
-{  e.volume.volume =  e.outputDB + e.outputTrimDB;   });
-}
-)
-},
-'freeSynths',
-{
-if ( (msg.size < 3 ) ,
-{"basicRendererCallback: freeSynths missing group name".warn;
-// postf("freeSynths MESS LEN: %", msg.size);
 
-},
-// else
-{
-var groupSym = msg [2] .asSymbol;
 
-~satie.satieGroups[groupSym].freeAll;
-postf("basicRendererCallback: freeing all synths in % group", groupSym);
-}
-)
-},
-'setOutputMute',
-{
-//postf("~basicRendererCallback setMute: %\n", msg[2]);
-if ( (msg.size < 3 ) ,
-{"basicRendererCallback: setOutputDIM missing value".warn;  },
-// else
-{
-if (msg [2] > 0,
-{e.volume.mute;},
-// else
-{e.volume.unmute;} );  // full muting implmentation
-}
-);
-}
-)
-});
-}
+
 */
-

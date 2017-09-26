@@ -43,11 +43,18 @@ SatieOSC {
 		this.newOSC(\satieSrcSetVec, this.setVecHandler, "/satie/source/setvec");
 		this.newOSC(\satieGroupSetVec, this.setVecHandler, "/satie/group/setvec");
 		this.newOSC(\satieProcSetVec, this.setVecHandler, "/satie/process/setvec");
+
 		this.newOSC(\audioplugins, this.getAudioPlugins, "/satie/audioplugins");
 		this.newOSC(\pluginArgs, this.getPluginArguments, "/satie/pluginargs");
-		this.newOSC(\satieLoadFile, this.loadFile, "/satie/load");
-		this.newOSC(\satieServerSetOrientationDeg, this.setOrientationDegHandler, "/satie/server/setOrientationDeg");
 
+		this.newOSC(\satieLoadFile, this.loadFile, "/satie/load");
+
+		this.newOSC(\satieRendererSetOrientationDeg, this.setOrientationDegHandler, "/satie/renderer/setOrientationDeg");
+		this.newOSC(\satieRendererSetOutputDB, this.setOutputDBHandler, "/satie/renderer/setOutputDB");
+		this.newOSC(\satieRendererSetOutputDBTrim, this.setOutputDBTrimHandler, "/satie/renderer/setOutputDBTrim");
+		this.newOSC(\satieRendererSetOutputMute, this.setOutputMuteHandler, "/satie/renderer/setOutputMute");
+		this.newOSC(\satieRendererSetOutputDim, this.setOutputDimHandler, "/satie/renderer/setOutputDim");
+		this.newOSC(\satieRendererFreeSynths, this.freeSynthsHandler, "/satie/renderer/freeSynths");
 	}
 
 	/*      create a new OSC definition*/
