@@ -9,6 +9,12 @@ SatieOSC {
 	var allGroupNodes;
 	var responder;
 
+
+			// used for audio renderer control
+		var volume;     // will point to server volume / mute control
+		var outputDB = 0;    // current state of the supercollider server output
+		var outputTrimDB = 0;
+
 	// TODO satieContext must be an array in order to duplicate message forwarding to sc server
 	*new { | satieContext, rootPath = "/satie", serverPort = 18032, clientPort = 18060 |
 		^super.newCopyArgs(satieContext, rootPath, serverPort, clientPort).initOSC;
@@ -20,6 +26,9 @@ SatieOSC {
 		allSourceNodes = Dictionary();
 		allGroupNodes = Dictionary();
 		responder = NetAddr("localhost", this.oscClientPort);
+		volume = satie.satieConfiguration.server.volume;
+		volume.setVolumeRange(-99, 18);
+
 		// scene level handler
 		this.newOSC(\satieScene, this.coreHandler, "/satie/scene");
 		// set command handlers
@@ -34,9 +43,18 @@ SatieOSC {
 		this.newOSC(\satieSrcSetVec, this.setVecHandler, "/satie/source/setvec");
 		this.newOSC(\satieGroupSetVec, this.setVecHandler, "/satie/group/setvec");
 		this.newOSC(\satieProcSetVec, this.setVecHandler, "/satie/process/setvec");
+
 		this.newOSC(\audioplugins, this.getAudioPlugins, "/satie/audioplugins");
 		this.newOSC(\pluginArgs, this.getPluginArguments, "/satie/pluginargs");
+
 		this.newOSC(\satieLoadFile, this.loadFile, "/satie/load");
+
+		this.newOSC(\satieRendererSetOrientationDeg, this.setOrientationDegHandler, "/satie/renderer/setOrientationDeg");
+		this.newOSC(\satieRendererSetOutputDB, this.setOutputDBHandler, "/satie/renderer/setOutputDB");
+		this.newOSC(\satieRendererSetOutputDBTrim, this.setOutputDBTrimHandler, "/satie/renderer/setOutputDBTrim");
+		this.newOSC(\satieRendererSetOutputMute, this.setOutputMuteHandler, "/satie/renderer/setOutputMute");
+		this.newOSC(\satieRendererSetOutputDim, this.setOutputDimHandler, "/satie/renderer/setOutputDim");
+		this.newOSC(\satieRendererFreeSynths, this.freeSynthsHandler, "/satie/renderer/freeSynths");
 	}
 
 	/*      create a new OSC definition*/
