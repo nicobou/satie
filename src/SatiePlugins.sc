@@ -42,6 +42,14 @@ SatiePlugins : Dictionary {
 
 	}
 
+	addAudioPlugin { | env |
+		var name, description, function;
+		name = env[\name];
+		description = env[\description];
+		function = env[\function];
+		this.add(name.asSymbol -> SatiePlugin.new(name.asSymbol, description, function));
+	}
+
 	showPlugins {
 		// post the key and associated plugin description
 		"\n- Showing plugins for %".format(this.inspect).postln;

@@ -52,6 +52,8 @@ DEFINITIONLIST::
 || Example of SATIE processes
 ## LINK::Examples/OSC::
 || How to talk (and listen) to SATIE via OSC
+## LINK::Examples/Plugins::
+|| Description of SATIE plugins
 ::
 
 SECTION:: Classes
