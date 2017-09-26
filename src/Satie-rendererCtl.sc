@@ -23,7 +23,7 @@
 
 			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
 
-			if ( (args.size < 3 ) ,
+			if ( (args.size != 3 ) ,
 				{
 					"→    %: message: bad arg count: expects 2 values:  azimuth and  elevation".format(this.class.getBackTrace).error
 				},
@@ -41,7 +41,7 @@
 
 			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
 
-			if ( (args.size < 2 ) ,
+			if ( (args.size != 2 ) ,
 				{
 					"→    %: message: bad arg count: expects 1 value:  outputDB".format(this.class.getBackTrace).error
 				},
@@ -58,7 +58,7 @@
 
 			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
 
-			if ( (args.size < 2 ) ,
+			if ( (args.size != 2 ) ,
 				{
 					"→    %: message: bad arg count: expects 1 value:  outputDBTrim".format(this.class.getBackTrace).error
 				},
@@ -75,7 +75,7 @@
 
 			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
 
-			if ( (args.size < 2 ) ,
+			if ( (args.size != 2 ) ,
 				{
 					"→    %: message: bad arg count: expects 1 value:  muteFlag".format(this.class.getBackTrace).error
 				},
@@ -95,7 +95,7 @@
 
 			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
 
-			if ( (args.size < 2 ) ,
+			if ( (args.size != 2 ) ,
 				{
 					"→    %: message: bad arg count: expects 1 value:  dimFlag".format(this.class.getBackTrace).error
 				},
@@ -116,7 +116,7 @@
 
 			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
 
-			if ( (args.size < 2 ) ,
+			if ( (args.size != 2 ) ,
 				{
 					"→    %: message: bad arg count: expects 1 symbol:  groupName".format(this.class.getBackTrace).error
 				},

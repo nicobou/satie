@@ -157,8 +157,7 @@ b.sendMsg("/satie/scene", "createSource",  "resonance_SC", "effect://busgverb in
 b.sendMsg("/satie/source/update", "resonance_SC", 0,0, -115,0,15000,20);   //update spatialiser
 
 
-b = NetAddr.new("127.0.0.1", 18032);    // connect to satie's RX port
-
+/*
 s.latency=0.01
 (
 ~speed=0.4;
@@ -213,4 +212,4 @@ b.sendMsg("/satie/group/update", "default", 0,0, -3,0,15000,20);   //update spat
 
 
 
-
+*/
