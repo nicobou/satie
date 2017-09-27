@@ -94,9 +94,13 @@ subsection:: Introspection
 You can query SATIE via OSC and get some information. SATIE responds to the following messages: 
 definitionlist::
 ##/satie/audioplugins   // get existing synthdefs
+|| SATIE responds with JSON string containing 2 objects: audiosources and effects, each listing existing synthdefs by name.
 ##/satie/pluginsargs arg // get arguments of some synthdef
 || arg string
+
+   SATIE responds with a JSON string representing plugin's name, description and list of arguments and default values
 ::
+
 
 note:: by default, the response is sent to ip.port of the sender. It can be set permanently for the duration of the session via by sending code::/satie/responder:: a message containing IP and port::
 
