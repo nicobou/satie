@@ -53,7 +53,7 @@
 		}
 	}
 
-	setOutputDBTrimHandler {
+	setOutputTrimDBHandler {
 		^{ | args |
 
 			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
