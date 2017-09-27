@@ -3,11 +3,14 @@ SatieOSC {
 	var <rootURI;
 	var <>oscServerPort;
 	var <>oscClientPort;
+	var <>oscClientIP;
 
 	// private
 	var allSourceNodes;
 	var allGroupNodes;
-	var responder;
+	// client
+	var <dynamicResponder;
+	var returnAddress;
 
 
 			// used for audio renderer control
@@ -25,7 +28,9 @@ SatieOSC {
 		" + %".format(satie.satieConfiguration.server).postln;
 		allSourceNodes = Dictionary();
 		allGroupNodes = Dictionary();
-		responder = NetAddr("localhost", this.oscClientPort);
+		dynamicResponder = true;
+		oscClientIP = "localhost";
+		returnAddress = NetAddr(this.oscClientIP, this.oscClientPort);
 		volume = satie.satieConfiguration.server.volume;
 		volume.setVolumeRange(-99, 18);
 
@@ -43,9 +48,10 @@ SatieOSC {
 		this.newOSC(\satieSrcSetVec, this.setVecHandler, "/satie/source/setvec");
 		this.newOSC(\satieGroupSetVec, this.setVecHandler, "/satie/group/setvec");
 		this.newOSC(\satieProcSetVec, this.setVecHandler, "/satie/process/setvec");
-
+		// client
 		this.newOSC(\audioplugins, this.getAudioPlugins, "/satie/audioplugins");
 		this.newOSC(\pluginArgs, this.getPluginArguments, "/satie/pluginargs");
+		this.newOSC(\responderAddress, this.returnAddress, "/satie/responder");
 
 		this.newOSC(\satieLoadFile, this.loadFile, "/satie/load");
 
