@@ -1,6 +1,6 @@
 // Tester for satieOSC protocol
 
-(
+
 // EVALUATE THIS BLOCK FIRST
 
 // GLOBAL:  listeningFormat   can be optionally set here:
@@ -15,23 +15,54 @@
 //~listeningFormat = \octoVBAP;
 //~listeningFormat = \stereoListener;
 
-(thisProcess.nowExecutingPath.dirname++"/../../prototype/bootSatie.scd").load;
+//(thisProcess.nowExecutingPath.dirname++"/../../prototype/bootSatie.scd").load;
 
-s.waitForBoot {
+(
+// project state
+~listeningFormat = \stereoListener;  // default listener for project
+~auxBusCount = 2;
+~outBusIndex = 0;
 
-	// load the satie low level environment
+s = Server.supernova.local;
 
-	s.sync;
+// pass the server to the configuration and define some options
+~satieConfiguration = SatieConfiguration.new(s, [~listeningFormat],~auxBusCount, [~outBusIndex]);
+~satieConfiguration.serverOptions.blockSize = 512;
+~satieConfiguration.serverOptions.memSize = (2**21).asInt;        // probably should just leave this the same for everyting
+~satieConfiguration.serverOptions.threads = 8;    // set this to core count
 
-	// load the project, which will instantiante a basic renderer and all that goes with
-	(thisProcess.nowExecutingPath.dirname++"/satieOSCexample.scd").load;   // load the satieOSC and example project resources, such as processes, synthdefs, etc
-	s.sync;
-};
+~satie = Satie.new(~satieConfiguration);
+~satie.boot();
+
+
+~satie.satieConfiguration.server.waitForBoot{
+
+	~satie.satieConfiguration.server.sync;
+
+	~satie.makeSynthDef(\pink, \PinkSin, [], [],  [~listeningFormat], [~satie.satieConfiguration.outBusIndex[0]]);
+	~satie.makeSynthDef(\dust, \DustDust,  [~satie.aux[0]], [], [~listeningFormat], [~satie.satieConfiguration.outBusIndex[0]]);
+	~satie.makeSynthDef(\default, \default,  [], [], [~listeningFormat], [~satie.satieConfiguration.outBusIndex[0]]);
+	~satie.makeSynthDef(\test, \testtone,   [], [], [~listeningFormat], [~satie.satieConfiguration.outBusIndex[0]]);
+	~satie.makeSynthDef(\busgverb, \gverb,  [], [], [~listeningFormat], [~satie.satieConfiguration.outBusIndex[0]]);
+	~satie.makeSynthDef(\zkarpluck1, \zkarpluck1, [~satie.aux[0]], [], [~listeningFormat], [~satie.satieConfiguration.outBusIndex[0]] );   // sends to effects bus, pre-spatializer
+
+	~satie.satieConfiguration.server.sync;
+
+	s.meter;
+	s.makeGui;
+	s.plotTree;
+
+};  // end of  waitforboot
 
 
 b = NetAddr.new("127.0.0.1", 18032);    // connect to satie's RX port
 
-)  // END OF BLOCK
+
+)
+
+
+
+
 
 
 
@@ -44,7 +75,7 @@ b.sendMsg("/satie/scene", "debugFlag", 0);    // deactivate debugging printing t
 
 
 //  1. single node example  -----------------------------------
-b.sendMsg("/satie/scene", "createSource",  "sheefa", "plugin://default", "default");    // create source
+b.sendMsg("/satie/scene/createSource",  "sheefa", "default", "default");    // create source
 b.sendMsg("/satie/source/update", "sheefa", 0,0,-3,0,15000,20);   //update spatialiser args:  azimuthRad elevationRad gainDB delayMS  lpHZ  distanceMETERS
 // OR  use the set method to update the same spatialization parameters using several key value pairs
 b.sendMsg("/satie/source/set", "sheefa", "aziDeg", 360.rand, "eleDeg", 0, "gainDB", -6, "delayMs", 0, "lpHz", 15000);
@@ -60,12 +91,14 @@ b.sendMsg("/satie/scene", "clear");    // clear scene
 
 
 // 1.bis  effects node example  -----------------------------------
-b.sendMsg("/satie/scene", "createSource",  "sheefaDust", "plugin://dust", "default");    // create source node
-b.sendMsg("/satie/source/update", "sheefaDust", 360.rand,0, -3,0,15000,20);   // update spatialiser
+b.sendMsg("/satie/scene/createSource",  "sheefaDust", "dust", "default");    // create source node
+b.sendMsg("/satie/source/update", "sheefaDust", 360.rand,0, 18,0,15000,20);   // update spatialiser
 b.sendMsg("/satie/source/set", "sheefaDust", "density2", 30);    // set param
 
-b.sendMsg("/satie/scene", "createSource",  "sheefaFx", "effect://busgverb inbus 0" );    // create effects node
-b.sendMsg("/satie/source/update", "sheefaFx", 0,0, -15,0,15000,20);   //update spatialiser
+b.sendMsg("/satie/scene/createEffect",  "sheefaFx", "busgverb inbus 0" );    // create effects node
+b.sendMsg("/satie/source/update", "sheefaFx", 0,0, 15,0,15000,20);   //update spatialiser
+
+b.sendMsg("/satie/scene", "deleteNode",  "sheefaFx");  // delete node
 
 b.sendMsg("/satie/scene", "clear");    // clear scene
 
