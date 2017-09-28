@@ -29,10 +29,10 @@ SatieOSC {
 		volume = satie.satieConfiguration.server.volume;
 		volume.setVolumeRange(-99, 18);
 
-		// set up default group
+		// set up default groups
 		if ( satie.groups[\default] == nil,
 			{
-				warn("satieOSC.INIT:  \default group not defined in Satie, instantiating, \default group");
+				warn("satieOSC.INIT:  \default group not defined on the server, creating \default group on head");
 				this.createGroup(\default);
 			},
 			// else all good, create an entry for \default group
@@ -45,10 +45,10 @@ SatieOSC {
 				postf(">>satieOSC.INIT:  setting up   % group at DSP %\n", \default, \head);
 		});
 
-				// set up defaultFx group
+		// set up defaultFx group
 		if ( satie.groups[\defaultFx] == nil,
 			{
-				warn("satieOSC.INIT:  \defaultFx group not defined in Satie, instantiating, \defaultFx group");
+				warn("satieOSC.INIT:  \defaultFx group not defined on the server, creating \defaultFx group on tail");
 				this.createGroup(\defaultFx,\addToTail);
 			},
 			// else all good, create an entry for \default group
@@ -256,7 +256,7 @@ SatieOSC {
 	}
 
 	// expects /oscaddress nodeNameSym UriString  <opt>groupNameSym
-	// where UriString == either:  synthName , or synthName 'inBus' N
+	// where UriString == either:  synthName , or synthName N, where N is the number of the Satie AuxBus input to the effect
 	createEffectHandler {
 		^{ | args |
 
@@ -285,20 +285,16 @@ SatieOSC {
 						{
 							"→    %: message: Empty URI String, can not create %".format(this.class.getBackTrace, sourceName.asString).error
 						},
-						// else OK to parse uriString
+						// else OK to parse uriString for auxBus assign value
 						{
 							synthName = stringArray[0].asSymbol;  // get synthName
 
 							// check for auxBus assignment
-							if (stringArray.size == 3,
+							if (stringArray.size == 2,
 								{
-									if (stringArray[1] == "inBus", { auxBus = stringArray[2] .asInt;
-
-									});
+									auxBus = stringArray[1] .asInt;
 							});
-
 							this.createEffectNode(sourceName, synthName, groupName, auxBus );
-
 					})
 				}
 			);
@@ -457,6 +453,11 @@ SatieOSC {
 		var synth;
 		if (satie.satieConfiguration.debug, {"→    %: sourceName: %,  synthName: %,  groupName: %,  auxBus %".format(this.class.getBackTrace, sourceName,synthName,groupName, auxBus).postln});
 
+		if (groupName == \default,
+			{
+				warn("satieOSC.createEffectNode: changing  "++sourceName++"'s group: "++groupName++" to: defaultFx group");
+				groupName = \defaultFx;
+		});
 
 		// check to see if group  exists,  if  not, create it on the tail
 		if (  allGroupNodes[groupName] == nil,
@@ -473,16 +474,12 @@ SatieOSC {
 				});
 		});
 
-
-
 		allSourceNodes[sourceName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
 		allSourceNodes[sourceName.asSymbol].put(\groupNameSym, groupName);
 		allSourceNodes[sourceName.asSymbol].put(\plugin, synthName);
-
-		postf("satieOSC.createEffectNode: creating effects node % of group %, with  synth:  % on bus %, \n", sourceName, groupName, synthName, auxBus);
 		synth = satie.makeInstance(sourceName, synthName, groupName, [\in, satie.aux[auxBus] ]);
-
 		allSourceNodes[sourceName.asSymbol].put(\synth, synth);
+		postf("satieOSC.createEffectNode: creating effects node % of group %, with  synth:  % on bus %, \n", sourceName, groupName, synthName, auxBus);
 	}
 
 

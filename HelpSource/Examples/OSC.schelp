@@ -9,43 +9,54 @@ definitionlist::
 ## /satie/load filename
 || loads and evaluates file in supercollider.  Filename must be a full file path to a file located on the audiorendering machine
 
-## /satie/scene createSource nodeName  plugin://synthdefName <groupName>
+## /satie/scene/createSource nodeName  synthdefName <groupName>
 || Instantiate an audio generator plugin.
 list::
 ##nodeName :  the name of the instance.
 ##synthDefName : the name of the synthdef registered with the system.
 ##groupName :  (optional) the name of the group. \default if no argument provided.
 ::
-## /satie/scene createSource nodeName effect://synthdefName <inbus: N> <groupName>
+## /satie/scene/createEffect nodeName synthdefName <groupName>
+## /satie/scene/createEffect nodeName synthdefNameAndAuxNo <groupName>
 || Instantiate an audio effect plugin
 list::
 ##nodeName :  the name of the instance.
 ##synthDefName : the name of the synthdef registered with the system.
-##inbus : (optional) bus number.
+## <or> synthDefNameAndAuxNo : a string with the name of the synthdef registered with the system and the auxBus bumber for the effect's input
 ##groupName :  (optional) the name of the group. \defaultFx if no argument provided.
 ::
-##/satie/scene createGroup nodeName <effect://>
+##/satie/scene/createGroup nodeName <type>
 || Create a new group
 list::
 ## nodeName : name of the group.
 ## type : uri determines the DSP position of group (head or tail), defaults to head
 ::
-##/satie/scene createProcess nodeName process://processName <optargs>
+##/satie/scene/createProcess nodeName processName <optargs>
 || Create/instantiate a process
 list::
 ## nodeName : the name of the instance.
 ## processName : the name of the defined process followed by its arguments, if any
 ::
-##/satie/scene deleteNode nodeName
+##/satie/scene/deleteNode nodeName
 || Delete a node
 list::
 ## nodeName : the name of the node to be deleted
 ::
-##/satie/scene clear
+##/satie/scene/clear
 || Clear the scene. Removes all instances and groups.
 ##/satie/scene/set key value
 || Set a scene-wide keyword value
+list::
+## keyword : parameter name
+## value :  int, float or string
 ::
+##/satie/scene/debug debugFlag
+|| Enable or disable debug printing
+list::
+## debugFlag : 1 or 0,  defaults to 0
+::
+::
+
 subsection:: Project Messages
 
 definitionlist::
