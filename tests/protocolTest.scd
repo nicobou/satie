@@ -86,11 +86,11 @@ b.sendMsg("/satie/scene/clear");    // clear scene
 
 // 1.bis  effects node example  -----------------------------------
 b.sendMsg("/satie/scene/createSource",  "sheefaDust", "dust", "default");    // create source node
-b.sendMsg("/satie/source/update", "sheefaDust", 360.rand,0, 18,0,15000,20);   // update spatialiser
-b.sendMsg("/satie/source/set", "sheefaDust", "density2", 30);    // set param
+b.sendMsg("/satie/source/update", "sheefaDust", 360.rand,0, -3,0,15000,20);   // update spatialiser
+b.sendMsg("/satie/source/set", "sheefaDust", "density2", 10);    // set param
 
-b.sendMsg("/satie/scene/createEffect",  "sheefaFx", "busgverb 0" );    // create effects node with input from satie's AuxBus 0
-b.sendMsg("/satie/source/update", "sheefaFx", 0,0, 0,0,15000,20);   //update spatialiser
+b.sendMsg("/satie/scene/createEffect",  "sheefaFx", "busgverb", 0 );    // create effects node in defaultFx group, with input from satie's AuxBus 0
+b.sendMsg("/satie/source/update", "sheefaFx", 0,0, -12,0,15000,20);   //update spatialiser
 b.sendMsg("/satie/source/set", "sheefaFx", "revtime",  10);    // set param
 b.sendMsg("/satie/source/set", "sheefaFx", "revtime", 1);    // set param
 
@@ -104,7 +104,7 @@ b.sendMsg("/satie/scene/clear");    // clear scene
 b.sendMsg("/satie/scene/createSourceGroup",  "sheefaGroup");    // create group node
 b.sendMsg("/satie/scene/createEffectGroup",  "sheefaFXgroup");    // create group node
 
-b.sendMsg("/satie/scene/createEffect",  "sheefaFx", "busgverb 0" , "sheefaFXgroup");    // create effects node with input from satie's AuxBus 0
+b.sendMsg("/satie/scene/createEffect",  "sheefaFx", "busgverb" , "sheefaFXgroup");    // create effects node in sheefaFXgroup, with input from satie's AuxBus 0
 b.sendMsg("/satie/source/update", "sheefaFx", 0,0, -20,0,15000,20);   //update spatialiser
 
 
@@ -197,7 +197,7 @@ b.sendMsg("/satie/source/set", "ball_1000", "c1", 0.9, "c3", 5);    // set key v
 
 b.sendMsg("/satie/source/set", "ball_1000", "fb", 100.rand);    // update fb param
 
-b.sendMsg("/satie/scene", "createSource",  "resonance_SC", "effect://busgverb inbus 0" );    // create effects node
+b.sendMsg("/satie/scene", "createEffect",  "resonance_SC", "busgverb", 0 );    // create effects node
 b.sendMsg("/satie/source/update", "resonance_SC", 0,0, -115,0,15000,20);   //update spatialiser
 
 

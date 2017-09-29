@@ -14,16 +14,21 @@ definitionlist::
 list::
 ##nodeName :  the name of the instance.
 ##synthDefName : the name of the synthdef registered with the system.
-##groupName :  (optional) the name of the group. \default if no argument provided.
+##groupName :  (optional) the name of the group. Default: '\default'
 ::
-## /satie/scene/createEffect nodeName synthdefName <groupName>
-## /satie/scene/createEffect nodeName synthdefNameAndAuxNo <groupName>
+## /satie/scene/createEffect nodeName synthdefName <groupName> <auxBus>
 || Instantiate an audio effect plugin
 list::
 ##nodeName :  the name of the instance.
 ##synthDefName : the name of the synthdef registered with the system.
-## <or> synthDefNameAndAuxNo : a string with the name of the synthdef registered with the system and the auxBus bumber for the effect's input
-##groupName :  (optional) the name of the group. \defaultFx if no argument provided.
+##groupName :  (optional) the name of the group.  Default: '\defaultFx'
+##auxBus: (optional) number of aux bus for the effect's input. Default: '0'
+::
+##/satie/scene/createProcess nodeName processName <optargs>
+|| Create/instantiate a process
+list::
+## nodeName : the name of the instance.
+## processName : the name of the defined process followed by its arguments, if any
 ::
 ##/satie/scene/createSourceGroup nodeName
 || Create a new group at the head of the Satie's DSP chain
@@ -39,12 +44,6 @@ list::
 || Create a new group on the head of the DSP chain
 list::
 ## nodeName : name of the group.
-::
-##/satie/scene/createProcess nodeName processName <optargs>
-|| Create/instantiate a process
-list::
-## nodeName : the name of the instance.
-## processName : the name of the defined process followed by its arguments, if any
 ::
 ##/satie/scene/deleteNode nodeName
 || Delete a node

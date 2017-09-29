@@ -27,7 +27,7 @@
 		}
 	}
 
-	// expects /oscaddress nodeNameSym UriString  <opt>groupNameSym
+	// expects /oscaddress nodeNameSym synthName  <opt>groupNameSym <opt>auxBus
 	// where UriString == either:  synthName , or synthName N, where N is the number of the Satie AuxBus input to the effect
 	createEffectHandler {
 		^{ | args |
@@ -41,33 +41,34 @@
 				// else
 				{
 					var sourceName = args[1].asSymbol;
-					var uriString  = args[2].asString;
+					var synthName  = args[2].asSymbol;
 					var groupName = \defaultFx;
-					var stringArray, auxBus = 0;
-					var synthName;
-
-					if (args.size == 4,
+					var auxBus = 0;
+~effectsMess=args;
+					if (args.size == 5,
 						{
-							groupName = args[3].asSymbol;
+							if (args[4].class == Symbol, {groupName = args[4].asSymbol;
+							},
+							//else
+							{
+								if (  (args[4].class == Integer) || (args[3].class == Float), {auxBus = args[4].asInt;
+								});
+
+							});
 					});
 
-					stringArray = uriString.asString.split($ );
-
-					if (stringArray.size == 0,
+					if (args.size > 3,
 						{
-							"→    %: message: Empty URI String, can not create %".format(this.class.getBackTrace, sourceName.asString).error
-						},
-						// else OK to parse uriString for auxBus assign value
-						{
-							synthName = stringArray[0].asSymbol;  // get synthName
+							if (args[3].class == Symbol, {groupName = args[3].asSymbol;
+							},
+							//else
+							{
+								if  (  (args[3].class == Integer) || (args[3].class == Float), {auxBus = args[3].asInt;
+								});
 
-							// check for auxBus assignment
-							if (stringArray.size == 2,
-								{
-									auxBus = stringArray[1] .asInt;
 							});
-							this.createEffectNode(sourceName, synthName, groupName, auxBus );
-					})
+					});
+					this.createEffectNode(sourceName, synthName, groupName, auxBus );
 				}
 			);
 		}
@@ -139,7 +140,7 @@
 		}
 	}
 
-		// expects /oscaddress groupName
+	// expects /oscaddress groupName
 	createProcessGroupHandler {
 		^{ | args |
 
