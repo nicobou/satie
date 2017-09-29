@@ -1,5 +1,215 @@
 + SatieOSC {
 
+	// expects /oscaddress nodeName pluginName groupName<optional>
+	createSourceHandler {
+		^{ | args |
+
+			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
+
+			if ( (args.size < 2 ) ,
+				{
+					"→    %: message: bad arg count: expects  at least 2 values:  nodeName, pluginName, and optionally:  groupName".format(this.class.getBackTrace).error
+				},
+				// else
+				{
+					var sourceName = args[1].asSymbol;
+					var synthName  = args[2].asSymbol;
+					var groupName = \default;
+
+					if (args.size == 4,
+						{
+							groupName = args[3].asSymbol;
+					});
+					this.createSourceNode(sourceName, synthName, groupName );
+				}
+
+			);
+		}
+	}
+
+	// expects /oscaddress nodeNameSym synthName  <opt>groupNameSym <opt>auxBus
+	// where UriString == either:  synthName , or synthName N, where N is the number of the Satie AuxBus input to the effect
+	createEffectHandler {
+		^{ | args |
+
+			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
+
+			if ( (args.size < 3 ) ,
+				{
+					"→    %: message: bad arg count: expects  at least 2 values:  nodeName, pluginUri, and optionally:  groupName".format(this.class.getBackTrace).error
+				},
+				// else
+				{
+					var sourceName = args[1].asSymbol;
+					var synthName  = args[2].asSymbol;
+					var groupName = \defaultFx;
+					var auxBus = 0;
+~effectsMess=args;
+					if (args.size == 5,
+						{
+							if (args[4].class == Symbol, {groupName = args[4].asSymbol;
+							},
+							//else
+							{
+								if (  (args[4].class == Integer) || (args[3].class == Float), {auxBus = args[4].asInt;
+								});
+
+							});
+					});
+
+					if (args.size > 3,
+						{
+							if (args[3].class == Symbol, {groupName = args[3].asSymbol;
+							},
+							//else
+							{
+								if  (  (args[3].class == Integer) || (args[3].class == Float), {auxBus = args[3].asInt;
+								});
+
+							});
+					});
+					this.createEffectNode(sourceName, synthName, groupName, auxBus );
+				}
+			);
+		}
+	}
+
+	// expects /oscaddress nodeName URI groupName<optional>
+	createProcessHandler {
+		^{ | args |
+
+			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
+
+			if ( (args.size < 2 ) ,
+				{
+					"→    %: message: bad arg count: expects  at least 2 values:  nodeName, pluginName, and optionally:  groupName".format(this.class.getBackTrace).error
+				},
+				// else
+				{
+					var sourceName = args[1].asSymbol;
+					var uriPath  = args[2].asString;
+					var groupName = \default;
+
+					if (args.size == 4,
+						{
+							groupName = args[3].asSymbol;
+					});
+					this.createProcessNode(sourceName, uriPath, groupName );
+
+				}
+
+			);
+		}
+	}
+
+
+	// expects /oscaddress groupName
+	createSourceGroupHandler {
+		^{ | args |
+
+			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
+
+			if ( (args.size < 2 ) ,
+				{
+					"→    %: message: missing  nodeName argument".format(this.class.getBackTrace).error
+				},
+				// else
+				{
+					var groupName = args[1].asSymbol;
+					this.createGroup(groupName, \addToHead);
+			});
+		}
+	}
+
+	// expects /oscaddress groupName
+	createEffectGroupHandler {
+		^{ | args |
+
+			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
+
+			if ( (args.size < 2 ) ,
+				{
+					"→    %: message: missing  nodeName argument".format(this.class.getBackTrace).error
+				},
+				// else
+				{
+					var groupName = args[1].asSymbol;
+
+					this.createGroup(groupName, \effect);
+			});
+		}
+	}
+
+	// expects /oscaddress groupName
+	createProcessGroupHandler {
+		^{ | args |
+
+			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
+
+			if ( (args.size < 2 ) ,
+				{
+					"→    %: message: missing  nodeName argument".format(this.class.getBackTrace).error
+				},
+				// else
+				{
+					var groupName = args[1].asSymbol;
+
+					this.createGroup(groupName, \addToHead);
+			});
+		}
+	}
+
+
+	deleteNodeHandler {
+		^{ | args |
+			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
+
+			if ( (args.size != 2 ) ,
+				{	"→    %: message missing nodeName %".format(this.class.getBackTrace, args).error},
+				// else
+				{
+					var nodeName = args[1];
+					// "~coreCallback: OSCrx deleteNode CALLED ".warn;
+
+					if (allGroupNodes.includesKey(nodeName.asSymbol),
+						{   this.removeGroup(nodeName);  },
+						// else
+						{
+							this.deleteSource(nodeName);   });
+				}
+			);
+		}
+	}
+
+	clearSceneHandler {
+		^{ | args |
+			var nodelist = allSourceNodes.keys;
+
+			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
+
+			// first flush all nodes
+			allSourceNodes.keysDo { |key |
+				this.clearSourceNode(key);
+			};
+			allSourceNodes.clear();
+
+			allSourceNodes.size;
+			"SatiOSC.clearSceneHandler:  clearScene called".warn;
+		}
+	}
+
+	debugFlagHandler {
+		^{ | args |
+			if ((args.size !=2 ),
+				{"% message missing flag".format(this.class.getBackTrace).warn},
+				{
+					"→    %:  message: %".format(this.class.getBackTrace, args).postln;
+					satie.satieConfiguration.debug = args[1].asInt.asBoolean;
+				}
+			)
+		}
+	}
+
 	updateSrcHandler {
 		^{ | args |
 			var nodeName = args[1];
@@ -300,21 +510,21 @@
 														{
 															matched = true;
 															myProcess[\setVec].value(myProcess, key, vector);   // use process's \setVec message handler
-														});
-												});
+													});
+											});
 											//
 											if (matched == false,
 												{
 													// or just update the process's group
 													thisGroup.set(key,vector);
-												});
-										});
+											});
+									});
 								},
 								{  // else error
 									error("satieOSCProtocol.setVecHandler:  process node: "++nodeName++"  is undefined \n");
-								});
-						});
-				});
+							});
+					});
+			});
 		}
 	}
 }

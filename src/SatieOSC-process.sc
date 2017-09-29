@@ -13,7 +13,7 @@
 // SatieOSC  - process handling
 
 + SatieOSC		{
-	createProcess {| sourceName, uriPath , groupName = \default |
+/*	createProcess {| sourceName, uriPath , groupName = \default |
 		if (allSourceNodes.includesKey(sourceName),
 			{
 				postf("satieOSC.createSource:   % exists, no action \n", sourceName);
@@ -32,7 +32,7 @@
 				});
 			}
 		);
-	}
+	}*/
 
 	createProcessNode { | sourceName, uriPath , groupNameDummy = \default |
 			var temp, type, charIndex, processName, myProcess, cloneGroup, cloneGroupName;

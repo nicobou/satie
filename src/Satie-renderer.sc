@@ -67,8 +67,14 @@
 
 	makeSatieGroup { |  name, addAction = \addToHead |
 		var group;
-		"Creating group %".format(name).postln;
-		group = ParGroup.new(addAction: addAction);
+		//"Creating group %".format(name).postln;
+		if (addAction == \addToEffects,
+			{
+				group = ParGroup.new(groups[\defaultFx], \addAfter);
+			},
+			{
+				group = ParGroup.new(addAction: addAction);
+		});
 		groups.put(name.asSymbol, group);
 		groupInstances.put(name.asSymbol, Dictionary.new);
 		^group;
