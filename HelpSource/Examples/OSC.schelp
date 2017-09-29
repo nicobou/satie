@@ -29,7 +29,7 @@ list::
 || Create a new group
 list::
 ## nodeName : name of the group.
-## type : uri determines the DSP position of group (head or tail), defaults to head
+## type :  (optional) determines the DSP position of group ("head" or "effect"), default="head"
 ::
 ##/satie/scene/createProcess nodeName processName <optargs>
 || Create/instantiate a process
@@ -47,7 +47,7 @@ list::
 ##/satie/scene/set key value
 || Set a scene-wide keyword value
 list::
-## keyword : parameter name
+## key : parameter name
 ## value :  int, float or string
 ::
 ##/satie/scene/debug debugFlag

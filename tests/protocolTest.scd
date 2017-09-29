@@ -61,16 +61,10 @@ b = NetAddr.new("127.0.0.1", 18032);    // connect to satie's RX port
 )
 
 
-
-
-
-
-
-
 // THEN Evaluate the different sections below
 
-b.sendMsg("/satie/scene", "debugFlag", 1);    // activate  debugging printing to console
-b.sendMsg("/satie/scene", "debugFlag", 0);    // deactivate debugging printing to console
+b.sendMsg("/satie/scene/debugFlag", 1);    // activate  debugging printing to console
+b.sendMsg("/satie/scene/debugFlag", 0);    // deactivate debugging printing to console
 
 
 
@@ -85,9 +79,9 @@ b.sendMsg("/satie/source/state", "sheefa", 0);    // set node state to 0  (pause
 b.sendMsg("/satie/source/state", "sheefa", 1);    // set node state to 1
 
 
-b.sendMsg("/satie/scene", "deleteNode",  "sheefa");  // delete node
+b.sendMsg("/satie/scene/deleteNode",  "sheefa");  // delete node
 
-b.sendMsg("/satie/scene", "clear");    // clear scene
+b.sendMsg("/satie/scene/clear");    // clear scene
 
 
 // 1.bis  effects node example  -----------------------------------
@@ -95,43 +89,60 @@ b.sendMsg("/satie/scene/createSource",  "sheefaDust", "dust", "default");    // 
 b.sendMsg("/satie/source/update", "sheefaDust", 360.rand,0, 18,0,15000,20);   // update spatialiser
 b.sendMsg("/satie/source/set", "sheefaDust", "density2", 30);    // set param
 
-b.sendMsg("/satie/scene/createEffect",  "sheefaFx", "busgverb inbus 0" );    // create effects node
-b.sendMsg("/satie/source/update", "sheefaFx", 0,0, 15,0,15000,20);   //update spatialiser
+b.sendMsg("/satie/scene/createEffect",  "sheefaFx", "busgverb 0" );    // create effects node with input from satie's AuxBus 0
+b.sendMsg("/satie/source/update", "sheefaFx", 0,0, 0,0,15000,20);   //update spatialiser
+b.sendMsg("/satie/source/set", "sheefaFx", "revtime",  10);    // set param
+b.sendMsg("/satie/source/set", "sheefaFx", "revtime", 1);    // set param
 
-b.sendMsg("/satie/scene", "deleteNode",  "sheefaFx");  // delete node
 
-b.sendMsg("/satie/scene", "clear");    // clear scene
+b.sendMsg("/satie/scene/deleteNode",  "sheefaFx");  // delete node
+
+b.sendMsg("/satie/scene/clear");    // clear scene
 
 
 //  2. group node example  -----------------------------------
-b.sendMsg("/satie/scene", "createGroup",  "sheefaGroup");    // create group node
+b.sendMsg("/satie/scene/createGroup",  "sheefaGroup");    // create group node
+b.sendMsg("/satie/scene/createGroup",  "sheefaFXgroup", \effect);    // create group node
+
+b.sendMsg("/satie/scene/createEffect",  "sheefaFx", "busgverb 0" , "sheefaFXgroup");    // create effects node with input from satie's AuxBus 0
+b.sendMsg("/satie/source/update", "sheefaFx", 0,0, -20,0,15000,20);   //update spatialiser
+
 
 // create member nodes in group
 (
 20.do( {|item|
 	var nodename=("testNode"++"_"++item);
-	b.sendMsg("/satie/scene", "createSource",  "sheefa"++item, "plugin://default", "sheefaGroup");    // create source
+	b.sendMsg("/satie/scene/createSource",  "sheefa"++item, "dust", "sheefaGroup");    // create source
 	b.sendMsg("/satie/source/update", "sheefa"++item, 360.rand,360.rand,-20,0,15000,20);   // create source
-	b.sendMsg("/satie/source/set", "sheefa"++item, "lfoHz", 2);
 
 });
 )
 
 // set member node parems using group node
-b.sendMsg("/satie/group/set", "default", "gainDB", -30);
+b.sendMsg("/satie/group/set", "sheefaGroup","density2", 30);    // set param
+b.sendMsg("/satie/group/set", "sheefaGroup","density2", 1);    // set param
+
 
 // set member node parems using group node
-b.sendMsg("/satie/group/set", "sheefaGroup", "lfoHz", 10.1.rand);
+b.sendMsg("/satie/group/set", "sheefaFXgroup", "outputDB",  -30);    // set param
+b.sendMsg("/satie/group/set", "sheefaFXgroup", "outputDB",  0);    // set param
+
+b.sendMsg("/satie/group/set", "sheefaFXgroup", "revtime",  5);    // set param
+b.sendMsg("/satie/group/set", "sheefaFXgroup", "revtime", 0.5);    // set param
+
+
 
 // destroy group members
 (
 20.do( {|item|
 	var nodename=("testNode"++"_"++item);
-	b.sendMsg("/satie/scene", "deleteNode",  "sheefa"++item);
+	b.sendMsg("/satie/scene/deleteNode",  "sheefa"++item);
 });
 )
 
-b.sendMsg("/satie/scene", "clear");    // clear scene
+b.sendMsg("/satie/scene/deleteNode",  "sheefaFx");  // delete node
+
+b.sendMsg("/satie/scene/clear");    // clear scene
 
 
 

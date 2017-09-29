@@ -42,7 +42,7 @@ SatieOSC {
 				allGroupNodes[\default].put(\groupSym , \default);  // save group name symbol
 				allGroupNodes[\default].put(\plugin, \nil);
 				allGroupNodes[\default].put(\position, \head);  //  indicates group DSP chain evaluation order  (head or tail)
-				postf(">>satieOSC.INIT:  setting up   % group at DSP %\n", \default, \head);
+				postf(">>satieOSC.INIT:  setting up   % group at head of server groups %\n", \default);
 		});
 
 		// set up defaultFx group
@@ -51,21 +51,25 @@ SatieOSC {
 				warn("satieOSC.INIT:  \defaultFx group not defined on the server, creating \defaultFx group on tail");
 				this.createGroup(\defaultFx,\addToTail);
 			},
-			// else all good, create an entry for \default group
+			// else all good, create an entry for \defaultFx group
 			{
 				allGroupNodes[\defaultFx] = Dictionary();   // create group node  -- create node-specific dict.
 				allGroupNodes[\defaultFx].put(\group , satie.groups[\defaultFx] );  // set group
 				allGroupNodes[\defaultFx].put(\groupSym , \defaultFx);  // save group name symbol
 				allGroupNodes[\defaultFx].put(\plugin, \nil);
-				allGroupNodes[\defaultFx].put(\position, \tail);  //  indicates group DSP chain evaluation order  (head or tail)
-				postf(">>satieOSC.INIT:  setting up   % group at DSP %\n", \defaultFx, \tail);
+				allGroupNodes[\defaultFx].put(\position, \effect);  //  indicates group DSP chain evaluation order  (head or tail)
+				postf(">>satieOSC.INIT:  setting up   % group at after the default group\n", \defaultFx);
 		});
 
 
 		// scene level handler
-		this.newOSC(\satieScene, this.coreHandler, "/satie/scene");
 		this.newOSC(\satieSceneCreateSource, this.createSourceHandler, "/satie/scene/createSource");
 		this.newOSC(\satieSceneCreateEffect, this.createEffectHandler, "/satie/scene/createEffect");
+		this.newOSC(\satieSceneCreateGroup, this.createGroupHandler, "/satie/scene/createGroup");
+		this.newOSC(\satieSceneCreateProcess, this.createProcessHandler, "/satie/scene/createProcess");
+		this.newOSC(\satieSceneDeleteNode, this.deleteNodeHandler, "/satie/scene/deleteNode");
+		this.newOSC(\satieDebugFlag, this.debugFlagHandler, "/satie/scene/debugFlag");
+		this.newOSC(\satieClearScene, this.clearSceneHandler, "/satie/scene/clear");
 
 		// set command handlers
 		this.newOSC(\satieSrcState, this.setState, "/satie/source/state");
@@ -102,215 +106,6 @@ SatieOSC {
 		OSCdef(id.asSymbol).free;
 	}
 
-	/////////////////////////////////////////////////////////
-	// Handle /satie/scene level messages:
-	//
-	// /satie/scene createSource  nodeName  URI<plugin://synthdefName groupName<opt>   // default groupName = 'default'
-	// /satie/scene createSource  nodeName  URI<effect://synthdefName  optionalArgs: inbus N >   groupName<opt>   // defaults:  groupName = 'defaultFx',  inbus = 0
-	// /satie/scene createGroup nodeName   optionalURI<effect://>   // uri determines the DSP position of group (head or tail)   -defaults to head
-	// /satie/scene createProcess nodeName URI<uriPath process://processName optargs >   // unique group is automatically generated for each created process node
-	// /satie/scene deleteNode nodeName
-	// /satie/scene clear
-	// /satie/scene/set keyword value   // to set scene parameters like 'debugFlag 1'
-	/////////////////////////////////////////////////////////
-	coreHandler {
-		^{|msg|
-			var command = msg[1];
-			if (msg.size < 3,
-				{
-					switch (command,
-						'clear',
-						{
-							this.clearScene();
-						};
-					);
-				},
-				{
-					switch (command,
-						'createSource',
-						{if (satie.satieConfiguration.debug,
-							{postf("•satieOSC.coreCallback: command: %, messLen: %   msg: %, \n", command, msg.size, msg);});
-
-						if ( (msg.size < 3 ) ,
-							{"satieOSC.coreCallback:  createSource message missing values".warn;
-								postf("createSource MESS LEN: %", msg.size);
-
-							},
-							// else
-							{
-								var sourceName = msg[2];
-								var uriName = "";
-								var groupName = "";
-
-								if (msg.size > 3,
-									{
-										uriName = msg[3];
-								});
-
-								if (msg.size > 4,
-									{
-										groupName = msg[4];
-								});
-								this.createSource(sourceName, uriName, groupName);
-						});},
-						'createGroup',
-						{
-							if ( (msg.size < 3 ) ,
-								{"satieOSC.coreCallback:  createGroup message missing values".warn;
-									postf("createGroup MESS LEN: %", msg.size);
-
-								},
-								// else
-								{
-									var groupName = msg[2];
-									var position = \addToHead;
-									var type;
-
-									if (msg.size == 4,
-										{
-											type = this.getUriType(msg[3].asString);
-											if (type == \effect, { position = \addToTail;});
-									});
-
-									this.createGroup(groupName, position);
-								}
-						)},
-						'createProcess',
-						{
-							if (satie.satieConfiguration.debug,
-								{postf("•satieOSC.coreCallback: createProcess:  command: %, messLen: %   msg: %, \n", command, msg.size, msg);});
-							if ( (msg.size < 3 ) ,
-								{"satieOSC.coreCallback:  createProcess message missing values".warn;
-									postf("createProcess MESS LEN: %", msg.size);
-
-								},
-								// else
-								{
-									var sourceName = msg[2];
-									var uriName = "";
-									var groupName = "";
-
-									if (msg.size > 3,
-										{
-											uriName = msg[3];
-									});
-
-									if (msg.size > 4,
-										{
-											groupName = msg[4];
-									});
-									this.createProcess(sourceName, uriName, groupName);
-							});
-						},
-						'deleteNode',
-						{
-							if ( (msg.size < 3 ) ,
-								{"satieOSC.coreCallback:  deleteNode message missing values".warn;},
-								// else
-								{
-									var nodeName = msg[2];
-									// "~coreCallback: OSCrx deleteNode CALLED ".warn;
-
-									if (allGroupNodes.includesKey(nodeName.asSymbol),
-										{   this.removeGroup(nodeName);  },
-										// else
-										{
-											this.deleteSource(nodeName);   });
-								}
-							)
-						},
-						'debugFlag',
-						{
-							this.setDebug(msg)
-						};
-					)
-			});
-		}
-	}
-
-	// expects /oscaddress nodeName pluginName groupName<optional>
-	createSourceHandler {
-		^{ | args |
-
-			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
-
-			if ( (args.size < 2 ) ,
-				{
-					"→    %: message: bad arg count: expects  at least 2 values:  nodeName, pluginName, and optionally:  groupName".format(this.class.getBackTrace).error
-				},
-				// else
-				{
-					var sourceName = args[1].asSymbol;
-					var synthName  = args[2].asSymbol;
-					var groupName = \default;
-
-					if (args.size == 4,
-						{
-							groupName = args[3].asSymbol;
-					});
-					this.createSourceNode(sourceName, synthName, groupName );
-				}
-
-			);
-		}
-	}
-
-	// expects /oscaddress nodeNameSym UriString  <opt>groupNameSym
-	// where UriString == either:  synthName , or synthName N, where N is the number of the Satie AuxBus input to the effect
-	createEffectHandler {
-		^{ | args |
-
-			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
-
-			if ( (args.size < 3 ) ,
-				{
-					"→    %: message: bad arg count: expects  at least 2 values:  nodeName, pluginUri, and optionally:  groupName".format(this.class.getBackTrace).error
-				},
-				// else
-				{
-					var sourceName = args[1].asSymbol;
-					var uriString  = args[2].asString;
-					var groupName = \defaultFx;
-					var stringArray, auxBus = 0;
-					var synthName;
-
-					if (args.size == 4,
-						{
-							groupName = args[3].asSymbol;
-					});
-
-					stringArray = uriString.asString.split($ );
-
-					if (stringArray.size == 0,
-						{
-							"→    %: message: Empty URI String, can not create %".format(this.class.getBackTrace, sourceName.asString).error
-						},
-						// else OK to parse uriString for auxBus assign value
-						{
-							synthName = stringArray[0].asSymbol;  // get synthName
-
-							// check for auxBus assignment
-							if (stringArray.size == 2,
-								{
-									auxBus = stringArray[1] .asInt;
-							});
-							this.createEffectNode(sourceName, synthName, groupName, auxBus );
-					})
-				}
-			);
-		}
-	}
-
-
-	setDebug { | msg |
-		msg.postln;
-		if ((msg.size < 3),
-			{"% wrong number of arguments".format(this.class.getBackTrace).warn},
-			{
-				satie.satieConfiguration.debug = msg[2].asInt.asBoolean;
-			}
-		)
-	}
 
 	removeGroup { | groupName |
 		if ( allGroupNodes.includesKey(groupName.asSymbol) ,
@@ -366,29 +161,6 @@ SatieOSC {
 		};
 	}
 
-	createSource {| sourceName, uriPath , groupName = \default |
-		//"createSource called".inform;
-		if (allSourceNodes.includesKey(sourceName),
-			{
-				postf("satieOSC.createSource:   % exists, no action \n", sourceName);
-			},
-			// else create new node
-			{
-				var type;
-				type = this.getUriType(uriPath);
-
-				if (  (type == \plugin)  ||  (type== \effect),
-					{
-						this.createSourceNode(sourceName.asSymbol, uriPath,groupName );
-					},
-					// else
-					{
-						postf("satieOSC.createSource: node  %  URI: %,  wrong type,  no action \n", sourceName, type);
-				});
-
-			}
-		);
-	}
 
 	getUriType { | uriPath |
 		var charIndex, uriName, type;
@@ -428,7 +200,7 @@ SatieOSC {
 
 
 		// make sure group is not located at the tail (used by efffects)
-		if (  allGroupNodes[groupName].at(\position) == \tail,
+		if (  allGroupNodes[groupName].at(\position) == \effect,
 			{
 				error("satieOSC.createSourceNode: node "++sourceName++"'s group: "++groupName++" is an effects group. Setting group to default group");
 				groupName = \default;
@@ -463,11 +235,11 @@ SatieOSC {
 		if (  allGroupNodes[groupName] == nil,
 			{
 				postf("~satieOSC.createEffectNode:   source:%    group:  % undefined,  creating  group on tail of DSP chain  \n", sourceName, groupName);
-				this.createGroup(groupName, \addToTail);
+				this.createGroup(groupName, \effect);
 			},
 			// else make sure named group is on the tail, if not, set to defaultFx group
 			{
-				if (  allGroupNodes[groupName].at(\position) != \tail,
+				if (  allGroupNodes[groupName].at(\position) != \effect,
 					{
 						error("satieOSC.createEffectNode: node "++sourceName++"'s group: "++groupName++" is not an effects group. Setting group to defaultFx group");
 						groupName = \defaultFx;
@@ -483,28 +255,21 @@ SatieOSC {
 	}
 
 
-	checkUri { | nodeName, uriString |
-		var type = this.getUriType(uriString);
-
-		//uriString.postln;
-		if ( (type != \plugin) && (type != \effect),
-			{
-				error("~checkUri:  node: %  bad URI: % , using default: \n", nodeName, uriString);
-				^nil;
-			},
-			{
-				^uriString;
-		});
-	}
-
 	createGroup { | groupName, position=\addToHead|
 
 		var groupPos = \head;
+		var addAction = \addToHead;
 
-		if (position != \addToHead,
+		if (position == \addToTail,
 			{
-				groupPos = \tail;
-				position = \addToTail;
+				groupPos = \effect;
+				addAction = \addToTail;
+		});
+
+		if (position == \effect,
+		{
+				groupPos = \effect;
+				addAction = \addToEffects;
 		});
 
 		if (allGroupNodes.includesKey(groupName),
@@ -522,7 +287,7 @@ SatieOSC {
 					},
 					// else  group does not exist in SATIE,  create it
 					{
-						group = satie.makeSatieGroup(groupName.asSymbol, position);
+						group = satie.makeSatieGroup(groupName.asSymbol, addAction);
 						if ( groupName.asSymbol == \default,
 							{
 								postf("satieOSC.createGroup:  BUG FOUND-- SHOULD NOT HAVE TO INSTANITATE DEFAULT GROUP !!!!");
@@ -545,54 +310,6 @@ SatieOSC {
 		);
 	}
 
-	setSynth {|nodeName, pluginName |
-		var validPluginName = pluginName;
-		var sourceNode = allSourceNodes[nodeName.asSymbol];
-		var groupName = sourceNode.at(\groupNameSym);
-		var type;
-		var inBus;
-
-		var uriPath = sourceNode.at(\uriStr);
-
-		type = this.getUriType( uriPath );
-
-
-		if (satie.satieConfiguration.debug,
-			{postf("•satieOSC.setSynth: node: %   uriStr: %  group: %  type: % \n",  nodeName, uriPath,  groupName,  type);});
-
-		if (validPluginName.asSymbol != allSourceNodes[nodeName.asSymbol].at(\plugin).asSymbol,
-			{
-				// replace existing with new plugin
-				var synth;
-
-				// check to see if a synth has already been allocacted, if so, kill it
-				if  ( allSourceNodes[nodeName.asSymbol].at(\synth) != nil,
-					{
-						'satieOSC.setSynth: REPLACE EXISTING SYNTH'.postln;
-						satie.cleanInstance(nodeName.asSymbol,groupName.asSymbol );
-				});
-
-				sourceNode.put(\plugin, validPluginName.asSymbol);
-
-				if ( ( type == \effect) ,
-					{
-						inBus = this.getFxInBus(uriPath);
-						postf("satieOSC.setSynth: assigning inBus: % to effects node % -- %\n", satie.aux[inBus] , nodeName, validPluginName.asSymbol);
-						synth = satie.makeInstance(nodeName.asSymbol, validPluginName.asSymbol, groupName.asSymbol, [\in, satie.aux[inBus] ]);
-					},
-					// else
-					{
-						synth = satie.makeInstance(nodeName.asSymbol, validPluginName.asSymbol, groupName.asSymbol);
-				});
-				synth.register(); // register with NodeWatcher for testing
-				sourceNode.put(\synth, synth);
-			},
-			{
-				// else plugin already set, take no action
-			}
-		);
-	}
-
 	getUriName { | uriPath |
 		var uriName, uriSynth;
 		~uriPAth = uriPath;
@@ -602,18 +319,7 @@ SatieOSC {
 		^uriSynth.asString;
 	}
 
-	clearScene {
-		var nodelist = allSourceNodes.keys;
-		"clearScene called".warn;
 
-		// first flush all nodes
-		allSourceNodes.keysDo { |key |
-			this.clearSourceNode(key);
-		};
-
-		allSourceNodes.clear();
-		allSourceNodes.size;
-	}
 
 	// receives OSC messages that look like:   /satie/load filename
 	loadFile {
