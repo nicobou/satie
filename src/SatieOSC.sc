@@ -65,8 +65,11 @@ SatieOSC {
 		// scene level handler
 		this.newOSC(\satieSceneCreateSource, this.createSourceHandler, "/satie/scene/createSource");
 		this.newOSC(\satieSceneCreateEffect, this.createEffectHandler, "/satie/scene/createEffect");
-		this.newOSC(\satieSceneCreateGroup, this.createGroupHandler, "/satie/scene/createGroup");
 		this.newOSC(\satieSceneCreateProcess, this.createProcessHandler, "/satie/scene/createProcess");
+		this.newOSC(\satieSceneCreateSourceGroup, this.createSourceGroupHandler, "/satie/scene/createSourceGroup");
+		this.newOSC(\satieSceneCreateEffectGroup, this.createEffectGroupHandler, "/satie/scene/createEffectGroup");
+		this.newOSC(\satieSceneCreateProcessGroup, this.createProcessGroupHandler, "/satie/scene/createProcessGroup");
+
 		this.newOSC(\satieSceneDeleteNode, this.deleteNodeHandler, "/satie/scene/deleteNode");
 		this.newOSC(\satieDebugFlag, this.debugFlagHandler, "/satie/scene/debugFlag");
 		this.newOSC(\satieClearScene, this.clearSceneHandler, "/satie/scene/clear");

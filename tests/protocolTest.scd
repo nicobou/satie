@@ -101,8 +101,8 @@ b.sendMsg("/satie/scene/clear");    // clear scene
 
 
 //  2. group node example  -----------------------------------
-b.sendMsg("/satie/scene/createGroup",  "sheefaGroup");    // create group node
-b.sendMsg("/satie/scene/createGroup",  "sheefaFXgroup", \effect);    // create group node
+b.sendMsg("/satie/scene/createSourceGroup",  "sheefaGroup");    // create group node
+b.sendMsg("/satie/scene/createEffectGroup",  "sheefaFXgroup");    // create group node
 
 b.sendMsg("/satie/scene/createEffect",  "sheefaFx", "busgverb 0" , "sheefaFXgroup");    // create effects node with input from satie's AuxBus 0
 b.sendMsg("/satie/source/update", "sheefaFx", 0,0, -20,0,15000,20);   //update spatialiser
@@ -119,8 +119,8 @@ b.sendMsg("/satie/source/update", "sheefaFx", 0,0, -20,0,15000,20);   //update s
 )
 
 // set member node parems using group node
-b.sendMsg("/satie/group/set", "sheefaGroup","density2", 30);    // set param
-b.sendMsg("/satie/group/set", "sheefaGroup","density2", 1);    // set param
+b.sendMsg("/satie/group/set", "sheefaGroup","density2", 0.1);    // set param
+b.sendMsg("/satie/group/set", "sheefaGroup","density2", 10);    // set param
 
 
 // set member node parems using group node

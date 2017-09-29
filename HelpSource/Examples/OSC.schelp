@@ -25,11 +25,20 @@ list::
 ## <or> synthDefNameAndAuxNo : a string with the name of the synthdef registered with the system and the auxBus bumber for the effect's input
 ##groupName :  (optional) the name of the group. \defaultFx if no argument provided.
 ::
-##/satie/scene/createGroup nodeName <type>
-|| Create a new group
+##/satie/scene/createSourceGroup nodeName
+|| Create a new group at the head of the Satie's DSP chain
 list::
 ## nodeName : name of the group.
-## type :  (optional) determines the DSP position of group ("head" or "effect"), default="head"
+::
+##/satie/scene/createEffectGroup nodeName
+|| Create a new group at the end of Satie's DSP chain
+list::
+## nodeName : name of the group.
+::
+##/satie/scene/createProcessGroup nodeName
+|| Create a new group on the head of the DSP chain
+list::
+## nodeName : name of the group.
 ::
 ##/satie/scene/createProcess nodeName processName <optargs>
 || Create/instantiate a process
