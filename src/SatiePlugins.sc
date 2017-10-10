@@ -29,6 +29,8 @@ SatiePlugins : Dictionary {
 		path.pathMatch.do{arg item;
 			item.loadPaths;
 			this.add(~name.asSymbol -> SatiePlugin.new(~name, ~description, ~function));
+			// reset global variables
+			~name = ~description = ~function = nil;
 		};
 
 	}
@@ -36,7 +38,9 @@ SatiePlugins : Dictionary {
 	spatializerPath { arg path;
 		path.pathMatch.do{arg item;
 			item.loadPaths;
-			this.add(~name.asSymbol -> SpatializerPlugin.new(~name, ~description, ~function, ~numChannels));
+			this.add(~name.asSymbol -> SpatializerPlugin.new(~name, ~description, ~function, ~numChannels, ~setup));
+			// reset global variables
+			~name = ~description = ~function = ~numChannels = ~setup = nil;
 		};
 
 
