@@ -11,17 +11,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*       Spatializer plugin definition 
+/*       Spatializer plugin definition
 
 	Each spatializer plugin should define the following global variables:
     ~name: (symbol) name of the spatializer
 	~description: (string) a short description
 	~numChannels: (int) number of channels
 	~function: the definition of the spatializer
-	
+
 	where function should use the following input arguments:
 
-	in 
+	in
 	aziDeg degrees (-180 to 180)
 	elevDeg   degrees (-180 to 180)
 	gainDB  decibels
@@ -34,7 +34,7 @@
 
 ~name = \ambi3;
 ~description = "16-channel spatialized output in ambisonic 3rd order format";
-~numChannels = 16;
+~numChannels = 16;  // the 16 channel ambisonics signal;
 
 ~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP
@@ -55,8 +55,43 @@
 	sourceSig = BHiPass.ar(sourceSig, VarLag.kr(hpHz, slewFilter )  );
 
 	ambiVec = PanAmbi3O.ar(sourceSig, Lag.kr(aziRad, 0.01),  Lag.kr(eleRad, 0.01) );
-
+	// 16 channel ambisonics vector output
 };
+
+~setup = { |satieInstance|
+	// only install resource if the listening format requires it
+	if ( satieInstance.satieConfiguration.listeningFormat.indexOf(\ambi3) != nil,
+		{
+			if (
+				{
+					var found = false;
+
+					Quarks.installed.size.do( {|item|
+						if (Quarks.installed[item].name == "AmbIEM", { found = true;});
+					});
+					found;}.value == false,
+				{
+					error("ambi3setup.scd: missing AmbIEM Quark,  Can't Continue.  Try:  Quarks.install(\"AmbIEM\")");
+				},
+				{
+					// else resources are defined, evaluate
+					// var kermarPath = Satie.filenameSymbol.asString.dirname++"/.."++"/satie-assets/hrtf/full";
+					var spatializerNumber = satieInstance.satieConfiguration.listeningFormat.indexOf(\ambi3);
+					var outBusIndex = satieInstance.satieConfiguration.outBusIndex[spatializerNumber];
+					satieInstance.satieConfiguration.kermarPath.postln;
+					BinAmbi3O.kemarPath_(satieInstance.satieConfiguration.kermarPath);
+					BinAmbi3O.init('1_4_7_4');   // spearker configuration:  1 top,  4 high, 7 ear level, and 4 low
+					if (satieInstance.debug, 
+						{ postln("ambi3.scd->setup:  Configuring  BinAmbi3O class instance"); }
+					);
+
+					satieInstance.replacePostProcessor([\ambi3BinauralDecoder], outBusIndex, spatializerNumber);
+					"%:  automatically installing ambi3BinauralDecoder preprocessor for use with ambi3 listening format, " ++
+					"with outBusIndex = % "
+					.format(this.class, outBusIndex).warn;
+			});
+	});
+}
 
 /*
 

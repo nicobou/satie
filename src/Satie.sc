@@ -12,9 +12,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /*
- * SATIE for SuperCollider3
- *
- */
+* SATIE for SuperCollider3
+*
+*/
 Satie {
 	var <>satieConfiguration;
 	var options;
@@ -68,17 +68,38 @@ Satie {
 		generators = IdentityDictionary.new();
 		effects = IdentityDictionary.new();
 		processes = Dictionary.new();
+
+		postf("THIS IS THE SERVER OUTPUT BUS: %\n", satieConfiguration.server.outputBus);
+
+
+
 		auxbus = Bus.audio(satieConfiguration.server, satieConfiguration.numAudioAux);
+		postf("THIS IS THE SERVER AUX BUS: %\n", auxbus);
+
 		aux = Array.fill(satieConfiguration.numAudioAux, {arg i; auxbus.index + i});
 		osc = SatieOSC(this);
 		inspector = SatieIntrospection.new(this);
 	}
 
 	boot {
+
+		// pre-boot
+		satieConfiguration.listeningFormat.do { arg item, i;
+			if (item.asSymbol == \ambi3,
+				{
+					"%:  forcing the server block size to 128 as required by % spatializer ".format(this.class, item).warn;
+					options.blockSize = 128;
+				});
+		};
+
+		// boot
 		satieConfiguration.server.boot;
+
+		// post-boot
 		satieConfiguration.server.doWhenBooted({this.makeSatieGroup(\default, \addToHead)});
 		satieConfiguration.server.doWhenBooted({this.makeSatieGroup(\defaultFx, \addToTail)});
 		satieConfiguration.server.doWhenBooted({this.makePostProcGroup()});
+		satieConfiguration.server.doWhenBooted({this.postExec()});
 	}
 
 	// public method
@@ -107,5 +128,21 @@ Satie {
 	// private method
 	makePostProcGroup {
 		postProcGroup = ParGroup(1,\addToTail);
+	}
+
+	// private method
+	postExec {
+		// execute any code needed after the server has been booted
+		satieConfiguration.listeningFormat.do { arg item, i;
+			// run .setup on spat plugin.
+			// TODO: discuss generalization of this for any plugin.
+			if ((spatPlugins[item.asSymbol].setup == nil).asBoolean,
+				{ if(debug, 
+					{ "% - no setup here".format(spatPlugins[item].name).postln; }
+				);
+				},
+				{ spatPlugins[item.asSymbol].setup.value(this) }
+			);
+		}
 	}
 }
