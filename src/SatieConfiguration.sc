@@ -77,15 +77,6 @@ SatieConfiguration {
 				postln("%: setting listening format to %\n".format(this.class, format));
 			});
 		};
-		// TEMPORARY PLATFORM SPECIFIC KLUGE TO DEAL WITH SUPERCOLLIDER BUS ALLOCATION BUG FOR OSX
-		//  the Bus class does not tak into acocunt the numOutputBusChannels when allocating new busses, so those busses need to be explicitely allocated
-		Platform.case(
-			\osx,       {
-				warn("%: OSX KLUGE: allocating audio bus for all % output channels\n".format(this.class, serverOptions.numOutputBusChannels));
-				Bus.audio(server, serverOptions.numOutputBusChannels);
-
-			}
-		);
 	}
 }
 

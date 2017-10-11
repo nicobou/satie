@@ -69,14 +69,6 @@ Satie {
 		effects = IdentityDictionary.new();
 		processes = Dictionary.new();
 
-		postf("THIS IS THE SERVER OUTPUT BUS: %\n", satieConfiguration.server.outputBus);
-
-
-
-		auxbus = Bus.audio(satieConfiguration.server, satieConfiguration.numAudioAux);
-		postf("THIS IS THE SERVER AUX BUS: %\n", auxbus);
-
-		aux = Array.fill(satieConfiguration.numAudioAux, {arg i; auxbus.index + i});
 		osc = SatieOSC(this);
 		inspector = SatieIntrospection.new(this);
 	}
@@ -130,9 +122,17 @@ Satie {
 		postProcGroup = ParGroup(1,\addToTail);
 	}
 
+	setAuxBusses {
+		postf("THIS IS THE SERVER OUTPUT BUS: %\n", satieConfiguration.server.outputBus);
+		auxbus = Bus.audio(satieConfiguration.server, satieConfiguration.numAudioAux);
+		postf("THIS IS THE SERVER AUX BUS: %\n", auxbus);
+
+		aux = Array.fill(satieConfiguration.numAudioAux, {arg i; auxbus.index + i});
+	}
 	// private method
 	postExec {
 		// execute any code needed after the server has been booted
+		this.setAuxBusses();
 		satieConfiguration.listeningFormat.do { arg item, i;
 			// run .setup on spat plugin.
 			// TODO: discuss generalization of this for any plugin.
