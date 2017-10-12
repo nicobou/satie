@@ -20,7 +20,7 @@
 (
 // project state
 ~listeningFormat = \stereoListener;  // default listener for project
-~auxBusCount = 2;
+~auxBusCount = 4;
 ~outBusIndex = 0;
 
 s = Server.supernova.local;
