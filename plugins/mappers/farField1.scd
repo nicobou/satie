@@ -12,19 +12,18 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-// example mapper is adding a two parameters, aziDegShift and eleDegShift, that affect
-// aziDeg and eleDeg sent to the spatializer
+// this example mapper preprocesses the standard spatializer input arguments by scaling the gain as a function of distance
 
-~name = \nearField1;
+
+~name = \farField1;
 ~function = {
 	// arguments,  corresponding to required spatializer parameters:
-	| aziDeg = 0, eleDeg = 0, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 0.5, spread = 1, distance = 1, radius = 1, exp = 1 |
+	| aziDeg = 0, eleDeg = 0, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 0.5, spread = 1, distance = 1, radius = 6, exp = 1 |
 
 	var newGainDB;
 	var dbOffset;
 	var nfScaler = distance.clip(0.01, radius) / radius;
 
-	nfScaler = 1 - nfScaler;   // make this far field
 
 	nfScaler = nfScaler**exp;
 	dbOffset = nfScaler.ampdb;
