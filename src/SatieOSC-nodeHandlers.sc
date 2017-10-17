@@ -306,7 +306,8 @@
 			\eleDeg, eleDeg,
 			\gainDB, gainDB,
 			\delayMs, delayMs,
-			\lpHz, lpHz
+			\lpHz, lpHz,
+			\distance, distance;
 		);
 	}
 

@@ -46,6 +46,10 @@ s = Server.supernova.local;
 	~satie.makeSynthDef(\busgverb, \gverb,  [], [], [~listeningFormat], [~satie.satieConfiguration.outBusIndex[0]]);
 	~satie.makeSynthDef(\zkarpluck1, \zkarpluck1, [~satie.aux[0]], [], [~listeningFormat], [~satie.satieConfiguration.outBusIndex[0]] );   // sends to effects bus, pre-spatializer
 
+		~satie.makeSynthDef(\nearTest, \default,   [~satie.aux[0]],  [],[~listeningFormat],  [~satie.satieConfiguration.outBusIndex[0]], \nearField1);  // for mapping distances
+		~satie.makeSynthDef(\farTest, \default,   [~satie.aux[0]],  [],[~listeningFormat],  [~satie.satieConfiguration.outBusIndex[0]], \farField1);  // for mapping distances
+
+
 	~satie.satieConfiguration.server.sync;
 
 	s.meter;
@@ -65,8 +69,6 @@ b = NetAddr.new("127.0.0.1", 18032);    // connect to satie's RX port
 
 b.sendMsg("/satie/scene/debugFlag", 1);    // activate  debugging printing to console
 b.sendMsg("/satie/scene/debugFlag", 0);    // deactivate debugging printing to console
-
-
 
 //  1. single node example  -----------------------------------
 b.sendMsg("/satie/scene/createSource",  "sheefa", "default", "default");    // create source
@@ -186,10 +188,40 @@ b.sendMsg("/satie/scene", "deleteNode", "sheefaProcess");
 b.sendMsg("/satie/scene", "clear");    // clear scene
 
 
+//  4. using mappers example  -----------------------------------
 
+// CREATE NEAR FIELD SOURCE
+b.sendMsg("/satie/scene/createSource",  "mappie", "nearTest", "default");    // create nearField source
+
+// OR CREATE FAR FIELD SOURCE
+b.sendMsg("/satie/scene/createSource",  "mappie", "farTest", "default");    // create farField source
+
+b.sendMsg("/satie/source/update", "mappie", 0,0,-0,0,15000,1);   //update spatialiser args:  azimuthRad elevationRad gainDB delayMS  lpHZ  distanceMETERS
+
+
+b.sendMsg("/satie/source/set", "mappie", "radius", 1);
+b.sendMsg("/satie/source/set", "mappie", "distance", 0);
+b.sendMsg("/satie/source/set", "mappie", "distance", 0.5);
+b.sendMsg("/satie/source/set", "mappie", "distance", 1);
+
+b.sendMsg("/satie/source/set", "mappie", "radius", 6);
+b.sendMsg("/satie/source/set", "mappie", "distance", 0);
+b.sendMsg("/satie/source/set", "mappie", "distance", 3);
+b.sendMsg("/satie/source/set", "mappie", "distance", 6);
+
+
+b.sendMsg("/satie/source/set", "mappie", "exp", 1);
+b.sendMsg("/satie/source/set", "mappie", "exp", 4);
+b.sendMsg("/satie/source/set", "mappie", "exp", 0.25);
+
+
+
+b.sendMsg("/satie/scene/deleteNode",  "mappie");  // delete node
+
+b.sendMsg("/satie/scene/clear");    // clear scene
 
 //   annex example:  setting a key with more than one value  -----------------------------------
-(
+
 b.sendMsg("/satie/scene", "createSource",  "ball_1000", "plugin://zkarpluck1", "default");    // create source
 b.sendMsg("/satie/source/update", "ball_1000", 0,0, -3,0,15000,20);   //update spatialiser
 b.sendMsg("/satie/source/set", "ball_1000", "trimDB", -10, "c1", 0.9, "c3", 5);    // set key value pairs to synth parameters
@@ -199,6 +231,13 @@ b.sendMsg("/satie/source/set", "ball_1000", "fb", 100.rand);    // update fb par
 
 b.sendMsg("/satie/scene", "createEffect",  "resonance_SC", "busgverb", 0 );    // create effects node
 b.sendMsg("/satie/source/update", "resonance_SC", 0,0, -115,0,15000,20);   //update spatialiser
+
+
+
+
+
+
+
 
 
 /*
