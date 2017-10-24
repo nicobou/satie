@@ -16,6 +16,7 @@ SatieConfiguration {
 	var <>listeningFormat;
 	var <numAudioAux;
 	var <outBusIndex;
+	var <hrtfPath;
 	var <>debug = false;
 
 	var <satieRoot;
@@ -30,11 +31,10 @@ SatieConfiguration {
 
 	// other options
 	var <>orientationOffsetDeg;
-	var <>kermarPath;
 
-	*new {| server, listeningFormat = #[\stereoListener, \stereoListener], numAudioAux = 0, outBusIndex = #[0], kermarPath = nil |
+	*new {| server, listeningFormat = #[\stereoListener, \stereoListener], numAudioAux = 0, outBusIndex = #[0], hrtfPath = nil |
 		server = server ? Server.supernova;
-		^super.newCopyArgs(server, listeningFormat, numAudioAux, outBusIndex).init;
+		^super.newCopyArgs(server, listeningFormat, numAudioAux, outBusIndex, hrtfPath).init;
 	}
 
 	init{
@@ -61,10 +61,8 @@ SatieConfiguration {
 		});
 		this.handleSpatFormat(listeningFormat);
 		orientationOffsetDeg = [0, 0];
-		if (kermarPath == nil,
-			{
-				kermarPath = (satieRoot++"satie-assets/hrtf/full").asString;
-		});
+
+
 	}
 
 	handleSpatFormat { arg format;
@@ -73,6 +71,12 @@ SatieConfiguration {
 		format.do { arg item, i;
 			var spatPlugin = this.spatPlugins[item.asSymbol];
 			serverOptions.numOutputBusChannels = serverOptions.numOutputBusChannels + spatPlugin.numChannels;
+			if (hrtfPath == nil,
+				{
+					if ( item.asSymbol == \ambi3, {hrtfPath = (satieRoot++"satie-assets/hrtf/full").asString;});
+					if ( item.asSymbol == \ambi1, {hrtfPath = (satieRoot++"satie-assets/ATK").asString;});
+					if (debug, {postln("%: setting hrtfPath to %\n".format(this.class, hrtfPath)); });
+			});
 			if (debug, {
 				postln("%: setting listening format to %\n".format(this.class, format));
 			});
