@@ -74,7 +74,7 @@ SatieConfiguration {
 			if (hrtfPath == nil,
 				{
 					if ( item.asSymbol == \ambi3, {hrtfPath = (satieRoot++"satie-assets/hrtf/full").asString;});
-					if ( item.asSymbol == \ambi1, {hrtfPath = (satieRoot++"satie-assets/ATK").asString;});
+					if ( item.asSymbol == \ambi1, {hrtfPath = (Atk.userSupportDir).asString;});
 					if (debug, {postln("%: setting hrtfPath to %\n".format(this.class, hrtfPath)); });
 			});
 			if (debug, {
