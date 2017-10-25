@@ -16,7 +16,7 @@ SatieConfiguration {
 	var <>listeningFormat;
 	var <numAudioAux;
 	var <outBusIndex;
-	var <hrtfPath;
+	var <>hrtfPath;
 	var <>debug = false;
 
 	var <satieRoot;
@@ -83,14 +83,6 @@ SatieConfiguration {
 			});
 		};
 	}
-
-	setHTRFpath { arg path;
-		hrtfPath = path.asString;
-		if (debug, {
-			postln("%.setHTRFpath: setting  ambisonics-based listener HRTF path to %\n".format(this.class, hrtfPath));
-		});
-	}
-
 }
 
 

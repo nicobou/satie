@@ -31,7 +31,10 @@ s = Server.supernova.local;
 ~satieConfiguration.serverOptions.memSize = (2**21).asInt;        // probably should just leave this the same for everyting
 ~satieConfiguration.serverOptions.threads = 8;    // set this to core count
 
-// for use with ambi1~satieConfiguration.setHTRFpath("/Users/zack/Library/Application Support/SuperCollider/downloaded-quarks/SATIE-quark/satie-assets/ATK");
+// for use with ambi1
+// choose custom location for HRTF data
+// ~satieConfiguration.hrtfPath = "/Users/zack/Library/Application Support/SuperCollider/downloaded-quarks/SATIE-quark/satie-assets/ATK";
+
 
 
 ~satie = Satie.new(~satieConfiguration);
