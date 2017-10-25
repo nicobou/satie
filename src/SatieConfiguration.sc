@@ -71,17 +71,26 @@ SatieConfiguration {
 		format.do { arg item, i;
 			var spatPlugin = this.spatPlugins[item.asSymbol];
 			serverOptions.numOutputBusChannels = serverOptions.numOutputBusChannels + spatPlugin.numChannels;
-			if (hrtfPath == nil,
-				{
-					if ( item.asSymbol == \ambi3, {hrtfPath = (satieRoot++"satie-assets/hrtf/full").asString;});
-					if ( item.asSymbol == \ambi1, {hrtfPath = (Atk.userSupportDir).asString;});
-					if (debug, {postln("%: setting hrtfPath to %\n".format(this.class, hrtfPath)); });
-			});
+			if ( item.asSymbol == \ambi3, {hrtfPath = (satieRoot++"satie-assets/hrtf/full").asString;});
+			if ( item.asSymbol == \ambi1, {hrtfPath = (Atk.userSupportDir).asString;});
+			if (debug, {postln("%: setting hrtfPath to %\n".format(this.class, hrtfPath)); });
 			if (debug, {
 				postln("%: setting listening format to %\n".format(this.class, format));
+				if (hrtfPath != nil,
+					{
+						postln("\t %: setting HRTF path  to %\n".format(this.class, hrtfPath));
+				});
 			});
 		};
 	}
+
+	setHTRFpath { arg path;
+		hrtfPath = path.asString;
+		if (debug, {
+			postln("%.setHTRFpath: setting  ambisonics-based listener HRTF path to %\n".format(this.class, hrtfPath));
+		});
+	}
+
 }
 
 
