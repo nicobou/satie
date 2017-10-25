@@ -78,10 +78,10 @@
 					// var kermarPath = Satie.filenameSymbol.asString.dirname++"/.."++"/satie-assets/hrtf/full";
 					var spatializerNumber = satieInstance.satieConfiguration.listeningFormat.indexOf(\ambi3);
 					var outBusIndex = satieInstance.satieConfiguration.outBusIndex[spatializerNumber];
-					satieInstance.satieConfiguration.kermarPath.postln;
-					BinAmbi3O.kemarPath_(satieInstance.satieConfiguration.kermarPath);
+					satieInstance.satieConfiguration.hrtfPath.postln;
+					BinAmbi3O.kemarPath_(satieInstance.satieConfiguration.hrtfPath);
 					BinAmbi3O.init('1_4_7_4');   // spearker configuration:  1 top,  4 high, 7 ear level, and 4 low
-					if (satieInstance.debug, 
+					if (satieInstance.debug,
 						{ postln("ambi3.scd->setup:  Configuring  BinAmbi3O class instance"); }
 					);
 
