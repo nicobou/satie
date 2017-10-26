@@ -79,9 +79,10 @@ SatieOSC {
 		this.newOSC(\satieDebugFlag, this.debugFlagHandler, "/satie/scene/debugFlag");
 		this.newOSC(\satieClearScene, this.clearSceneHandler, "/satie/scene/clear");
 
-		// set command handlers
-		this.newOSC(\satieSrcState, this.setState, "/satie/source/state");
-		this.newOSC(\satieGroupState, this.setState, "/satie/group/state");
+		// node level handlers
+		this.newOSC(\satieSrcState, this.stateHandler, "/satie/source/state");
+		this.newOSC(\satieGroupState, this.stateHandler, "/satie/group/state");
+		this.newOSC(\satieGroupState, this.stateHandler, "/satie/process/state");
 		this.newOSC(\satieSrcSet, this.setSrcHandler, "/satie/source/set");
 		this.newOSC(\satieGroupSet, this.setGroupHandler, "/satie/group/set");
 		this.newOSC(\satieProcSet, this.setProcHandler, "/satie/process/set");
@@ -91,6 +92,14 @@ SatieOSC {
 		this.newOSC(\satieSrcSetVec, this.setVecHandler, "/satie/source/setvec");
 		this.newOSC(\satieGroupSetVec, this.setVecHandler, "/satie/group/setvec");
 		this.newOSC(\satieProcSetVec, this.setVecHandler, "/satie/process/setvec");
+
+		// process only handlers
+		this.newOSC(\satieProcSetVec, this.propertyProcHandler, "/satie/process/property");
+		this.newOSC(\satieProcEval, this.evalFnProcHandler, "/satie/process/eval");
+
+
+
+
 		// client
 		this.newOSC(\audioplugins, this.getAudioPlugins, "/satie/audioplugins");
 		this.newOSC(\pluginArgs, this.getPluginArguments, "/satie/pluginargs");
@@ -362,91 +371,5 @@ SatieOSC {
 					});
 			});
 		}
-	}
-
-	// handles /satie/nodetype/state  nodeName flag
-	setState {
-		^{ | args |
-			var type = args[0].asString.split[2].asSymbol;
-
-			if ( satie.satieConfiguration.debug,
-				{
-					postf("•satieOSC.setStateHandler: % \n", args);
-			});
-
-			// verify message
-			if (  ( args.size != 3)  ,
-				{
-					error("satieOSCProtocol.setStateHandler: bad messafe length: expects oscAddress nodeName val % \n", args);
-				}, // else args good
-				{
-					var nodeName  = args[1];
-					var value = args[2];
-					var targetNode = nil;
-					var state;
-
-					if ( value == 0 , { state = false}, {state = true});
-
-					switch(type,
-						'source',
-						{
-							if ( allSourceNodes.includesKey(nodeName.asSymbol) == true,
-								{
-									targetNode = this.getSourceNode(nodeName, \synth);
-									if ( targetNode == nil,
-										{
-											error("satieOSCProtocol.setStateHandler:  source node: "++nodeName++"  BUG FOUND: undefined SYNTH  \n");
-										}, // else good to go
-										{
-											targetNode.run(state);
-											targetNode.register(); // register with NodeWatcher, for state checking
-									});
-								},
-								{
-									error("satieOSCProtocol.setStateHandler:  source node: "++nodeName++"  is undefined \n");
-							}); // else node exists,  process event
-						},
-						'group',
-						{
-							if (  allGroupNodes.includesKey (nodeName.asSymbol) == true,
-								{
-									targetNode = allGroupNodes[nodeName.asSymbol].at(\group).group;
-									targetNode.run(state);
-									targetNode.register(); // register with NodeWatcher, for state checking
-
-								},
-								{   // else no group
-									error("satieOSCProtocol.setStateHandler:  group node: "++nodeName++"  is undefined \n");
-							});
-						},
-						'process',
-						{
-							if ( allSourceNodes.includesKey(nodeName.asSymbol) == true,
-								{
-									var thisGroupName = allSourceNodes[nodeName.asSymbol].at(\groupNameSym);  // process nodes have unique groups
-									var thisGroup = allGroupNodes[thisGroupName].at(\group).group;
-									var myProcess = this.getSourceNode(nodeName, \process);
-
-									if ( myProcess == nil,
-										{
-											error("satieOSCProtocol.setStateHandler:  process node: "++nodeName++"  BUG FOUND: undefined process  \n");
-										},
-										{  // good to go
-											if ( myProcess[\state].class == Function,     // does the process implement the \state handler
-												{
-													myProcess[\state].value(myProcess, state);   // yes, call it
-												},
-												{
-													thisGroup.run(state);   // or just update the process's group
-													// thisGroup.register(); // TODO: is this relevant for processes?
-											});
-									});
-								},
-								{  // else error
-									error("satieOSCProtocol.setStateHandler:  process node: "++nodeName++"  is undefined \n");
-							});
-					});
-			});
-		};
 	}
 }

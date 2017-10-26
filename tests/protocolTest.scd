@@ -157,13 +157,25 @@ b.sendMsg("/satie/scene/clear");    // clear scene
 //  3. process node examples -----------------------------------
 
 // Hello World
-b.sendMsg("/satie/scene", "createProcess",  "myProcess", "process://helloWorld" );    // create process node - unique group will be automatically generated for each created
-b.sendMsg("/satie/process/set", "myProcess", "someParam", 1);    //
+b.sendMsg("/satie/scene/createProcess",  "myProcess", "helloWorld  a 1 b 2 c 3" );    // create process node - unique group will be automatically generated for each created.  Note the use of creation key value argument pairs
 
-b.sendMsg("/satie/process/property", "myProcess", "debugFlag", 1);    // set process environment variable
-b.sendMsg("/satie/process/set", "myProcess", "someParam", 2);    // set synth param
+b.sendMsg("/satie/process/property", "myProcess", "debugFlag", 1);    // set existing process environment variable
+b.sendMsg("/satie/process/property", "myProcess", "debugFlag", 0);    // set existing process environment variable
 
-b.sendMsg("/satie/scene", "deleteNode", "myProcess");
+b.sendMsg("/satie/process/property", "myProcess", "someProperty", 1);    // can set arbitrary key value pairs to the processes's environment
+
+
+b.sendMsg("/satie/process/set", "myProcess", "someParam", 2);    // set a synth param
+
+b.sendMsg("/satie/process/eval", "myProcess", "doit", 2, 3,4);    // call a function defined in the processes's environment
+b.sendMsg("/satie/process/eval", "myProcess", "nonexistant", 2, 3,4);    // call a function defined in the processes's environment
+
+
+b.sendMsg("/satie/process/state", "myProcess", 0);    // set state
+b.sendMsg("/satie/process/state", "myProcess", 1);    // set state
+
+
+b.sendMsg("/satie/scene/deleteNode", "myProcess");
 
 
 // Custom Process
