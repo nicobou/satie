@@ -414,6 +414,7 @@
 		var value;
 		var keyHandler = nil;
 		var setHandler = nil;
+		var thisGroup = process.nodeGroup;
 
 		if (satie.satieConfiguration.debug, {
 			"%: %".format(this.class.getBackTrace, props);
@@ -449,12 +450,16 @@
 					process[\set].value(process, prop, val);
 				},
 				{
+					// if no set method is defined for the process, the group value will be set to the group
+					//thisGroup.set(prop, val);
 					"%: % does not implement a setter".format(this.class.getBackTrace, process).postln;
 				}
 			)
 
 		})
 	}
+
+
 
 	// accepts arbitrary key value pair,  and sets value to corresponding process environment key
 	propertyProcHandler
