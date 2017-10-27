@@ -328,7 +328,7 @@
 								this.class.getBackTrace, nodeName);
 						},
 						{
-							this.processSet (myProcess, props);
+							this.processSet (myProcess, thisGroup, props);
 						}
 					)
 				}
@@ -410,11 +410,10 @@
 		})
 	}
 
-	processSet { | process, props |
+	processSet { | process, group, props |
 		var value;
 		var keyHandler = nil;
 		var setHandler = nil;
-		var thisGroup = process.nodeGroup;
 
 		if (satie.satieConfiguration.debug, {
 			"%: %".format(this.class.getBackTrace, props);
@@ -450,7 +449,7 @@
 					process[\set].value(process, prop, val);
 				},
 				{
-					thisGroup.set(prop.asSymbol, val);
+					group.set(prop.asSymbol, val);
 					"%: % does not implement a setter".format(this.class.getBackTrace, process).postln;
 			});
 		});
