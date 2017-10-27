@@ -178,32 +178,32 @@ b.sendMsg("/satie/process/state", "myProcess", 1);    // set state
 b.sendMsg("/satie/scene/deleteNode", "myProcess");
 
 
-// Custom Process
+// more complex process  (depends on satie4Unity project)
 (
-b.sendMsg("/satie/scene", "createProcess",  "sheefaProcess", "process://sheefa cloneCount 20" );    // create process node - unique group will be automatically generated for each created node
+b.sendMsg("/satie/scene/createProcess",  "sheefaProcess", "sheefa cloneCount 20" );    // create process node - unique group will be automatically generated for each created node
 b.sendMsg("/satie/process/update", "sheefaProcess", 0,0, -6,0,15000,20);   // update spatialiser
 b.sendMsg("/satie/process/set", "sheefaProcess", "spread", 30);    // calls custom handler 'spread', defined in process's environment
 )
 
-b.sendMsg("/satie/process/property", "sheefaProcess", "debugFlag", 0);    // set process environment variable
-b.sendMsg("/satie/process/property", "sheefaProcess", "debugFlag", 1);    // set process environment variable
+b.sendMsg("/satie/process/property", "sheefaProcess", "debugFlag", 0);    // 'property'  set's the named process environment variable
+b.sendMsg("/satie/process/property", "sheefaProcess", "debugFlag", 1);
 
-b.sendMsg("/satie/process/setvec" , "sheefaProcess", "trigger", 60, 1,1);     // for processes, 'setvec' will call custom handler 'trigger', if defined in process's environment
+b.sendMsg("/satie/process/eval" , "sheefaProcess", "trigger", 60, 1,1);     //  'eval' will call custom handler 'trigger',  defined in process's environment - handles zero or more args.
 
-b.sendMsg("/satie/process/set", "sheefaProcess", "player", 1);    // calls custom handler 'player', defined in process's environment
-b.sendMsg("/satie/process/set", "sheefaProcess", "player", 0);    // calls custom handler 'player', defined in process's environment
+b.sendMsg("/satie/process/eval", "sheefaProcess", "player", 1);    // 'eval' will call  custom handler 'player', defined in process's environment
+b.sendMsg("/satie/process/eval", "sheefaProcess", "player", 0);
 
-b.sendMsg("/satie/process/property", "sheefaProcess", "triggerIntervalMs", 100);    // set process environment variable
-b.sendMsg("/satie/process/property", "sheefaProcess", "triggerIntervalMs", 500);    // set process environment variable
-b.sendMsg("/satie/process/property", "sheefaProcess", "triggerIntervalMs", 2000);    // set process environment variable
+b.sendMsg("/satie/process/property", "sheefaProcess", "triggerIntervalMs", 100);
+b.sendMsg("/satie/process/property", "sheefaProcess", "triggerIntervalMs", 500);
+b.sendMsg("/satie/process/property", "sheefaProcess", "triggerIntervalMs", 2000);
 
-b.sendMsg("/satie/process/property", "sheefaProcess", "cloneCount", 1);    // set process environment variable
-b.sendMsg("/satie/process/property", "sheefaProcess", "cloneCount", 50);    // set process environment variable
+b.sendMsg("/satie/process/property", "sheefaProcess", "cloneCount", 1);
+b.sendMsg("/satie/process/property", "sheefaProcess", "cloneCount", 50);
 
 
-b.sendMsg("/satie/scene", "deleteNode", "sheefaProcess");
+b.sendMsg("/satie/scene/deleteNode", "sheefaProcess");
 
-b.sendMsg("/satie/scene", "clear");    // clear scene
+b.sendMsg("/satie/scene/clear");    // clear scene
 
 
 //  4. using mappers example  -----------------------------------

@@ -55,7 +55,6 @@
 				});
 			});
 
-
 			if (allSourceNodes[sourceName.asSymbol]  != nil,
 				{
 					error("satieOSC.createProcessNode source Process node: %,   ALREAYD EXISTS, aborting \n", sourceName);

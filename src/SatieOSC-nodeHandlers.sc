@@ -82,7 +82,7 @@
 
 			if ( (args.size < 2 ) ,
 				{
-					"→    %: message: bad arg count: expects  at least 2 values:  nodeName, pluginName, and optionally:  groupName".format(this.class.getBackTrace).error
+					"→    %: message: bad arg count: expects  at least 2 values:  nodeName, pluginName, and optionally: groupName".format(this.class.getBackTrace).error
 				},
 				// else
 				{
@@ -450,13 +450,10 @@
 					process[\set].value(process, prop, val);
 				},
 				{
-					// if no set method is defined for the process, the group value will be set to the group
-					//thisGroup.set(prop, val);
+					thisGroup.set(prop.asSymbol, val);
 					"%: % does not implement a setter".format(this.class.getBackTrace, process).postln;
-				}
-			)
-
-		})
+			});
+		});
 	}
 
 
