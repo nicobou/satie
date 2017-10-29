@@ -106,18 +106,20 @@ Only for noteType: process
 definitionlist::
 ##/satie/process/property processName key value   // to update a process environment property
 || property key, value
+##/satie/process/eval processName handlerName optArg1 ... opeArgN   // to invoke a process function with zero or more arguments
+|| eval handlerName, args[]
 ::
 
 subsection:: Introspection
 
-You can query SATIE via OSC and get some information. SATIE responds to the following messages: 
+You can query SATIE via OSC and get some information. SATIE responds to the following messages:
 definitionlist::
-##/satie/audioplugins   // get existing synthdefs
-|| SATIE responds with JSON string containing 2 objects: audiosources and effects, each listing existing synthdefs by name.
-##/satie/pluginsargs arg // get arguments of some synthdef
-|| arg string
+##/satie/query/plugins/audioSources   // get existing synthdefs
+|| SATIE responds with an osc message:  /satie/dump/plugins/audioSources with one  JSON string containing 2 objects: audiosources and effects, each listing existing synthdefs by name.
+##/satie/query/plugins/audioSourceArgs synthdefName // get arguments of some synthdef
+|| synthdefName string
 
-   SATIE responds with a JSON string representing plugin's name, description and list of arguments and default values
+   SATIE responds with an osc message:  /satie/dump/plugins/audioSourceArgs with one JSON string representing plugin's name, description and list of arguments and default values
 ::
 
 
@@ -151,7 +153,7 @@ s.waitForBoot({
 	~satie.makeSynthDef(\busreverb, \freeverb,  [], [], ~satieConfiguration.listeningFormat, [0]);
 	~satie.makeSynthDef(\busgverb, \gverb,  [], [], ~satieConfiguration.listeningFormat, [0]);
 
-	~satie.makeSynthDef(\zkarpluck2P, \zkarpluck2P,   [~satie.aux[0]],  [],~satieConfiguration.listeningFormat,  [0], \randOffsets1); 
+	~satie.makeSynthDef(\zkarpluck2P, \zkarpluck2P,   [~satie.aux[0]],  [],~satieConfiguration.listeningFormat,  [0], \randOffsets1);
 });
 )
 
