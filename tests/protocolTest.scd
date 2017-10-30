@@ -1,7 +1,7 @@
 // Tester for satieOSC protocol
 
 
-// EVALUATE THIS BLOCK FIRST
+
 
 // GLOBAL:  listeningFormat   can be optionally set here:
 // defaults to:
@@ -15,11 +15,12 @@
 //~listeningFormat = \octoVBAP;
 //~listeningFormat = \stereoListener;
 
-//(thisProcess.nowExecutingPath.dirname++"/../../prototype/bootSatie.scd").load;
 
 (
+// EVALUATE THIS FIRST to test everyting EXCEPT processes
+
 // project state
-~listeningFormat = \ambi1;  // default listener for project
+~listeningFormat = \stereoListener;  // default listener for project
 ~auxBusCount = 4;
 ~outBusIndex = 0;
 
@@ -35,11 +36,8 @@ s = Server.supernova.local;
 // choose custom location for HRTF data
 // ~satieConfiguration.hrtfPath = "/Users/zack/Library/Application Support/SuperCollider/downloaded-quarks/SATIE-quark/satie-assets/ATK";
 
-
-
 ~satie = Satie.new(~satieConfiguration);
 ~satie.boot();
-
 
 ~satie.satieConfiguration.server.waitForBoot{
 
@@ -52,9 +50,8 @@ s = Server.supernova.local;
 	~satie.makeSynthDef(\busgverb, \gverb,  [], [], [~listeningFormat], [~satie.satieConfiguration.outBusIndex[0]]);
 	~satie.makeSynthDef(\zkarpluck1, \zkarpluck1, [~satie.aux[0]], [], [~listeningFormat], [~satie.satieConfiguration.outBusIndex[0]] );   // sends to effects bus, pre-spatializer
 
-		~satie.makeSynthDef(\nearTest, \default,   [~satie.aux[0]],  [],[~listeningFormat],  [~satie.satieConfiguration.outBusIndex[0]], \nearField1);  // for mapping distances
-		~satie.makeSynthDef(\farTest, \default,   [~satie.aux[0]],  [],[~listeningFormat],  [~satie.satieConfiguration.outBusIndex[0]], \farField1);  // for mapping distances
-
+	~satie.makeSynthDef(\nearTest, \default,   [~satie.aux[0]],  [],[~listeningFormat],  [~satie.satieConfiguration.outBusIndex[0]], \nearField1);  // for mapping distances
+	~satie.makeSynthDef(\farTest, \default,   [~satie.aux[0]],  [],[~listeningFormat],  [~satie.satieConfiguration.outBusIndex[0]], \farField1);  // for mapping distances
 
 	~satie.satieConfiguration.server.sync;
 
@@ -64,10 +61,7 @@ s = Server.supernova.local;
 
 };  // end of  waitforboot
 
-
 b = NetAddr.new("127.0.0.1", 18032);    // connect to satie's RX port
-
-
 )
 
 
@@ -78,10 +72,12 @@ b.sendMsg("/satie/scene/debugFlag", 0);    // deactivate debugging printing to c
 
 //  1. single node example  -----------------------------------
 b.sendMsg("/satie/scene/createSource",  "sheefa", "default", "default");    // create source
-b.sendMsg("/satie/source/update", "sheefa", 0,0,-3,0,15000,20);   //update spatialiser args:  azimuthRad elevationRad gainDB delayMS  lpHZ  distanceMETERS
+b.sendMsg("/satie/source/update", "sheefa", 0,0,-30,0,15000,20);   //update spatialiser args:  azimuthRad elevationRad gainDB delayMS  lpHZ  distanceMETERS
 // OR  use the set method to update the same spatialization parameters using several key value pairs
 b.sendMsg("/satie/source/set", "sheefa", "aziDeg", 360.rand, "eleDeg", 0, "gainDB", -6, "delayMs", 0, "lpHz", 15000);
 b.sendMsg("/satie/source/set", "sheefa", "lfoHz", 20.1.rand);    // set a key value pair of the synth
+b.sendMsg("/satie/source/setvec", "sheefa", "note", 60, 1);    // set a key with more than one value
+
 
 b.sendMsg("/satie/source/state", "sheefa", 0);    // set node state to 0  (pauses synth)
 b.sendMsg("/satie/source/state", "sheefa", 1);    // set node state to 1
@@ -101,7 +97,6 @@ b.sendMsg("/satie/scene/createEffect",  "sheefaFx", "busgverb", 0 );    // creat
 b.sendMsg("/satie/source/update", "sheefaFx", 0,0, -12,0,15000,20);   //update spatialiser
 b.sendMsg("/satie/source/set", "sheefaFx", "revtime",  10);    // set param
 b.sendMsg("/satie/source/set", "sheefaFx", "revtime", 1);    // set param
-
 
 b.sendMsg("/satie/scene/deleteNode",  "sheefaFx");  // delete node
 
@@ -126,8 +121,13 @@ b.sendMsg("/satie/source/update", "sheefaFx", 0,0, -20,0,15000,20);   //update s
 });
 )
 
+
+b.sendMsg("/satie/group/state", "sheefaGroup", 0);    // set groups' nodes state to 0  (deactivate synth)
+b.sendMsg("/satie/group/state", "sheefaGroup", 1);    // set  groups' nodes state to 1  (reactivate synth)
+
+
 // set member node parems using group node
-b.sendMsg("/satie/group/set", "sheefaGroup","density2", 0.1);    // set param
+b.sendMsg("/satie/group/set", "sheefaGroup","density2", 1);    // set param
 b.sendMsg("/satie/group/set", "sheefaGroup","density2", 10);    // set param
 
 
@@ -137,7 +137,6 @@ b.sendMsg("/satie/group/set", "sheefaFXgroup", "outputDB",  0);    // set param
 
 b.sendMsg("/satie/group/set", "sheefaFXgroup", "revtime",  5);    // set param
 b.sendMsg("/satie/group/set", "sheefaFXgroup", "revtime", 0.5);    // set param
-
 
 
 // destroy group members
@@ -154,59 +153,7 @@ b.sendMsg("/satie/scene/clear");    // clear scene
 
 
 
-//  3. process node examples -----------------------------------
-
-// Hello World
-b.sendMsg("/satie/scene/createProcess",  "myProcess", "helloWorld  a 1 b 2 c 3" );    // create process node - unique group will be automatically generated for each created.  Note the use of creation key value argument pairs
-
-b.sendMsg("/satie/process/property", "myProcess", "debugFlag", 1);    // set existing process environment variable
-b.sendMsg("/satie/process/property", "myProcess", "debugFlag", 0);    // set existing process environment variable
-
-b.sendMsg("/satie/process/property", "myProcess", "someProperty", 1);    // can set arbitrary key value pairs to the processes's environment
-
-
-b.sendMsg("/satie/process/set", "myProcess", "someParam", 2);    // set a synth param
-
-b.sendMsg("/satie/process/eval", "myProcess", "doit", 2, 3,4);    // call a function defined in the processes's environment
-b.sendMsg("/satie/process/eval", "myProcess", "nonexistant", 2, 3,4);    // call a function defined in the processes's environment
-
-
-b.sendMsg("/satie/process/state", "myProcess", 0);    // set state
-b.sendMsg("/satie/process/state", "myProcess", 1);    // set state
-
-
-b.sendMsg("/satie/scene/deleteNode", "myProcess");
-
-
-// more complex process  (depends on satie4Unity project)
-(
-b.sendMsg("/satie/scene/createProcess",  "sheefaProcess", "sheefa cloneCount 20" );    // create process node - unique group will be automatically generated for each created node
-b.sendMsg("/satie/process/update", "sheefaProcess", 0,0, -6,0,15000,20);   // update spatialiser
-b.sendMsg("/satie/process/set", "sheefaProcess", "spread", 30);    // calls custom handler 'spread', defined in process's environment
-)
-
-b.sendMsg("/satie/process/property", "sheefaProcess", "debugFlag", 0);    // 'property'  set's the named process environment variable
-b.sendMsg("/satie/process/property", "sheefaProcess", "debugFlag", 1);
-
-b.sendMsg("/satie/process/eval" , "sheefaProcess", "trigger", 60, 1,1);     //  'eval' will call custom handler 'trigger',  defined in process's environment - handles zero or more args.
-
-b.sendMsg("/satie/process/eval", "sheefaProcess", "player", 1);    // 'eval' will call  custom handler 'player', defined in process's environment
-b.sendMsg("/satie/process/eval", "sheefaProcess", "player", 0);
-
-b.sendMsg("/satie/process/property", "sheefaProcess", "triggerIntervalMs", 100);
-b.sendMsg("/satie/process/property", "sheefaProcess", "triggerIntervalMs", 500);
-b.sendMsg("/satie/process/property", "sheefaProcess", "triggerIntervalMs", 2000);
-
-b.sendMsg("/satie/process/property", "sheefaProcess", "cloneCount", 1);
-b.sendMsg("/satie/process/property", "sheefaProcess", "cloneCount", 50);
-
-
-b.sendMsg("/satie/scene/deleteNode", "sheefaProcess");
-
-b.sendMsg("/satie/scene/clear");    // clear scene
-
-
-//  4. using mappers example  -----------------------------------
+//  3. using mappers example  -----------------------------------
 
 // CREATE NEAR FIELD SOURCE
 b.sendMsg("/satie/scene/createSource",  "mappie", "nearTest", "default");    // create nearField source
@@ -232,85 +179,100 @@ b.sendMsg("/satie/source/set", "mappie", "exp", 1);
 b.sendMsg("/satie/source/set", "mappie", "exp", 4);
 b.sendMsg("/satie/source/set", "mappie", "exp", 0.25);
 
-
-
 b.sendMsg("/satie/scene/deleteNode",  "mappie");  // delete node
 
 b.sendMsg("/satie/scene/clear");    // clear scene
 
-//   annex example:  setting a key with more than one value  -----------------------------------
 
-b.sendMsg("/satie/scene", "createSource",  "ball_1000", "plugin://zkarpluck1", "default");    // create source
-b.sendMsg("/satie/source/update", "ball_1000", 0,0, -3,0,15000,20);   //update spatialiser
+// 4. example:  setting a key with more than one value using setvec   -----------------------------------
+
+b.sendMsg("/satie/scene/createSource",  "ball_1000", "zkarpluck1", "default");    // create source
+b.sendMsg("/satie/source/update", "ball_1000", 0,0, -12,0,15000,20);   //update spatialiser
 b.sendMsg("/satie/source/set", "ball_1000", "trimDB", -10, "c1", 0.9, "c3", 5);    // set key value pairs to synth parameters
 b.sendMsg("/satie/source/set", "ball_1000", "c1", 0.9, "c3", 5);    // set key value pairs to synth parameters
 
 b.sendMsg("/satie/source/set", "ball_1000", "fb", 100.rand);    // update fb param
 
-b.sendMsg("/satie/scene", "createEffect",  "resonance_SC", "busgverb", 0 );    // create effects node
-b.sendMsg("/satie/source/update", "resonance_SC", 0,0, -115,0,15000,20);   //update spatialiser
-
-
-
-
-
-
-
-
-
-/*
-s.latency=0.01
 (
-~speed=0.4;
-~speed=0.2;
-~speed=0.1;
-~speed=0.05;
-~speed=0.01;
-
-~index=0;
-
-t = Task({ {
-
-	var nodename="ball_"++~index.mod(150);
-	~index = ~index+1;
-
-	//b.sendMsg("/satie/source/setvec", "ball_1000", "note", (55+20.rand), (0.5+0.5.rand), (0.5+0.5.rand));    // set param
-
-	~satie.groupInstances[\default][nodename.asSymbol].set("t_trig", 1);    // set param
-
-	//b.sendMsg("/satie/source/set", nodename, "t_trig", 1);    // set param
-
-	//b.sendMsg("/satie/source/update", "ball_1000", 360.rand,0, -16,0,15000,20);   //update spatialiser
-//nodename.postln;
-	~speed.wait; }.loop });
-t.start;
-
-)
-
-(
-t.stop;
-b.sendMsg("/satie/scene", "deleteNode",  "ball_1000");  // delete node
-b.sendMsg("/satie/scene", "deleteNode",  "resonance_SC");  // delete node
-
+b.sendMsg("/satie/source/setvec", "ball_1000", "note", (48+24.rand), 0.5, (0.01*100.rand));    // update pitch and velocity
+b.sendMsg("/satie/source/set", "ball_1000", "t_trig",1);    // trigger synth
 )
 
 
-b.sendMsg("/satie/source/set", "ball_1", "t_trig", 1);    // set param
-
-b.sendMsg("/satie/group/set", "default", "c1", 2, "c3", 5);    // set key value pairs to synth parameters
-
-b.sendMsg("/satie/group/set", "default", "t_trig", 1);    // set param
+b.sendMsg("/satie/scene/createEffect",  "resonance_SC", "busgverb", 0 );    // create effects node
+b.sendMsg("/satie/source/update", "resonance_SC", 0,0, -15,0,15000,20);   //update spatialiser
 
 
-b.sendMsg("/satie/group/update", "default", 0,0, -3,0,15000,20);   //update spatialiser
 
-
+//  5. process node examples -------------   THESE EXAMPLES DEPEND ON THE SATIE4UNITY PROJECT   ---------------------------------
 
 (
- b.sendMsg("/satie/source/set", "ball_1", "c1", 0.9, "c3", 1);    // set key value pairs to synth
-	b.sendMsg("/satie/source/setvec", "ball_1", "t_trig", 1);    // set param
+// Evaluate this to load Satie4Unity state
+s.quit;
+~listeningFormat = \stereoListener;  // set listener here
+("~/".standardizePath++"src/satie4UnityExample/satieProject/satie4unityExample.scd").load;    // assumes that the satie4Unity project is located in  ~/src
+b = NetAddr.new("127.0.0.1", 18032);    // connect to satie's RX port
 )
 
 
 
-*/
+// then evaluate the code below
+
+
+b.sendMsg("/satie/scene/debugFlag", 1);    // activate  debugging printing to console
+b.sendMsg("/satie/scene/debugFlag", 0);    // deactivate debugging printing to console
+
+
+
+// Hello World   (depends on satie4Unity project)
+b.sendMsg("/satie/scene/createProcess",  "myProcess", "helloWorld  a 1 b 2 c 3" );    // create process node - unique group will be automatically generated for each created.  Note the use of creation key value argument pairs
+
+b.sendMsg("/satie/process/set", "myProcess", "spread", 30);    // set a synth param arg
+b.sendMsg("/satie/process/setvec", "myProcess", "paramB", 30, 40, 59);    // set a synth param vector
+
+
+b.sendMsg("/satie/process/property", "myProcess", "debugFlag", 1);    // set existing process environment variable
+b.sendMsg("/satie/process/property", "myProcess", "debugFlag", 0);
+
+b.sendMsg("/satie/process/property", "myProcess", "someProperty", 1);    // can set arbitrary key value pairs to the processes's environment
+
+
+b.sendMsg("/satie/process/eval", "myProcess", "doit", 2, 3,4);    // call a function defined in the processes's environment
+b.sendMsg("/satie/process/eval", "myProcess", "nonexistant", 2, 3,4);    // call a function defined in the processes's environment
+
+
+b.sendMsg("/satie/process/state", "myProcess", 0);    // set state disabled
+b.sendMsg("/satie/process/state", "myProcess", 1);    // set state  enabled
+
+b.sendMsg("/satie/group/state", "myProcess_group", 0);    // OR set groups' nodes states
+b.sendMsg("/satie/group/state", "myProcess_group", 1);
+
+b.sendMsg("/satie/scene/deleteNode", "myProcess");
+
+
+// more complex process  (depends on satie4Unity project)
+(
+b.sendMsg("/satie/scene/createProcess",  "mySheefa", "sheefaProcess cloneCount 20" );    // create process node - unique group will be automatically generated for each created node
+b.sendMsg("/satie/process/update", "mySheefa", 0,0, -6,0,15000,20);   // update spatialiser
+b.sendMsg("/satie/process/set", "mySheefa", "spread", 30);    // calls custom handler 'spread', defined in process's environment
+)
+
+b.sendMsg("/satie/process/property", "mySheefa", "debugFlag", 0);    // 'property'  set's the named process environment variable
+b.sendMsg("/satie/process/property", "mySheefa", "debugFlag", 1);
+
+b.sendMsg("/satie/process/eval" , "mySheefa", "trigger", 60, 1,1);     //  'eval' will call custom handler 'trigger',  defined in process's environment - handles zero or more args.
+
+b.sendMsg("/satie/process/eval", "mySheefa", "player", 1);    // 'eval' will call  custom handler 'player', defined in process's environment
+b.sendMsg("/satie/process/eval", "mySheefa", "player", 0);
+
+b.sendMsg("/satie/process/property", "mySheefa", "triggerIntervalMs", 100);
+b.sendMsg("/satie/process/property", "mySheefa", "triggerIntervalMs", 500);
+b.sendMsg("/satie/process/property", "mySheefa", "triggerIntervalMs", 2000);
+
+b.sendMsg("/satie/process/property", "mySheefa", "cloneCount", 1);
+b.sendMsg("/satie/process/property", "mySheefa", "cloneCount", 50);
+
+
+b.sendMsg("/satie/scene/deleteNode", "mySheefa");
+
+b.sendMsg("/satie/scene/clear");    // clear scene

@@ -80,21 +80,21 @@ SatieOSC {
 		this.newOSC(\satieClearScene, this.clearSceneHandler, "/satie/scene/clear");
 
 		// node level handlers
-		this.newOSC(\satieSrcState, this.stateHandler, "/satie/source/state");
-		this.newOSC(\satieGroupState, this.stateHandler, "/satie/group/state");
-		this.newOSC(\satieGroupState, this.stateHandler, "/satie/process/state");
+		this.newOSC(\satieSrcState, this.stateSourceHandler, "/satie/source/state");
+		this.newOSC(\satieGroupState, this.stateGroupHandler, "/satie/group/state");
+		this.newOSC(\satieProcState, this.stateProcHandler, "/satie/process/state");
 		this.newOSC(\satieSrcSet, this.setSrcHandler, "/satie/source/set");
 		this.newOSC(\satieGroupSet, this.setGroupHandler, "/satie/group/set");
 		this.newOSC(\satieProcSet, this.setProcHandler, "/satie/process/set");
 		this.newOSC(\satieSrcUpdate, this.updateSrcHandler, "/satie/source/update");
 		this.newOSC(\satieGroupUpdate, this.updateGroupHandler, "/satie/group/update");
 		this.newOSC(\satieProcUpdate, this.updateProcHandler, "/satie/process/update");
-		this.newOSC(\satieSrcSetVec, this.setVecHandler, "/satie/source/setvec");
-		this.newOSC(\satieGroupSetVec, this.setVecHandler, "/satie/group/setvec");
-		this.newOSC(\satieProcSetVec, this.setVecHandler, "/satie/process/setvec");
+		this.newOSC(\satieSrcSetVec, this.setVecSourceHandler, "/satie/source/setvec");
+		this.newOSC(\satieGroupSetVec, this.setVecGroupHandler, "/satie/group/setvec");
+		this.newOSC(\satieProcSetVec, this.setVecProcHandler, "/satie/process/setvec");
 
 		// process only handlers
-		this.newOSC(\satieProcSetVec, this.propertyProcHandler, "/satie/process/property");
+		this.newOSC(\satieProcProp, this.propertyProcHandler, "/satie/process/property");
 		this.newOSC(\satieProcEval, this.evalFnProcHandler, "/satie/process/eval");
 
 
