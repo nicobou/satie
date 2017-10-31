@@ -44,7 +44,7 @@
 					var synthName  = args[2].asSymbol;
 					var groupName = \defaultFx;
 					var auxBus = 0;
-~effectsMess=args;
+					~effectsMess=args;
 					if (args.size == 5,
 						{
 							if (args[4].class == Symbol, {groupName = args[4].asSymbol;
@@ -74,7 +74,7 @@
 		}
 	}
 
-	// expects /oscaddress nodeName URI groupName<optional>
+	// expects /oscaddress nodeName URI groupName<opt: but ignored>
 	createProcessHandler {
 		^{ | args |
 
@@ -82,19 +82,19 @@
 
 			if ( (args.size < 2 ) ,
 				{
-					"→    %: message: bad arg count: expects  at least 2 values:  nodeName, pluginName, and optionally:  groupName".format(this.class.getBackTrace).error
+					"→    %: message: bad arg count: expects  at least 2 values:  nodeName, pluginName, and optionally: groupName".format(this.class.getBackTrace).error
 				},
 				// else
 				{
 					var sourceName = args[1].asSymbol;
 					var uriPath  = args[2].asString;
-					var groupName = \default;
+					// var groupName = \default;
 
-					if (args.size == 4,
-						{
-							groupName = args[3].asSymbol;
-					});
-					this.createProcessNode(sourceName, uriPath, groupName );
+					/*					if (args.size == 4,
+					{
+					groupName = args[3].asSymbol;
+					});*/
+					this.createProcessNode(sourceName, uriPath );
 
 				}
 
@@ -313,7 +313,7 @@
 
 	setProcHandler {
 		^{ | args |
-			var nodeName = args[1];
+			var nodeName = args[1].asSymbol;
 			var props = args.copyRange(2, args.size -1);
 
 			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
@@ -328,11 +328,14 @@
 								this.class.getBackTrace, nodeName);
 						},
 						{
-							this.processSet (myProcess, props);
+							this.processSet (myProcess, thisGroup, props);
 						}
 					)
-				}
-			);
+				},
+				{  // else error
+					error("SatieOSC.setProcHandler:  process node: "++nodeName++"  is undefined \n");
+			});
+
 		}
 	}
 
@@ -410,7 +413,7 @@
 		})
 	}
 
-	processSet { | process, props |
+	processSet { | process, group, props |
 		var value;
 		var keyHandler = nil;
 		var setHandler = nil;
@@ -449,24 +452,84 @@
 					process[\set].value(process, prop, val);
 				},
 				{
+					group.set(prop.asSymbol, val);
 					"%: % does not implement a setter".format(this.class.getBackTrace, process).postln;
-				}
-			)
-
-		})
+			});
+		});
 	}
 
-	setVecHandler {
+
+
+	// accepts arbitrary key value pair,  and sets value to corresponding process environment key
+	propertyProcHandler
+	{
 		^{ | args |
 			var type = args[0].asString.split[2].asSymbol;
+			var nodeName  = args[1];
+			var propsVec = args.copyRange(2, args.size - 1);
+
+			if (satie.satieConfiguration.debug,
+				{
+					postf("SatieOSC.processProperty: % \n", args);
+			});
+
+			// verify data
+			if (  (  ( (propsVec.size&1)==1) || (propsVec.size == 0) ),
+				{
+					error("SatieOSC.processProperty: BAD ARGS: "++propsVec);
+				}, // else args good
+				{  // verify node
+					if ( allSourceNodes.includesKey(nodeName.asSymbol) == true,
+						{
+							var thisGroupName = allSourceNodes[nodeName.asSymbol].at(\groupNameSym);  // process nodes have unique groups
+							var thisGroup = this.getGroupNode(thisGroupName, \group);
+							var myProcess = allSourceNodes[nodeName.asSymbol].at(\process);
+
+							if ( myProcess == nil,     // verify process
+								{
+									error("SatieOSC.processProperty:  process node: "++nodeName++"  BUG FOUND: undefined process  \n");
+
+								},
+								{  // good to go:  write key val pairs to process environment instance
+
+									var handler= nil;
+
+									// postf("SatieOSC.processProperty:  process node: "++nodeName++" process: % \n", myProcess.class);
 
 
-			if (satie.satieConfiguration.debug, { postf("•satieOSCProtocol.setvecMessHandler:  mess: %\n", args); });
+									if (myProcess[\property].class == Function,
+										{
+											handler = myProcess[\property];
+									});
+
+									propsVec.pairsDo({ | prop, val |
+
+										if (handler != nil,
+											{
+												handler.value(myProcess, prop, val);
+											}, // else set the process's environment variable directly
+											{
+												myProcess[prop.asSymbol] = val;
+										});
+									});
+							});
+						},
+						{  // else error
+							error("SatieOSC.setMessHandler:  process node: "++nodeName++"  is undefined \n");
+					});
+			});
+		}
+	}
+
+	evalFnProcHandler {
+		^{ | args |
+
+			if (satie.satieConfiguration.debug, { postf("SatieOSC.evalProcFnHandler:  mess: %\n", args); });
 
 			// verify data
 			if (  ( args.size < 3)  ,
 				{
-					error("satieOSCProtocol.setVecHandler: bad message length: expects oscAddress key data1 or more \n"++args);
+					error("SatieOSC.evalProcFnHandler: bad message length: expects oscAddress key data1 or more \n"++args);
 				}, // else args good
 				{
 					var nodeName  = args[1];
@@ -474,58 +537,256 @@
 					var vector = args.copyRange(3, args.size - 1);
 					var targetNode = nil;
 
-					switch(type,
-						'source',
+					if ( allSourceNodes.includesKey(nodeName.asSymbol) == true,
 						{
-							targetNode = this.getSourceNode(nodeName, \synth);
-							targetNode.set(key, vector);
-						},
-						'group',
-						{
-							targetNode = this.getGroupNode(nodeName, \group);
-							targetNode.set(key, vector);
-						},
-						'process',
-						{
-							if ( allSourceNodes.includesKey(nodeName.asSymbol) == true,
+							var thisGroupName = allSourceNodes[nodeName.asSymbol].at(\groupNameSym);  // process nodes have unique groups
+							var thisGroup = this.getGroupNode(thisGroupName, \group);
+							var myProcess = allSourceNodes[nodeName.asSymbol].at(\process);
+							var matched = false;
+
+							if ( myProcess == nil,
 								{
-									var thisGroupName = allSourceNodes[nodeName.asSymbol].at(\groupNameSym);  // process nodes have unique groups
-									var thisGroup = this.getGroupNode(thisGroupName, \group);
-									var myProcess = allSourceNodes[nodeName.asSymbol].at(\process);
-									var matched = false;
-
-									if ( myProcess == nil,
-										{
-											error("satieOSCProtocol.setVecHandler:  process node: "++nodeName++"  BUG FOUND: undefined process  \n");
-
-										},
-										{  // good to go
-											if ( myProcess[key.asSymbol].class == Function,  // does a specific handler exist for this key ?
-												{
-													matched = true;
-													myProcess[key.asSymbol].value(myProcess, vector);   // use process's specially defined message handler for this key
-												},
-												{
-													// else  nope:  no handler with that name exists.  Check  if a handler named \setVec is defined.
-													if ( myProcess[\setVec].class == Function,
-														{
-															matched = true;
-															myProcess[\setVec].value(myProcess, key, vector);   // use process's \setVec message handler
-													});
-											});
-											//
-											if (matched == false,
-												{
-													// or just update the process's group
-													thisGroup.set(key,vector);
-											});
-									});
+									error("SatieOSC.evalProcFnHandler:  process node: "++nodeName++"  BUG FOUND: undefined process  \n");
 								},
-								{  // else error
-									error("satieOSCProtocol.setVecHandler:  process node: "++nodeName++"  is undefined \n");
+								{  // good to go
+									if ( myProcess[key.asSymbol].class == Function,  // does a specific handler exist for this key ?
+										{
+											myProcess[key.asSymbol].value(myProcess, vector);   // use process's specially defined message handler for this key
+										},
+										{
+											// else  nope:  no handler with that name exists.  Check  if a handler named \setVec is defined.
+											warn("SatieOSC.evalProcFnHandler:  process node: "++nodeName++"  undefined method: "++key.asSymbol++"  , can not service message \n");
+									});
 							});
 					});
 			});
 		}
 	}
-}
+
+	setVecProcHandler {
+		^{ | args |
+
+			if (satie.satieConfiguration.debug, { postf("SatieOSC.setVecProcHandler:  mess: %\n", args); });
+
+			if (  ( args.size < 3)  ,   			// verify data
+				{
+					error("SatieOSC.setVecHandler: bad message length: expects oscAddress key data1 or more \n"++args);
+				}, // else args good
+				{
+					var nodeName  = args[1];
+					var key = args[2];
+					var vector = args.copyRange(3, args.size - 1);
+					var targetNode = nil;
+
+					if ( allSourceNodes.includesKey(nodeName.asSymbol) == true,
+						{
+							var thisGroupName = allSourceNodes[nodeName.asSymbol].at(\groupNameSym);  // process nodes have unique groups
+							var thisGroup = this.getGroupNode(thisGroupName, \group);
+							var myProcess = allSourceNodes[nodeName.asSymbol].at(\process);
+							var matched = false;
+
+							if ( myProcess == nil,
+								{
+									error("SatieOSC.setVecHandler:  process node: "++nodeName++"  BUG FOUND: undefined process  \n");
+
+								},
+								{  // good to go
+									if ( myProcess[key.asSymbol].class == Function,  // does a specific handler exist for this key ?
+										{
+											matched = true;
+											myProcess[key.asSymbol].value(myProcess, vector);   // use process's specially defined message handler for this key
+										},
+										{
+											// else  nope:  no handler with that name exists.  Check  if a handler named \setVec is defined.
+											if ( myProcess[\setVec].class == Function,
+												{
+													matched = true;
+													myProcess[\setVec].value(myProcess, key, vector);   // use process's \setVec message handler
+											});
+									});
+									//
+									if (matched == false,
+										{
+											// or just update the process's group
+											thisGroup.set(key,vector);
+									});
+							});
+						},
+						{  // else error
+							error("SatieOSC.setVecHandler:  process node: "++nodeName++"  is undefined \n");
+					});
+			});
+		}
+	}
+
+	setVecSourceHandler {
+		^{ | args |
+
+			if (satie.satieConfiguration.debug, { postf("satieOSC.setVecSourceHandler:  mess: %\n", args); });
+
+			if (  ( args.size < 3)  ,   // verify data
+				{
+					error("SatieOSC.setVecHandler: bad message length: expects oscAddress key data1 or more \n"++args);
+				}, // else args good
+				{
+					var nodeName  = args[1];
+					var key = args[2];
+					var vector = args.copyRange(3, args.size - 1);
+					var targetNode;
+
+					targetNode = this.getSourceNode(nodeName, \synth);
+					targetNode.set(key, vector);
+			});
+		}
+	}
+
+	setVecGroupHandler {
+		^{ | args |
+
+			if (satie.satieConfiguration.debug, { postf("SatieOSC.setVecGroupHandler:  mess: %\n", args); });
+
+			if (  ( args.size < 3)  ,   // verify data
+				{
+					error("SatieOSC.setVecHandler: bad message length: expects oscAddress key data1 or more \n"++args);
+				}, // else args good
+				{
+					var nodeName  = args[1];
+					var key = args[2];
+					var vector = args.copyRange(3, args.size - 1);
+					var targetNode;
+
+					targetNode = this.getGroupNode(nodeName, \group);
+					targetNode.set(key, vector);
+			});
+		}
+	}
+
+	// handles /satie/source/state  nodeName flag
+	stateSourceHandler {
+		^{ | args |
+
+			if ( satie.satieConfiguration.debug,
+				{
+					postf("SatieOSC.stateSourceHandler: % \n", args);
+			});
+
+			// verify message
+			if (  ( args.size != 3)  ,
+				{
+					error("SatieOSC.stateSourceHandler: bad messafe length: expects oscAddress nodeName val % \n", args);
+				}, // else args good
+				{
+					var nodeName  = args[1];
+					var value = args[2];
+					var targetNode = nil;
+					var state;
+
+					if ( value == 0 , { state = false}, {state = true});
+
+					if ( allSourceNodes.includesKey(nodeName.asSymbol) == true,
+						{
+							targetNode = this.getSourceNode(nodeName, \synth);
+							if ( targetNode == nil,
+								{
+									error("SatieOSC.stateSourceHandler:  source node: "++nodeName++"  BUG FOUND: undefined SYNTH  \n");
+								}, // else good to go
+								{
+									targetNode.run(state);
+									targetNode.register(); // register with NodeWatcher, for state checking
+							});
+						},
+						{
+							error("SatieOSC.stateSourceHandler:  source node: "++nodeName++"  is undefined \n");
+					}); // else node exists,  process event
+			});
+		}
+	}
+
+	// handles /satie/group/state  nodeName flag
+	stateGroupHandler {
+		^{ | args |
+
+			if ( satie.satieConfiguration.debug,
+				{
+					postf("SatieOSC.stateGroupHandler: % \n", args);
+			});
+
+			// verify message
+			if (  ( args.size != 3)  ,
+				{
+					error("SatieOSC.stateGroupHandler: bad messafe length: expects oscAddress nodeName val % \n", args);
+				}, // else args good
+				{
+					var nodeName  = args[1];
+					var value = args[2];
+					var targetNode = nil;
+					var state;
+
+					if ( value == 0 , { state = false}, {state = true});
+
+					if (  allGroupNodes.includesKey (nodeName.asSymbol) == true,
+						{
+							targetNode = allGroupNodes[nodeName.asSymbol].at(\group).group;
+							targetNode.run(state);
+							targetNode.register(); // register with NodeWatcher, for state checking
+
+						},
+						{   // else no group
+							error("SatieOSC.stateGroupHandler:  group node: "++nodeName++"  is undefined \n");
+					});
+			});
+		}
+	}
+
+	// handles /satie/process/state  nodeName flag
+	stateProcHandler {
+		^{ | args |
+
+			if ( satie.satieConfiguration.debug,
+				{
+					postf("SatieOSC.stateProcHandler: % \n", args);
+			});
+
+			// verify message
+			if (  ( args.size != 3)  ,
+				{
+					error("SatieOSC.stateProcHandler: bad messafe length: expects oscAddress nodeName val % \n", args);
+				}, // else args good
+				{
+					var nodeName  = args[1];
+					var value = args[2];
+					var targetNode = nil;
+					var state;
+
+					if ( value == 0 , { state = false}, {state = true});
+
+					if ( allSourceNodes.includesKey(nodeName.asSymbol) == true,
+						{
+							var thisGroupName = allSourceNodes[nodeName.asSymbol].at(\groupNameSym);  // process nodes have unique groups
+							var thisGroup = allGroupNodes[thisGroupName].at(\group).group;
+							var myProcess = this.getSourceNode(nodeName, \process);
+
+							if ( myProcess == nil,
+								{
+									error("SatieOSC.stateProcHandler:  process node: "++nodeName++"  BUG FOUND: undefined process  \n");
+								},
+								{  // good to go
+									if ( myProcess[\state].class == Function,     // does the process implement the \state handler
+										{
+											myProcess[\state].value(myProcess, state);   // yes, call it
+										},
+										{
+											thisGroup.run(state);   // or just update the process's group
+											// thisGroup.register(); // TODO: is this relevant for processes?
+									});
+							});
+						},
+						{  // else error
+							error("SatieOSC.stateProcHandler:  process node: "++nodeName++"  is undefined \n");
+					});
+			});
+		}
+	}
+
+}  // end of context
+

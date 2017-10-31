@@ -100,6 +100,7 @@
 		this.removeProcess(processName);
 		inform("satieProcessManager: registering process environment: "++processName);
 		processes.put(processName.asSymbol, env);
+		env[\satieInstance] = this;
 		env.know = true;
 		^env;
 	}

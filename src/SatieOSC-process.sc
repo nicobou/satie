@@ -34,19 +34,20 @@
 		);
 	}*/
 
-	createProcessNode { | sourceName, uriPath , groupNameDummy = \default |
+	createProcessNode { | sourceName, uriPath |
 			var temp, type, charIndex, processName, myProcess, cloneGroup, cloneGroupName;
 			var processClone = nil;
 			var rawArgVec = nil;
 			var argList = List[];
 
-			if ( satie.satieConfiguration.debug,  { postf("•satieOSC.createProcessNode:   %   URI  % \n", sourceName, uriPath);});
 
-			processName= uriPath.asString.split($ )[0].split($/)[2];
+		processName= uriPath.asString.split($ )[0];
 			rawArgVec = uriPath.asString.split($ );
 			rawArgVec.removeAt(0);  // drop first item in list
 
-			// make list of items in argString
+			if ( satie.satieConfiguration.debug,  { postf("•satieOSC.createProcessNode:   %   URI  %   optArgs: %\n", sourceName, uriPath, rawArgVec);});
+
+		// make list of items in argString
 			rawArgVec.do( { arg item;
 				if ( item != "",
 					{
@@ -54,10 +55,9 @@
 				});
 			});
 
-
 			if (allSourceNodes[sourceName.asSymbol]  != nil,
 				{
-					error("satieOSC.createProcessNode source Process node: %,   ALREAYD EXISTS, aborting \n", sourceName);
+				error("satieOSC.createProcessNode source Process node: "++sourceName++",   ALREAYD EXISTS, aborting \n", );
 				},
 				// else ALL GOOD,  instantiate
 				{
