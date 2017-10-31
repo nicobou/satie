@@ -35,7 +35,7 @@
 			);
 			json = satie.inspector.getInstancesJSON();
 			if(satie.satieConfiguration.debug, {"% json: %".format(this.class.getBackTrace, json).postln;});
-			returnAddress.sendMsg("/satie/dump/plugins/audioSources", json);
+			returnAddress.sendMsg("/plugins", json);
 		}
 	}
 
@@ -50,7 +50,7 @@
 				}
 			);
 			json = satie.inspector.getInstanceInfoJSON(pluginName);
-			returnAddress.sendMsg("/satie/dump/plugins/audioSourceArgs", json);
+			returnAddress.sendMsg("/arguments", json);
 		}
 	}
 }
