@@ -101,7 +101,7 @@ SatieOSC {
 
 
 		// client
-		this.newOSC(\audioplugins, this.getAudioPlugins, "/satie/audioplugins");
+		this.newOSC(\audioplugins, this.getAudioPlugins, "/satie/plugins");
 		this.newOSC(\pluginArgs, this.getPluginArguments, "/satie/pluginargs");
 		this.newOSC(\responderAddress, this.returnAddress, "/satie/responder");
 
