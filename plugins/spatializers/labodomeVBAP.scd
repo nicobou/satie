@@ -11,23 +11,23 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*       Spatializer plugin definition 
+/*       Spatializer plugin definition
 
-	Each spatializer plugin should define the following global variables:
-    ~name: (symbol) name of the spatializer
-	~description: (string) a short description
-	~numChannels: (int) number of channels
-	~function: the definition of the spatializer
-	
-	where function should use the following input arguments:
+Each spatializer plugin should define the following global variables:
+~name: (symbol) name of the spatializer
+~description: (string) a short description
+~numChannels: (int) number of channels
+~function: the definition of the spatializer
 
-	in 
-	aziDeg degrees (-180 to 180)
-	elevDeg   degrees (-180 to 180)
-	gainDB  decibels
-	delaySec  seconds
-	lpHz    hertz
-	spread  units  (0 == directional, ....,  100 == omni)
+where function should use the following input arguments:
+
+in
+aziDeg degrees (-180 to 180)
+elevDeg   degrees (-180 to 180)
+gainDB  decibels
+delaySec  seconds
+lpHz    hertz
+spread  units  (0 == directional, ....,  100 == omni)
 */
 
 // labodome speaker layout
@@ -36,13 +36,13 @@
 ~description = "24 channel speaker layout on a sphere (minidome at the SAT)";
 ~numChannels = 24;
 
-~spk24 = VBAPSpeakerArray.new(3, [
-[0, 90],
-[0, 60], [45, 60], [90, 60], [135, 60], [180, 60], [-135, 60], [-90, 60], [-45, 60],
-[0, 20], [45, 20], [90, 20], [135, 20], [180, 20], [-135, 20], [-90, 20], [-45, 20],
-[0, -15], [45, -15], [90, -15], [135, -15], [-135, -10], [-90, -10], [-45, -10],]);
 
-~vbuf24 = Buffer.loadCollection(s, ~spk24.getSetsAndMatrices);
+	~spk24 = VBAPSpeakerArray.new(3, [
+		[0, 90],
+		[0, 60], [45, 60], [90, 60], [135, 60], [180, 60], [-135, 60], [-90, 60], [-45, 60],
+		[0, 20], [45, 20], [90, 20], [135, 20], [180, 20], [-135, 20], [-90, 20], [-45, 20],
+		[0, -15], [45, -15], [90, -15], [135, -15], [-135, -10], [-90, -10], [-45, -10],]);
+
 
 ~function = { | in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP
@@ -78,12 +78,13 @@
 	outsig * Ramp.kr(panWeights, slewPanning);
 };
 
+~setup = { |satieInstance|
 
-// debug
-/*
-o = OSCresponderNode(s.addr, '/tr', { |time, resp, msg| msg.postln }).add;
-o.remove;  // when done, you need to clean up the OSCresponderNode
-*/
 
-//  in synthdef
-//SendTrig.kr(Impulse.kr(1), 0, freq);  
+					s.waitForBoot {
+						s.sync;
+	~vbuf24 = Buffer.loadCollection(satieInstance.satieConfiguration.server, ~spk24.getSetsAndMatrices);
+	}
+
+
+};
