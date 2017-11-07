@@ -11,38 +11,72 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*       Spatializer plugin definition 
+/*       Spatializer plugin definition
 
-	Each spatializer plugin should define the following global variables:
-    ~name: (symbol) name of the spatializer
-	~description: (string) a short description
-	~numChannels: (int) number of channels
-	~function: the definition of the spatializer
-	
-	where function should use the following input arguments:
+Each spatializer plugin should define the following global variables:
+~name: (symbol) name of the spatializer
+~description: (string) a short description
+~numChannels: (int) number of channels
+~function: the definition of the spatializer
 
-	in 
-	aziDeg degrees (-180 to 180)
-	elevDeg   degrees (-180 to 180)
-	gainDB  decibels
-	delaySec  seconds
-	lpHz    hertz
-	spread  units  (0 == directional, ....,  100 == omni)
+where function should use the following input arguments:
+
+in
+aziDeg degrees (-180 to 180)
+elevDeg   degrees (-180 to 180)
+gainDB  decibels
+delaySec  seconds
+lpHz    hertz
+spread  units  (0 == directional, ....,  100 == omni)
 */
 
-// labodome speaker layout
+// IAIA 24-channel speaker layout
 
-~name = \labodomeVBAP;
-~description = "24 channel speaker layout on a sphere (minidome at the SAT)";
+~name = \iaiaVBAP;
+~description = "24 channel speaker layout on a sphere ( digital dome at IAIA)";
 ~numChannels = 24;
 
-~spk24 = VBAPSpeakerArray.new(3, [
-[0, 90],
-[0, 60], [45, 60], [90, 60], [135, 60], [180, 60], [-135, 60], [-90, 60], [-45, 60],
-[0, 20], [45, 20], [90, 20], [135, 20], [180, 20], [-135, 20], [-90, 20], [-45, 20],
-[0, -15], [45, -15], [90, -15], [135, -15], [-135, -10], [-90, -10], [-45, -10],]);
+~spkIAIA_24 = VBAPSpeakerArray.new(3, [
 
-~vbuf24 = Buffer.loadCollection(s, ~spk24.getSetsAndMatrices);
+	// IAIA speaker configuration (nov. 2017)
+	//Speakers starting front left and incrementing clockwise:
+	//1-8. low wall speakers
+	//9-16. high wall speakers
+	//17-20. ceiling speakers
+	//21-24. floor speakers
+
+	// mid-low
+	[-22.5, -22.5],
+	[22.5, -22.5],
+	[67.5, -22.5],
+	[112.5, -22.5],
+	[157.5, -22.5],
+	[-157.5, -22.5],
+	[-112.5, -22.5],
+	[-67.5, -22.5],
+
+	//mid-high
+	[-22.5, 22.5],
+	[22.5, 22.5],
+	[67.5, 22.5],
+	[112.5, 22.5],
+	[157.5, 22.5],
+	[-157.5, 22.5],
+	[-112.5, 22.5],
+	[-67.5, 22.5],
+
+	//ceiling
+	[-45, 60],
+	[45, 60],
+	[135, 60],
+	[-135, 60],
+
+	//floor
+	[-45, -60],
+	[45, -60],
+	[135, -60],
+	[-135, -60]
+]);
 
 ~function = { | in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP
@@ -54,9 +88,6 @@
 	var panWeights;
 	var outsig;
 
-
-
-
 	outsig =  LPF.ar(DelayC.ar(
 		Lag.kr(gain, slewGain) * in,
 		maxdelaytime: 0.5,
@@ -64,26 +95,70 @@
 
 	outsig = BHiPass.ar(outsig, VarLag.kr(hpHz, slewFilter )  );
 
-	panWeights = VBAP.kr(numChans: ~spk24.numSpeakers,
+	panWeights = VBAP.kr(numChans: ~spkIAIA_24.numSpeakers,
 		in: 1.0,
-		bufnum: ~vbuf24.bufnum,
+		bufnum: ~vbufIAIA_24.bufnum,
 		azimuth: aziDeg,
 		elevation: eleDeg,
 		spread: spread );
 
-	//SendTrig.kr(Impulse.kr(4), 0,  VarLag.kr(hpHz, 1, 0, Env.shapeNumber(\sin)  )     );  //  Enable for debugging
-
-	//SendTrig.kr(Impulse.kr(1), 0, [ Lag.kr(gain, slewGain),  gain ] );  //  Enable for debugging
-
 	outsig * Ramp.kr(panWeights, slewPanning);
 };
 
+~setup = { |satieInstance|
 
-// debug
+	s.waitForBoot {
+		s.sync;
+		~vbufIAIA_24 = Buffer.loadCollection(satieInstance.satieConfiguration.server, ~spkIAIA_24.getSetsAndMatrices);
+	}
+
+
+};
+
 /*
-o = OSCresponderNode(s.addr, '/tr', { |time, resp, msg| msg.postln }).add;
-o.remove;  // when done, you need to clean up the OSCresponderNode
-*/
 
-//  in synthdef
-//SendTrig.kr(Impulse.kr(1), 0, freq);  
+OFFICIAL LAYOUT
+
+~spkIAIA_24 = VBAPSpeakerArray.new(3, [
+
+	// IAIA speaker configuration (nov. 2017)
+	//Speakers starting front left and incrementing clockwise:
+	//1-8. low wall speakers
+	//9-16. high wall speakers
+	//17-20. ceiling speakers
+	//21-24. floor speakers
+
+	// mid-low
+	[-22.5, -22.5],
+	[22.5, -22.5],
+	[67.5, -22.5],
+	[112.5, -22.5],
+	[157.5, -22.5],
+	[-157.5, -22.5],
+	[-112.5, -22.5],
+	[-67.5, -22.5],
+
+	//mid-high
+	[-22.5, 22.5],
+	[22.5, 22.5],
+	[67.5, 22.5],
+	[112.5, 22.5],
+	[157.5, 22.5],
+	[-157.5, 22.5],
+	[-112.5, 22.5],
+	[-67.5, 22.5],
+
+	//ceiling
+	[-45, 60],
+	[45, 60],
+	[135, 60],
+	[-135, 60],
+
+	//floor
+	[-45, -60],
+	[45, -60],
+	[135, -60],
+	[-135, -60]
+]);
+
+*/
