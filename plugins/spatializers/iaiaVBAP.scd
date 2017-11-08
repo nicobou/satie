@@ -39,6 +39,7 @@ spread  units  (0 == directional, ....,  100 == omni)
 ~spkIAIA_24 = VBAPSpeakerArray.new(3, [
 
 	// IAIA speaker configuration (nov. 2017)
+	// adjusted by zack settel, using aproximate measures, based on a point located at 0,0,2m (height)
 	//Speakers starting front left and incrementing clockwise:
 	//1-8. low wall speakers
 	//9-16. high wall speakers
@@ -46,36 +47,36 @@ spread  units  (0 == directional, ....,  100 == omni)
 	//21-24. floor speakers
 
 	// mid-low
-	[-22.5, -22.5],
-	[22.5, -22.5],
-	[67.5, -22.5],
-	[112.5, -22.5],
-	[157.5, -22.5],
-	[-157.5, -22.5],
-	[-112.5, -22.5],
-	[-67.5, -22.5],
+	[-22.5, 0],
+	[22.5, 0],
+	[67.5, 0],
+	[112.5, 0],
+	[157.5, 0],
+	[-157.5, 0],
+	[-112.5, 0],
+	[-67.5, 0],
 
 	//mid-high
-	[-22.5, 22.5],
-	[22.5, 22.5],
-	[67.5, 22.5],
-	[112.5, 22.5],
-	[157.5, 22.5],
-	[-157.5, 22.5],
-	[-112.5, 22.5],
-	[-67.5, 22.5],
+	[-22.5, 45],
+	[22.5, 45],
+	[67.5, 45],
+	[112.5, 45],
+	[157.5, 45],
+	[-157.5, 45],
+	[-112.5, 45],
+	[-67.5, 45],
 
 	//ceiling
-	[-45, 60],
-	[45, 60],
-	[135, 60],
-	[-135, 60],
+	[-45, 80],
+	[45, 80],
+	[135, 80],
+	[-135, 80],
 
 	//floor
-	[-45, -60],
-	[45, -60],
-	[135, -60],
-	[-135, -60]
+	[-45, -10],
+	[45, -10],
+	[135, -10],
+	[-135, -10]
 ]);
 
 ~function = { | in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1 |
