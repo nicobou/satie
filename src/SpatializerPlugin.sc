@@ -18,7 +18,7 @@
 
 SpatializerPlugin : SatiePlugin {
 	var <numChannels;
-	var <setup;
+	//var <setup;
 
 	*new{|name, description="This should describe the plugin", function, numChannels, setup|
 		description = description ? "Description missing"
