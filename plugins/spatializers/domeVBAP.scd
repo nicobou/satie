@@ -11,17 +11,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*       Spatializer plugin definition 
+/*       Spatializer plugin definition
 
 	Each spatializer plugin should define the following global variables:
     ~name: (symbol) name of the spatializer
 	~description: (string) a short description
 	~numChannels: (int) number of channels
 	~function: the definition of the spatializer
-	
+
 	where function should use the following input arguments:
 
-	in 
+	in
 	aziDeg degrees (-180 to 180)
 	elevDeg   degrees (-180 to 180)
 	gainDB  decibels
@@ -49,7 +49,6 @@
 	[7.5, 20], [37.5, 20], [67.5, 20], [97.5, 20], [127.5, 20], [157.5, 20], [-172.5, 20], [-142.5, 20], [-112.5, 20], [-82.5, 20], [-52.5, 20], [-22.5, 20],
 [7.5, -15], [37.5, -15], [67.5, -15], [97.5, -15], [127.5, -15], [157.5, -15], [-172.5, -15], [-142.5, -15], [-112.5, -15], [-82.5, -15], [-52.5, -15], [-22.5, -15] ]);
 
-~vbuf31 = Buffer.loadCollection(s, ~spk31.getSetsAndMatrices);
 
 ~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP
@@ -77,6 +76,16 @@
 
 	outsig * Lag.kr(panWeights, 0.030);
 };
+
+~setup = { |satieInstance|
+
+	s.waitForBoot {
+		s.sync;
+		~vbuf31 = Buffer.loadCollection(satieInstance.satieConfiguration.server, ~spk31.getSetsAndMatrices);
+	}
+};
+
+
 
 
 // ~function = {|in = 0, aziDeg = 0.5, eleDeg = 0, gainDB = 0, delayMs = 1, lpHz = 15000, spread = 1 |

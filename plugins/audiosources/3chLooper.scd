@@ -11,13 +11,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*       Audio plugin definition 
+/*       Audio plugin definition
 
 	Each audio plugin should define the following global variables:
     ~name: (symbol) name of the spatializer
 	~description: (string) a short description
 	~function: the actual definition of the plugin
-	
+
 */
 
 /* debugging
@@ -36,14 +36,6 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 // args:   \note, #[ midiPitch60 == no transposition,    force: between -1 and 1,   incidence:  not used  ]
 //   when force == 0,  NOTE OFF
 
-
-// set up VBAP
-~tmpSpkConfig = VBAPSpeakerArray.new(2, [-90, 0, 90]); // 3 channel ring   using 180 degree range (-90 to 90 )
-~tmpVbuf= ~tmpSpkConfig.loadToBuffer;
-
-
-~name = "3chLooper".asSymbol;
-
 // note:  bufnum must be first arg !!
 
 // sampSpr:  0 narrow -----   100  wide
@@ -53,7 +45,10 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 // initializes to note-on playing state
 
 // sampAZI clipped from -90 to 90
-~description = "3 channels looper";
+
+
+~name = "3chLooper".asSymbol;
+~description = "3 track sample looper";
 ~function = { | bufnum=0, glide=0.2, loopRel=0, startPosSecs=0, trimDB=0, startLoop=0, endLoop=99999999, ipol=2, curve=0, attackMs=0.01, releaseSecs=1, warp=5, transp=0, sampAzi=0, sampSpr=0,  exp=1, eLamp=1, eMamp=1, eHamp=1, boostDB=3, boostExp = 1, note = #[60, 1, 1] |
 
 
@@ -87,7 +82,7 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 
 	sig = LoopBuf.ar(3,bufnum, BufRateScale.kr(bufnum) * rate, gate+loopRel, startPos, startLoop, endLoop, ipol);
 
-	vbapScalers = VBAP.kr(~tmpSpkConfig.numSpeakers, 1.0, ~tmpVbuf.bufnum, sampAzi, 0, sampSpr);
+	vbapScalers = VBAP.kr(~threeChLooperSpkConfig.numSpeakers, 1.0, ~threeChLooperSpkConfigVbuf.bufnum, sampAzi, 0, sampSpr);
 
 
 	eScalers[0] = eLamp * (vbapScalers[0] ** exp);
@@ -102,6 +97,18 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 	// Out.ar(0, mixdown);   // for debugging
 
 };
+
+
+
+// called after server is booted so that the VBAP buffer can be properly allocated
+~setup = { |satieInstance|
+
+// set up VBAP
+~threeChLooperSpkConfig = VBAPSpeakerArray.new(2, [-90, 0, 90]); // 3 channel ring   using 180 degree range (-90 to 90 )
+~threeChLooperSpkConfigVbuf= ~threeChLooperSpkConfig.loadToBuffer;
+}
+
+
 
 
 /*
