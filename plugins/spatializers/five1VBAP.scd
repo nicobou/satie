@@ -68,11 +68,7 @@
 
 
 ~setup = { |satieInstance|
-
-	s.waitForBoot {
-		s.sync;
 		~vbuf5 = Buffer.loadCollection(satieInstance.satieConfiguration.server, ~spk5.getSetsAndMatrices);
-	}
 };
 
 
