@@ -49,7 +49,7 @@ SatieConfiguration {
 		pluginsPath = pluginsPath.fullPath;
 		serverOptions = server.options;
 		// load plugins
-		audioPlugins = SatiePlugins.newAudio(pluginsPath++"/audiosources/*.scd");
+		audioPlugins = SatiePlugins.newSource(pluginsPath++"/audiosources/*.scd");
 		fxPlugins = SatiePlugins.newAudio(pluginsPath++"/effects/*.scd");
 		spatPlugins = SatiePlugins.newSpat(pluginsPath++"/spatializers/*.scd");
 		mapperPlugins = SatiePlugins.newAudio(pluginsPath++"/mappers/*.scd");

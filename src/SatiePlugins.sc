@@ -21,6 +21,10 @@ SatiePlugins : Dictionary {
 		^super.new.spatializerPath(path);
 	}
 
+		*newSource {|path|
+		^super.new.sourcePath(path);
+	}
+
 
 	/*
 	*  Append plugins from path
@@ -28,9 +32,9 @@ SatiePlugins : Dictionary {
 	audioPath { arg path;
 		path.pathMatch.do{arg item;
 			item.loadPaths;
-			this.add(~name.asSymbol -> SatiePlugin.new(~name, ~description, ~function,~setup));
+			this.add(~name.asSymbol -> SatiePlugin.new(~name, ~description, ~function));
 			// reset global variables
-			~name = ~description = ~function = ~setup = nil;
+			~name = ~description = ~function = nil;
 		};
 
 	}
@@ -42,17 +46,22 @@ SatiePlugins : Dictionary {
 			// reset global variables
 			~name = ~description = ~function = ~numChannels = ~setup = nil;
 		};
-
-
+	}
+		sourcePath { arg path;
+		path.pathMatch.do{arg item;
+			item.loadPaths;
+			this.add(~name.asSymbol -> SourcePlugin.new(~name, ~description, ~function, ~setup));
+			// reset global variables
+			~name = ~description = ~function = ~setup = nil;
+		};
 	}
 
 	addAudioPlugin { | env |
-		var name, description, function, setup;
+		var name, description, function;
 		name = env[\name];
 		description = env[\description];
 		function = env[\function];
-		setup = env[\setup];
-		this.add(name.asSymbol -> SatiePlugin.new(name.asSymbol, description, function, setup));
+		this.add(name.asSymbol -> SatiePlugin.new(name.asSymbol, description, function));
 	}
 
 	showPlugins {

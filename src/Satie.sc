@@ -137,12 +137,25 @@ Satie {
 			// run .setup on spat plugin.
 			// TODO: discuss generalization of this for any plugin.
 			if ((spatPlugins[item.asSymbol].setup == nil).asBoolean,
-				{ if(debug, 
+				{ if(debug,
 					{ "% - no setup here".format(spatPlugins[item].name).postln; }
 				);
 				},
 				{ spatPlugins[item.asSymbol].setup.value(this) }
 			);
-		}
+		};
+	satieConfiguration.server.sync;
+	satieConfiguration.audioPlugins.do { arg item, i;
+
+	if (item.setup  != nil,
+		{
+			item.setup.value(this);
+			"% - CALLING setup here".format(item.name).postln;
+		},
+		{ "% - no setup here".format(item.name).postln; }
+	);
+};
+			satieConfiguration.server.sync;
+
 	}
 }

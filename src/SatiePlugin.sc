@@ -12,10 +12,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 SatiePlugin {
-	var <name, <description, <function, 	<setup;
+	var <name, <description, <function;
 
-	*new{|name, description="This should describe the plugin", function, setup|
+	*new{|name, description="This should describe the plugin", function|
 		description = description ? "Description missing"
-		^super.newCopyArgs(name, description, function, setup);
+		^super.newCopyArgs(name, description, function);
 	}
 }

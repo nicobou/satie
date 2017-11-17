@@ -11,17 +11,16 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*   SpatializerPlugin
+/*   SourcePlugin
 *
 */
 
 
-SpatializerPlugin : SatiePlugin {
-	var <numChannels;
+SourcePlugin : SatiePlugin {
 	var <setup;
 
-	*new{|name, description="This should describe the plugin", function, numChannels, setup|
+	*new{|name, description="This should describe the plugin", function, setup|
 		description = description ? "Description missing"
-		^super.newCopyArgs(name, description, function, numChannels, setup);
+		^super.newCopyArgs(name, description, function, setup);
 	}
 }
