@@ -1,26 +1,22 @@
 // Tester for satieOSC protocol
 
+(
+// EVALUATE THIS FIRST to test everyting EXCEPT processes
 
 
 
-// GLOBAL:  listeningFormat   can be optionally set here:
+// CHOOSE listeningFormat   can be optionally set here:
 // defaults to:
-//~listeningFormat = \stereoListener;
+~listeningFormat = \stereoListener;
 // optional formats:
 //  Uncomment to use a different listening format
 //~listeningFormat = \ambi1;
 //~listeningFormat = \ambi3;
 //~listeningFormat = \domeVBAP;
-//~listeningFormat = \labodomeVBAP;
+~listeningFormat = \labodomeVBAP;
 //~listeningFormat = \octoVBAP;
 //~listeningFormat = \stereoListener;
 
-
-(
-// EVALUATE THIS FIRST to test everyting EXCEPT processes
-
-// project state
-~listeningFormat = \stereoListener;  // default listener for project
 ~auxBusCount = 4;
 ~outBusIndex = 0;
 
@@ -30,7 +26,7 @@ s = Server.supernova.local;
 ~satieConfiguration = SatieConfiguration.new(s, [~listeningFormat],~auxBusCount, [~outBusIndex]);
 ~satieConfiguration.serverOptions.blockSize = 512;
 ~satieConfiguration.serverOptions.memSize = (2**21).asInt;        // probably should just leave this the same for everyting
-~satieConfiguration.serverOptions.threads = 8;    // set this to core count
+~satieConfiguration.serverOptions.threads = 24;    // set this to core count
 
 // for use with ambi1
 // choose custom location for HRTF data
@@ -41,17 +37,18 @@ s = Server.supernova.local;
 
 ~satie.satieConfiguration.server.waitForBoot{
 
+	~satie.satieConfiguration.server.sync;    // two are needed, otherwise supernova will exit when synths are generated (maxOS 10.12)
 	~satie.satieConfiguration.server.sync;
 
-	~satie.makeSynthDef(\pink, \PinkSin, [], [],  [~listeningFormat], [~satie.satieConfiguration.outBusIndex[0]]);
-	~satie.makeSynthDef(\dust, \DustDust,  [~satie.aux[0]], [], [~listeningFormat], [~satie.satieConfiguration.outBusIndex[0]]);
-	~satie.makeSynthDef(\default, \default,  [], [], [~listeningFormat], [~satie.satieConfiguration.outBusIndex[0]]);
-	~satie.makeSynthDef(\test, \testtone,   [], [], [~listeningFormat], [~satie.satieConfiguration.outBusIndex[0]]);
-	~satie.makeSynthDef(\busgverb, \gverb,  [], [], [~listeningFormat], [~satie.satieConfiguration.outBusIndex[0]]);
-	~satie.makeSynthDef(\zkarpluck1, \zkarpluck1, [~satie.aux[0]], [], [~listeningFormat], [~satie.satieConfiguration.outBusIndex[0]] );   // sends to effects bus, pre-spatializer
+	~satie.makeSynthDef(\pink, \PinkSin, [], [],  ~satie.satieConfiguration.listeningFormat, [~satie.satieConfiguration.outBusIndex[0]]);
+	~satie.makeSynthDef(\dust, \DustDust,  [~satie.aux[0]], [], ~satie.satieConfiguration.listeningFormat, [~satie.satieConfiguration.outBusIndex[0]]);
+	~satie.makeSynthDef(\default, \default,  [], [], ~satie.satieConfiguration.listeningFormat, [~satie.satieConfiguration.outBusIndex[0]]);
+	~satie.makeSynthDef(\test, \testtone,   [], [], ~satie.satieConfiguration.listeningFormat, [~satie.satieConfiguration.outBusIndex[0]]);
+	~satie.makeSynthDef(\busgverb, \gverb,  [], [], ~satie.satieConfiguration.listeningFormat, [~satie.satieConfiguration.outBusIndex[0]]);
+	~satie.makeSynthDef(\zkarpluck1, \zkarpluck1, [~satie.aux[0]], [], ~satie.satieConfiguration.listeningFormat, [~satie.satieConfiguration.outBusIndex[0]] );   // sends to effects bus, pre-spatializer
 
-	~satie.makeSynthDef(\nearTest, \default,   [~satie.aux[0]],  [],[~listeningFormat],  [~satie.satieConfiguration.outBusIndex[0]], \nearField1);  // for mapping distances
-	~satie.makeSynthDef(\farTest, \default,   [~satie.aux[0]],  [],[~listeningFormat],  [~satie.satieConfiguration.outBusIndex[0]], \farField1);  // for mapping distances
+	~satie.makeSynthDef(\nearTest, \default,   [~satie.aux[0]],  [],~satie.satieConfiguration.listeningFormat,  [~satie.satieConfiguration.outBusIndex[0]], \nearField1);  // for mapping distances
+	~satie.makeSynthDef(\farTest, \default,   [~satie.aux[0]],  [],~satie.satieConfiguration.listeningFormat,  [~satie.satieConfiguration.outBusIndex[0]], \farField1);  // for mapping distances
 
 	~satie.satieConfiguration.server.sync;
 
@@ -113,7 +110,7 @@ b.sendMsg("/satie/source/update", "sheefaFx", 0,0, -20,0,15000,20);   //update s
 
 // create member nodes in group
 (
-20.do( {|item|
+2000.do( {|item|
 	var nodename=("testNode"++"_"++item);
 	b.sendMsg("/satie/scene/createSource",  "sheefa"++item, "dust", "sheefaGroup");    // create source
 	b.sendMsg("/satie/source/update", "sheefa"++item, 360.rand,360.rand,-20,0,15000,20);   // create source

@@ -13,13 +13,13 @@
 // };
 //
 
-/*       Audio plugin definition 
+/*       Audio plugin definition
 
-	Each audio plugin should define the following global variables:
-    ~name: (symbol) name of the spatializer
-	~description: (string) a short description
-	~function: the actual definition of the plugin
-	
+Each audio plugin should define the following global variables:
+~name: (symbol) name of the spatializer
+~description: (string) a short description
+~function: the actual definition of the plugin
+
 */
 
 ~name = \syncSamp1;
@@ -29,35 +29,13 @@
 // pitch disabled
 
 
-
-
-if ( ~syncBus == nil,
-	{
-		"\syncSamp1: setting up global Phasor".inform;
-		~syncBus = Bus.audio(s,1); // this will be our sync bus
-});
-
-
-// set up needed sync signal generator and bus for this synthdef
-SynthDef(\globalPhasor, {| t_trig = 0 |
-	var invSR;
-	invSR = (1 / SampleRate.ir);
-	Out.ar(~syncBus, Phasor.ar(t_trig, invSR, 0,  36000   ));         // increments every second wraps around once every 36000 seconds==10 hours
-}).add;
-
-
-
-// set up VBAP
-~tmpSpkConfig = VBAPSpeakerArray.new(2, [0, 60, 120, 180, -120, -60]); // 6 channel ring
-~tmpVbuf= ~tmpSpkConfig.loadToBuffer;
-
-/* NOTE: this generator must be instantiated for the audiosource defined in this file to work
+/* NOTE: The generator defined in the setup() function below must be instantiated for the audiosource defined in this file to work
 copy the code below into the project file   ".main" to be evaluated
-		if (~phasorSync == nil,
-			{
-		"creating phasorSync generator".inform;
-			~phasorSync = Synth.before(s,\globalPhasor);
-		});
+if (~phasorSync == nil,
+{
+"creating phasorSync generator".inform;
+~phasorSync = Synth.before(s,\globalPhasor);
+});
 */
 // spread == 0, narrow,  spread == 100  wide
 ~function ={| buf = 0, sampAzi = 0, sampSpr = 0, indexSecs = 0, t_trig = 0, loop = 1, durSecs = 4, fadeSecs = 2, trimDB=0,  note = #[60, 1, 1] |
@@ -76,7 +54,7 @@ copy the code below into the project file   ".main" to be evaluated
 	var ampScaled;
 	var interpolation = 4;  // 1 means no interpolation, 2 is linear, 4 is cubic interpolation.
 
-	var phasor =  (In.ar(~syncBus, 1) + indexSecs);  // get the global phasor for sample reading index
+	var phasor =  (In.ar(~syncSamp1SyncBus, 1) + indexSecs);  // get the global phasor for sample reading index
 
 	var wrappedPhasor =  Wrap.ar( phasor,0, BufDur.kr(buf) );   // phasor.Mod(buffDur)
 
@@ -95,7 +73,7 @@ copy the code below into the project file   ".main" to be evaluated
 	// WAS hpassFq = 800 - ( ampScaled * 799) ;  // used to pass lows when force is high
 	hpassFq = 800 - ( incidence * 799) ;  // used to pass lows when incidence is high
 
-	mixScalers = VBAP.kr(~tmpSpkConfig.numSpeakers, 1.0, ~tmpVbuf.bufnum, sampAzi, 0, sampSpr);
+	mixScalers = VBAP.kr(~syncSamp1SpkConfig.numSpeakers, 1.0, ~syncSamp1Vbuf.bufnum, sampAzi, 0, sampSpr);
 	vbapMix = mixScalers * outSig;
 
 	mixdown =  Mix.ar(vbapMix);
@@ -109,6 +87,32 @@ copy the code below into the project file   ".main" to be evaluated
 	// enable for debugging
 	//Out.ar([0,1],mixdown);
 };
+
+
+
+~setup = { |satieInstance|
+
+	// set up VBAP
+	~syncSamp1SpkConfig = VBAPSpeakerArray.new(2, [0, 60, 120, 180, -120, -60]); // 6 channel ring
+	~syncSamp1Vbuf= ~syncSamp1SpkConfig.loadToBuffer;
+
+
+	if ( ~syncSamp1SyncBus == nil,
+		{
+			"\syncSamp1: setting up global Phasor".inform;
+			~syncSamp1SyncBus = Bus.audio(satieInstance.satieConfiguration.server,1); // this will be our sync bus
+	});
+
+	// set up needed sync signal generator and bus for this synthdef
+	SynthDef(\globalPhasor, {| t_trig = 0 |
+		var invSR;
+		invSR = (1 / SampleRate.ir);
+		Out.ar(~syncSamp1SyncBus, Phasor.ar(t_trig, invSR, 0,  36000   ));         // increments every second wraps around once every 36000 seconds==10 hours
+	}).add;
+}
+
+
+
 
 
 // DEBUG

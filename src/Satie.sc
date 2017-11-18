@@ -81,7 +81,7 @@ Satie {
 				{
 					"%:  forcing the server block size to 128 as required by % spatializer ".format(this.class, item).warn;
 					options.blockSize = 128;
-				});
+			});
 		};
 
 		// boot
@@ -133,16 +133,28 @@ Satie {
 	postExec {
 		// execute any code needed after the server has been booted
 		this.setAuxBusses();
+
+		// execute setup functions for spatializers
 		satieConfiguration.listeningFormat.do { arg item, i;
 			// run .setup on spat plugin.
 			// TODO: discuss generalization of this for any plugin.
 			if ((spatPlugins[item.asSymbol].setup == nil).asBoolean,
-				{ if(debug, 
+				{ if(debug,
 					{ "% - no setup here".format(spatPlugins[item].name).postln; }
 				);
 				},
 				{ spatPlugins[item.asSymbol].setup.value(this) }
 			);
-		}
+		};
+		satieConfiguration.server.sync;
+
+		// execute setup functions for audioSources
+		satieConfiguration.audioPlugins.do { arg item, i;
+			if (item.setup  != nil,
+				{
+					item.setup.value(this);
+			});
+		};
+		satieConfiguration.server.sync;
 	}
 }

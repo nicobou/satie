@@ -29,20 +29,15 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 //   when force == 0,  NOTE OFF
 
 
-// set up VBAP
-~tmpSpkConfig = VBAPSpeakerArray.new(2, [0, 60, 120, 180, -120, -60]); // 6 channel ring
-~tmpVbuf= ~tmpSpkConfig.loadToBuffer;
-
-
-~name = "6chLoopbuff".asSymbol;
-
 // note:  bufnum must be first arg !!
 
 // sampSpr:  0 narrow -----   100  wide
 //  6 channel mapping  :   sampAzi:    -180 to 180  degrees
 // amp scales the whole thing
 // initializes to note-on playing state
-~description = "6 channels looper";
+
+~name = "6chLoopbuff".asSymbol;
+~description = "6 track sample looper";
 ~function = { | bufnum=0, glide=0.2, loopRel=0, startPosSecs=0, trimDB=0, startLoop=0, endLoopSecs=99999, ipol=2, curve=0, attackMs=0.01, releaseSecs=1, warp=5, transp=0, sampAzi=0, sampSpr=0,  amp=1, clipBoostDB = 0, note = #[60, 1, 1] |
 
 
@@ -61,7 +56,7 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 
 
 	/*var eScalers = [1,1,1,1,1,1];    // available for further implementation of custom track weighting is needed... try to avoid, though-- get it right in the track mix first
-*/
+	*/
 
 	// incidence = incidence.clip(0,1);    // incidence not used
 
@@ -73,7 +68,7 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 
 	sig = LoopBuf.ar(6,bufnum, BufRateScale.kr(bufnum) * rate, gate+loopRel, startPos, startLoop, endLoop, ipol);
 
-	vbapScalers = VBAP.kr(~tmpSpkConfig.numSpeakers, 1.0, ~tmpVbuf.bufnum, sampAzi, 0, sampSpr);
+	vbapScalers = VBAP.kr(~sixChLooperSpkConfig.numSpeakers, 1.0, ~sixChLooperVbuf.bufnum, sampAzi, 0, sampSpr);
 
 
 	// eScalers[0] = eLamp * (vbapScalers[0] ** exp);
@@ -93,6 +88,18 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 	// Out.ar(0, outsig);   // for debugging
 
 };
+
+
+// called after server is booted so that the VBAP buffer can be properly allocated
+~setup = { |satieInstance|
+
+	// set up VBAP
+	~sixChLooperSpkConfig = VBAPSpeakerArray.new(2, [0, 60, 120, 180, -120, -60]); // 6 channel ring
+	~sixChLooperVbuf= ~sixChLooperSpkConfig.loadToBuffer;
+
+}
+
+
 
 
 /*

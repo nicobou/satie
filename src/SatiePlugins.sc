@@ -21,6 +21,10 @@ SatiePlugins : Dictionary {
 		^super.new.spatializerPath(path);
 	}
 
+		*newSource {|path|
+		^super.new.sourcePath(path);
+	}
+
 
 	/*
 	*  Append plugins from path
@@ -42,8 +46,14 @@ SatiePlugins : Dictionary {
 			// reset global variables
 			~name = ~description = ~function = ~numChannels = ~setup = nil;
 		};
-
-
+	}
+		sourcePath { arg path;
+		path.pathMatch.do{arg item;
+			item.loadPaths;
+			this.add(~name.asSymbol -> SourcePlugin.new(~name, ~description, ~function, ~setup));
+			// reset global variables
+			~name = ~description = ~function = ~setup = nil;
+		};
 	}
 
 	addAudioPlugin { | env |

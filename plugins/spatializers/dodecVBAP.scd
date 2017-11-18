@@ -11,17 +11,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*       Spatializer plugin definition 
+/*       Spatializer plugin definition
 
 	Each spatializer plugin should define the following global variables:
     ~name: (symbol) name of the spatializer
 	~description: (string) a short description
 	~numChannels: (int) number of channels
 	~function: the definition of the spatializer
-	
+
 	where function should use the following input arguments:
 
-	in 
+	in
 	aziDeg degrees (-180 to 180)
 	elevDeg   degrees (-180 to 180)
 	gainDB  decibels
@@ -60,9 +60,6 @@
 // defined by Peter Otto
 // define_loudspeakers 3 90. -69.094841 -90. -69.094841 45. -35.264389 -45. -35.264389 -135. -35.264389 135. -35.264389 0. -20.905161 180. -20.905161 69.094841 0. -69.094841 0. -110.905159 0. 110.905159 0. 0. 20.905161 180. 20.905161 45. 35.264389 -45. 35.264389 -135. 35.264389 135. 35.264389 90. 69.094841 -90. 69.094841
 
-~vbuf20 = Buffer.loadCollection(s, ~spk20.getSetsAndMatrices);
-
-
 
 ~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP
@@ -89,6 +86,11 @@
 		spread: spread );
 
 	outsig * Lag.kr(panWeights, 0.030);
+};
+
+
+~setup = { |satieInstance|
+		~vbuf20 = Buffer.loadCollection(satieInstance.satieConfiguration.server, ~spk20.getSetsAndMatrices);
 };
 
 

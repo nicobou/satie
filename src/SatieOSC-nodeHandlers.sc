@@ -440,9 +440,9 @@
 					value = satie.aux[val.asInt];
 				},
 				{
-					"%: running default set, args: \n     prop: %\n     value: % ".format(
+/*					"%: running default set, args: \n     prop: %\n     value: % ".format(
 						this.class.getBackTrace, prop, val
-					).postln;
+					).postln;*/
 					value = val;
 				}
 			);
@@ -453,7 +453,7 @@
 				},
 				{
 					group.set(prop.asSymbol, val);
-					"%: % does not implement a setter".format(this.class.getBackTrace, process).postln;
+					//"%: % does not implement a setter".format(this.class.getBackTrace, process).postln;
 			});
 		});
 	}

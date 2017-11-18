@@ -11,17 +11,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*       Spatializer plugin definition 
+/*       Spatializer plugin definition
 
 	Each spatializer plugin should define the following global variables:
     ~name: (symbol) name of the spatializer
 	~description: (string) a short description
 	~numChannels: (int) number of channels
 	~function: the definition of the spatializer
-	
+
 	where function should use the following input arguments:
 
-	in 
+	in
 	aziDeg degrees (-180 to 180)
 	elevDeg   degrees (-180 to 180)
 	gainDB  decibels
@@ -36,7 +36,6 @@
 
 ~spk5 = VBAPSpeakerArray.new(2, [-45, 45, 135, -135, 0]); // 5 channel ring
 // output channel assignment order from 0 to 5:   [FL, FR ,SR , SL ,C ,SUB]
-~vbuf5 = Buffer.loadCollection(s, ~spk5.getSetsAndMatrices);
 
 ~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP
@@ -68,5 +67,8 @@
 };
 
 
+~setup = { |satieInstance|
+		~vbuf5 = Buffer.loadCollection(satieInstance.satieConfiguration.server, ~spk5.getSetsAndMatrices);
+};
 
 

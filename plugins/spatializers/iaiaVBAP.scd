@@ -30,19 +30,54 @@ lpHz    hertz
 spread  units  (0 == directional, ....,  100 == omni)
 */
 
-// labodome speaker layout
+// IAIA 24-channel speaker layout
 
-~name = \labodomeVBAP;
-~description = "24 channel speaker layout on a sphere (minidome at the SAT)";
+~name = \iaiaVBAP;
+~description = "24 channel speaker layout on a sphere ( digital dome at IAIA)";
 ~numChannels = 24;
 
+~spkIAIA_24 = VBAPSpeakerArray.new(3, [
 
-	~spk24 = VBAPSpeakerArray.new(3, [
-		[0, 90],
-		[0, 60], [45, 60], [90, 60], [135, 60], [180, 60], [-135, 60], [-90, 60], [-45, 60],
-		[0, 20], [45, 20], [90, 20], [135, 20], [180, 20], [-135, 20], [-90, 20], [-45, 20],
-		[0, -15], [45, -15], [90, -15], [135, -15], [-135, -10], [-90, -10], [-45, -10],]);
+	// IAIA speaker configuration (nov. 2017)
+	// adjusted by zack settel, using aproximate measures, based on a point located at 0,0,2m (height)
+	//Speakers starting front left and incrementing clockwise:
+	//1-8. low wall speakers
+	//9-16. high wall speakers
+	//17-20. ceiling speakers
+	//21-24. floor speakers
 
+	// mid-low
+	[-22.5, 0],
+	[22.5, 0],
+	[67.5, 0],
+	[112.5, 0],
+	[157.5, 0],
+	[-157.5, 0],
+	[-112.5, 0],
+	[-67.5, 0],
+
+	//mid-high
+	[-22.5, 45],
+	[22.5, 45],
+	[67.5, 45],
+	[112.5, 45],
+	[157.5, 45],
+	[-157.5, 45],
+	[-112.5, 45],
+	[-67.5, 45],
+
+	//ceiling
+	[-45, 80],
+	[45, 80],
+	[135, 80],
+	[-135, 80],
+
+	//floor
+	[-45, -10],
+	[45, -10],
+	[135, -10],
+	[-135, -10]
+]);
 
 ~function = { | in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP
@@ -54,9 +89,6 @@ spread  units  (0 == directional, ....,  100 == omni)
 	var panWeights;
 	var outsig;
 
-
-
-
 	outsig =  LPF.ar(DelayC.ar(
 		Lag.kr(gain, slewGain) * in,
 		maxdelaytime: 0.5,
@@ -64,20 +96,64 @@ spread  units  (0 == directional, ....,  100 == omni)
 
 	outsig = BHiPass.ar(outsig, VarLag.kr(hpHz, slewFilter )  );
 
-	panWeights = VBAP.kr(numChans: ~spk24.numSpeakers,
+	panWeights = VBAP.kr(numChans: ~spkIAIA_24.numSpeakers,
 		in: 1.0,
-		bufnum: ~vbuf24.bufnum,
+		bufnum: ~vbufIAIA_24.bufnum,
 		azimuth: aziDeg,
 		elevation: eleDeg,
 		spread: spread );
-
-	//SendTrig.kr(Impulse.kr(4), 0,  VarLag.kr(hpHz, 1, 0, Env.shapeNumber(\sin)  )     );  //  Enable for debugging
-
-	//SendTrig.kr(Impulse.kr(1), 0, [ Lag.kr(gain, slewGain),  gain ] );  //  Enable for debugging
 
 	outsig * Ramp.kr(panWeights, slewPanning);
 };
 
 ~setup = { |satieInstance|
-	~vbuf24 = Buffer.loadCollection(satieInstance.satieConfiguration.server, ~spk24.getSetsAndMatrices);
+		~vbufIAIA_24 = Buffer.loadCollection(satieInstance.satieConfiguration.server, ~spkIAIA_24.getSetsAndMatrices);
 };
+
+/*
+
+OFFICIAL LAYOUT
+
+~spkIAIA_24 = VBAPSpeakerArray.new(3, [
+
+	// IAIA speaker configuration (nov. 2017)
+	//Speakers starting front left and incrementing clockwise:
+	//1-8. low wall speakers
+	//9-16. high wall speakers
+	//17-20. ceiling speakers
+	//21-24. floor speakers
+
+	// mid-low
+	[-22.5, -22.5],
+	[22.5, -22.5],
+	[67.5, -22.5],
+	[112.5, -22.5],
+	[157.5, -22.5],
+	[-157.5, -22.5],
+	[-112.5, -22.5],
+	[-67.5, -22.5],
+
+	//mid-high
+	[-22.5, 22.5],
+	[22.5, 22.5],
+	[67.5, 22.5],
+	[112.5, 22.5],
+	[157.5, 22.5],
+	[-157.5, 22.5],
+	[-112.5, 22.5],
+	[-67.5, 22.5],
+
+	//ceiling
+	[-45, 60],
+	[45, 60],
+	[135, 60],
+	[-135, 60],
+
+	//floor
+	[-45, -60],
+	[45, -60],
+	[135, -60],
+	[-135, -60]
+]);
+
+*/
