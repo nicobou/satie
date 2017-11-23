@@ -42,6 +42,7 @@ Satie {
 
 	// introspection
 	var <inspector;
+	var <>generatedSynthDefs;
 
 	// mastering spatialisation. one unique synth is generater per spatializer
 	var <postProcessors;
@@ -73,6 +74,7 @@ Satie {
 		inspector = SatieIntrospection.new(this);
 	}
 
+	// public method
 	boot {
 
 		// pre-boot
@@ -92,9 +94,9 @@ Satie {
 		satieConfiguration.server.doWhenBooted({this.makeSatieGroup(\defaultFx, \addToTail)});
 		satieConfiguration.server.doWhenBooted({this.makePostProcGroup()});
 		satieConfiguration.server.doWhenBooted({this.postExec()});
+
 	}
 
-	// public method
 	replacePostProcessor{ | pipeline, outputIndex = 0, spatializerNumber = 0, defaultArgs = #[] |
 		satieConfiguration.server.doWhenBooted({
 			var postprocname = "satie_post_processor_"++spatializerNumber;
@@ -155,6 +157,13 @@ Satie {
 					item.setup.value(this);
 			});
 		};
+
+		// generate synthdefs
+		audioPlugins.do { arg item;
+			this.makeSynthDef(item.name,item.name, [], [], satieConfiguration.listeningFormat, [satieConfiguration.outBusIndex]);
+		};
+		generatedSynthDefs = audioPlugins.keys;
+
 		satieConfiguration.server.sync;
 	}
 }

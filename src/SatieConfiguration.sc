@@ -18,7 +18,6 @@ SatieConfiguration {
 	var <outBusIndex;
 	var <>hrtfPath;
 	var <>debug = false;
-
 	var <satieRoot;
 	var <serverOptions;
 
