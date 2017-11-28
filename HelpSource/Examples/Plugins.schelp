@@ -18,14 +18,14 @@ code::
 ~description = "Short description of plugin's purpose or functionality";
 // function definition
 ~function = {| sfreq = 200 |
-    // note, that the plugin should not contain Out uGen. 
-    FSinOsc.ar(sfreq)
+    // note, that the plugin should not contain Out uGen.
+    FSinOsc.ar(sfreq)
 };
 ::
 Each plugin resides in its own .scd file. Each field is a global variable which gets consumed by the plugin loader, one at a time.
 
 SECTION:: Working with plugins on-the-fly
-ANCHOR::onthefly
+ANCHOR::onthefly::
 
 Sometimes, especially when developing new instruments, it is desirable to just doodle on a scratchpad without the need of saving a loading files off the disk. link::Classes/SatiePlugins#addAudioPlugin:: allows for loading a plugin defined in an environment, mimicking the above plugin creation guidelines:
 
