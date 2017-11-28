@@ -1,7 +1,7 @@
 TITLE:: SpatializerPlugin
 summary:: A SATIE spatializer plugin
 categories:: Libraries>SATIE
-related:: Overview/SATIE-Overview, Classes/Satie, Classes/SatiePlugins, Classes/SpatializerPlugin, Overview/Plugins
+related:: Overview/SATIE-Overview, Classes/Satie, Classes/SatiePlugins, Classes/SpatializerPlugin, Examples/Plugins
 
 DESCRIPTION::
 A spacializer plugins
@@ -10,7 +10,7 @@ A spacializer plugins
 CLASSMETHODS::
 
 METHOD:: new
-Make a new instance of a plugin loaded from disk. See link::Overview/Plugins:: for an example about SATIE plugins.
+Make a new instance of a plugin loaded from disk. See link::Examples/Plugins:: for an example about SATIE plugins.
 
 ARGUMENT:: name
 Symbol, (unique) name under which the plugin will be referred to by SATIE.makeSynthDef method.

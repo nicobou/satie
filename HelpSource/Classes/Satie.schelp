@@ -222,11 +222,6 @@ s = Server.supernova.local;
 ~satie = Satie.new(~satieConfiguration);
 ~satie.boot();
 s.waitForBoot({
-    // create a default group
-    // ~satie.makeSatieGroup(\default);
-    // define some synths
-    ~satie.makeSynthDef(\boo, \misDrone, [], [], ~satieConfiguration.listeningFormat, [0]);
-    ~satie.makeSynthDef(\test, \testtone, [], [], ~satieConfiguration.listeningFormat, [0]);
     // display some information
     s.meter;
     s.makeGui;
