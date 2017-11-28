@@ -1,0 +1,172 @@
+TITLE:: SATIE OSC protocol
+summary:: The documentation of the SATIE OSC protocol
+categories:: Libraries>SATIE
+Section:: OSC API
+SATIE listens on port 18032 by default.
+
+subsection:: Scene Messages
+definitionlist::
+## /satie/load filename
+|| loads and evaluates file in supercollider.  Filename must be a full file path to a file located on the audiorendering machine
+
+## /satie/scene/createSource nodeName  synthdefName <groupName>
+|| Instantiate an audio generator plugin.
+list::
+##nodeName :  the name of the instance.
+##synthDefName : the name of the synthdef registered with the system.
+##groupName :  (optional) the name of the group. Default: '\default'
+::
+## /satie/scene/createEffect nodeName synthdefName <groupName> <auxBus>
+|| Instantiate an audio effect plugin
+list::
+##nodeName :  the name of the instance.
+##synthDefName : the name of the synthdef registered with the system.
+##groupName :  (optional) the name of the group.  Default: '\defaultFx'
+##auxBus: (optional) number of aux bus for the effect's input. Default: '0'
+::
+##/satie/scene/createProcess nodeName processName <optargs>
+|| Create/instantiate a process
+list::
+## nodeName : the name of the instance.
+## processName : the name of the defined process followed by its arguments, if any
+::
+##/satie/scene/createSourceGroup nodeName
+|| Create a new group at the head of the Satie's DSP chain
+list::
+## nodeName : name of the group.
+::
+##/satie/scene/createEffectGroup nodeName
+|| Create a new group at the end of Satie's DSP chain
+list::
+## nodeName : name of the group.
+::
+##/satie/scene/createProcessGroup nodeName
+|| Create a new group on the head of the DSP chain
+list::
+## nodeName : name of the group.
+::
+##/satie/scene/deleteNode nodeName
+|| Delete a node
+list::
+## nodeName : the name of the node to be deleted
+::
+##/satie/scene/clear
+|| Clear the scene. Removes all instances and groups.
+##/satie/scene/set key value
+|| Set a scene-wide keyword value
+list::
+## key : parameter name
+## value :  int, float or string
+::
+##/satie/scene/debug debugFlag
+|| Enable or disable debug printing
+list::
+## debugFlag : 1 or 0,  defaults to 0
+::
+::
+
+subsection:: Project Messages
+
+definitionlist::
+##/satie/project/projectName setProjectDir
+||full path to supercollider resources, such as soundfiles or midi files
+::
+
+subsection:: Node messages
+For nodeTypes:  source, group, or process
+definitionlist::
+##/satie/<nodeType>/state nodeName value
+|| Node state : 1 = active, 0 = inactive
+##/satie/<nodeType>/event nodeName eventName <opt> atom1 atom2...atomN
+|| some event
+##/satie/<nodeType>/set nodeName key1 val1 key2 val2 .... keyN valN
+|| set a property
+##/satie/<nodeType>/setvec nodeName key val1 .....  valN
+|| set a vector
+::
+Only for nodeTypes: source and process
+definitionlist::
+##/satie/<nodeType>/update nodeName azimuthDegrees elevationDegrees gainDB delayMS  lpHZ  distance
+|| update
+list::
+## nodeName : name of the node
+## azimuthDegrees : azimuth in degrees (-180 ... 180)
+## elevationDegrees : (-180 ... 180)
+## gainDB : gain in decibles
+## delayMS : delay in miliseconds
+## lpHZ : low pas filter in Hertz
+## distance : distance in meters
+::
+##/satie/<nodeType>/ublob nodeName byte1 ... byte12     // for update blob: packed encoded update message  (some loss)
+|| packed encoded update message
+::
+
+Only for noteType: process
+
+definitionlist::
+##/satie/process/property processName key value   // to update a process environment property
+|| property key, value
+##/satie/process/eval processName handlerName optArg1 ... opeArgN   // to invoke a process function with zero or more arguments
+|| eval handlerName, args[]
+::
+
+subsection:: Introspection
+
+You can query SATIE via OSC and get some information. SATIE responds to the following messages:
+definitionlist::
+##/satie/plugins   // get existing synthdefs
+|| SATIE responds with an osc message: /plugins   JSON string containing 2 objects: audiosources and effects, each listing existing synthdefs by name.
+##/satie/pluginargs synthdefName // get arguments of some synthdef
+|| synthdefName string
+
+   SATIE responds with an osc message:  /arguments   JSON string representing plugin's name, description and list of arguments and default values
+::
+
+
+note:: by default, the response is sent to ip.port of the sender. It can be set permanently for the duration of the session via by sending code::/satie/responder:: a message containing IP and port::
+
+definitionlist::
+##/satie/responder ip port
+|| ip, port are a string and int
+::
+
+The folloing example sets up a SATIE system, sets return address to localhost and fix port and queries some plugins:
+
+code::
+// prepare server
+(
+~listeningFormat = \stereoListener;
+
+s = Server.supernova.local;
+~satieConfiguration = SatieConfiguration.new(s, [~listeningFormat], numAudioAux: 2);
+~satieConfiguration.serverOptions.blockSize = 1024;
+~satieConfiguration.debug = false;
+~satie = Satie.new(~satieConfiguration);
+~satie.boot();
+s.waitForBoot({
+	~satie.makeSynthDef(\string, \zkarpluck1, [], [~satie.aux[0]], ~satieConfiguration.listeningFormat, [0]);
+	~satie.makeSynthDef(\default, \default, [], [], ~satieConfiguration.listeningFormat, [0]);
+	~satie.makeSynthDef(\dust, \DustDust,   [], [~satie.aux[0]], ~satieConfiguration.listeningFormat, [0]);  // post-spatializer send
+	// be sure the synthDef is compiled on the server	s.meter;
+	~satie.makeSynthDef(\zkarpluck1P, \zkarpluck1P,   [~satie.aux[0]], [], ~satieConfiguration.listeningFormat, [0]);   // sends to effects bus, pre-spatializer
+	~satie.makeSynthDef(\zkarpluck1, \zkarpluck1,  [], [~satie.aux[0]], ~satieConfiguration.listeningFormat, [0]);   // sends to effects bus, post-spatializer
+	~satie.makeSynthDef(\busreverb, \freeverb,  [], [], ~satieConfiguration.listeningFormat, [0]);
+	~satie.makeSynthDef(\busgverb, \gverb,  [], [], ~satieConfiguration.listeningFormat, [0]);
+
+	~satie.makeSynthDef(\zkarpluck2P, \zkarpluck2P,   [~satie.aux[0]],  [],~satieConfiguration.listeningFormat,  [0], \randOffsets1);
+});
+)
+
+// set up an OSC client
+b = NetAddr.new("127.0.0.1", 18032);    // connect to satie's RX port
+
+// set SATIE's responder address for this session
+b.sendMsg("/satie/responder", "127.0.0.1", 18132);
+
+// enquire about existing synthdefs
+b.sendMsg("/satie/audioplugins")
+// choose query the synthdef arguments
+b.sendMsg("/satie/pluginargs", "string")
+::
+
+Go back to link::Overview/SATIE-Overview::

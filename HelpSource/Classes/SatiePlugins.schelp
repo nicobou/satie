@@ -1,0 +1,49 @@
+TITLE:: SatiePlugins
+summary:: A dictionary of plugins
+categories:: Libraries>SATIE
+related:: Overview/SATIE-Overview, Classes/Satie, Classes/SatiePlugin, Classes/SpatializerPlugin, Examples/Plugins
+
+DESCRIPTION::
+Collects plugins from a provided path and makes them available to SATIE user.
+
+CLASSMETHODS::
+
+METHOD:: newAudio
+Load audio (generators or effects) plugins.
+
+ARGUMENT:: path
+Absolute path to the directory containing plugins (String)
+
+returns:: SatiePlugins (dictionary)
+
+METHOD:: newSpat
+Load spatializer plugins.
+
+ARGUMENT:: path
+Absolute path to the directory containing plugins (String)
+
+returns:: SatiePlugins (dictionary)
+
+
+INSTANCEMETHODS::
+
+METHOD:: showPlugins
+Print some information on contained plugins (name and description)
+
+METHOD:: addAudioPlugin
+Add an audio plugin to list of plugins.
+
+ARGUMENT:: env
+Environment: The plugin definitionm (see link::Examples/Plugins:: for an example).
+
+METHOD:: audioPath
+A method for building a dictionary of audio plugins.
+
+ARGUMENT:: path
+Absolute path to the directory containing plugins.
+
+METHOD:: spatializerPath
+A method for building a dictionary of spatializer plugins.
+
+ARGUMENT:: path
+Absolute path to the directory containing plugins.

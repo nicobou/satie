@@ -1,0 +1,114 @@
+TITLE:: Processes
+summary:: Introduction to SATIE processes
+categories:: Libraries>SATIE
+
+Go back to link::Overview/SATIE-Overview:: previous: link::Examples/Kamikaze:: next:  link::Examples/ProcessComplex::
+
+Processes allow more complex behaviors while limiting OSC communications between 3D engine and SATIE server. Processes are arbitrary routines and could be associated with particle systems, granular-type sound events, patterns, sequences, but are not limited to generating sound (or other events) could also be used for introspection, tracking of various interaction or sound features and reporting. The process will run completely independent of the 3D engine control via OSC, unless appropriate methods have been implemented or overriden.
+
+SECTION::Simple process example
+
+We start with setting up SATIE. The synths that will be used by the process must be compiled on the server:
+
+code::
+(
+s = Server.supernova.local;
+~satieConfiguration = SatieConfiguration.new(s, [\stereoListener]);
+~satieConfiguration.serverOptions.blockSize = 1024;
+~satieConfiguration.debug = false;
+~satie = Satie.new(~satieConfiguration);
+~satie.boot();
+s.waitForBoot({
+	~satie.makeSynthDef(\string, \zkarpluck1, [], [], ~satieConfiguration.listeningFormat, [0]);
+	// be sure the synthDef is compiled on the server	s.meter;
+	s.makeGui;
+	s.plotTree;
+})
+)
+::
+
+And we define the process. The process needs to be encapsulated in an environment and must implement soft::setup:: and soft::cleanup:: methods. These methods are being used in OSC handlers. See OSC API to see which methods could be implemented to have some control over process via OSC.
+
+code::
+(
+//process definition
+~helloProcess = Environment.make({
+	~routine;
+	~makeRoutine = { |self |
+		self.routine = Routine {
+			// Here the routine creates sound objects without deleting them util the routine is stopped.
+			loop { arg item;
+				var nodename=("testNode"++"_"++item).asSymbol;
+				var synth;
+				var note;
+				var elev = Prand([-90, -60, 30, 0, 90]).asStream;
+				note = rrand(60, 63);
+				synth = ~satie.makeKamikaze(nodename.asSymbol, \string);
+				synth.set(
+					\t_trig, 1,
+					\gainDB, rrand(-40, -30),
+					\note, [note, 1, 0.5],
+					\aziDeg, rrand(-180,180),
+					\spread, 0,
+					\eleDeg, elev.next
+				);
+				0.5.wait;
+			}
+		};
+	};
+	~start = { | self | self.routine.reset; self.routine.play };
+
+	// setup and cleanup methods are mandatory, particularly for use via OSC
+	~setup = { | self | self.makeRoutine; self.start; };
+	~cleanup = { | self | self.routine.stop;};
+});
+)
+::
+
+code::
+// register the process with SATIE
+~process = ~satie.makeProcess(\testProcess, ~helloProcess);
+// setup will will execute it automatically
+~process.setup.value();
+// stop the process
+~process.cleanup;
+::
+code::
+(
+// invoke specific process functions
+~process.makeRoutine;
+~process.start;
+~process.cleanup;
+)
+::
+
+We can also/alternatively access processes via SATIE's dictionaries
+code::
+(
+~satie.processes[\testProcess].makeRoutine
+~satie.processes[\testProcess].start
+)
+::
+
+And, of course, we use it remotely, via OSC:
+note::
+soft::createProcess:: handler automatically executes soft::setup:: method. Similarly, soft::deleteNode:: handler automatically executes soft::cleanup:: method. See the link::Examples/OSC:: and link::Classes/OSC:: for more information ::
+code::
+(
+// connect to satie's RX port
+b = NetAddr.new("127.0.0.1", 18032);
+b.sendMsg("/satie/scene", "debugFlag", 1);    // activate  debugging printing to console
+b.sendMsg("/satie/scene", "debugFlag", 0);    // deactivate debugging printing to console
+)
+// create process node - unique group will be automatically generated for each created
+b.sendMsg("/satie/scene", "createProcess",  "myProcess", "process://testProcess" );
+// remove it
+b.sendMsg("/satie/scene", "deleteNode", "myProcess");
+::
+
+
+Go back to link::Overview/SATIE-Overview::
+
+Previous Section: link::Examples/Kamikaze::
+
+Next Section: link::Examples/ProcessComplex::

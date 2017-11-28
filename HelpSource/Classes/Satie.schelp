@@ -1,0 +1,233 @@
+TITLE:: Satie
+summary:: The main SATIE renderer
+categories:: Libraries
+related:: Overview/SATIE-Overview, Classes/SatieConfiguration, Classes/SatiePlugin, Classes/SatieFactory
+
+DESCRIPTION::
+This is the main entry class into the SATIE audio rendering system. It relies on  LINK::Classes/SatieConfiguration::
+
+
+CLASSMETHODS::
+
+METHOD:: new
+Creates a new Satie renderer
+
+ARGUMENT:: satieConfiguration
+LINK::Classes/SatieConfiguration::
+
+INSTANCEMETHODS::
+
+METHOD:: satieRoot
+The directory on user's file system from where SATIE is instantiated. This class variable is computed automatically by LINK::Classes/SatieConfiguration:: and is taken into account by plugin definition loaders.
+
+returns:: Root path of SATIE installation
+
+METHOD:: makeInstance
+Instantiate a compiled synthdef (audio source or effect) and insert a reference into the groupInstances dictionary.
+
+ARGUMENT:: name
+Symbol: a unique name by which the audio source or effect will be recognizable by SATIE
+
+ARGUMENT:: synthDefName
+Symbol: the name of the synth definition (see link::Classes/Satie#-makeSynthDef:: below)
+
+ARGUMENT:: group
+Symbol: the name of the group to place the audio source or effect in.
+
+ARGUMENT:: synthArgs
+Array: Synth properties to be taken intio account at instantiation time. All settable synth properties can be manipulated via the standard set message provided by link::Classes/Synth:: instance.
+
+returns:: a link::Classes/Synth::
+
+METHOD:: replacePostProcessor
+Replaces post-processor pipeline at the output of the spatializer.
+
+ARGUMENT:: pipeline
+a list of symbols representing the post-processor names. See link::Classes/Plugins:: and link::Examples/Plugins:: for more information on SATIE plugins
+
+ARGUMENT:: outputIndex
+Output channel index from which this post-processor will take effect, default 0
+
+ARGUMENT:: spatializerNumber
+Index number of the spatializer to which the post-process will be attached. Default 0
+
+ARGUMENT:: defaultArgs
+An array of arguments, if any
+
+
+
+METHOD:: fxPlugins
+a dictionary containing effects plugins definitions
+
+returns:: link::Classes/SatiePlugins::
+
+METHOD:: cloneProcess
+Clone a process
+
+ARGUMENT:: processName
+The name of the process
+
+returns:: a clone of the process
+
+(see an example of processes in LINK::Examples/Processes::)
+
+METHOD:: makeKamikaze
+Instantiate a shadow of the audio source of effect. See LINK::Examples/Kamikaze:: for an example of Kamikaze. See link::Classes/Satie#-makeSynthDef:: above for the description of arguments.
+
+returns:: link::Classes/Synth::
+
+METHOD:: makeSatieGroup
+A SATIE group is a dictionary that holds references to instantiated audio objects. It is particularly useful for changing properties on many objects with one message.
+
+ARGUMENT:: name
+Symbol: the group's name
+
+ARGUMENT:: addAction
+defines where this group will placed within the chain  of existing groups.
+
+returns:: link::Classes/ParGroup::
+
+METHOD:: cleanInstance
+Remove the synth instance (audio source or effect)
+
+ARGUMENT:: name
+Symbol: name of the instance
+
+ARGUMENT:: group
+Symbol: from which group
+
+This method does not return.
+
+METHOD:: spat
+Instance variable that holds the name of the curently used spatializer.
+
+returns:: Symbol
+
+METHOD:: server
+Holds the server instance.
+
+returns:: SuperCollider server
+
+METHOD:: makeProcess
+Creates a process. See link::Examples/Processes:: for an example about processes.
+
+ARGUMENT:: processName
+Name of process as Symbol. See link::Examples/Processes:: for an example about processes.
+
+ARGUMENT:: env
+String: the Environment source (see LINK::Examples/Processes::)
+
+returns:: link::Classes/Environment::
+
+METHOD:: processes
+A dictionary of processes. Read only.
+
+returns:: link::Classes/Dictionary::
+
+METHOD:: groups
+A dictionary of groups. Read only.
+
+returns:: link::Classes/Dictionary::
+
+METHOD:: groupInstances
+A dictionary of instances, per group. Read only.
+
+returns:: link::Classes/Dictionary::
+
+METHOD:: killSatieGroup
+Remove a SATIE group.
+
+ARGUMENT:: name
+Symbol: the name of the group.
+
+METHOD:: pauseInstance
+Stop processing an instance but do not destroy it (sends it release() message).
+
+ARGUMENT:: name
+Symbol: the name of the instance.
+
+ARGUMENT:: group
+Symbol: the name of the group.
+
+This method does not return.
+
+METHOD:: mapperPlugins
+
+returns:: a link::Classes/Dictionary:: of mapper plugins
+
+METHOD:: debug
+
+returns:: link::Classes/SatieConfiguration##debug::
+
+METHOD:: spatPlugins
+
+returns:: link::Classes/SatieConfiguration##spatPlugins::
+
+METHOD:: audioPlugins
+(describe method here)
+
+returns:: (describe returnvalue here)
+
+METHOD:: initRenderer
+(describe method here)
+
+returns:: (describe returnvalue here)
+
+METHOD:: makeSynthDef
+Calls link::Classes/SatieFactory#makeSynthDef:: method and creates references to compiled SynthDefs
+
+ARGUMENT:: id
+(Symbol) The SynthDef's unique name on the server
+
+ARGUMENT:: srcName
+(Symbol) The name of the source (see link::Examples/Plugins::)
+
+ARGUMENT:: srcPreToBusses
+(Array) Passed to pre-process busses (see link::Classes/SatieFactory::)
+
+ARGUMENT:: srcPostToBusses
+(Array) Passed to post-process busses (see link::Classes/SatieFactory::)
+
+ARGUMENT:: spatSymbolArray
+(Array) Passed to spatialiser array (see link::Classes/SatieFactory::)
+
+ARGUMENT:: firstOutputIndexes
+(Array) Start output bus index (see link::Classes/SatieFactory::)
+
+ARGUMENT:: paramsMapper
+(Array) Parameter mapper plugins (see link::Classes/SatieFactory::)
+
+ARGUMENT:: synthArgs
+Custom synth arguments passed to link::Classes/SatieFactory::
+
+returns:: a Synth
+
+METHOD:: satieConfiguration
+Reference to link::Classes/SatieConfiguration::
+
+METHOD:: removeProcess
+Remove a process from the pipeline and clear its references.
+
+ARGUMENT:: processName
+(Symbol) The name (id) of the process
+
+EXAMPLES::
+Post-processor example
+code::
+(
+// prepare the server
+s = Server.supernova.local;
+~satieConfiguration = SatieConfiguration.new(s, [\stereoListener]);
+~satieConfiguration.serverOptions.blockSize = 1024;
+~satie = Satie.new(~satieConfiguration);
+~satie.boot();
+s.waitForBoot({
+    // display some information
+    s.meter;
+    s.makeGui;
+    s.plotTree;
+});
+)
+// add post-process
+~satie.replacePostProcessor([\limiter], 0, 0);
+::

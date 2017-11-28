@@ -1,0 +1,37 @@
+TITLE:: SourcePlugin
+summary:: SATIE audio source plugin
+categories:: SATIE
+related:: Overview/SATIE-Overview, Classes/Satie, Classes/SatiePlugins, Classes/SpatializerPlugin, Examples/Plugins
+
+
+DESCRIPTION::
+This is a base class for SATIE plugin that will output audio signals.
+All SATIE plugins (audiosources, effects, mappers, postprocessors, spatializers) reside in the plugin directory within the SATIE tree. Other plugins can be added from, arbitrary location, by adding to the appropriate dictionaries (see link::Classes/SatiePlugins:: and link::Classes/SatieConfiguration::).
+
+
+CLASSMETHODS::
+
+METHOD:: new
+Make a new instance of a plugin loaded from disk. See link::Examples/Plugins:: for an example about SATIE plugins.
+
+ARGUMENT:: name
+Symbol, (unique) name under which the plugin will be referred to by SATIE.makeSynthDef method.
+
+ARGUMENT:: description
+String, a short description of the plugin
+
+ARGUMENT:: function
+The actual sclang code that defines the plugin's behaviour.
+
+ARGUMENT:: setup
+String, a function that will be executed within the boot sequence
+
+returns:: SatiePlugin
+
+
+INSTANCEMETHODS::
+
+METHOD:: setup
+Private method
+
+returns:: provided parameters

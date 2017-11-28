@@ -1,0 +1,12 @@
+TITLE:: Kamikaze
+summary:: Introduction to the concept of Kamikaze object in SATIE.
+categories:: Libraries>SATIE
+
+Section::Disposable synths
+
+Kamikaze are synths (or effects) that will free themselves after they have performed some task. See link::Examples/Processes:: for an example use of a Kamikaze.
+
+Go back to link::Overview/SATIE-Overview::
+
+Previous Section: link::Examples/Effects::
+Next Section: link::Examples/Processes::

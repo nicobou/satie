@@ -1,0 +1,107 @@
+TITLE:: SatieConfiguration
+summary:: (put short description here)
+categories:: Libraries
+related:: Overview/SATIE-Overview, Classes/Satie
+
+DESCRIPTION::
+This class configures SATIE. It also provides access to the server options.
+
+
+CLASSMETHODS::
+
+METHOD:: new
+Create a new configuration
+
+ARGUMENT:: server
+The server instance. The server should not be booted. Only supernova should be used with SATIE.
+
+ARGUMENT:: listeningFormat
+A name of the of the listening format configuration. The default is stereoListener. The list of plugins is available via spatPlugins instance variable.
+
+ARGUMENT:: numAudioAux
+A number of auxiliary channels. Auxiliary channels are used for routing audio signals to effects, espcially, but can have other uses.
+
+ARGUMENT:: outBusIndex
+The physical output offset. By default, it uses the first available physical output (index 0).
+
+returns:: A SatieConfiguration.
+
+
+INSTANCEMETHODS::
+
+METHOD:: handleSpatFormat
+Private method to set up the spatializer.
+
+ARGUMENT:: format
+A Symbol representing the spatializer format.
+
+table::
+## emptySpat || No spat. Expect nothing.
+## monoSpat || Mono spat
+## stereoListener || A stereo panner
+## stereoPanner || Another stereo panner (use stereoListener)
+## quadVBAP || 4 channel ring (2D)
+## ambi1 || 4-channel spatialized output in ambisonic 3rd order format
+## five1VBAP || 5.1 layout (2D)
+## exaVBAP || 6 channel ring (2D)
+## cube || 8 channel 3D layout (Cube corners)
+## octoVBAP || 8 channel ring (2D)
+## _1474_VBAP || 16 channel dome (IEM)
+## dodecVBAP || 20 channel layout (3D)
+## labodomeVBAP || 24 channel speaker layout on a sphere (minidome at the SAT)
+## domeVBAP || 31 channel sphere (SAT dome)
+::
+
+METHOD:: fxPlugins
+Instance variable for effects plugins.
+
+returns:: Dictionary
+
+METHOD:: serverOptions
+Get/set options
+
+returns:: supernova.options
+
+METHOD:: mapperPlugins
+Instance variable holds mapper plugins.
+
+returns:: Dictionary
+
+METHOD:: audioPlugins
+Instance variable holds audio plugins
+
+returns:: Dictionary
+
+METHOD:: debug
+Print SATIE debug messages
+
+METHOD:: spatPlugins
+Instance variable hold spatializer plugins
+
+returns:: Dictionary
+
+METHOD:: listeningFormat
+Spatializer(s) in use
+
+returns:: Array
+
+METHOD:: satieRoot
+Absolute path to the SATIE installation
+
+returns:: String
+
+METHOD:: init
+Private init
+
+METHOD:: server
+Current server
+returns:: Server instance
+
+EXAMPLES::
+
+code::
+// define a server, SATIE needs it
+s = Server.supernova.local;
+// instantiate a SatieConfiguration. Here we will use a stereo spatializer
+~satieConfiguration = SatieConfiguration.new(s, [\stereoListener]);
+::
