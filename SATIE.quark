@@ -4,9 +4,9 @@
   version: "1.0.0",
   schelp: "HelpSource/Overview/SATIE-Overview.schelp",
   dependencies: #[
-					"AmbIEM",
-					"Ctk",
-          "UnitTest"
+	"AmbIEM",
+	"Ctk",
+    "UnitTest"
 ],
   url: "https://gitlab.com/sat-metalab/SATIE-quark",
   since: "2016",

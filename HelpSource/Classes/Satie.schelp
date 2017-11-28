@@ -4,7 +4,7 @@ categories:: Libraries
 related:: Overview/SATIE-Overview, Classes/SatieConfiguration, Classes/SatiePlugin, Classes/SatieFactory
 
 DESCRIPTION::
-This is the main entry class into the SATIE audio rendering system. It depends on Supernova engine and relies on  LINK::Classes/SatieConfiguration::
+This is the main entry class into the SATIE audio rendering system. It relies on  LINK::Classes/SatieConfiguration::
 
 
 CLASSMETHODS::
@@ -23,7 +23,7 @@ The directory on user's file system from where SATIE is instantiated. This class
 returns:: Root path of SATIE installation
 
 METHOD:: makeInstance
-Instantiate a compiled synthdef (audio source or effect)
+Instantiate a compiled synthdef (audio source or effect) and insert a reference into the groupInstances dictionary.
 
 ARGUMENT:: name
 Symbol: a unique name by which the audio source or effect will be recognizable by SATIE
@@ -174,46 +174,42 @@ METHOD:: initRenderer
 returns:: (describe returnvalue here)
 
 METHOD:: makeSynthDef
-(describe method here)
+Calls link::Classes/SatieFactory#makeSynthDef:: method and creates references to compiled SynthDefs
 
 ARGUMENT:: id
-(describe argument here)
+(Symbol) The SynthDef's unique name on the server
 
 ARGUMENT:: srcName
-(describe argument here)
+(Symbol) The name of the source (see link::Examples/Plugins::)
 
 ARGUMENT:: srcPreToBusses
-(describe argument here)
+(Array) Passed to pre-process busses (see link::Classes/SatieFactory::)
 
 ARGUMENT:: srcPostToBusses
-(describe argument here)
+(Array) Passed to post-process busses (see link::Classes/SatieFactory::)
 
 ARGUMENT:: spatSymbolArray
-(describe argument here)
+(Array) Passed to spatialiser array (see link::Classes/SatieFactory::)
 
 ARGUMENT:: firstOutputIndexes
-(describe argument here)
+(Array) Start output bus index (see link::Classes/SatieFactory::)
 
 ARGUMENT:: paramsMapper
-(describe argument here)
+(Array) Parameter mapper plugins (see link::Classes/SatieFactory::)
 
 ARGUMENT:: synthArgs
-(describe argument here)
+Custom synth arguments passed to link::Classes/SatieFactory::
 
-returns:: (describe returnvalue here)
+returns:: a Synth
 
 METHOD:: satieConfiguration
-(describe method here)
-
-returns:: (describe returnvalue here)
+Reference to link::Classes/SatieConfiguration::
 
 METHOD:: removeProcess
-(describe method here)
+Remove a process from the pipeline and clear its references.
 
 ARGUMENT:: processName
-(describe argument here)
-
-returns:: (describe returnvalue here)
+(Symbol) The name (id) of the process
 
 EXAMPLES::
 Post-processor example
@@ -226,15 +222,10 @@ s = Server.supernova.local;
 ~satie = Satie.new(~satieConfiguration);
 ~satie.boot();
 s.waitForBoot({
-    // create a default group
-    // ~satie.makeSatieGroup(\default);
-    // define some synths
-    ~satie.makeSynthDef(\boo, \misDrone, [], [], ~satieConfiguration.listeningFormat, [0]);
-    ~satie.makeSynthDef(\test, \testtone, [], [], ~satieConfiguration.listeningFormat, [0]);
-    // display some information
-    s.meter;
-    s.makeGui;
-    s.plotTree;
+    // display some information
+    s.meter;
+    s.makeGui;
+    s.plotTree;
 });
 )
 // add post-process
