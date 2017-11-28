@@ -1,29 +1,13 @@
-TITLE:: SatiePlugin
-summary:: A SATIE plugin
-categories:: Libraries>SATIE
+TITLE:: SourcePlugin
+summary:: SATIE audio source plugin
+categories:: SATIE
 related:: Overview/SATIE-Overview, Classes/Satie, Classes/SatiePlugins, Classes/SpatializerPlugin, Examples/Plugins
 
+
 DESCRIPTION::
-This is a base class for SATIE plugin. It is used by link::Classes/SatiePlugins::
+This is a base class for SATIE plugin that will output audio signals.
 All SATIE plugins (audiosources, effects, mappers, postprocessors, spatializers) reside in the plugin directory within the SATIE tree. Other plugins can be added from, arbitrary location, by adding to the appropriate doctionaries (see link::Classes/SatiePlugins:: and link::Classes/SatieConfiguration::).
 
-Every plugin should follow the following format:
-
-code::
-// Mandatory "fields" of a plugin:
-
-// name
-~name = \pluginName;
-// description
-~description = "Short description of plugin's purpose or functionality";
-// function definition
-~function = {| sfreq = 200 |
-	// note, that the plugin should not contain Out uGen.
-	FSinOsc.ar(sfreq)
-};
-::
-
-Each plugin resides in its own .scd file. Each field is a global variable which gets consumed by the plugin loader, one at a time.
 
 CLASSMETHODS::
 
@@ -39,7 +23,15 @@ String, a short description of the plugin
 ARGUMENT:: function
 The actual sclang code that defines the plugin's behaviour.
 
+ARGUMENT:: setup
+String, a function that will be executed within the boot sequence
+
 returns:: SatiePlugin
 
 
+INSTANCEMETHODS::
 
+METHOD:: setup
+Private method
+
+returns:: provided parameters
