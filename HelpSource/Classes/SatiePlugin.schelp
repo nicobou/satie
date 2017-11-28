@@ -1,7 +1,7 @@
 TITLE:: SatiePlugin
 summary:: A SATIE plugin
 categories:: Libraries>SATIE
-related:: Overview/SATIE-Overview, Classes/Satie, Classes/SatiePlugins, Classes/SpatializerPlugin, Overview/Plugins
+related:: Overview/SATIE-Overview, Classes/Satie, Classes/SatiePlugins, Classes/SpatializerPlugin, Examples/Plugins
 
 DESCRIPTION::
 This is a base class for SATIE plugin. It is used by link::Classes/SatiePlugins::
@@ -18,17 +18,17 @@ code::
 ~description = "Short description of plugin's purpose or functionality";
 // function definition
 ~function = {| sfreq = 200 |
-	// note, that the plugin should not contain Out uGen. 
+	// note, that the plugin should not contain Out uGen.
 	FSinOsc.ar(sfreq)
 };
 ::
 
-Each plugin resides in its own .scd file. Each field is a global variable which gets consumed by the plugin loader, one at a time. 
+Each plugin resides in its own .scd file. Each field is a global variable which gets consumed by the plugin loader, one at a time.
 
 CLASSMETHODS::
 
 METHOD:: new
-Make a new instance of a plugin loaded from disk. See link::Overview/Plugins:: for an example about SATIE plugins.
+Make a new instance of a plugin loaded from disk. See link::Examples/Plugins:: for an example about SATIE plugins.
 
 ARGUMENT:: name
 Symbol, (unique) name under which the plugin will be referred to by SATIE.makeSynthDef method.
@@ -40,3 +40,6 @@ ARGUMENT:: function
 The actual sclang code that defines the plugin's behaviour.
 
 returns:: SatiePlugin
+
+
+

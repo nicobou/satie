@@ -67,5 +67,11 @@ DEFINITIONLIST::
 || Satie Factory
 ##LINK::Classes/SatiePlugin::
 || Satie specific plugins
+##LINK::Classes/SourcePlugin::
+|| Generates an audio signal, a subclass of link::Classes/SatiePlugin::
+##LINK::Classes/SpatializerPlugin::
+|| Spatiliser is a subclass of link::Classes/SatiePlugin::
+##LINK::Classes/SatiePlugins::
+|| A Dictionary of plugins
 ::
 

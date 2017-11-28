@@ -37,7 +37,7 @@ SatieOSC {
 		// set up default groups
 		if ( satie.groups[\default] == nil,
 			{
-				warn("satieOSC.INIT:  \default group not defined on the server, creating \default group on head");
+				postln("satieOSC.INIT:  \default group not defined on the server, creating \default group on head");
 				this.createGroup(\default);
 			},
 			// else all good, create an entry for \default group
@@ -53,7 +53,7 @@ SatieOSC {
 		// set up defaultFx group
 		if ( satie.groups[\defaultFx] == nil,
 			{
-				warn("satieOSC.INIT:  \defaultFx group not defined on the server, creating \defaultFx group on tail");
+				postln("satieOSC.INIT:  \defaultFx group not defined on the server, creating \defaultFx group on tail");
 				this.createGroup(\defaultFx,\addToTail);
 			},
 			// else all good, create an entry for \defaultFx group
@@ -306,11 +306,7 @@ SatieOSC {
 					// else  group does not exist in SATIE,  create it
 					{
 						group = satie.makeSatieGroup(groupName.asSymbol, addAction);
-						if ( groupName.asSymbol == \default,
-							{
-								postf("satieOSC.createGroup:  BUG FOUND-- SHOULD NOT HAVE TO INSTANITATE DEFAULT GROUP !!!!");
-						});
-				});
+					});
 
 				allGroupNodes[groupName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
 				allGroupNodes[groupName.asSymbol].put(\group , group);  // save group

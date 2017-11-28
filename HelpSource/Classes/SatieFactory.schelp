@@ -1,0 +1,41 @@
+TITLE:: SatieFactory
+summary:: SATIE factory
+categories:: Libraries
+related:: Classes/Satie
+
+DESCRIPTION::
+A factory. This class is central to the renderer. It consumes a synth definition, wraps it other Ugens to fit SATIE's design and places it in the rendering pipeline, either as a sound source or effect. It is being internally by the main link::Classes/Satie:: class.
+
+
+CLASSMETHODS::
+
+METHOD:: makeSynthDef
+Compile a synthdef on the server and make it available to the engine.
+
+ARGUMENT:: name
+(Symbol) A unique identifier by which this synth will be referred to.
+
+ARGUMENT:: src
+(String) A synth definition. This is a standard sclang SynthDef code, omitting the Out. See link::Examples/Plugins:: for an example.
+
+ARGUMENT:: preBusArray
+(Array) Pre processing busses
+
+ARGUMENT:: postBusArray
+(Array) Post-processing busses
+
+ARGUMENT:: spatializerArray
+(Array) List of sptialisers that will process this synth
+
+ARGUMENT:: firstOutputIndexArray
+Which output bus is its first output channel.
+
+ARGUMENT:: paramsMapper
+Some parameters can be modified by a link::Examples/MapperPlugins
+
+ARGUMENT:: synthArgs
+Arguments specific to this synth
+
+returns:: It does not return any value. On success, places a compiled SynthDef on the server.
+
+

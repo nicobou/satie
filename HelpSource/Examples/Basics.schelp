@@ -1,10 +1,12 @@
 TITLE:: SATIE basics
 summary:: basic SATIE tutorial with examples
 categories:: Libraries
+related:: Overview/SATIE-Overview, Classes/SatieConfiguration
 
 Section:: First steps
 
-SATIE depends and takes advantage of parrallel processing provided by supernova server. Before using it, we need create a configuration. The configuration will typically define the number of speakers and their layout, number of effect busses to use etc. We can also configure the supernova server options, which are held in serverOptions variable. We will also define which audio "plugins" (audio sources and effects) we will use (more on the format of plugins in link::Overview/Plugins::). SATIE will prepare the synthdefs on the server and later we will be able to control their life cycle.
+NOTE::SATIE takes advantage of parrallel processing provided by supernova server therefore it is a preferred setup and examples use it by default. ::
+Before using SATIE, we need to create a configuration. The configuration will typically define the number of speakers and their layout, number of effect busses to use etc. We can also configure the supernova server options, which are held in serverOptions variable. We will also define which audio "plugins" (audio sources and effects) we will use (more on the format of plugins in link::Examples/Plugins::). SATIE will prepare the synthdefs on the server and later we will be able to control their life cycle.
 
 code::
 (
@@ -28,8 +30,7 @@ s.waitForBoot({
 )
 ::
 
-The above is somewhat a minimum to get SATIE running. We are using 2 audio producing plugins: misDrone and testtone, both are identified in the SATIE system as "boo" and "test" respectively.
-We will use this simple configuration for the examples that follow.
+The above is somewhat a minimum to get SATIE running. We will use this simple configuration for the examples that follow.
 Now, let's make some noise. We can create instances of synths and pass them some initial arguments.
 
 code::
@@ -38,8 +39,8 @@ code::
 20.do( { arg item;
 	var nodename=("testNode"++"_"++item).asSymbol;
 	var synth;
-	synth = ~satie.makeInstance(nodename.asSymbol, \misDrone, \default, synthArgs: [\dur: 500]);
-	synth.set(\gainDB, rrand(-90, -38), \sfreq, rrand(100, 1000));
+	synth = ~satie.makeInstance(nodename.asSymbol, \misDrone, \default, synthArgs: [\dur: 8500]);
+	synth.set(\gainDB, rrand(-70, -18), \sfreq, rrand(100, 1000));
 });
 )
 ::
@@ -48,8 +49,8 @@ We can set properties to the entire group:
 
 code::
 (
-~satie.groups[\default].set(\gainDB, -90);
-~satie.groups[\default].set(\gainDB, -65, \freq, 220);
+~satie.groups[\default].set(\gainDB, -99);
+~satie.groups[\default].set(\gainDB, -18, \freq, 220);
 )
 ::
 
@@ -68,7 +69,7 @@ code::
 (
 20.do( {|item|
 	var nodename=("testNode"++"_"++item);
-	~satie.groupInstances[\default][nodename.asSymbol].set(\gainDB, rrand(-100, -40));
+	~satie.groupInstances[\default][nodename.asSymbol].set(\gainDB, rrand(-100, -10));
 });
 )
 

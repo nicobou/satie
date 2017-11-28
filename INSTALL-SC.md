@@ -1,6 +1,6 @@
 **Goal**: you want SuperCollider version 3.8 and sc3-plugins working with supernova (the parallel SuperCollider server), so that SATIE will run many sound sources simultaneously.
 
-Building for Ubuntu 16.04
+Building for Ubuntu 16.04 and up
 -------------------------
 
 From a terminal, go into your source directory and type the following commands.
@@ -43,6 +43,13 @@ sudo make install
 
 Then type `scide` (the SuperCollider IDE) and check the console to see if everything installed well.
 
+SATIE is a SuperCollider Quark and it depends on the following Quarks:
+
+- UnitTesting
+- AmbIEM
+- Ctk
+- Atk
+
 
 ####  plugin locations for OSX
 The supercollider plugins should be located in:
@@ -55,12 +62,12 @@ or
 ## Binaural Rendering
 Satie provides two binaural rendering options. Using HRTF filtering, the chosen renderer will convert the multi-channel spatialized output signal of each sound source to a stereo binaural signal. Both options depend on non-kernal resources that need to be installed for use. The installation and configuration details for each option are shown below:
 #### ambi1
-First order ambisonics method, using the ATK [Ambisonic Tool Kit] (http://www.ambisonictoolkit.net/)  package that is a standard sc3-plugin. To use this, the `Ctk` (Composers Tool Kit) quark must be installed. Follow directions in the following section. 
+First order ambisonics method, using the ATK [Ambisonic Tool Kit] (http://www.ambisonictoolkit.net/)  package that is a standard sc3-plugin. To use this, the `Ctk` (Composers Tool Kit) quark must be installed. Follow directions in the following section.
 #### ambi3
-Third order ambisonics method, using the [AmbIEM package](http://sonenvir.at/downloads/sc3/ambiem/). To use this, the `AmbIEM` quark must be installed. Follow directions in the following section. 
+Third order ambisonics method, using the [AmbIEM package](http://sonenvir.at/downloads/sc3/ambiem/). To use this, the `AmbIEM` quark must be installed. Follow directions in the following section.
 ### Installing quarks
 Quarks can be installed in a number of ways. Here are two ways to do it (in supercollider):
-	
+
 ~~~~
 // installation via the gui:
 Quarks.gui
@@ -83,4 +90,3 @@ Each option depends on a corresponding set of HRTF data. Satie provides submodul
 [ATK] (http://www.ambisonictoolkit.net/documentation/supercollider)
 
 [AmbIEM] (http://alumni.media.mit.edu/~kdm/hrtfdoc/hrtfdoc.html)
-
