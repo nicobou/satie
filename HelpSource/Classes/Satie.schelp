@@ -23,7 +23,7 @@ The directory on user's file system from where SATIE is instantiated. This class
 returns:: Root path of SATIE installation
 
 METHOD:: makeInstance
-Instantiate a compiled synthdef (audio source or effect)
+Instantiate a compiled synthdef (audio source or effect) and insert a reference into the groupInstances dictionary.
 
 ARGUMENT:: name
 Symbol: a unique name by which the audio source or effect will be recognizable by SATIE

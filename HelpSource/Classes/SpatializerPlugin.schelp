@@ -1,7 +1,7 @@
 TITLE:: SpatializerPlugin
 summary:: A SATIE spatializer plugin
 categories:: Libraries>SATIE
-related:: Overview/SATIE-Overview, Classes/Satie, Classes/SatiePlugins, Classes/SpatializerPlugin, Examples/Plugins
+related:: Overview/SATIE-Overview, Classes/Satie, Classes/SatiePlugins, Examples/Plugins
 
 DESCRIPTION::
 A spacializer plugins

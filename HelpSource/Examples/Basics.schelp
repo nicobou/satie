@@ -1,11 +1,12 @@
 TITLE:: SATIE basics
 summary:: basic SATIE tutorial with examples
 categories:: Libraries
+related:: Overview/SATIE-Overview, Classes/SatieConfiguration
 
 Section:: First steps
 
 NOTE::SATIE takes advantage of parrallel processing provided by supernova server therefore it is a preferred setup and examples use it by default. ::
-Before using SATIE, we need create a configuration. The configuration will typically define the number of speakers and their layout, number of effect busses to use etc. We can also configure the supernova server options, which are held in serverOptions variable. We will also define which audio "plugins" (audio sources and effects) we will use (more on the format of plugins in link::Examples/Plugins::). SATIE will prepare the synthdefs on the server and later we will be able to control their life cycle.
+Before using SATIE, we need to create a configuration. The configuration will typically define the number of speakers and their layout, number of effect busses to use etc. We can also configure the supernova server options, which are held in serverOptions variable. We will also define which audio "plugins" (audio sources and effects) we will use (more on the format of plugins in link::Examples/Plugins::). SATIE will prepare the synthdefs on the server and later we will be able to control their life cycle.
 
 code::
 (
