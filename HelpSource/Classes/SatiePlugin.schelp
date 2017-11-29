@@ -39,6 +39,7 @@ String, a short description of the plugin
 ARGUMENT:: function
 The actual sclang code that defines the plugin's behaviour.
 
+
 returns:: SatiePlugin
 
 
