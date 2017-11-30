@@ -8,7 +8,7 @@
 	"Ctk",
   "UnitTesting"
 ],
-  isCompatible, true,
+  isCompatible: true,
   url: "https://gitlab.com/sat-metalab/SATIE-quark",
   since: "2016",
   license: "GPL",
