@@ -38,18 +38,21 @@ SatieIntrospection {
 		var argnames, plugs;
 		this.updatePluginsList;
 		pluginsList.do({|coll|
+			coll.asCompileString.postln;
 			if(coll.keys.includes(plugin.asSymbol),
 				{
-					^argnames = coll[plugin].function.def.keyValuePairsFromArgs;
+
+					argnames = coll[plugin].function.def.keyValuePairsFromArgs;
 				},
 				{
 					if(context.satieConfiguration.debug,
 						{"% tried % in % and found none...".format(this.class.getBackTrace, plugin, pluginsList).warn}
 					);
-					^argnames = "null";
+					argnames = "null";
 				}
 			);
 		});
+		^argnames;
 	}
 
 	getPluginDescription { | plugin |
