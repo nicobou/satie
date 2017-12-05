@@ -69,9 +69,6 @@ Satie {
 		generators = IdentityDictionary.new();
 		effects = IdentityDictionary.new();
 		processes = Dictionary.new();
-
-		osc = SatieOSC(this);
-		inspector = SatieIntrospection.new(this);
 	}
 
 	// public method
@@ -165,5 +162,7 @@ Satie {
 		generatedSynthDefs = audioPlugins.keys;
 
 		satieConfiguration.server.sync;
+		osc = SatieOSC(this);
+		inspector = SatieIntrospection.new(this);
 	}
 }
