@@ -1,0 +1,126 @@
+#!/bin/bash
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#TODO option for log files
+#TODO soundflower ? 
+#TODO use jack blocksize for satie configuration
+#TODO allow user to specify a dir with sound files that will be made as synthDef
+#TODO scd file to evaluate after satie boot
+
+# global variables
+LOG_PREFIX="SATIE-RES:"
+SATIE_OPTIONS=" logprefix $LOG_PREFIX "
+JACKD_RC="${HOME}/.jackdrc"
+JACKD_PID="none"
+JACKD_LAUNCH="y"
+SCLANG_PID="none"
+
+# functions
+
+function usage() {
+echo "Usage: satie [OPTION]"
+echo "This commands runs a SATIE server, ."
+echo ""
+echo "Possible options:"
+echo "  -h             print this help"
+echo "  -L             list listener formats"
+echo "  -S             list sound object types"
+echo "  -l <format>    set listener format (default is stereoListener)"
+echo "  -m             display SuperCollider meter"
+echo "  -g             display SuperCollider GUI"
+echo "  -t             display SuperCollider tree"
+echo "  -b <size>      set SuperCollider blockSize"
+echo "  -y             set scsynth instead of supernova"
+echo "  -i <#inputs>   set number of inputs (default is 0)"
+echo "  -j <file>      use jack configuration file (default is ~/.jackdrc)"
+echo "  -J             disable jack launching"
+}
+
+function on_exit() {
+    # killing jackd process
+    if [ $JACKD_LAUNCH = "y" ]
+    then
+	kill $JACKD_PID
+    fi
+}
+
+# option parsing
+while getopts ":hmgtb:l:yLSi:j:J" opt; do
+  case $opt in
+    h)
+      usage >&2
+      exit 1
+      ;;
+    m)
+      SATIE_OPTIONS+=" meter "
+      ;;
+    g)
+      SATIE_OPTIONS+=" gui "
+      ;;
+    t)
+      SATIE_OPTIONS+=" tree "
+      ;;
+    b)
+      SATIE_OPTIONS+=" blockSize $OPTARG "
+      ;;
+    l)
+      SATIE_OPTIONS+=" listener $OPTARG "
+      ;;
+    y)
+      SATIE_OPTIONS+=" scsynth "
+      ;;
+    L)
+      SATIE_OPTIONS+=" listListeners "
+      ;;
+    S)
+      SATIE_OPTIONS+=" listSourceTypes "
+      ;;
+    i)
+      SATIE_OPTIONS+=" numInputs $OPTARG "
+      ;;
+    j)
+      JACKD_RC=$OPTARG
+      ;;
+    J)
+      JACKD_LAUNCH="n"
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      ;;
+    :)
+      echo "Option -$OPTARG requires an argument." >&2
+      exit 1
+      ;;
+  esac
+done
+
+trap 'on_exit' INT
+trap 'on_exit' KILL
+trap 'on_exit' QUIT
+
+# running jackd
+if [ $JACKD_LAUNCH = "y" ]
+then
+    JACKDARGS=$(cat $JACKD_RC | awk -F "jackd " '/1/ {print $2}')
+    jackd $JACKDARGS > /tmp/satie-jack.log 2> /tmp/satie-jack-err.log &
+    JACKD_PID=$(echo $!)
+fi
+
+# running SATIE
+sclang ./satie.scd $SATIE_OPTIONS > /tmp/satie.log 2> /tmp/satie-err.log
+
+# print SATIE output
+grep $LOG_PREFIX /tmp/satie.log | sed "s/$LOG_PREFIX//"
+
