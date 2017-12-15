@@ -5,9 +5,6 @@ SatieOSC {
 	var <>oscClientPort;
 	var <>oscClientIP;
 
-	// private
-	var <allSourceNodes;
-	var <allGroupNodes;
 	// client
 	var <dynamicResponder;
 	var returnAddress;
