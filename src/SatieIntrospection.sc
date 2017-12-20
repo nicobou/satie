@@ -19,7 +19,7 @@ SatieIntrospection {
 	*
 	*/
 	updatePluginsList{
-		pluginsList = [context.audioPlugins, context.fxPlugins];
+		pluginsList = [context.audioPlugins, context.fxPlugins, context.postprocessorPlugins];
 	}
 
 	// return a dictionary audio plugins. Key is the type of plugin, value a Set of names.
@@ -27,6 +27,7 @@ SatieIntrospection {
 		var ret = Dictionary.new();
 		ret.add(\generators -> context.audioPlugins.keys);
 		ret.add(\effects -> context.fxPlugins.keys);
+		ret.add(\mastering -> context.postprocessorPlugins);
 		^ret;
 	}
 
@@ -37,8 +38,8 @@ SatieIntrospection {
 	getPluginArguments { | plugin |
 		var argnames, plugs;
 		this.updatePluginsList;
-		pluginsList.do({|coll|
-			coll.asCompileString.postln;
+ 		pluginsList.do({|coll|
+			"    ***** looking for key: % in: %\n".format(plugin, coll[plugin]).asCompileString.postln;
 			if(coll.keys.includes(plugin.asSymbol),
 				{
 
@@ -46,7 +47,7 @@ SatieIntrospection {
 				},
 				{
 					if(context.satieConfiguration.debug,
-						{"% tried % in % and found none...".format(this.class.getBackTrace, plugin, pluginsList).warn}
+						{"% tried % in % and found none...\n".format(this.class.getBackTrace, plugin, pluginsList).warn}
 					);
 					argnames = "null";
 				}
@@ -108,11 +109,17 @@ SatieIntrospection {
 		^context.effects;
 	}
 
+	getPostProcessors {
+		// var
+		^context.postprocessorPlugins;
+	}
+
 	// grouped by generators and effects
 	getInstances {
 		var instances = Dictionary.new();
 		instances.add(\synths -> this.getGenerators());
 		instances.add(\effects -> this.getEffects());
+		instances.add(\mastering -> this.getPostProcessors());
 		^instances;
 	}
 
@@ -126,7 +133,9 @@ SatieIntrospection {
 		arguments = Dictionary.new();
 
 		this.getInstances.keysValuesDo({| category, instances |
+			"  ** category: % instances: %".format(category, instances.asCompileString).postln;
 			instances.keysValuesDo({| name, srcName |
+				"    ****  getInstanceInfo: %".format(name).postln;
 				if (id.asSymbol == name.asSymbol,
 					{
 						var plug = this.getPluginInfo(srcName.asSymbol);
