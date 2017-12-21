@@ -60,8 +60,6 @@ SatieConfiguration {
 		});
 		this.handleSpatFormat(listeningFormat);
 		orientationOffsetDeg = [0, 0];
-
-
 	}
 
 	handleSpatFormat { arg format;
@@ -83,12 +81,3 @@ SatieConfiguration {
 		};
 	}
 }
-
-
-
-
-
-
-
-
-
