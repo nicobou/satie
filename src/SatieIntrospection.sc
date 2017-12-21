@@ -42,7 +42,7 @@ SatieIntrospection {
 			if(coll.keys.includes(plugin.asSymbol),
 				{
 
-					argnames = coll[plugin].function.def.keyValuePairsFromArgs;
+					^argnames = coll[plugin].function.def.keyValuePairsFromArgs;
 				},
 				{
 					if(context.satieConfiguration.debug,
