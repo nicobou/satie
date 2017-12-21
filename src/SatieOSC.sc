@@ -6,8 +6,8 @@ SatieOSC {
 	var <>oscClientIP;
 
 	// private
-	var allSourceNodes;
-	var allGroupNodes;
+	var <allSourceNodes;
+	var <allGroupNodes;
 	// client
 	var <dynamicResponder;
 	var returnAddress;
@@ -26,8 +26,6 @@ SatieOSC {
 	initOSC {
 		" - satie: %\n - rootURI: %\n - port: %".format(satie, rootURI, oscServerPort).postln;
 		" + %".format(satie.satieConfiguration.server).postln;
-		allSourceNodes = Dictionary();
-		allGroupNodes = Dictionary();
 		dynamicResponder = true;
 		oscClientIP = "localhost";
 		returnAddress = NetAddr(this.oscClientIP, this.oscClientPort);
@@ -39,32 +37,14 @@ SatieOSC {
 			{
 				postln("satieOSC.INIT:  \default group not defined on the server, creating \default group on head");
 				this.createGroup(\default);
-			},
-			// else all good, create an entry for \default group
-			{
-				allGroupNodes[\default] = Dictionary();   // create group node  -- create node-specific dict.
-				allGroupNodes[\default].put(\group , satie.groups[\default] );  // set group
-				allGroupNodes[\default].put(\groupSym , \default);  // save group name symbol
-				allGroupNodes[\default].put(\plugin, \nil);
-				allGroupNodes[\default].put(\position, \head);  //  indicates group DSP chain evaluation order  (head or tail)
-				postf(">>satieOSC.INIT:  setting up   % group at head of server groups %\n", \default);
-		});
+			});
 
 		// set up defaultFx group
 		if ( satie.groups[\defaultFx] == nil,
 			{
 				postln("satieOSC.INIT:  \defaultFx group not defined on the server, creating \defaultFx group on tail");
 				this.createGroup(\defaultFx,\addToTail);
-			},
-			// else all good, create an entry for \defaultFx group
-			{
-				allGroupNodes[\defaultFx] = Dictionary();   // create group node  -- create node-specific dict.
-				allGroupNodes[\defaultFx].put(\group , satie.groups[\defaultFx] );  // set group
-				allGroupNodes[\defaultFx].put(\groupSym , \defaultFx);  // save group name symbol
-				allGroupNodes[\defaultFx].put(\plugin, \nil);
-				allGroupNodes[\defaultFx].put(\position, \effect);  //  indicates group DSP chain evaluation order  (head or tail)
-				postf(">>satieOSC.INIT:  setting up   % group at after the default group\n", \defaultFx);
-		});
+			});
 
 
 		// scene level handler
@@ -126,57 +106,42 @@ SatieOSC {
 
 
 	removeGroup { | groupName |
-		if ( allGroupNodes.includesKey(groupName.asSymbol) ,
+		if ( satie.groups.includesKey(groupName.asSymbol) ,
 			{
 				if (satie.satieConfiguration.debug, {postf("•satieOSC.removeGroup:  group node: % \n",  groupName);});
-				allGroupNodes.removeAt(groupName.asSymbol);     // remove node from global dictionary
+				satie.groups.removeAt(groupName.asSymbol);     // remove node from global dictionary
 		});
 	}
 
 	deleteSource { | nodeName |
-		if ( allSourceNodes.includesKey(nodeName.asSymbol) ,
-			{
-				this.clearSourceNode(nodeName.asSymbol);
-				allSourceNodes.removeAt(nodeName.asSymbol);     // remove node from global dictionary
+		satie.groupInstances.keys.do({|gr, idx|
+			if ( satie.groupInstances[gr].includesKey(nodeName.asSymbol) ,
+				{
+					this.clearSourceNode(nodeName.asSymbol, gr.asSymbol);
+				});
 		});
 	}
 
-	clearSourceNode {  | nameSym |
-		var node = allSourceNodes[nameSym];
-		var nodeKeys = node.keys;
-		var thisGroupName = allSourceNodes[nameSym].at(\groupNameSym);
-
+	clearSourceNode {  | nameSym, group = \default |
+		var node = nameSym.asSymbol;
 		// is this a process node?
-		if ( allSourceNodes[nameSym].at(\process) != nil,
+		if ( satie.processInstances.includesKey(node),
 			{
-				var groupSym =  allSourceNodes[nameSym].at(\groupNameSym);
-
-				var myProcess = allSourceNodes[nameSym].at(\process);
-				"found a process %".format(allSourceNodes[nameSym].at(\process)).postln;
-
-				myProcess.cleanup();   // frees any state the process may have created, i.e. synths
-
-				//  IF THE SYNTH IS NOT CLEANED FROM THE NODE TREE, DO THE SAME AS THE REGULAR SOURCE CASE BELOW
-				satie.cleanInstance(nameSym,thisGroupName );
-
-				// now delete group
-				this.removeGroup(groupSym); //
-				satie.killSatieGroup(groupSym);   // kill the group, since it was unique to this source
+				satie.cleanProcessInstance(node);
 			},
 			// else  its just a regular source
 			{
-				var synth = satie.groupInstances[thisGroupName][nameSym];
-				satie.cleanInstance(nameSym,thisGroupName );
+				if (satie.groupInstances[group].includesKey(node),
+					{
+						satie.cleanInstance(node, group.asSymbol);
+					},
+					{
+						"%: node: % does not exist".format(this.class.getBackTrace, node).warn;
+					}
+				);
 				if (satie.satieConfiguration.debug,
-					{postf("•satieOSC.clearSourceNode: delete  node  % in group %\n", nameSym, thisGroupName);});
+					{postf("•satieOSC.clearSourceNode: delete  node  % in group %\n", nameSym, group);});
 		});
-
-		//  clear node's local dictionary
-		// probably this is unnecessary
-		nodeKeys.do { | key |
-			//postf("removing node keys:  node: %   key %  \n",  nameSym, key);
-			node.removeAt(key);
-		};
 	}
 
 
@@ -209,31 +174,8 @@ SatieOSC {
 
 		if (satie.satieConfiguration.debug, {"→    %: sourceName: %,  synthName: %,  groupName: %".format(this.class.getBackTrace, sourceName,synthName,groupName).postln});
 
-		// check to see if group  exists,  if  not, create it
-		if (  allGroupNodes[groupName] == nil,
-			{
-				postf("~satieOSC.createSourceNode:   source:%    group:  % undefined,  creating  group  \n", sourceName, groupName);
-				this.createGroup(groupName);
-		});
-
-
-		// make sure group is not located at the tail (used by efffects)
-		if (  allGroupNodes[groupName].at(\position) == \effect,
-			{
-				error("satieOSC.createSourceNode: node "++sourceName++"'s group: "++groupName++" is an effects group. Setting group to default group");
-				groupName = \default;
-		});
-
-
-		allSourceNodes[sourceName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
-		// allSourceNodes[sourceName.asSymbol].put(\uriStr, uriString);
-
 		synth = satie.makeInstance(sourceName.asSymbol, synthName, groupName);
 		synth.register(); // register with NodeWatcher for testing
-
-		allSourceNodes[sourceName.asSymbol].put(\groupNameSym, groupName);
-		allSourceNodes[sourceName.asSymbol].put(\plugin, synthName);
-		allSourceNodes[sourceName.asSymbol].put(\synth, synth);
 
 		postf(">>satieOSC.createSourceNode:  creating %:  uri: %  group: %\n", sourceName, synthName, groupName);
 
@@ -243,32 +185,7 @@ SatieOSC {
 		var synth;
 		if (satie.satieConfiguration.debug, {"→    %: sourceName: %,  synthName: %,  groupName: %,  auxBus %".format(this.class.getBackTrace, sourceName,synthName,groupName, auxBus).postln});
 
-		if (groupName == \default,
-			{
-				warn("satieOSC.createEffectNode: changing  "++sourceName++"'s group: "++groupName++" to: defaultFx group");
-				groupName = \defaultFx;
-		});
-
-		// check to see if group  exists,  if  not, create it on the tail
-		if (  allGroupNodes[groupName] == nil,
-			{
-				postf("~satieOSC.createEffectNode:   source:%    group:  % undefined,  creating  group on tail of DSP chain  \n", sourceName, groupName);
-				this.createGroup(groupName, \effect);
-			},
-			// else make sure named group is on the tail, if not, set to defaultFx group
-			{
-				if (  allGroupNodes[groupName].at(\position) != \effect,
-					{
-						error("satieOSC.createEffectNode: node "++sourceName++"'s group: "++groupName++" is not an effects group. Setting group to defaultFx group");
-						groupName = \defaultFx;
-				});
-		});
-
-		allSourceNodes[sourceName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
-		allSourceNodes[sourceName.asSymbol].put(\groupNameSym, groupName);
-		allSourceNodes[sourceName.asSymbol].put(\plugin, synthName);
 		synth = satie.makeInstance(sourceName, synthName, groupName, [\in, satie.aux[auxBus] ]);
-		allSourceNodes[sourceName.asSymbol].put(\synth, synth);
 		postf("satieOSC.createEffectNode: creating effects node % of group %, with  synth:  % on bus %, \n", sourceName, groupName, synthName, auxBus);
 	}
 
@@ -290,10 +207,10 @@ SatieOSC {
 				addAction = \addToEffects;
 		});
 
-		if (allGroupNodes.includesKey(groupName),
+		if (satie.groups.includesKey(groupName),
 			{
 				postf("satieOSC.createGroup:  GroupNode % exists, no action \n", groupName);
-				allGroupNodes[groupName.asSymbol].at(\group);  // return group
+				satie.groups[groupName.asSymbol];  // return group
 			},
 			// else create new group node
 			{
@@ -307,15 +224,6 @@ SatieOSC {
 					{
 						group = satie.makeSatieGroup(groupName.asSymbol, addAction);
 					});
-
-				allGroupNodes[groupName.asSymbol] = Dictionary();   // create node  -- create node-specific dict.
-				allGroupNodes[groupName.asSymbol].put(\group , group);  // save group
-				allGroupNodes[groupName.asSymbol].put(\groupSym , groupName.asSymbol);  // save group name symbol
-				allGroupNodes[groupName.asSymbol].put(\plugin, \nil);
-				allGroupNodes[groupName.asSymbol].put(\position, groupPos);  //  indicates group DSP chain evaluation order  (head or tail)
-
-				//  set group
-				allGroupNodes[groupName.asSymbol].put(\group, group );
 
 				postf(">>satieOSC.createGroup:  creating   %   groupType: %\n", groupName, groupPos);
 

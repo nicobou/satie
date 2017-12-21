@@ -117,7 +117,7 @@
 	cloneProcess { | processName |
 		var processClone = nil;
 
-		if (processes.includesKey(processName.asSymbol),
+		if (processes.includesKey(processName),
 			{
 				var temp = processes.at(processName.asSymbol);
 				processClone = temp.copy;
@@ -127,5 +127,23 @@
 				processClone = nil;
 		});
 		^processClone;
+	}
+
+	// instantiate a process - also creates a unique group
+	makeProcessInstance { | id, processName, addAction=\addToHead |
+		var groupName, myProcess;
+		groupName = (id++"_group").asSymbol;
+		this.makeSatieGroup(groupName, addAction);
+		myProcess = this.cloneProcess(processName.asSymbol);
+		processInstances.put(id, myProcess);
+		processInstances[id].setup(id, groupName);
+		^processInstances;
+	}
+
+	cleanProcessInstance {  | id |
+		var name = id;
+		processInstances[name].cleanup;
+		this.killSatieGroup((name++"_group").asSymbol);
+		processInstances.removeAt(name);
 	}
 }

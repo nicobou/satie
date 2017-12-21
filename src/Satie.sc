@@ -36,7 +36,7 @@ Satie {
 	// compiled definitions
 	var <generators, <effects, <processes;
 	// instantiated
-	var <groups, <groupInstances;
+	var <groups, <groupInstances, <processInstances;
 
 	var <osc;
 
@@ -66,6 +66,7 @@ Satie {
 		postProcessors = Dictionary.new();
 		groups = Dictionary.new();
 		groupInstances = Dictionary.new();
+		processInstances = Dictionary.new();
 		generators = IdentityDictionary.new();
 		effects = IdentityDictionary.new();
 		processes = Dictionary.new();
@@ -119,6 +120,7 @@ Satie {
 	// private method
 	makePostProcGroup {
 		postProcGroup = ParGroup(1,\addToTail);
+		groups.put(\postProc, postProcGroup);
 	}
 
 	setAuxBusses {
