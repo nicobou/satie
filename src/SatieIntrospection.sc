@@ -109,7 +109,6 @@ SatieIntrospection {
 	}
 
 	getPostProcessors {
-		// var
 		^context.mastering;
 	}
 
