@@ -39,7 +39,6 @@ SatieIntrospection {
 		var argnames, plugs;
 		this.updatePluginsList;
  		pluginsList.do({|coll|
-			"    ***** looking for key: % in: %\n".format(plugin, coll[plugin]).asCompileString.postln;
 			if(coll.keys.includes(plugin.asSymbol),
 				{
 
@@ -111,7 +110,7 @@ SatieIntrospection {
 
 	getPostProcessors {
 		// var
-		^context.postprocessorPlugins;
+		^context.mastering;
 	}
 
 	// grouped by generators and effects
@@ -133,9 +132,7 @@ SatieIntrospection {
 		arguments = Dictionary.new();
 
 		this.getInstances.keysValuesDo({| category, instances |
-			"  ** category: % instances: %".format(category, instances.asCompileString).postln;
 			instances.keysValuesDo({| name, srcName |
-				"    ****  getInstanceInfo: %".format(name).postln;
 				if (id.asSymbol == name.asSymbol,
 					{
 						var plug = this.getPluginInfo(srcName.asSymbol);
