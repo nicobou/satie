@@ -166,23 +166,23 @@ SatieOSC {
 		^type.asSymbol;
 	}
 
-	createSourceNode { | sourceName, synthName , groupName |
+	createSourceNode { | sourceName, synthName , groupName=\default |
 		var type, synth;
 
 		if (satie.satieConfiguration.debug, {"→    %: sourceName: %,  synthName: %,  groupName: %".format(this.class.getBackTrace, sourceName,synthName,groupName).postln});
 
-		synth = satie.makeInstance(sourceName.asSymbol, synthName, groupName);
+		synth = satie.makeSourceInstance(sourceName.asSymbol, synthName, groupName);
 		synth.register(); // register with NodeWatcher for testing
 
 		postf(">>satieOSC.createSourceNode:  creating %:  uri: %  group: %\n", sourceName, synthName, groupName);
 
 	}
 
-	createEffectNode { | sourceName, synthName , groupName, auxBus|
+	createEffectNode { | sourceName, synthName , groupName=\defaultFx, auxBus|
 		var synth;
 		if (satie.satieConfiguration.debug, {"→    %: sourceName: %,  synthName: %,  groupName: %,  auxBus %".format(this.class.getBackTrace, sourceName,synthName,groupName, auxBus).postln});
 
-		synth = satie.makeInstance(sourceName, synthName, groupName, [\in, satie.aux[auxBus] ]);
+		synth = satie.makeFxInstance(sourceName, synthName, groupName, [\in, satie.aux[auxBus] ]);
 		postf("satieOSC.createEffectNode: creating effects node % of group %, with  synth:  % on bus %, \n", sourceName, groupName, synthName, auxBus);
 	}
 
