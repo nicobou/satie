@@ -62,6 +62,20 @@
 		^synth;
 	}
 
+	makeFxInstance{| name, synthDefName, group = \defaultFx, synthArgs = #[] |
+		var fx;
+		this.makeSatieGroup(group.asSymbol, \addToEffects);
+		fx = this.makeInstance(name, synthDefName, group, synthArgs);
+		^fx;
+	}
+
+	makeSourceInstance{| name, synthDefName, group = \default, synthArgs = #[] |
+		var src;
+		this.makeSatieGroup(group.asSymbol);
+		src = this.makeInstance(name, synthDefName, group, synthArgs);
+		^src;
+	}
+
 	makeKamikaze {| name, synthDefName, group = \default, synthArgs = #[] |
 		var synth = Synth(synthDefName ++ "_kamikaze", args: synthArgs, target: groups[group], addAction: \addToHead);
 		^synth;
@@ -70,16 +84,20 @@
 	makeSatieGroup { |  name, addAction = \addToHead |
 		var group;
 		//"Creating group %".format(name).postln;
-		if (addAction == \addToEffects,
+		if ( groups.includesKey(name.asSymbol) == false,
 			{
-				group = ParGroup.new(groups[\defaultFx], \addAfter);
-			},
-			{
-				group = ParGroup.new(addAction: addAction);
-		});
-		groups.put(name.asSymbol, group);
-		groupInstances.put(name.asSymbol, Dictionary.new);
-		^group;
+				if (addAction == \addToEffects,
+					{
+						group = ParGroup.new(groups[\defaultFx], \addAfter);
+					},
+					{
+						group = ParGroup.new(addAction: addAction);
+					});
+				groups.put(name.asSymbol, group);
+				groupInstances.put(name.asSymbol, Dictionary.new);
+				^group;
+			}
+		);
 	}
 
 	killSatieGroup { | name |
