@@ -197,18 +197,20 @@
 			});
 
 			// flush all nodes
-			satie.groupInstances.keysDo { |key |
-				this.clearSourceNode(key);
-			};
+			satie.groups.keysDo ({ |group |
+				satie.groupInstances[group.asSymbol].keysDo({|key|
+					this.clearSourceNode(key);
+				})
+			});
 
 			// remove the groups
 			satie.groups.keysDo({|item|
-				satie.killSatieGroup(item);
+				if ((item.asSymbol == \default) || (item.asSymbol == \defaultFx) == false,
+					{
+						satie.killSatieGroup(item);
+					}
+				)
 			});
-
-			// finally, recreate defaults
-			satie.boot; // it will not reboot the server of already running.
-
 		}
 	}
 
