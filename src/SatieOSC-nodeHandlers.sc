@@ -199,7 +199,7 @@
 			// flush all nodes
 			satie.groups.keysDo ({ |group |
 				satie.groupInstances[group.asSymbol].keysDo({|key|
-					this.clearSourceNode(key);
+					this.clearSourceNode(key, group);
 				})
 			});
 
