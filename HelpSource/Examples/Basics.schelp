@@ -41,7 +41,7 @@ code::
 20.do( { arg item;
 	var nodename=("testNode"++"_"++item).asSymbol;
 	var synth;
-	synth = ~satie.makeInstance(nodename.asSymbol, \misDrone, \default, synthArgs: [\dur: 8500]);
+	synth = ~satie.makeSourceInstance(nodename.asSymbol, \misDrone, \default, synthArgs: [\dur: 8500]);
 	synth.set(\gainDB, rrand(-70, -18), \sfreq, rrand(100, 1000));
 });
 )
@@ -117,7 +117,7 @@ code::
 20.do( { arg item;
 	var nodename=("test_tone"++"_"++item).asSymbol;
 	var synth;
-	synth = ~satie.makeInstance(nodename.asSymbol, \testtone, \synths, synthArgs: [
+	synth = ~satie.makeSourceInstance(nodename.asSymbol, \testtone, \synths, synthArgs: [
 		\sfreq, rrand(200, 800),
 		\gainDB, rrand(-60, -30),
 		\azideg, rrand(-90, 90)]);
@@ -130,7 +130,7 @@ code::
 ~satie.groups[\synths].set(\sfreq, 360);
 
 // add another instance of a synth to the group
-~satie.makeInstance(\solo, \misDrone, \synths, [\gainDB, -20]);
+~satie.makeSourceInstance(\solo, \misDrone, \synths, [\gainDB, -20]);
 
 // set parameters of one instance
 ~satie.groupInstances[\synths][\solo].set(\freq, 800);
