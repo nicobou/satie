@@ -28,7 +28,9 @@
 			{
 				dico = satieConfiguration.audioPlugins;
 				generators.add(id.asSymbol -> srcName.asSymbol);
-			},
+			}
+		);
+		if(satieConfiguration.fxPlugins.at(srcName) != nil,
 			{
 				dico = satieConfiguration.fxPlugins;
 				effects.add(id.asSymbol -> srcName.asSymbol);

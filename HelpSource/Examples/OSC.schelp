@@ -115,7 +115,7 @@ subsection:: Introspection
 You can query SATIE via OSC and get some information. SATIE responds to the following messages:
 definitionlist::
 ##/satie/plugins   // get existing synthdefs
-|| SATIE responds with an osc message: /plugins   JSON string containing 2 objects: audiosources and effects, each listing existing synthdefs by name.
+|| SATIE responds with an osc message: /plugins   JSON string containing 3 objects: audiosources, effects and mastering, each listing existing synthdefs by name.
 ##/satie/pluginargs synthdefName // get arguments of some synthdef
 || synthdefName string
 
@@ -164,7 +164,7 @@ b = NetAddr.new("127.0.0.1", 18032);    // connect to satie's RX port
 b.sendMsg("/satie/responder", "127.0.0.1", 18132);
 
 // enquire about existing synthdefs
-b.sendMsg("/satie/audioplugins")
+b.sendMsg("/satie/plugins")
 // choose query the synthdef arguments
 b.sendMsg("/satie/pluginargs", "string")
 ::
