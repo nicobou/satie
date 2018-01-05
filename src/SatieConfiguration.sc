@@ -32,7 +32,7 @@ SatieConfiguration {
 	var <>orientationOffsetDeg;
 
 	*new {| server, listeningFormat = #[\stereoListener, \stereoListener], numAudioAux = 0, outBusIndex = #[0], hrtfPath = nil |
-		server = server ? Server.supernova;
+		server = server;
 		^super.newCopyArgs(server, listeningFormat, numAudioAux, outBusIndex, hrtfPath).init;
 	}
 
