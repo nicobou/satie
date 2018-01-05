@@ -18,7 +18,7 @@ code::
 (
 s = Server.supernova.local;
 // pass the server to the configuration and define some options
-~satieConfiguration = SatieConfiguration.new(s, \stereoListener);
+~satieConfiguration = SatieConfiguration.new(s, [\stereoListener]);
 // At this point SatieConfiguration has scanned the plugins directories:
 // audiosources - audio generators
 // effects - audio effects
@@ -71,4 +71,3 @@ DEFINITIONLIST::
 ##LINK::Classes/SatiePlugins::
 || A Dictionary of plugins
 ::
-
