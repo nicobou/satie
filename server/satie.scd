@@ -14,12 +14,14 @@
 s = Server.supernova.local;
 
 ~meter = false;
-~gui = false;
 ~tree = false;
 ~listener = "stereoListener";
 ~blocksize = 1024;
 ~listListeners = false;
 ~listSourceTypes = false;
+~listDevices = false;
+~audioDevice = nil;
+~runScsynth = false;
 ~logPrefix = "";
 Server.local.options.numInputBusChannels = 0;
 
@@ -30,18 +32,44 @@ thisProcess.argv.do({
 	{ item == "logprefix" } { ~logPrefix = thisProcess.argv[ i + 1]; }
 	{ item == "listListeners" } { ~listListeners = true; }
 	{ item == "listSourceTypes" } { ~listSourceTypes = true; }
+	{ item == "listDevices" } { ~listDevices = true; }
+	{ item == "device" } { ~audioDevice = thisProcess.argv[ i + 1]; }
 	{ item == "meter" } { ~meter = true; }
-	{ item == "gui" } { ~gui = true; }
 	{ item == "tree" } { ~tree = true; }
 	{ item == "listener" } { ~listener = thisProcess.argv[ i + 1]; }
 	{ item == "blockSize" } { ~blocksize = thisProcess.argv[ i + 1].asInteger; }
-	{ item == "scsynth" } { s = Server.scsynth.local; };
+	{ item == "scsynth" } { ~runScsynth = true; };
+});
+
+if (~listDevices == true, {
+	Platform.case(
+		\osx, {
+			ServerOptions.devices.do({arg item; (~logPrefix ++ item.asSymbol).postln});
+			thisProcess.shutdown;
+			0.exit;
+		},
+		\linux,     { (~logPrefix ++ "list devices is not supported for Linux").postln; 0.exit; },
+		\windows,   { (~logPrefix ++ "list devices is not supported for Windows").postln; 0.exit; }
+	);
 });
 
 ~satieConfiguration = SatieConfiguration.new(s, [~listener.asSymbol]);
-~satieConfiguration.serverOptions.blockSize = ~blocksize;
+Platform.case( \linux, { ~satieConfiguration.serverOptions.blockSize = ~blocksize; });
+
+if (~audioDevice != nil, {
+	Platform.case(
+		\osx, {
+			s.options.device = ~audioDevice.replace("%", " ");
+		},
+		\linux,     { (~logPrefix ++ "audio device selection is not supported for Linux").postln; 0.exit; },
+		\windows,   { (~logPrefix ++ "audio device selection is not supported for Windows").postln; 0.exit; }
+	);
+});
+
+if (~runScsynth == true, {s = Server.scsynth.local});
 ~satie = Satie.new(~satieConfiguration);
 ~satie.boot();
+
 
 s.waitForBoot({
 	s.sync;
@@ -51,24 +79,22 @@ s.waitForBoot({
 		thisProcess.shutdown;
 		0.exit;
 	});
-	
+
 	if (~listSourceTypes == true, {
 		~satie.generatedSynthDefs.do({arg item; (~logPrefix ++ item.asSymbol).postln});
 		thisProcess.shutdown;
 		0.exit;
 	});
 
-	// generate 
+	// generate
 	Server.local.options.numInputBusChannels.do({
 		arg item, i;
-		//("--------------------------------------- audio" ++ i.asSymbol).postln;
 		~satie.makeInstance("audio" ++ i.asSymbol, \MonoIn, synthArgs: [\gainDB: 0, \bus: i, \t_trig: 1]);
 		//~satie.makeInstance("audio" ++ i.asSymbol, \misDrone, \default, synthArgs: [\gainDB: 0]);
 	});
 
-	~satie.groupInstances.postln;
-
 	if (~meter, {s.meter;});
-	if (~gui, {s.makeGui;});
 	if (~tree, {s.plotTree;});
 });
+
+
