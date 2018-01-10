@@ -25,25 +25,32 @@ SATIE_OPTIONS=" logprefix $LOG_PREFIX "
 JACKD_RC="${HOME}/.jackdrc"
 JACKD_PID="none"
 JACKD_LAUNCH="y"
+DEBUG_SATIE_SERVER="n"
 SCLANG_PID="none"
 
 # functions
 
 function usage() {
 echo "Usage: satie [OPTION]"
-echo "This commands runs a SATIE server, ."
-echo ""
-echo "Possible options:"
-echo "  -h             print this help"
+echo "This command runs a SATIE server."
+echo
+echo "Options:"
+echo "  -l <format>    set listener format (default is stereoListener)"
 echo "  -L             list listener formats"
 echo "  -S             list sound object types"
-echo "  -l <format>    set listener format (default is stereoListener)"
-echo "  -m             display SuperCollider meter"
-echo "  -g             display SuperCollider GUI"
-echo "  -t             display SuperCollider tree"
-echo "  -b <size>      set SuperCollider blockSize"
 echo "  -y             set scsynth instead of supernova"
+echo "  -g             display many debug lines in the terminal"
+echo "  -h             print this help"
+echo
+echo "Monitoring options:"
+echo "  -m             display SuperCollider meter"
+echo "  -t             display SuperCollider tree"
+echo
+echo "Audio device options:"
 echo "  -i <#inputs>   set number of inputs (default is 0)"
+echo "  -b <size>      set SuperCollider blockSize"
+echo "  -D             list audio devices (OSX only)"
+echo "  -d <device>    use selected device (OSX only)"
 echo "  -j <file>      use jack configuration file (default is ~/.jackdrc)"
 echo "  -J             disable jack launching"
 }
@@ -52,12 +59,12 @@ function on_exit() {
     # killing jackd process
     if [ $JACKD_LAUNCH = "y" ]
     then
-	kill $JACKD_PID
+	kill $JACKD_PID 2> /dev/null
     fi
 }
 
 # option parsing
-while getopts ":hmgtb:l:yLSi:j:J" opt; do
+while getopts ":hmgtb:l:yLSi:j:JDd:" opt; do
   case $opt in
     h)
       usage >&2
@@ -67,13 +74,21 @@ while getopts ":hmgtb:l:yLSi:j:J" opt; do
       SATIE_OPTIONS+=" meter "
       ;;
     g)
-      SATIE_OPTIONS+=" gui "
+      DEBUG_SATIE_SERVER="y"
       ;;
     t)
       SATIE_OPTIONS+=" tree "
       ;;
     b)
       SATIE_OPTIONS+=" blockSize $OPTARG "
+      ;;
+    D)
+      SATIE_OPTIONS+=" scsynth "
+      SATIE_OPTIONS+=" listDevices "
+      ;;
+    d)
+      TMP_OPTION=$(echo $OPTARG | tr " " %)
+      SATIE_OPTIONS+=" device $TMP_OPTION "
       ;;
     l)
       SATIE_OPTIONS+=" listener $OPTARG "
@@ -82,9 +97,11 @@ while getopts ":hmgtb:l:yLSi:j:J" opt; do
       SATIE_OPTIONS+=" scsynth "
       ;;
     L)
+      SATIE_OPTIONS+=" scsynth "
       SATIE_OPTIONS+=" listListeners "
       ;;
     S)
+      SATIE_OPTIONS+=" scsynth "
       SATIE_OPTIONS+=" listSourceTypes "
       ;;
     i)
@@ -118,8 +135,34 @@ then
     JACKD_PID=$(echo $!)
 fi
 
-# running SATIE
-sclang ./satie.scd $SATIE_OPTIONS > /tmp/satie.log 2> /tmp/satie-err.log
+# search for sclang
+if [ x$SCLANG_BIN = "x" ] # check if SCLANG_BIN is a already defined
+then 
+    SCLANG_BIN=$(command -v sclang)
+    if [ x$SCLANG_BIN = "x" ] # check if SCLANG_BIN has been found with command
+    then
+	SCLANG_BIN="/Applications/SuperCollider.app/Contents/MacOS/sclang"
+    fi
+fi
+
+if [ ! -f ${SCLANG_BIN} ] # check if SCLANG_BIN is a file
+then 
+    echo "Supercollider interpreter (sclang) not found."
+    echo " You can set bash variable SCLANG_BIN in order to"
+    echo " specify a folder containing the sclang binary "
+    echo " Current content of SCLANG_BIN is: " $SCLANG_BIN
+    exit 1
+fi
+
+
+#running SATIE
+SCLANG_PATH=$(echo ${SCLANG_BIN} | sed 's/sclang//')
+if [ $DEBUG_SATIE_SERVER = "n" ]
+then
+${SCLANG_PATH}sclang ./satie.scd $SATIE_OPTIONS > /tmp/satie.log 2> /tmp/satie-err.log
+else
+${SCLANG_PATH}sclang ./satie.scd $SATIE_OPTIONS 
+fi
 
 # print SATIE output
 grep $LOG_PREFIX /tmp/satie.log | sed "s/$LOG_PREFIX//"
