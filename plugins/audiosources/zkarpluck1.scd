@@ -11,13 +11,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*       Audio plugin definition 
+/*       Audio plugin definition
 
 	Each audio plugin should define the following global variables:
     ~name: (symbol) name of the spatializer
 	~description: (string) a short description
 	~function: the actual definition of the plugin
-	
+
 */
 
 /* debugging
@@ -46,6 +46,8 @@ fB	 ??  Inharmonicity factor.
 
 ~name = \zkarpluck1;
 ~description = "Another plucked string";
+~type = \mono;
+
 ~function = {  | t_trig=0, c1 = 1, c3=20, fb = 2, trimDB = 0, note = #[60, 1, 0.5],  i_blockDelay = 2  |   // note: pitch force incidence
 	var env,inp,son;
 	var freq = note[0].midicps;

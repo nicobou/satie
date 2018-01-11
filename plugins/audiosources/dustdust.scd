@@ -11,16 +11,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*       Audio plugin definition 
+/*       Audio plugin definition
 
 	Each audio plugin should define the following global variables:
     ~name: (symbol) name of the spatializer
 	~description: (string) a short description
 	~function: the actual definition of the plugin
-	
+
 */
 
 ~name = \DustDust;
 ~description = "just some synthetic dust";
+~type = \mono;
+
 ~function = {| density1 = 1, density2 = 10, trimDB = 0 |
 	trimDB.dbamp * (Dust.ar(density1) + (0.5 * Dust2.ar(density2)))};

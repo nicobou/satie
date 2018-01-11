@@ -11,13 +11,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*       Audio plugin definition 
+/*       Audio plugin definition
 
 	Each audio plugin should define the following global variables:
     ~name: (symbol) name of the spatializer
 	~description: (string) a short description
 	~function: the actual definition of the plugin
-	
+
 */
 
 
@@ -29,6 +29,8 @@
 
 ~name = \pbell1;
 ~description = "a variant of a synthesized bell (unstable)";
+~type = \mono;
+
 // note:  midiPitch  Unit-Incidence Unit-Amplitude  (positive values between 0 and 1)
 ~function = { |outbus, decayscale = 0.2, i_doneAction = 0,  trimDB=0,  muteSecs = 10,  note = #[60, 0, 0], t_trig= -1 |
 

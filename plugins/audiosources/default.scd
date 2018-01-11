@@ -13,6 +13,8 @@
 
 ~name = \default;
 ~description = "...";
+~type = \mono;
+
 ~function = { arg amp=1, lfoHz=10, trimDB = 0, t_gate=0, note=#[60,1];
 	var signal, env;
 	env = EnvGen.ar(Env.perc(0.01, 0.3, 0.5), gate: t_gate, doneAction:0);
