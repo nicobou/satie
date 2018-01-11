@@ -35,6 +35,7 @@
 ~name = \_1474_VBAP;
 ~description = "16 channel dome (IEM)";
 ~numChannels = 16;
+~type = \mono;
 
 /* speaker positions used by ambIEM
 https://github.com/supercollider-quarks/AmbIEM/blob/master/Classes/DecodeAmbi.sc
