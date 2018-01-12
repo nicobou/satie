@@ -45,6 +45,7 @@ echo
 echo "Monitoring options:"
 echo "  -m             display SuperCollider meter"
 echo "  -t             display SuperCollider tree"
+echo "  -u             display basic spatialization UI (with -i option only)  "
 echo
 echo "Audio device options:"
 echo "  -i <#inputs>   set number of inputs (default is 0)"
@@ -64,7 +65,7 @@ function on_exit() {
 }
 
 # option parsing
-while getopts ":hmgtb:l:yLSi:j:JDd:" opt; do
+while getopts ":hmgtb:l:yLSi:j:JDd:u" opt; do
   case $opt in
     h)
       usage >&2
@@ -112,6 +113,9 @@ while getopts ":hmgtb:l:yLSi:j:JDd:" opt; do
       ;;
     J)
       JACKD_LAUNCH="n"
+      ;;
+    u)
+      SATIE_OPTIONS+=" inputUI "
       ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
