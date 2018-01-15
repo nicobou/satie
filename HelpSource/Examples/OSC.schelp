@@ -1,10 +1,35 @@
 TITLE:: SATIE OSC protocol
 summary:: The documentation of the SATIE OSC protocol
 categories:: Libraries>SATIE
+related:: Overview/SATIE-Overview
+
 Section:: OSC API
-SATIE listens on port 18032 by default.
+SATIE listens to OSC messages on port 18032 by default and will occasionnaly respond by sending a message to the originating host:port. See link::#Introspection:: for more details on control of SATIE OSC responses.
+
+
+The following sections document several level of access and control:
+
+DEFINITIONLIST::
+## link::#Project Messages::
+|| Project level commands
+## link::#Scene Messages::
+|| Handles creation and destruction of various SATIE entities.
+## link::#Node Messages::
+|| Handles maipulation of instances of SATIE entities.
+## link::#Introspection::
+|| Query SATIE about its internal state
+::
+subsection:: Project Messages
+
+definitionlist::
+##/satie/project/projectName setProjectDir
+||full path to supercollider resources, such as soundfiles or midi files
+::
 
 subsection:: Scene Messages
+
+A "scene" contains source/effect/process nodes which are kept in groups. These messages create and manage scene content.
+
 definitionlist::
 ## /satie/load filename
 || loads and evaluates file in supercollider.  Filename must be a full file path to a file located on the audiorendering machine
@@ -25,7 +50,7 @@ list::
 ##auxBus: (optional) number of aux bus for the effect's input. Default: '0'
 ::
 ##/satie/scene/createProcess nodeName processName <optargs>
-|| Create/instantiate a process
+|| Create/instantiate a link::Examples/Processes##process::
 list::
 ## nodeName : the name of the instance.
 ## processName : the name of the defined process followed by its arguments, if any
@@ -65,30 +90,51 @@ list::
 ::
 ::
 
-subsection:: Project Messages
+SUBSECTION:: Node messages
 
-definitionlist::
-##/satie/project/projectName setProjectDir
-||full path to supercollider resources, such as soundfiles or midi files
-::
+Nodes are instances of audiosources, effects, processes etc. Nodes also belong to groups.
 
-subsection:: Node messages
-For nodeTypes:  source, group, or process
-definitionlist::
+DEFINITIONLIST::
 ##/satie/<nodeType>/state nodeName value
-|| Node state : 1 = active, 0 = inactive
+|| Node state (whether it is playing/computing or not): 1 = active, 0 = inactive
 ##/satie/<nodeType>/event nodeName eventName <opt> atom1 atom2...atomN
 || some event
-##/satie/<nodeType>/set nodeName key1 val1 key2 val2 .... keyN valN
+::
+
+For specific sources, effects and processes, consult the sources located in the soft::plugins:: directory. Also, see link::#Introspection:: for other means of getting information from SATIE.
+
+
+DEFINITIONLIST::
+##/SATIE/<nodeType>/set nodeName key1 val1 key2 val2 .... keyN valN
 || set a property
 ##/satie/<nodeType>/setvec nodeName key val1 .....  valN
 || set a vector
 ::
+
+NOTE::SOFT::set:: and SOFT::setvec:: messages are used to address specific properties. Each node has two groups of properties: those provided by the spatializer and those specific to the node. The latter vary from node to node.
+
+Propertie common to all:
+table::
+## preBus_gainDB || dB || default = 0
+## postBus_gainDB || dB || default = 0
+::
+
+Spatializer properties (contained in most spatializers)
+table::
+## aziDeg || 0 - 360 (degrees) || default = 0
+## eleDeg || -90 - 90 (degrees) || default 0
+## gainDB || dB || default = 0
+## delayMs || milliseconds || default 1
+## lpHz || Hz || default = 15000
+## hpHz || Hz || default = 1
+## spread || range (0 to 100) || default = 1
+::
+::
 Only for nodeTypes: source and process
 definitionlist::
 ##/satie/<nodeType>/update nodeName azimuthDegrees elevationDegrees gainDB delayMS  lpHZ  distance
-|| update
-list::
+|| Update many essential properties at once. This message is typically sent every frame, all properties relate to node's position. soft::distance:: applies only to processes.
+LIST::
 ## nodeName : name of the node
 ## azimuthDegrees : azimuth in degrees (-180 ... 180)
 ## elevationDegrees : (-180 ... 180)
