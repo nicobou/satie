@@ -92,7 +92,13 @@ list::
 
 SUBSECTION:: Node messages
 
-Nodes are instances of audiosources, effects, processes etc. Nodes also belong to groups.
+Nodes are instances of audiosources, effects or processes. Nodes also belong to groups. There are three ways of addressing a node:
+
+list::
+## source - individual instance of type soft::audiosource:: or soft::effect::
+## group
+## process
+::
 
 DEFINITIONLIST::
 ##/satie/<nodeType>/state nodeName value
@@ -169,7 +175,7 @@ definitionlist::
 ::
 
 
-note:: by default, the response is sent to ip.port of the sender. It can be set permanently for the duration of the session via by sending code::/satie/responder:: a message containing IP and port::
+note:: by default, the response is sent to ip:port of the sender. It can be set permanently for the duration of the session via by sending code::/satie/responder:: a message containing IP and port::
 
 definitionlist::
 ##/satie/responder ip port
