@@ -58,6 +58,11 @@
 
 	makeInstance {| name, synthDefName, group = \default, synthArgs = #[] |
 		var synth = Synth(synthDefName, args: synthArgs, target: groups[group], addAction: \addToHead);
+		if (groupInstances[group][name] != nil,
+			{
+				this.cleanInstance(name, group: group);
+			}
+		);
 		groupInstances[group].put(name, synth);
 		^synth;
 	}
