@@ -166,7 +166,7 @@ Satie {
 
 		// generate synthdefs
 		audioPlugins.do { arg item;
-			this.makeSynthDef(item.name,item.name, [], [], satieConfiguration.listeningFormat, [satieConfiguration.outBusIndex]);
+			this.makeSynthDef(item.name,item.name, [], [], satieConfiguration.listeningFormat, satieConfiguration.outBusIndex);
 		};
 
 		generatedSynthDefs = audioPlugins.keys;

@@ -63,7 +63,7 @@ SatieConfiguration {
 	}
 
 	handleSpatFormat { arg format;
-		serverOptions.numOutputBusChannels = 0;
+		serverOptions.numOutputBusChannels = outBusIndex.minItem;
 
 		format.do { arg item, i;
 			var spatPlugin = this.spatPlugins[item.asSymbol];
