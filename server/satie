@@ -13,12 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#TODO option for log files
-#TODO soundflower ? 
-#TODO use jack blocksize for satie configuration
-#TODO allow user to specify a dir with sound files that will be made as synthDef
-#TODO scd file to evaluate after satie boot
-
 # global variables
 LOG_PREFIX="SATIE-RES:"
 SATIE_OPTIONS=" logprefix $LOG_PREFIX "
@@ -39,6 +33,7 @@ echo "  -l <format>    set listener format (default is stereoListener)"
 echo "  -L             list listener formats"
 echo "  -S             list sound object types"
 echo "  -y             set scsynth instead of supernova"
+echo "  -a <count>     set number of internal aux busses to create"
 echo "  -g             display many debug lines in the terminal"
 echo "  -h             print this help"
 echo
@@ -46,11 +41,13 @@ echo "Monitoring options:"
 echo "  -m             display SuperCollider meter"
 echo "  -t             display SuperCollider tree"
 echo "  -u             display basic spatialization UI (with -i option only)  "
+echo "  -v             display volume controler  "
 echo
 echo "Audio device options:"
 echo "  -i <#inputs>   set number of inputs (default is 0)"
-echo "  -O <#index>    set output channel offset"
 echo "  -I <#index>    set input channel offset"
+echo "  -n             no automatic generation of audio input spatialization"
+echo "  -O <#index>    set output channel offset"
 echo "  -b <size>      set SuperCollider blockSize"
 echo "  -D             list audio devices (OSX only)"
 echo "  -d <device>    use selected device (OSX only)"
@@ -59,80 +56,89 @@ echo "  -J             disable jack launching"
 }
 
 function on_exit() {
-    # killing jackd process
-    if [ $JACKD_LAUNCH = "y" ]
-    then
-	kill $JACKD_PID 2> /dev/null
-    fi
+# killing jackd process
+if [ $JACKD_LAUNCH = "y" ]
+then
+kill $JACKD_PID 2> /dev/null
+fi
 }
 
 # option parsing
-while getopts ":hmgtb:l:yLSi:j:JDd:uO:I:" opt; do
-  case $opt in
-    h)
-      usage >&2
-      exit 1
-      ;;
-    m)
-      SATIE_OPTIONS+=" meter "
-      ;;
-    g)
-      DEBUG_SATIE_SERVER="y"
-      ;;
-    t)
-      SATIE_OPTIONS+=" tree "
-      ;;
-    b)
-      SATIE_OPTIONS+=" blockSize $OPTARG "
-      ;;
-    D)
-      SATIE_OPTIONS+=" scsynth "
-      SATIE_OPTIONS+=" listDevices "
-      ;;
-    d)
-      TMP_OPTION=$(echo $OPTARG | tr " " %)
-      SATIE_OPTIONS+=" device $TMP_OPTION "
-      ;;
-    l)
-      SATIE_OPTIONS+=" listener $OPTARG "
-      ;;
-    y)
-      SATIE_OPTIONS+=" scsynth "
-      ;;
-    L)
-      SATIE_OPTIONS+=" scsynth "
-      SATIE_OPTIONS+=" listListeners "
-      ;;
-    S)
-      SATIE_OPTIONS+=" scsynth "
-      SATIE_OPTIONS+=" listSourceTypes "
-      ;;
-    i)
-      SATIE_OPTIONS+=" numInputs $OPTARG "
-      ;;
-    O)
-      SATIE_OPTIONS+=" outOffset $OPTARG "
-      ;;
-    I)
-      SATIE_OPTIONS+=" inOffset $OPTARG "
-      ;;
-    j)
-      JACKD_RC=$OPTARG
-      ;;
-    J)
-      JACKD_LAUNCH="n"
-      ;;
-    u)
-      SATIE_OPTIONS+=" inputUI "
-      ;;
-    \?)
-      echo "Invalid option: -$OPTARG" >&2
-      ;;
-    :)
-      echo "Option -$OPTARG requires an argument." >&2
-      exit 1
-      ;;
-  esac
+while getopts ":hmgtb:l:yLSi:j:JDd:uO:I:a:vn" opt; do
+    case $opt in
+	h)
+	    usage >&2
+	    exit 1
+	    ;;
+	m)
+	    SATIE_OPTIONS+=" meter "
+	    ;;
+	n)
+	    SATIE_OPTIONS+=" nosynths "
+	    ;;
+	g)
+	    DEBUG_SATIE_SERVER="y"
+	    ;;
+	t)
+	    SATIE_OPTIONS+=" tree "
+	    ;;
+	b)
+	    SATIE_OPTIONS+=" blockSize $OPTARG "
+	    ;;
+	a)
+	    SATIE_OPTIONS+=" auxBusCount $OPTARG "
+	    ;;
+	D)
+	    SATIE_OPTIONS+=" scsynth "
+	    SATIE_OPTIONS+=" listDevices "
+	    ;;
+	d)
+	    TMP_OPTION=$(echo $OPTARG | tr " " %)
+	    SATIE_OPTIONS+=" device $TMP_OPTION "
+	    ;;
+	l)
+	    SATIE_OPTIONS+=" listener $OPTARG "
+	    ;;
+	v)
+	    SATIE_OPTIONS+=" volumeCtl "
+	    ;;
+	y)
+	    SATIE_OPTIONS+=" scsynth "
+	    ;;
+	L)
+	    SATIE_OPTIONS+=" scsynth "
+	    SATIE_OPTIONS+=" listListeners "
+	    ;;
+	S)
+	    SATIE_OPTIONS+=" scsynth "
+	    SATIE_OPTIONS+=" listSourceTypes "
+	    ;;
+	i)
+	    SATIE_OPTIONS+=" numInputs $OPTARG "
+	    ;;
+	O)
+	    SATIE_OPTIONS+=" outOffset $OPTARG "
+	    ;;
+	I)
+	    SATIE_OPTIONS+=" inOffset $OPTARG "
+	    ;;
+	j)
+	    JACKD_RC=$OPTARG
+	    ;;
+	J)
+	    JACKD_LAUNCH="n"
+	    ;;
+	u)
+	    SATIE_OPTIONS+=" inputUI "
+	    ;;
+	\?)
+	    echo "Invalid option: -$OPTARG" >&2
+	    ;;
+	:)
+	    echo "Option -$OPTARG requires an argument." >&2
+	    exit 1
+	    ;;
+    esac
 done
 
 trap 'on_exit' INT
@@ -142,28 +148,28 @@ trap 'on_exit' QUIT
 # running jackd
 if [ $JACKD_LAUNCH = "y" ]
 then
-    JACKDARGS=$(cat $JACKD_RC | awk -F "jackd " '/1/ {print $2}')
-    jackd $JACKDARGS > /tmp/satie-jack.log 2> /tmp/satie-jack-err.log &
-    JACKD_PID=$(echo $!)
+JACKDARGS=$(cat $JACKD_RC | awk -F "jackd " '/1/ {print $2}')
+jackd $JACKDARGS > /tmp/satie-jack.log 2> /tmp/satie-jack-err.log &
+JACKD_PID=$(echo $!)
 fi
 
 # search for sclang
 if [ x$SCLANG_BIN = "x" ] # check if SCLANG_BIN is a already defined
-then 
-    SCLANG_BIN=$(command -v sclang)
-    if [ x$SCLANG_BIN = "x" ] # check if SCLANG_BIN has been found with command
-    then
-	SCLANG_BIN="/Applications/SuperCollider.app/Contents/MacOS/sclang"
-    fi
+then
+SCLANG_BIN=$(command -v sclang)
+if [ x$SCLANG_BIN = "x" ] # check if SCLANG_BIN has been found with command
+then
+SCLANG_BIN="/Applications/SuperCollider.app/Contents/MacOS/sclang"
+fi
 fi
 
 if [ ! -f ${SCLANG_BIN} ] # check if SCLANG_BIN is a file
-then 
-    echo "Supercollider interpreter (sclang) not found."
-    echo " You can set bash variable SCLANG_BIN in order to"
-    echo " specify a folder containing the sclang binary "
-    echo " Current content of SCLANG_BIN is: " $SCLANG_BIN
-    exit 1
+then
+echo "Supercollider interpreter (sclang) not found."
+echo " You can set bash variable SCLANG_BIN in order to"
+echo " specify a folder containing the sclang binary "
+echo " Current content of SCLANG_BIN is: " $SCLANG_BIN
+exit 1
 fi
 
 
@@ -173,7 +179,7 @@ if [ $DEBUG_SATIE_SERVER = "n" ]
 then
 ${SCLANG_PATH}sclang ./satie.scd $SATIE_OPTIONS > /tmp/satie.log 2> /tmp/satie-err.log
 else
-${SCLANG_PATH}sclang ./satie.scd $SATIE_OPTIONS 
+${SCLANG_PATH}sclang ./satie.scd $SATIE_OPTIONS
 fi
 
 # print SATIE output
