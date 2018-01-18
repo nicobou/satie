@@ -198,8 +198,8 @@
 
 			// flush all nodes
 			satie.groups.keysDo ({ |group |
-				satie.groupInstances[group.asSymbol].keysDo({|key|
-					this.clearSourceNode(key, group);
+				satie.groupInstances[group.asSymbol].do({|key|
+					key.free();
 				})
 			});
 
