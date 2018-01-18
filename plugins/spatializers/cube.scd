@@ -37,7 +37,7 @@
 ~name = \cube;
 ~description = "8 channel 3D layout (Cube corners)";
 ~numChannels = 8;
-~type = \mono;
+~channelLayout = \mono;
 
 ~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 0.0 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP

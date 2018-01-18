@@ -22,7 +22,7 @@
 
 ~name = \testee;
 ~descrioption = "a droney sound";
-~type = \mono;
+~channelLayout = \mono;
 
 ~function = {
 var tri = Array.with(

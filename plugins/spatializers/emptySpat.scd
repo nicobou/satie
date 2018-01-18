@@ -33,7 +33,7 @@
 ~name = \emptySpat;
 ~description = "No spat. Expect nothing.";
 ~numChannels = 0;
-~type = \mono;
+~channelLayout = \mono;
 
 
 ~function = {|in = 0, aziDeg = 0, eleDeg = 0, gainDB = 0, delayMs = 1, lpHz = 15000, hpHz = 20, spread = 1 |

@@ -37,7 +37,7 @@ fB	 ??  Inharmonicity factor.
 
 ~name = \zkarpluck2P;
 ~description = "Plucked string physical model for kamikaze clones";
-~type = \mono;
+~channelLayout = \mono;
 
 ~function = {  | t_trig=0, trimDB = -10, c1 = 1, c3=20, fb = 2, randTrigMaxMs = 10000 , note = #[60, 1, 0.5] , i_blockDelay = 2  |   // note: pitch force incidence
 	var env,inp,son;

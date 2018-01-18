@@ -38,7 +38,7 @@
 ~name = \octoVBAP;
 ~numChannels = 8;
 ~description = "8 channel ring (2D)";
-~type = \mono;
+~channelLayout = \mono;
 
 ~spk8 = VBAPSpeakerArray.new(2, [0, 45, 90, 135, 180, -135, -90, -45]); // 8 channel ring
 

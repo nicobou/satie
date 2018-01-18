@@ -18,7 +18,7 @@
 
 ~name = \MonoIn;
 ~description = "A direct input";
-~type = \mono;
+~channelLayout = \mono;
 
 ~function = {
 	|t_trig = 0, bus = 0|

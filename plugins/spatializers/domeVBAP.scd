@@ -33,7 +33,7 @@
 ~name = \domeVBAP;
 ~description = "31 channel sphere (SAT dome)";
 ~numChannels = 31;
-~type = \mono;
+~channelLayout = \mono;
 
 // layout for domes developed by olie
 // ~spk31 = VBAPSpeakerArray.new(3, [

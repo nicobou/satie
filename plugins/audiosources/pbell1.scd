@@ -29,7 +29,7 @@
 
 ~name = \pbell1;
 ~description = "a variant of a synthesized bell (unstable)";
-~type = \mono;
+~channelLayout = \mono;
 
 // note:  midiPitch  Unit-Incidence Unit-Amplitude  (positive values between 0 and 1)
 ~function = { |outbus, decayscale = 0.2, i_doneAction = 0,  trimDB=0,  muteSecs = 10,  note = #[60, 0, 0], t_trig= -1 |

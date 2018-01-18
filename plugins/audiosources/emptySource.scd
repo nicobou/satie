@@ -22,7 +22,7 @@
 
 ~name = \emptySource;
 ~description = "dummy/template";
-~type = \mono;
+~channelLayout = \mono;
 
 ~function = {
 	DC.ar(0);

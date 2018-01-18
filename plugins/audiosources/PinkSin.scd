@@ -22,7 +22,7 @@
 
 ~name = \PinkSin;
 ~description = "Mix of pink noise and sine wave";
-~type = \mono;
+~channelLayout = \mono;
 
 ~function = {| sfreq = 200 |
 	PinkNoise.ar() + FSinOsc.ar(sfreq)

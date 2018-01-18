@@ -19,7 +19,7 @@
 
 ~name = \sndFile;
 ~description = "A sound file player (stream from disk)";
-~type = \mono;
+~channelLayout = \mono;
 
 ~function = { | bufnum = 0, loop = 0 |
 	DiskIn.ar(2, bufnum, loop = loop);

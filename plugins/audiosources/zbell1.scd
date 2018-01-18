@@ -22,7 +22,7 @@
 
 ~name = \zbell1;
 ~description = "synthesized bell sound using a bank of resonant filers";
-~type = \mono;
+~channelLayout = \mono;
 
 ~function = {   arg outbus, t_trig = 0, note = #[60, 1, 0.5], decay = 0.3, lag = 0.01, i_doneAction = 0 ;
 	var freq = note[0].midicps;

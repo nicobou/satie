@@ -24,7 +24,7 @@
 
 ~name = \misDrone;
 ~description = "a rich drone sound";
-~type = \mono;
+~channelLayout = \mono;
 
 ~function = { | freq = 200, dur = 22, amp = 0.75|
 	var bnq = Array.with(

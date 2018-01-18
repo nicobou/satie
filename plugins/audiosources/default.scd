@@ -13,7 +13,7 @@
 
 ~name = \default;
 ~description = "...";
-~type = \mono;
+~channelLayout = \mono;
 
 ~function = { arg amp=1, lfoHz=10, trimDB = 0, t_gate=0, note=#[60,1];
 	var signal, env;

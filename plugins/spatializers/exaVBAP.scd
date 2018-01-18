@@ -33,7 +33,7 @@
 ~name = \exaVBAP;
 ~description = "6 channel ring (2D)";
 ~numChannels = 6;
-~type = \mono;
+~channelLayout = \mono;
 
 ~spk6 = VBAPSpeakerArray.new(2, [0, 60, 120, 180, -120, -60]); // 8 channel ring
 

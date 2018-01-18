@@ -38,7 +38,7 @@ fB	 ??  Inharmonicity factor.
 
 ~name = \zkarpluck1P;
 ~description = "a variant of plucked string for resonant, continuously updasted particles";
-~type = \mono;
+~channelLayout = \mono;
 
 ~function = {  | t_trig=0, c1 = 1, c3=20, fb = 2, randTrigMaxMs = 10000 , note = #[60, 1, 0.5]  |   // note: pitch force incidence
 	var env,inp,son;

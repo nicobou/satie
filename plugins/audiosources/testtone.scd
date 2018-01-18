@@ -22,7 +22,7 @@
 
 ~name = \testtone;
 ~description = "a standard test tone (sine)";
-~type = \mono;
+~channelLayout = \mono;
 
 ~function = {| sfreq = 200 |
 	FSinOsc.ar(sfreq)

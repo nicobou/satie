@@ -24,7 +24,7 @@
 
 ~name = \particule1;
 ~description = "a particule";
-~type = \mono;
+~channelLayout = \mono;
 
 ~function = {| t_trig = 0, attackDB = -100,  decayMs = 1000, force = 0.75, incidence = 0.75,  pitch = 60, i_blockDelay = 2 |
 	var outsig, z,ampScaler, hfqRolloffAmp, outGainBias;

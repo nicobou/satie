@@ -19,7 +19,7 @@
 
 ~name = \zPsamp1;
 ~description = "Play a sample buffer";
-~type = \mono;
+~channelLayout = \mono;
 // uses a delay of two blocks to avoid transient mangulation by supernova
 // args:   midiPitch60 == no transposition,  force & incidence  between -1 and 1
 ~function = { | bufnum = 0, loop = 0, startPos=0, t_trig=0, trimDB=0,  note = #[60, 1, 0.7]  |

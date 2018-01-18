@@ -46,7 +46,7 @@ fB	 ??  Inharmonicity factor.
 
 ~name = \zkarpluck1;
 ~description = "Another plucked string";
-~type = \mono;
+~channelLayout = \mono;
 
 ~function = {  | t_trig=0, c1 = 1, c3=20, fb = 2, trimDB = 0, note = #[60, 1, 0.5],  i_blockDelay = 2  |   // note: pitch force incidence
 	var env,inp,son;

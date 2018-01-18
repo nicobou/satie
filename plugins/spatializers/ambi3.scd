@@ -35,7 +35,7 @@
 ~name = \ambi3;
 ~description = "16-channel spatialized output in ambisonic 3rd order format";
 ~numChannels = 16;  // the 16 channel ambisonics signal;
-~type = \mono;
+~channelLayout = \mono;
 
 ~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP

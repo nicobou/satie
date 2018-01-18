@@ -35,7 +35,7 @@ spread  units  (0 == directional, ....,  100 == omni)
 ~name = \ambi1;
 ~description = "4-channel spatialized output in ambisonic 1st order format";
 ~numChannels = 4;
-~type = \mono;
+~channelLayout = \mono;
 
 ~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP

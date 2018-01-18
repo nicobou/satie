@@ -38,7 +38,7 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 
 ~name = "6chLoopbuff".asSymbol;
 ~description = "6 track sample looper";
-~type = \mono;
+~channelLayout = \mono;
 
 ~function = { | bufnum=0, glide=0.2, loopRel=0, startPosSecs=0, trimDB=0, startLoop=0, endLoopSecs=99999, ipol=2, curve=0, attackMs=0.01, releaseSecs=1, warp=5, transp=0, sampAzi=0, sampSpr=0,  amp=1, clipBoostDB = 0, note = #[60, 1, 1] |
 

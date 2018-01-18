@@ -22,7 +22,7 @@
 
 ~name = \DustDust;
 ~description = "just some synthetic dust";
-~type = \mono;
+~channelLayout = \mono;
 
 ~function = {| density1 = 1, density2 = 10, trimDB = 0 |
 	trimDB.dbamp * (Dust.ar(density1) + (0.5 * Dust2.ar(density2)))};

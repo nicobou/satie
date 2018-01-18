@@ -22,7 +22,7 @@
 
 ~name = \zkarpluck0;
 ~description = "another variation of a plucked string";
-~type = \mono;
+~channelLayout = \mono;
 
 ~function = { arg outputDB = 0, lpFq = 12000, pWidth = 0,  combRTsec = 0.1, attkRiseMs = 0, attkDurMs = 0.1,  t_gate = 0, note = #[60,1];  // note gain
 	var hpFq = 20;   // highpass for fb delay.
