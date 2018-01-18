@@ -49,6 +49,8 @@ echo "  -u             display basic spatialization UI (with -i option only)  "
 echo
 echo "Audio device options:"
 echo "  -i <#inputs>   set number of inputs (default is 0)"
+echo "  -O <#index>    set output channel offset"
+echo "  -I <#index>    set input channel offset"
 echo "  -b <size>      set SuperCollider blockSize"
 echo "  -D             list audio devices (OSX only)"
 echo "  -d <device>    use selected device (OSX only)"
@@ -65,7 +67,7 @@ function on_exit() {
 }
 
 # option parsing
-while getopts ":hmgtb:l:yLSi:j:JDd:u" opt; do
+while getopts ":hmgtb:l:yLSi:j:JDd:uO:I:" opt; do
   case $opt in
     h)
       usage >&2
@@ -107,6 +109,12 @@ while getopts ":hmgtb:l:yLSi:j:JDd:u" opt; do
       ;;
     i)
       SATIE_OPTIONS+=" numInputs $OPTARG "
+      ;;
+    O)
+      SATIE_OPTIONS+=" outOffset $OPTARG "
+      ;;
+    I)
+      SATIE_OPTIONS+=" inOffset $OPTARG "
       ;;
     j)
       JACKD_RC=$OPTARG

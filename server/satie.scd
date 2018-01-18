@@ -24,6 +24,8 @@ s = Server.supernova.local;
 ~runScsynth = false;
 ~logPrefix = "";
 ~inputUI = false;
+~inOffset=0;
+~outOffset=0;
 
 Server.local.options.numInputBusChannels = 0;
 
@@ -41,8 +43,12 @@ thisProcess.argv.do({
 	{ item == "listener" } { ~listener = thisProcess.argv[ i + 1]; }
 	{ item == "blockSize" } { ~blocksize = thisProcess.argv[ i + 1].asInteger; }
 	{ item == "scsynth" } { ~runScsynth = true; }
-	{ item == "inputUI" } { ~inputUI = true; };
+	{ item == "inputUI" } { ~inputUI = true; }
+	{ item == "outOffset" } { ~outOffset = thisProcess.argv[ i + 1].asInteger; }
+	{ item == "inOffset" } { ~inOffset = thisProcess.argv[ i + 1].asInteger; };
 });
+
+~numAudioInSynth=(Server.local.options.numInputBusChannels - ~inOffset).clip(0, Server.local.options.numInputBusChannels);
 
 if (~listDevices == true, {
 	Platform.case(
@@ -56,7 +62,7 @@ if (~listDevices == true, {
 	);
 });
 
-~satieConfiguration = SatieConfiguration.new(s, [~listener.asSymbol]);
+~satieConfiguration = SatieConfiguration.new(s, [~listener.asSymbol], 0, [~outOffset]);
 Platform.case( \linux, { ~satieConfiguration.serverOptions.blockSize = ~blocksize; });
 
 if (~audioDevice != nil, {
@@ -81,11 +87,11 @@ if (~audioDevice != nil, {
 	lpHzSpec = ControlSpec(0, 19000, \linear, 1);
 	hpHzSpec = ControlSpec(0, 18000, \linear, 1);
 
-	w = GUI.window.new("SATIE spatializers", Rect( 200, 100, 10 + 550, 5 + 120*Server.local.options.numInputBusChannels), scroll: true);
+	w = GUI.window.new("SATIE spatializers", Rect( 200, 100, 10 + 550, 5 + 120*~numAudioInSynth), scroll: true);
 	w.view.decorator = FlowLayout( w.view.bounds);
 	w.view.background = Color.grey;
 	~satie.groupInstances[\default].postln;
-	Server.local.options.numInputBusChannels.do({
+	~numAudioInSynth.do({
 		arg item, i;
 		var container, orient, db, nodeName, spread, delayMs, lpHz, hpHz;
 		nodeName = ("audio"++i).asSymbol;
@@ -163,11 +169,11 @@ s.waitForBoot({
 		0.exit;
 	});
 
-	// generate
-	Server.local.options.numInputBusChannels.do({
+	// generate audio synth capturing inputs
+	~numAudioInSynth.do({
 		arg item, i;
 		var nodeName = ("audio" ++ i);
-		~satie.makeInstance(nodeName.asSymbol, \MonoIn, synthArgs: [\gainDB: 0, \bus: i + 1, \t_trig: 1]);
+		~satie.makeInstance(nodeName.asSymbol, \MonoIn, synthArgs: [\gainDB: 0, \bus: i + 1 + ~inOffset, \t_trig: 1]);
 		// ~satie.makeInstance("drone" ++ i.asSymbol, \misDrone, \default, synthArgs: [\gainDB: 0]);
 	});
 
