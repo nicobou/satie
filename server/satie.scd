@@ -13,6 +13,7 @@
 
 s = Server.supernova.local;
 
+~numInputs = 8;
 ~nosynths = false;
 ~volumeCtl = false;
 ~auxBusCount = 0;
@@ -30,12 +31,10 @@ s = Server.supernova.local;
 ~inOffset=0;
 ~outOffset=0;
 
-Server.local.options.numInputBusChannels = 0;
-
 thisProcess.argv.do({
 	arg item, i;
 	case
-	{ item == "numInputs" } { Server.local.options.numInputBusChannels = thisProcess.argv[ i + 1].asInteger; }
+	{ item == "numInputs" } { ~numInputs = thisProcess.argv[ i + 1].asInteger; }
 	{ item == "logprefix" } { ~logPrefix = thisProcess.argv[ i + 1]; }
 	{ item == "listListeners" } { ~listListeners = true; }
 	{ item == "listSourceTypes" } { ~listSourceTypes = true; }
@@ -53,6 +52,8 @@ thisProcess.argv.do({
 	{ item == "auxBusCount"} { ~auxBusCount = thisProcess.argv[ i + 1].asInteger; }
 	{ item == "nosynths"} {~nosynths = true; };
 });
+
+Server.local.options.numInputBusChannels = ~numInputs + ~inOffset;
 
 ~numAudioInSynth=(Server.local.options.numInputBusChannels - ~inOffset).clip(0, Server.local.options.numInputBusChannels);
 if(~nosynths, {
@@ -159,6 +160,7 @@ if (~audioDevice != nil, {
 	w.front;
 };
 
+
 if (~runScsynth == true, {s = Server.scsynth.local});
 ~satie = Satie.new(~satieConfiguration);
 ~satie.boot();
@@ -189,7 +191,7 @@ s.waitForBoot({
 				// ~satie.makeInstance("drone" ++ i.asSymbol, \misDrone, \default, synthArgs: [\gainDB: 0]);
 			});
 		});
-	
+
 	if (~meter, {s.meter;});
 	if (~volumeCtl, {s.makeGui;});
 	if (~tree, {s.plotTree;});
