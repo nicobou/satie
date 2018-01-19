@@ -48,9 +48,7 @@ Then type `scide` (the SuperCollider IDE) and check the console to see if everyt
 SATIE is a SuperCollider Quark and it depends on the following Quarks:
 
 - UnitTesting
-- AmbIEM
-- Ctk
-- Atk
+- SC-HOA
 
 
 ####  plugin locations for OSX
@@ -75,8 +73,7 @@ Quarks can be installed in a number of ways. Here are two ways to do it (in supe
 Quarks.gui
 
 // installation via command:
-Quarks.install("AmbIEM");
-Quarks.install("Ctk");
+Quarks.install("SC-HOA");
 ~~~~
 
 note:  once you have installed the quark(s) in supercollider, you will need to evaluate the following lines so that supercollider remembers.
@@ -86,9 +83,3 @@ LanguageConfig.includePaths
 LanguageConfig.store
 ~~~~
 
-### HRTF data resources
-Each option depends on a corresponding set of HRTF data. SATIE provides submodules with copies of these databases, which will be installed automatically when using the `git clone --recursive` flag. For more information on the subject:
-
-[ATK] (http://www.ambisonictoolkit.net/documentation/supercollider)
-
-[AmbIEM] (http://alumni.media.mit.edu/~kdm/hrtfdoc/hrtfdoc.html)
