@@ -110,8 +110,8 @@ SatieIntrospection {
 					);
 				}
 			)
-		}
-		ret.add(plugin.asSymbol -> fileds);
+		};
+		ret.add(plugin.asSymbol -> fields);
 		^ret;
 	}
 
