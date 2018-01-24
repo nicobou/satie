@@ -89,6 +89,31 @@ SatieIntrospection {
 		^ToJSON.stringify(dico);
 	}
 
+	// we will probably want to get other available fields of a plugin, we can list them here
+	getPluginFields { | plugin |
+		var fields, plugClass, plugInstance, ret;
+		fields = Dictionary.new();
+		ret = Dictionary.new();
+		this.updatePluginsList;
+		pluginsList.do {| coll |
+			if(coll.keys.includes(plugin.asSymbol),
+				{
+					plugInstance = coll[plugin.asSymbol];
+					plugClass = plugInstance.class;
+					plugClass.instVarNames.do({|item, i|
+						fields.add(item.asSymbol -> plugInstance.instVarAt(i).asCompileString);
+					});
+				},
+				{
+					if(context.satieConfiguration.debug,
+						{"% tried % in % and found none...".format(this.class.getBackTrace, plugin, pluginsList).warn}
+					);
+				}
+			)
+		}
+		ret.add(plugin.asSymbol -> fileds);
+		^ret;
+	}
 
 	/* *****
 	*	queries about compiled synths & effects
