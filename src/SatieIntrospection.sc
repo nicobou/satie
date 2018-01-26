@@ -1,6 +1,7 @@
 SatieIntrospection {
 	var context;
 	var pluginsList;
+	var spatList;
 
 	*new {|satieContext|
 		if (satieContext.class == Satie,
@@ -34,6 +35,11 @@ SatieIntrospection {
 	pluginListJSON {
 		^ToJSON.stringify(this.getPluginList);
 	}
+
+	getSynthDefList {
+
+	}
+
 	// @plugin
 	getPluginArguments { | plugin |
 		var argnames, plugs;
@@ -115,6 +121,31 @@ SatieIntrospection {
 		^ret;
 	}
 
+	getPluginFieldsJSON {|spatPlug|
+		^ToJSON.stringify(this.getPluginFields(spatPlug.asSymbol));
+	}
+
+	getSpatializerArguments {| spatPlug |
+		var argnames;
+		this.updateSpatList();
+		if(spatList.keys.includes(spatPlug.asSymbol),
+			{
+				^argnames = spatList[spatPlug.asSymbol].function.def.keyValuePairsFromArgs;
+			},
+			{
+				if(context.satieConfiguration.debug,
+					{"% tried % in % and found none...\n".format(this.class.getBackTrace, spatPlug, spatList).warn}
+				);
+				argnames = "null";
+			}
+		);
+		^argnames;
+	}
+
+	updateSpatList {
+		spatList = context.spatPlugins;
+	}
+
 	/* *****
 	*	queries about compiled synths & effects
 	*
@@ -148,6 +179,14 @@ SatieIntrospection {
 
 	getInstancesJSON {
 		^ToJSON.stringify(this.getInstances);
+	}
+
+	getCompiledPlugins {
+		var infos, synthdefs;
+		infos = Dictionary.new();
+		synthdefs = this.getInstances();
+		this.updatePluginsList();
+		// TODO: get name and descriptions of items in synthdefs from pluginsList
 	}
 
 	getInstanceInfo { | id |
