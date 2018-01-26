@@ -85,7 +85,7 @@ Binaural rendering is made possible through the ambitools HRIR Filters. Here fol
 
 ~~~~
 mkdir -p ~/.local/share/satie/
-cd ~/.satie/
+cd ~/.local/share/satie/
 git clone https://github.com/sekisushai/ambitools.git
 ~~~~
 
