@@ -204,6 +204,10 @@
 			});
 
 			// remove the groups
+
+			satie.groupInstances[\default] = Dictionary.new;
+			satie.groupInstances[\defaultFx] = Dictionary.new;
+
 			satie.groups.keysDo({|item|
 				if ((item.asSymbol == \default) || (item.asSymbol == \defaultFx) == false,
 					{
