@@ -38,10 +38,6 @@ SatieIntrospection {
 		^ToJSON.stringify(this.getPluginList);
 	}
 
-	getSynthDefList {
-
-	}
-
 	// @plugin
 	getPluginArguments { | plugin |
 		var argnames, plugs;
