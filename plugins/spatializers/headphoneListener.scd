@@ -32,8 +32,8 @@
 */
 
 
-~name = \stereoListener;
-~description = "A stereo panner";
+~name = \headphoneListener;
+~description = "a stereo listener with near-field rendering";
 ~numChannels = 2;
 
 
@@ -45,9 +45,11 @@
 	var slewDelay = 0.3; //  note: this needs to be improved ... smoother
 	var slewGain = 0.1;
 	var slewFilter = 0.3;   // was 0.6
+	var slewHeadShadow = 0.1;   // was 0.6
 	var slewPanning = 0.02;
 	var panWeights;
     var slewIAD = 0.1;
+	var slewITD = 0.1;
 
 	var aziScale = 0.01 * (100 - spread);
 	var aziRads = aziDeg * 0.017453292519943;
@@ -58,14 +60,14 @@
 	var panIndex;
     var nfIndexSmoothed = nfIndex.lag(slewFilter);
 	// near field processing
-	var nfScaler = (0.8 + (0.2 * nfIndexSmoothed));    // note: this defines the amount of "cross talk" for the far field
+	var nfScaler = (0.8 + (0.2 * nfIndex));    // note: this defines the amount of "cross talk" for the far field
 	var nfCutoff = 250;   // nearField shadowed ear cutoff HZ
 	var ffCutoff = (SampleRate.ir * 0.5) - nfCutoff;
 
 
 
-	var  posXlpfq  = (44100 * 0.5) - ( nfIndexSmoothed * ffCutoff * index.clip(-1,0).abs);
-	var  negXlpfq =  (44100 * 0.5) - ( nfIndexSmoothed * ffCutoff * index.clip(0,1).abs);
+	var  posXlpfq  = (44100 * 0.5) - ( nfIndex * ffCutoff * index.clip(-1,0).abs);
+	var  negXlpfq =  (44100 * 0.5) - ( nfIndex * ffCutoff * index.clip(0,1).abs);
 
 	var negXdelay = (i_interAuralDelay * rawIndex.clip(0,1).abs);
 	var posXdelay = (i_interAuralDelay * rawIndex.clip(-1,0).abs);
@@ -73,13 +75,13 @@
 	panIndex = index*nfScaler;
 
 	//  apply filtering to direct signal
-	sourceSig =  LPF.ar( Lag.kr(gain, slewGain)  * in,  lpHz.lag(slewFilter)  );
-	sourceSig = BHiPass.ar(sourceSig, VarLag.kr(hpHz, slewFilter )  );
+	sourceSig =  LPF.ar( Lag.kr(gain, slewGain)  * in,     Lag.ar(K2A.ar(lpHz), slewFilter));
+	sourceSig = BHiPass.ar(sourceSig, Lag.ar(K2A.ar(hpHz), slewFilter));
 
 	//  apply delay to direct signal
 	sourceSig = DelayC.ar(sourceSig ,
 		1.0 ,   // max delay time:   one second  (a sound at a distance of 323 meters or so)
-		delay.lag(slewDelay));
+		Lag.ar(K2A.ar(delay), slewFilter));
 
 	//  pan direct signal
 	stOutsig = Pan2.ar(sourceSig, VarLag.kr(panIndex, slewPanning )  );
@@ -87,10 +89,10 @@
 	// apply interaural time difference
 	stOutsig = DelayC.ar(stOutsig ,
 		[ 0.006, 0.006] ,   // max delay time for interaural time difference  -- usually around  660μs  == 0.00066 secs
-		[ negXdelay.lag(slewIAD), posXdelay.lag(slewIAD)]);
+		[ negXdelay.lag(slewITD), posXdelay.lag(slewITD)]);
 
 	// apply interaural highFq shadowing
-	LPF.ar(stOutsig, [ Lag.ar(K2A.ar(negXlpfq), slewFilter) , Lag.ar(K2A.ar(posXlpfq), slewFilter) ]);
+	LPF.ar(stOutsig, [ Lag.ar(K2A.ar(negXlpfq), slewHeadShadow) , Lag.ar(K2A.ar(posXlpfq), slewHeadShadow) ]);
 
 };
 
