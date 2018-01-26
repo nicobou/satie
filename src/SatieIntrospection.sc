@@ -1,6 +1,6 @@
 SatieIntrospection {
 	var context;
-	var pluginsList;
+	var allPlugins;
 	var spatList;
 
 	*new {|satieContext|
@@ -20,7 +20,9 @@ SatieIntrospection {
 	*
 	*/
 	updatePluginsList{
-		pluginsList = [context.audioPlugins, context.fxPlugins, context.postprocessorPlugins];
+		var tempPlugs;
+		tempPlugs = context.audioPlugins.merge(context.fxPlugins).merge(context.postprocessorPlugins);
+		allPlugins = tempPlugs;
 	}
 
 	// return a dictionary audio plugins. Key is the type of plugin, value a Set of names.
@@ -44,7 +46,7 @@ SatieIntrospection {
 	getPluginArguments { | plugin |
 		var argnames, plugs;
 		this.updatePluginsList;
- 		pluginsList.do({|coll|
+ 		allPlugins.do({|coll|
 			if(coll.keys.includes(plugin.asSymbol),
 				{
 
@@ -52,7 +54,7 @@ SatieIntrospection {
 				},
 				{
 					if(context.satieConfiguration.debug,
-						{"% tried % in % and found none...\n".format(this.class.getBackTrace, plugin, pluginsList).warn}
+						{"% tried % in % and found none...\n".format(this.class.getBackTrace, plugin, allPlugins).warn}
 					);
 					argnames = "null";
 				}
@@ -64,14 +66,14 @@ SatieIntrospection {
 	getPluginDescription { | plugin |
 		var description;
 		this.updatePluginsList;
-		pluginsList.do({|coll|
+		allPlugins.do({|coll|
 			if(coll.keys.includes(plugin.asSymbol),
 				{
 					^description = coll[plugin].description;
 				},
 				{
 					if(context.satieConfiguration.debug,
-						{"% tried % in % and found none...".format(this.class.getBackTrace, plugin, pluginsList).warn}
+						{"% tried % in % and found none...".format(this.class.getBackTrace, plugin, allPlugins).warn}
 					);
 					^description = "null";
 				}
@@ -101,7 +103,7 @@ SatieIntrospection {
 		fields = Dictionary.new();
 		ret = Dictionary.new();
 		this.updatePluginsList;
-		pluginsList.do {| coll |
+		allPlugins.do {| coll |
 			if(coll.keys.includes(plugin.asSymbol),
 				{
 					plugInstance = coll[plugin.asSymbol];
@@ -112,7 +114,7 @@ SatieIntrospection {
 				},
 				{
 					if(context.satieConfiguration.debug,
-						{"% tried % in % and found none...".format(this.class.getBackTrace, plugin, pluginsList).warn}
+						{"% tried % in % and found none...".format(this.class.getBackTrace, plugin, allPlugins).warn}
 					);
 				}
 			)
@@ -171,7 +173,7 @@ SatieIntrospection {
 	// grouped by generators and effects
 	getInstances {
 		var instances = Dictionary.new();
-		instances.add(\synths -> this.getGenerators());
+		instances.add(\generators -> this.getGenerators());
 		instances.add(\effects -> this.getEffects());
 		instances.add(\mastering -> this.getPostProcessors());
 		^instances;
@@ -186,7 +188,21 @@ SatieIntrospection {
 		infos = Dictionary.new();
 		synthdefs = this.getInstances();
 		this.updatePluginsList();
-		// TODO: get name and descriptions of items in synthdefs from pluginsList
+		synthdefs.keysDo({|key|
+			var temp = Dictionary.new();
+			infos[key.asSymbol] = Dictionary.new();
+			synthdefs[key].do({|item|
+				temp[item.asSymbol] = Dictionary.newFrom(List[
+					\name, allPlugins[item.asSymbol].name, \description, allPlugins[item.asSymbol].description
+				]);
+			});
+			infos[key.asSymbol] = temp;
+		});
+		^infos;
+	}
+
+	getCompiledPluginsJSON{
+		^ToJSON.stringify(this.getCompiledPlugins());
 	}
 
 	getInstanceInfo { | id |

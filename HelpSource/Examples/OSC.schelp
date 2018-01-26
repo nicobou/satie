@@ -167,7 +167,7 @@ subsection:: Introspection
 You can query SATIE via OSC and get some information. SATIE responds to the following messages:
 definitionlist::
 ##/satie/plugins   // get existing synthdefs
-|| SATIE responds with an osc message: /plugins   JSON string containing 3 objects: audiosources, effects and mastering, each listing existing synthdefs by name.
+|| SATIE responds with an osc message: /plugins   JSON string containing 3 objects: generators, effects and mastering, each listing existing synthdefs by name and description.
 ##/satie/pluginargs synthdefName // get arguments of some synthdef
 || synthdefName string
 
