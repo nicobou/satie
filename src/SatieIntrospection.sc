@@ -185,9 +185,11 @@ SatieIntrospection {
 		synthdefs.keysDo({|key|
 			var temp = Dictionary.new();
 			infos[key.asSymbol] = Dictionary.new();
-			synthdefs[key].do({|item|
+			synthdefs[key].keysDo({|item|
+				var plugInfo = allPlugins[synthdefs[key.asSymbol][item.asSymbol]];
 				temp[item.asSymbol] = Dictionary.newFrom(List[
-					\name, allPlugins[item.asSymbol].name, \description, allPlugins[item.asSymbol].description
+					\type, plugInfo.name,
+					\description, plugInfo.description
 				]);
 			});
 			infos[key.asSymbol] = temp;
