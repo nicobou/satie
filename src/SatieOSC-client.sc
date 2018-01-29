@@ -33,7 +33,7 @@
 					this.setResponderAddress(addr);
 				}
 			);
-			json = satie.inspector.getInstancesJSON();
+			json = satie.inspector.getCompiledPluginsJSON();
 			if(satie.satieConfiguration.debug, {"% json: %".format(this.class.getBackTrace, json).postln;});
 			returnAddress.sendMsg("/plugins", json);
 		}

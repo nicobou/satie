@@ -1,6 +1,7 @@
 SatieIntrospection {
 	var context;
-	var pluginsList;
+	var allPlugins;
+	var spatList;
 
 	*new {|satieContext|
 		if (satieContext.class == Satie,
@@ -19,7 +20,7 @@ SatieIntrospection {
 	*
 	*/
 	updatePluginsList{
-		pluginsList = [context.audioPlugins, context.fxPlugins, context.postprocessorPlugins];
+		allPlugins = context.audioPlugins.merge(context.fxPlugins).merge(context.postprocessorPlugins);
 	}
 
 	// return a dictionary audio plugins. Key is the type of plugin, value a Set of names.
@@ -34,11 +35,12 @@ SatieIntrospection {
 	pluginListJSON {
 		^ToJSON.stringify(this.getPluginList);
 	}
+
 	// @plugin
 	getPluginArguments { | plugin |
 		var argnames, plugs;
 		this.updatePluginsList;
- 		pluginsList.do({|coll|
+ 		allPlugins.do({|coll|
 			if(coll.keys.includes(plugin.asSymbol),
 				{
 
@@ -46,7 +48,7 @@ SatieIntrospection {
 				},
 				{
 					if(context.satieConfiguration.debug,
-						{"% tried % in % and found none...\n".format(this.class.getBackTrace, plugin, pluginsList).warn}
+						{"% tried % in % and found none...\n".format(this.class.getBackTrace, plugin, allPlugins).warn}
 					);
 					argnames = "null";
 				}
@@ -58,14 +60,14 @@ SatieIntrospection {
 	getPluginDescription { | plugin |
 		var description;
 		this.updatePluginsList;
-		pluginsList.do({|coll|
+		allPlugins.do({|coll|
 			if(coll.keys.includes(plugin.asSymbol),
 				{
 					^description = coll[plugin].description;
 				},
 				{
 					if(context.satieConfiguration.debug,
-						{"% tried % in % and found none...".format(this.class.getBackTrace, plugin, pluginsList).warn}
+						{"% tried % in % and found none...".format(this.class.getBackTrace, plugin, allPlugins).warn}
 					);
 					^description = "null";
 				}
@@ -89,6 +91,56 @@ SatieIntrospection {
 		^ToJSON.stringify(dico);
 	}
 
+	// we will probably want to get other available fields of a plugin, we can list them here
+	getPluginFields { | plugin |
+		var fields, plugClass, plugInstance, ret;
+		fields = Dictionary.new();
+		ret = Dictionary.new();
+		this.updatePluginsList;
+		allPlugins.do {| coll |
+			if(coll.keys.includes(plugin.asSymbol),
+				{
+					plugInstance = coll[plugin.asSymbol];
+					plugClass = plugInstance.class;
+					plugClass.instVarNames.do({|item, i|
+						fields.add(item.asSymbol -> plugInstance.instVarAt(i).asCompileString);
+					});
+				},
+				{
+					if(context.satieConfiguration.debug,
+						{"% tried % in % and found none...".format(this.class.getBackTrace, plugin, allPlugins).warn}
+					);
+				}
+			)
+		};
+		ret.add(plugin.asSymbol -> fields);
+		^ret;
+	}
+
+	getPluginFieldsJSON {|spatPlug|
+		^ToJSON.stringify(this.getPluginFields(spatPlug.asSymbol));
+	}
+
+	getSpatializerArguments {| spatPlug |
+		var argnames;
+		this.updateSpatList();
+		if(spatList.keys.includes(spatPlug.asSymbol),
+			{
+				^argnames = spatList[spatPlug.asSymbol].function.def.keyValuePairsFromArgs;
+			},
+			{
+				if(context.satieConfiguration.debug,
+					{"% tried % in % and found none...\n".format(this.class.getBackTrace, spatPlug, spatList).warn}
+				);
+				argnames = "null";
+			}
+		);
+		^argnames;
+	}
+
+	updateSpatList {
+		spatList = context.spatPlugins;
+	}
 
 	/* *****
 	*	queries about compiled synths & effects
@@ -115,7 +167,7 @@ SatieIntrospection {
 	// grouped by generators and effects
 	getInstances {
 		var instances = Dictionary.new();
-		instances.add(\synths -> this.getGenerators());
+		instances.add(\generators -> this.getGenerators());
 		instances.add(\effects -> this.getEffects());
 		instances.add(\mastering -> this.getPostProcessors());
 		^instances;
@@ -123,6 +175,28 @@ SatieIntrospection {
 
 	getInstancesJSON {
 		^ToJSON.stringify(this.getInstances);
+	}
+
+	getCompiledPlugins {
+		var infos, synthdefs;
+		infos = Dictionary.new();
+		synthdefs = this.getInstances();
+		this.updatePluginsList();
+		synthdefs.keysDo({|key|
+			var temp = Dictionary.new();
+			infos[key.asSymbol] = Dictionary.new();
+			synthdefs[key].do({|item|
+				temp[item.asSymbol] = Dictionary.newFrom(List[
+					\name, allPlugins[item.asSymbol].name, \description, allPlugins[item.asSymbol].description
+				]);
+			});
+			infos[key.asSymbol] = temp;
+		});
+		^infos;
+	}
+
+	getCompiledPluginsJSON{
+		^ToJSON.stringify(this.getCompiledPlugins());
 	}
 
 	getInstanceInfo { | id |
