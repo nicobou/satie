@@ -20,9 +20,7 @@ SatieIntrospection {
 	*
 	*/
 	updatePluginsList{
-		var tempPlugs;
-		tempPlugs = context.audioPlugins.merge(context.fxPlugins).merge(context.postprocessorPlugins);
-		allPlugins = tempPlugs;
+		allPlugins = context.audioPlugins.merge(context.fxPlugins).merge(context.postprocessorPlugins);
 	}
 
 	// return a dictionary audio plugins. Key is the type of plugin, value a Set of names.
