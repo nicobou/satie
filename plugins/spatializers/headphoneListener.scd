@@ -45,7 +45,7 @@
 	var slewDelay = 0.3; //  note: this needs to be improved ... smoother
 	var slewGain = 0.1;
 	var slewFilter = 0.3;   // was 0.6
-	var slewHeadShadow = 0.1;   // was 0.6
+	var slewHeadShadow = 0.3;
 	var slewPanning = 0.02;
 	var panWeights;
     var slewIAD = 0.1;
@@ -53,35 +53,44 @@
 
 	var aziScale = 0.01 * (100 - spread);
 	var aziRads = aziDeg * 0.017453292519943;
-	var rawIndex = aziRads.sin;
+	var rawIndex = aziRads.sin;  // normalized angle index
 	var theta = aziScale * aziRads;  // radians
-	var index = SinOsc.kr(0, theta );
+	var rawPanIndex = SinOsc.kr(0, theta );
 	var sourceSig, stOutsig;
-	var panIndex;
-    var nfIndexSmoothed = nfIndex.lag(slewFilter);
+
+    //var nfIndexSmoothed = nfIndex.lag(slewFilter);
 	// near field processing
-	var nfScaler = (0.8 + (0.2 * nfIndex));    // note: this defines the amount of "cross talk" for the far field
+	var nfScaler = (0.8 + (0.2 * nfIndex ));    // note: this defines the amount of "cross talk" for the far field
 	var nfCutoff = 250;   // nearField shadowed ear cutoff HZ
 	var ffCutoff = (SampleRate.ir * 0.5) - nfCutoff;
 
+	var panIndex = rawPanIndex*nfScaler;
 
+	var nfIndexNonlin = nfIndex.pow(2);  // bigger, sooner
 
-	var  posXlpfq  = (44100 * 0.5) - ( nfIndex * ffCutoff * index.clip(-1,0).abs);
-	var  negXlpfq =  (44100 * 0.5) - ( nfIndex * ffCutoff * index.clip(0,1).abs);
+	var nfProxDB = 10 * nfIndexNonlin;   // boost lows nDB  in the nearfield to contribute to the "proximity effect"
+
+	var  posXlpfq  = (44100 * 0.5) - ( nfIndex * ffCutoff * rawPanIndex.clip(-1,0).abs.pow(0.5));  // pow offers more, sooner
+	var  negXlpfq =  (44100 * 0.5) - ( nfIndex * ffCutoff * rawPanIndex.clip(0,1).pow(0.5));  // pow offers more, sooner
+
 
 	var negXdelay = (i_interAuralDelay * rawIndex.clip(0,1).abs);
 	var posXdelay = (i_interAuralDelay * rawIndex.clip(-1,0).abs);
 
-	panIndex = index*nfScaler;
 
-	//  apply filtering to direct signal
-	sourceSig =  LPF.ar( Lag.kr(gain, slewGain)  * in,     Lag.ar(K2A.ar(lpHz), slewFilter));
-	sourceSig = BHiPass.ar(sourceSig, Lag.ar(K2A.ar(hpHz), slewFilter));
+	//  apply distance  filtering to direct signal
+	sourceSig =  LPF.ar( Lag.kr(gain, slewGain)  * in,     Lag3.ar(K2A.ar(lpHz), slewFilter));
+	sourceSig = BHiPass.ar(sourceSig, Lag3.ar(K2A.ar(hpHz), slewFilter));
+
+	// apply nearField "proximity effect" bass boost below 200hz
+	//sourceSig = BLowShelf.ar(sourceSig,  200, 1,    Lag.ar(K2A.ar(nfProxDB), slewGain));
+	sourceSig = BLowShelf.ar(sourceSig,  200, 1,    Lag.kr(nfProxDB, slewGain));
+
 
 	//  apply delay to direct signal
 	sourceSig = DelayC.ar(sourceSig ,
 		1.0 ,   // max delay time:   one second  (a sound at a distance of 323 meters or so)
-		Lag.ar(K2A.ar(delay), slewFilter));
+		Lag3.ar(K2A.ar(delay), slewFilter));   //slewFilter
 
 	//  pan direct signal
 	stOutsig = Pan2.ar(sourceSig, VarLag.kr(panIndex, slewPanning )  );
@@ -89,10 +98,10 @@
 	// apply interaural time difference
 	stOutsig = DelayC.ar(stOutsig ,
 		[ 0.006, 0.006] ,   // max delay time for interaural time difference  -- usually around  660μs  == 0.00066 secs
-		[ negXdelay.lag(slewITD), posXdelay.lag(slewITD)]);
+		[ Lag3.ar(K2A.ar(negXdelay), slewITD), Lag3.ar(K2A.ar(posXdelay), slewITD)]);
 
 	// apply interaural highFq shadowing
-	LPF.ar(stOutsig, [ Lag.ar(K2A.ar(negXlpfq), slewHeadShadow) , Lag.ar(K2A.ar(posXlpfq), slewHeadShadow) ]);
+   LPF.ar(stOutsig, [ Lag2.kr(negXlpfq, slewHeadShadow) , Lag2.kr(posXlpfq, slewHeadShadow) ]);
 
 };
 
