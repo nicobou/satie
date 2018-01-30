@@ -1,6 +1,6 @@
 SatieIntrospection {
 	var context;
-	var allPlugins;
+	var <allPlugins;
 	var spatList;
 
 	*new {|satieContext|
@@ -40,11 +40,11 @@ SatieIntrospection {
 	getPluginArguments { | plugin |
 		var argnames, plugs;
 		this.updatePluginsList;
- 		allPlugins.do({|coll|
-			if(coll.keys.includes(plugin.asSymbol),
+ 		allPlugins.keysDo({|key|
+			if(key === plugin.asSymbol,
 				{
 
-					^argnames = coll[plugin].function.def.keyValuePairsFromArgs;
+					^argnames = allPlugins[key].function.def.keyValuePairsFromArgs;
 				},
 				{
 					if(context.satieConfiguration.debug,
@@ -60,10 +60,10 @@ SatieIntrospection {
 	getPluginDescription { | plugin |
 		var description;
 		this.updatePluginsList;
-		allPlugins.do({|coll|
-			if(coll.keys.includes(plugin.asSymbol),
+		allPlugins.keysDo({|key|
+			if(key === plugin.asSymbol,
 				{
-					^description = coll[plugin].description;
+					^description = allPlugins[key.asSymbol].description;
 				},
 				{
 					if(context.satieConfiguration.debug,
@@ -97,10 +97,10 @@ SatieIntrospection {
 		fields = Dictionary.new();
 		ret = Dictionary.new();
 		this.updatePluginsList;
-		allPlugins.do {| coll |
-			if(coll.keys.includes(plugin.asSymbol),
+		allPlugins.keysDo {| key |
+			if(key === plugin.asSymbol,
 				{
-					plugInstance = coll[plugin.asSymbol];
+					plugInstance = allPlugins[key.asSymbol];
 					plugClass = plugInstance.class;
 					plugClass.instVarNames.do({|item, i|
 						fields.add(item.asSymbol -> plugInstance.instVarAt(i).asCompileString);
