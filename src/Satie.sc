@@ -137,10 +137,18 @@ Satie {
 
 		aux = Array.fill(satieConfiguration.numAudioAux, {arg i; auxbus.index + i});
 	}
+	setAmbiBusses {
+		satieConfiguration.ambiBusIndex = Array.newClear(satieConfiguration.ambiOrders.size());
+		satieConfiguration.ambiOrders.do { arg item, i;
+			satieConfiguration.ambiBusIndex[i] = Bus.audio(satieConfiguration.server, (item+1).pow(2));
+		};
+	}
+
 	// private method
 	postExec {
 		// execute any code needed after the server has been booted
 		this.setAuxBusses();
+		this.setAmbiBusses();
 
 		// execute setup functions for spatializers
 		satieConfiguration.listeningFormat.do { arg item, i;
@@ -167,13 +175,10 @@ Satie {
 		// generate synthdefs
 		audioPlugins.do { arg item;
 			this.makeSynthDef(item.name,item.name, [], [], satieConfiguration.listeningFormat, satieConfiguration.outBusIndex);
-			this.makeAmbi((item.name ++ "Ambi1"), item.name, [], [], 1, [], satieConfiguration.outBusIndex);
-			this.makeAmbi((item.name ++ "Ambi2"), item.name, [], [], 2, [], satieConfiguration.outBusIndex);
-			this.makeAmbi((item.name ++ "Ambi3"), item.name, [], [], 3, [], satieConfiguration.outBusIndex);
-			this.makeAmbi((item.name ++ "Ambi4"), item.name, [], [], 4, [], satieConfiguration.outBusIndex);
-			this.makeAmbi((item.name ++ "Ambi5"), item.name, [], [], 5, [], satieConfiguration.outBusIndex);
+			satieConfiguration.ambiOrders.do { |order, i|
+				this.makeAmbi((item.name ++ "Ambi" ++ order.asSymbol), item.name, [], [], order, [], satieConfiguration.ambiBusIndex[i]);
+			};
 		};
-
 		generatedSynthDefs = audioPlugins.keys;
 
 		satieConfiguration.server.sync;

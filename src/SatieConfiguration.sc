@@ -17,6 +17,8 @@ SatieConfiguration {
 	var <numAudioAux;
 	var <outBusIndex;
 	var <>hrtfPath;
+	var <ambiOrders;  // array of wanted orders. Available orders are 1 to 5
+	var <>ambiBusIndex; // array of bus indexes, related to the wanted orders specifyed in ambiOrders
 	var <>debug = false;
 	var <satieRoot;
 	var <serverOptions;
@@ -31,9 +33,9 @@ SatieConfiguration {
 	// other options
 	var <>orientationOffsetDeg;
 
-	*new {| server, listeningFormat = #[\stereoListener, \stereoListener], numAudioAux = 0, outBusIndex = #[0], hrtfPath = nil |
+	*new {| server, listeningFormat = #[\stereoListener, \stereoListener], numAudioAux = 0, outBusIndex = #[0], hrtfPath = nil, ambiOrders = #[] |
 		server = server;
-		^super.newCopyArgs(server, listeningFormat, numAudioAux, outBusIndex, hrtfPath).init;
+		^super.newCopyArgs(server, listeningFormat, numAudioAux, outBusIndex, hrtfPath, ambiOrders).init;
 	}
 
 	init{
