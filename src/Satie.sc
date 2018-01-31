@@ -167,6 +167,11 @@ Satie {
 		// generate synthdefs
 		audioPlugins.do { arg item;
 			this.makeSynthDef(item.name,item.name, [], [], satieConfiguration.listeningFormat, satieConfiguration.outBusIndex);
+			this.makeAmbi((item.name ++ "Ambi1"), item.name, [], [], 1, [], satieConfiguration.outBusIndex);
+			this.makeAmbi((item.name ++ "Ambi2"), item.name, [], [], 2, [], satieConfiguration.outBusIndex);
+			this.makeAmbi((item.name ++ "Ambi3"), item.name, [], [], 3, [], satieConfiguration.outBusIndex);
+			this.makeAmbi((item.name ++ "Ambi4"), item.name, [], [], 4, [], satieConfiguration.outBusIndex);
+			this.makeAmbi((item.name ++ "Ambi5"), item.name, [], [], 5, [], satieConfiguration.outBusIndex);
 		};
 
 		generatedSynthDefs = audioPlugins.keys;

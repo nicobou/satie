@@ -66,6 +66,53 @@
 		);
 	}
 
+	makeAmbi {|
+		name,
+		srcName,
+		preBusArray,
+		postBusArray,
+		ambiOrder,
+		ambiEffectPipeline = #[],
+		ambiBusIndex = 0,
+		paramsMapper = \defaultMapper,
+		synthArgs = #[] |
+
+		var dico;
+		if(satieConfiguration.audioPlugins.at(srcName) != nil,
+			{
+				dico = satieConfiguration.audioPlugins;
+				generators.add(name.asSymbol -> srcName.asSymbol);
+			}
+		);
+		if(satieConfiguration.fxPlugins.at(srcName) != nil,
+			{
+				dico = satieConfiguration.fxPlugins;
+				effects.add(name.asSymbol -> srcName.asSymbol);
+			}
+		);
+		if (satieConfiguration.debug,
+			{
+				"params mapper %".format(paramsMapper).postln;
+			}
+		);
+
+		if(satieConfiguration.audioPlugins.at(srcName).type == \mono, {
+			SatieFactory.makeAmbiFromMono(
+				name,
+				dico.at(srcName).function,
+				preBusArray,
+				postBusArray,
+				ambiOrder,
+				ambiEffectPipeline,
+				ambiBusIndex,
+				satieConfiguration.mapperPlugins.at(paramsMapper).function,
+				synthArgs);
+		},{ // else
+			"makeAmbi failled: audio source must be mono (% is not mono)".format(srcName).warn;
+			^0;
+		});
+	}
+
 	makeInstance {| name, synthDefName, group = \default, synthArgs = #[] |
 		var synth = Synth(synthDefName, args: synthArgs, target: groups[group], addAction: \addToHead);
 		if (groupInstances[group][name] != nil,
