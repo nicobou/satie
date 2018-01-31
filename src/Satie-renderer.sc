@@ -27,7 +27,7 @@
 		if(satieConfiguration.audioPlugins.at(srcName) != nil,
 			{
 				if(satieConfiguration.audioPlugins.at(srcName).type != \mono, {
-					"makesynthDef failled: audio source must be mono (% is not mono)".format(srcName).warn;
+					"makesynthDef failed: audio source must be mono (% is not mono)".format(srcName).warn;
 					^0;
 				});
 				dico = satieConfiguration.audioPlugins;
@@ -47,7 +47,7 @@
 		);
 		spatSymbolArray.collect({|item, i|
 			if(satieConfiguration.spatPlugins.at(item).type != \mono, {
-				"makesynthDef failled: spatializer must be mono (% is not mono)".format(item).warn;
+				"makesynthDef failed: spatializer must be mono (% is not mono)".format(item).warn;
 				^0;
 			});
 		});
@@ -108,7 +108,7 @@
 				satieConfiguration.mapperPlugins.at(paramsMapper).function,
 				synthArgs);
 		},{ // else
-			"makeAmbi failled: audio source must be mono (% is not mono)".format(srcName).warn;
+			"makeAmbi failed: audio source must be mono (% is not mono)".format(srcName).warn;
 			^0;
 		});
 	}
