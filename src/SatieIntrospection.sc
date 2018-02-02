@@ -1,6 +1,6 @@
 SatieIntrospection {
 	var context;
-	var <allPlugins;
+	var allPlugins;
 	var spatList;
 
 	*new {|satieContext|
@@ -69,10 +69,11 @@ SatieIntrospection {
 					if(context.satieConfiguration.debug,
 						{"% tried % in % and found none...".format(this.class.getBackTrace, plugin, allPlugins).warn}
 					);
-					^description = "null";
+					description = "null";
 				}
 			);
 		});
+		^description;
 	}
 
 	getPluginInfo { | plugin |
