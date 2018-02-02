@@ -58,6 +58,7 @@ SatieIntrospection {
 	}
 
 	getPluginDescription { | plugin |
+		//  plugin: symbol - synthdef name
 		var description;
 		this.updatePluginsList;
 		allPlugins.keysDo({|key|
@@ -77,6 +78,7 @@ SatieIntrospection {
 	}
 
 	getPluginInfo { | plugin |
+		//  plugin: symbol - synthdef name
 		var description, arguments, dico;
 		dico = Dictionary.new();
 		description = this.getPluginDescription(plugin);
@@ -202,21 +204,21 @@ SatieIntrospection {
 		^ToJSON.stringify(this.getCompiledPlugins());
 	}
 
-	getInstanceInfo { | id |
+	getInstanceInfo { | instanceName |
 		var srcName, description, arguments, ret;
 		description = Dictionary.new();
 		arguments = Dictionary.new();
 
 		this.getInstances.keysValuesDo({| category, instances |
 			instances.keysValuesDo({| name, srcName |
-				if (id.asSymbol == name.asSymbol,
+				if (instanceName.asSymbol == name.asSymbol,
 					{
 						var plug = this.getPluginInfo(srcName.asSymbol);
 						ret = Dictionary.new();
 						description = plug[\description];
 						arguments = plug[\arguments];
 						srcName = srcName.asSymbol;
-						ret.add(id.asSymbol -> Dictionary.with(*[
+						ret.add(instanceName.asSymbol -> Dictionary.with(*[
 							\srcName -> srcName,
 							\description -> description,
 							\arguments -> arguments])
@@ -225,7 +227,7 @@ SatieIntrospection {
 					},
 					{
 						if (context.satieConfiguration.debug,
-							{"% did not find % in %".format(this.class.getBackTrace, id, instances).postln});
+							{"% did not find % in %".format(this.class.getBackTrace, instanceName, instances).postln});
 						ret = "null";
 					}
 				);
