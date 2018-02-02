@@ -178,7 +178,16 @@ TELETYPE::
 ##/satie/pluginargs synthdefName // get arguments of some synthdef
 || synthdefName string
 
-   SATIE responds with an osc message:  /arguments   JSON string representing plugin's name, description and list of arguments and default values
+   SATIE responds with an osc message:  /arguments   JSON string representing plugin's name, description and list of arguments and default values, for exemple:
+TELETYPE::
+{ "test":
+  { "description":
+      "a standard test tone (sine)",
+  "arguments":
+      { "sfreq": 200 }, "srcName": "testtone"
+  }
+}
+::
 ::
 
 
