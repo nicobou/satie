@@ -49,7 +49,7 @@
 					this.setResponderAddress(addr);
 				}
 			);
-			json = satie.inspector.getInstanceInfoJSON(pluginName);
+			json = satie.inspector.getSynthDefInfoJSON(pluginName);
 			returnAddress.sendMsg("/arguments", json);
 		}
 	}
