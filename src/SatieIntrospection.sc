@@ -168,7 +168,7 @@ SatieIntrospection {
 	}
 
 	// grouped by generators and effects
-	getInstances {
+	getSynthDefs {
 		var instances = Dictionary.new();
 		instances.add(\generators -> this.getGenerators());
 		instances.add(\effects -> this.getEffects());
@@ -176,14 +176,14 @@ SatieIntrospection {
 		^instances;
 	}
 
-	getInstancesJSON {
-		^ToJSON.stringify(this.getInstances);
+	getSynthDefsJSON {
+		^ToJSON.stringify(this.getSynthDefs);
 	}
 
 	getCompiledPlugins {
 		var infos, synthdefs;
 		infos = Dictionary.new();
-		synthdefs = this.getInstances();
+		synthdefs = this.getSynthDefs();
 		this.updatePluginsList();
 		synthdefs.keysDo({|key|
 			var temp = Dictionary.new();
@@ -204,12 +204,12 @@ SatieIntrospection {
 		^ToJSON.stringify(this.getCompiledPlugins());
 	}
 
-	getInstanceInfo { | instanceName |
+	getSynthDefInfo { | instanceName |
 		var srcName, description, arguments, ret;
 		description = Dictionary.new();
 		arguments = Dictionary.new();
 
-		this.getInstances.keysValuesDo({| category, instances |
+		this.getSynthDefs.keysValuesDo({| category, instances |
 			instances.keysValuesDo({| name, srcName |
 				if (instanceName.asSymbol == name.asSymbol,
 					{
@@ -236,7 +236,7 @@ SatieIntrospection {
 		^ret;
 	}
 
-	getInstanceInfoJSON { | id |
-		^ToJSON.stringify(this.getInstanceInfo(id));
+	getSynthDefInfoJSON { | id |
+		^ToJSON.stringify(this.getSynthDefInfo(id));
 	}
 }
