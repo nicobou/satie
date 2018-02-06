@@ -239,4 +239,67 @@ SatieIntrospection {
 	getSynthDefInfoJSON { | id |
 		^ToJSON.stringify(this.getSynthDefInfo(id));
 	}
+
+	getSynthDefParameters { | synthName |
+		var srcName, description, arguments, ret;
+		description = Dictionary.new();
+		arguments = Array.new();
+
+		this.getSynthDefs.keysValuesDo({| category, instances |
+			instances.keysValuesDo({| name, srcName |
+				if (synthName.asSymbol == name.asSymbol,
+					{
+						var plug = this.getPluginInfo(srcName.asSymbol);
+						ret = Dictionary.new();
+						description = plug[\description];
+						arguments = this.buildArgStruct(plug[\arguments]);
+						srcName = srcName.asSymbol;
+						ret.add(synthName.asSymbol -> Dictionary.with(*[
+							\srcName -> srcName,
+							\description -> description,
+							\arguments -> arguments])
+						);
+						^ret;
+					},
+					{
+						if (context.satieConfiguration.debug,
+							{"% did not find % in %".format(this.class.getBackTrace, synthName, instances).postln});
+						ret = "null";
+					}
+				);
+			});
+		});
+		^ret;
+	}
+
+	getSynthDefParametersJSON{ | id |
+		^ToJSON.stringify(this.getSynthDefParameters(id));
+	}
+
+	buildArgStruct { | argDico |
+		var ret, dico;
+		ret = Array.new();
+		argDico.keysDo({ | key, val |
+			dico = Dictionary.new();
+			dico.add(\name -> key);
+			dico.add(\value -> this.checkForNil(val));
+			dico.add(\type -> val.class.asString);
+			ret = ret.add(dico);
+		});
+		^ret;
+	}
+
+
+	checkForNil {|val|
+		var ret;
+		if (val != nil,
+			{
+				ret = val;
+			},
+			{
+				ret = "unused".quote;
+			}
+		);
+		^ret;
+	}
 }
