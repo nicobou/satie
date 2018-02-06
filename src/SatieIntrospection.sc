@@ -279,11 +279,11 @@ SatieIntrospection {
 	buildArgStruct { | argDico |
 		var ret, dico;
 		ret = Array.new();
-		argDico.keysDo({ | key, val |
+		argDico.keysDo({ | key|
 			dico = Dictionary.new();
 			dico.add(\name -> key);
-			dico.add(\value -> this.checkForNil(val));
-			dico.add(\type -> val.class.asString);
+			dico.add(\value -> this.checkForNil(argDico[key]));
+			dico.add(\type -> argDico[key].class.asString);
 			ret = ret.add(dico);
 		});
 		^ret;
