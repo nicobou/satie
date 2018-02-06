@@ -204,21 +204,21 @@ SatieIntrospection {
 		^ToJSON.stringify(this.getCompiledPlugins());
 	}
 
-	getSynthDefInfo { | instanceName |
+	getSynthDefInfo { | synthName |
 		var srcName, description, arguments, ret;
 		description = Dictionary.new();
 		arguments = Dictionary.new();
 
 		this.getSynthDefs.keysValuesDo({| category, instances |
 			instances.keysValuesDo({| name, srcName |
-				if (instanceName.asSymbol == name.asSymbol,
+				if (synthName.asSymbol == name.asSymbol,
 					{
 						var plug = this.getPluginInfo(srcName.asSymbol);
 						ret = Dictionary.new();
 						description = plug[\description];
 						arguments = plug[\arguments];
 						srcName = srcName.asSymbol;
-						ret.add(instanceName.asSymbol -> Dictionary.with(*[
+						ret.add(synthName.asSymbol -> Dictionary.with(*[
 							\srcName -> srcName,
 							\description -> description,
 							\arguments -> arguments])
@@ -227,7 +227,7 @@ SatieIntrospection {
 					},
 					{
 						if (context.satieConfiguration.debug,
-							{"% did not find % in %".format(this.class.getBackTrace, instanceName, instances).postln});
+							{"% did not find % in %".format(this.class.getBackTrace, synthName, instances).postln});
 						ret = "null";
 					}
 				);
