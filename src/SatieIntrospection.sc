@@ -208,7 +208,7 @@ SatieIntrospection {
 		var srcName, description, arguments, ret;
 		description = Dictionary.new();
 		arguments = Dictionary.new();
-
+		"Deprecation warning: this method may be phased out with time. Please use getSynthDefParameters (or /satie/plugindetails via OSC)".warn;
 		this.getSynthDefs.keysValuesDo({| category, instances |
 			instances.keysValuesDo({| name, srcName |
 				if (synthName.asSymbol == name.asSymbol,
