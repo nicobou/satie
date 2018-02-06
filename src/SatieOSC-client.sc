@@ -53,4 +53,19 @@
 			returnAddress.sendMsg("/arguments", json);
 		}
 	}
+
+	getPluginDetails {
+		^{| args, time, addr, recvPort |
+			var pluginName, json;
+			pluginName = args[1];
+			if(satie.satieConfiguration.debug, {"% arguments: %".format(this.class.getBackTrace, args).postln;});
+			if (dynamicResponder,
+				{
+					this.setResponderAddress(addr);
+				}
+			);
+			json = satie.inspector.getSynthDefParametersJSON(pluginName);
+			returnAddress.sendMsg("/arguments", json);
+		}
+	}
 }
