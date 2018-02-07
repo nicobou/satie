@@ -188,6 +188,21 @@ TELETYPE::
   }
 }
 ::
+
+##/satie/plugindetails synthdefName // get arguments of some synthdef
+|| synthdefName string
+
+   Like above, SATIE responds with an osc message:  /arguments   JSON string representing plugin's name, description and list of arguments, their types and default values, wrapped in a dictionary like the example below:
+TELETYPE::
+{ "misDrone":
+	{ "description": "a rich drone sound", "arguments":
+		[ { "name": "freq", "value": 200, "type": "Integer" },
+			{ "name": "dur", "value": 22, "type": "Integer" },
+			{ "name": "amp", "value": 0.75, "type": "Float" } ],
+		"srcName": "misDrone"
+	}
+}
+::
 ::
 
 

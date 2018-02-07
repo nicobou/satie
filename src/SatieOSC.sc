@@ -80,6 +80,7 @@ SatieOSC {
 		// client
 		this.newOSC(\audioplugins, this.getAudioPlugins, "/satie/plugins");
 		this.newOSC(\pluginArgs, this.getPluginArguments, "/satie/pluginargs");
+		this.newOSC(\pluginDetails, this.getPluginDetails, "/satie/plugindetails");
 		this.newOSC(\responderAddress, this.returnAddress, "/satie/responder");
 
 		this.newOSC(\satieLoadFile, this.loadFile, "/satie/load");
