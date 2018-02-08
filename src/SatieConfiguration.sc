@@ -16,7 +16,7 @@ SatieConfiguration {
 	var <>listeningFormat;
 	var <numAudioAux;
 	var <outBusIndex;
-	var <>hrtfPath;
+	var <>hrirPath;
 	var <ambiOrders;  // array of wanted orders. Available orders are 1 to 5
 	var <>ambiBusIndex; // array of bus indexes, related to the wanted orders specifyed in ambiOrders
 	var <>debug = false;
@@ -29,13 +29,14 @@ SatieConfiguration {
 	var <>spatPlugins;
 	var <>mapperPlugins;
 	var <>postprocessorPlugins;
+	var <>hoaPlugins;
 
 	// other options
 	var <>orientationOffsetDeg;
 
-	*new {| server, listeningFormat = #[\stereoListener, \stereoListener], numAudioAux = 0, outBusIndex = #[0], hrtfPath = nil, ambiOrders = #[] |
+	*new {| server, listeningFormat = #[\stereoListener, \stereoListener], numAudioAux = 0, outBusIndex = #[0], hrirPath = "~/.local/share/satie/ambitools/FIR/hrir/hrir_ku100_lebedev50/", ambiOrders = #[] |
 		server = server;
-		^super.newCopyArgs(server, listeningFormat, numAudioAux, outBusIndex, hrtfPath, ambiOrders).init;
+		^super.newCopyArgs(server, listeningFormat, numAudioAux, outBusIndex, hrirPath.asString, ambiOrders).init;
 	}
 
 	init{
@@ -55,6 +56,7 @@ SatieConfiguration {
 		spatPlugins = SatiePlugins.newSpat(pluginsPath++"/spatializers/*.scd");
 		mapperPlugins = SatiePlugins.newAudio(pluginsPath++"/mappers/*.scd");
 		postprocessorPlugins = SatiePlugins.newAudio(pluginsPath++"/postprocessors/*.scd");
+		hoaPlugins = SatiePlugins.newAudio(pluginsPath++"/hoa/*.scd");
 		if (debug, {
 			"New configuration: \nRoot: %\nSpat: %\nPlugins: %, %, %, %".format(
 				this.satieRoot, listeningFormat, this.audioPlugins, this.fxPlugins, this.spatPlugins, this.mapperPlugins, this.postprocessorPlugins
@@ -70,14 +72,11 @@ SatieConfiguration {
 		format.do { arg item, i;
 			var spatPlugin = this.spatPlugins[item.asSymbol];
 			serverOptions.numOutputBusChannels = serverOptions.numOutputBusChannels + spatPlugin.numChannels;
-			if ( item.asSymbol == \ambi3, {hrtfPath = (satieRoot++"satie-assets/hrtf/full").asString;});
-			if ( item.asSymbol == \ambi1, {hrtfPath = (Atk.userSupportDir).asString;});
-			if (debug, {postln("%: setting hrtfPath to %\n".format(this.class, hrtfPath)); });
 			if (debug, {
 				postln("%: setting listening format to %\n".format(this.class, format));
-				if (hrtfPath != nil,
+				if (hrirPath != nil,
 					{
-						postln("\t %: setting HRTF path  to %\n".format(this.class, hrtfPath));
+						postln("\t %: setting HRIR path  to %\n".format(this.class, hrirPath));
 				});
 			});
 		};
