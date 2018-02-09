@@ -1,4 +1,6 @@
-**Goal**: you want SuperCollider version 3.8 and sc3-plugins working with supernova (the parallel SuperCollider server), so that SATIE will run many sound sources simultaneously.
+**Note**: SATIE is now updated to use SuperCollider version 3.9
+
+**Goal**: you want SuperCollider version 3.9 and sc3-plugins working with supernova (the parallel SuperCollider server), so that SATIE will run many sound sources simultaneously.
 
 Building for Ubuntu 16.04 and up
 -------------------------
@@ -19,7 +21,7 @@ sudo apt-get install build-essential libqt4-dev libqtwebkit-dev \
 ```
 git clone https://github.com/supercollider/supercollider.git
 cd supercollider
-git checkout Version-3.8.0
+git checkout 3.9
 git submodule init && git submodule update
 mkdir build
 cd build
@@ -32,7 +34,7 @@ sudo make install
 ```
 git clone https://github.com/supercollider/sc3-plugins.git
 cd sc3-plugins
-git checkout Version-3.8.0
+git checkout 3.9
 git submodule init && git submodule update
 mkdir build
 cd build
@@ -60,7 +62,7 @@ or
 `~/Library/Application Support/SuperCollider/Extensions/plugins`
 
 ## Binaural Rendering
-Satie provides two binaural rendering options. Using HRTF filtering, the chosen renderer will convert the multi-channel spatialized output signal of each sound source to a stereo binaural signal. Both options depend on non-kernal resources that need to be installed for use. The installation and configuration details for each option are shown below:
+SATIE provides two binaural rendering options. Using HRTF filtering, the chosen renderer will convert the multi-channel spatialized output signal of each sound source to a stereo binaural signal. Both options depend on non-kernal resources that need to be installed for use. The installation and configuration details for each option are shown below:
 #### ambi1
 First order ambisonics method, using the ATK [Ambisonic Tool Kit] (http://www.ambisonictoolkit.net/)  package that is a standard sc3-plugin. To use this, the `Ctk` (Composers Tool Kit) quark must be installed. Follow directions in the following section.
 #### ambi3
@@ -85,7 +87,7 @@ LanguageConfig.store
 ~~~~
 
 ### HRTF data resources
-Each option depends on a corresponding set of HRTF data. Satie provides submodules with copies of these databases, which will be installed automatically when using the `git clone --recursive` flag. For more information on the subject:
+Each option depends on a corresponding set of HRTF data. SATIE provides submodules with copies of these databases, which will be installed automatically when using the `git clone --recursive` flag. For more information on the subject:
 
 [ATK] (http://www.ambisonictoolkit.net/documentation/supercollider)
 
