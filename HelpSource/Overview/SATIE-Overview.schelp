@@ -18,22 +18,21 @@ code::
 (
 s = Server.supernova.local;
 // pass the server to the configuration and define some options
-~satieConfiguration = SatieConfiguration.new(s, \stereoListener);
+~satieConfiguration = SatieConfiguration.new(s, [\stereoListener]);
+// At this point SatieConfiguration has scanned the plugins directories:
+// audiosources - audio generators
+// effects - audio effects
+// mappers - paramater mapping plugins
+// postprocessors - mastering
+// spatializers - duh...
 // s.options are exposed via the instance variable serverOptions of the SatieConfiguration class
 ~satieConfiguration.serverOptions.blockSize = 1024;
-
 // now we can boot SATIE
 ~satie = Satie.new(~satieConfiguration);
 ~satie.boot();
 )
 ::
 
-SUBSECTION:: Load some audio sources
-Once the server is booted, we can define the synthdefs. See LINK::Classes/SatiePlugin:: for the description of the plugin format.
-
-code::
-~satie.makeSynthDef(\test, \testtone, [], [], [~satieConfiguration.listeningFormat], [0]);
-::
 
 SUBSECTION:: Use it
 One can use it either directly from SuperCollider or by sending it OSC messages. See examples below for various applications.
@@ -44,12 +43,10 @@ The examples below show various facets of SATIE's functionality.
 DEFINITIONLIST::
 ## LINK::Examples/Basics::
 || Progressive examples of SATIE functionnality, how to use it from scide.
-## LINK::Examples/Effects::
-|| Introduction to using effects
-## LINK::Examples/Kamikaze::
-|| A short introduction to the concept of kamikaze audio source
 ## LINK::Examples/Processes::
 || Example of SATIE processes
+## LINK::Examples/Effects::
+|| Introduction to using effects
 ## LINK::Examples/OSC::
 || How to talk (and listen) to SATIE via OSC
 ## LINK::Examples/Plugins::
@@ -74,4 +71,3 @@ DEFINITIONLIST::
 ##LINK::Classes/SatiePlugins::
 || A Dictionary of plugins
 ::
-

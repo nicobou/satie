@@ -6,7 +6,7 @@ related:: Overview/SATIE-Overview, Classes/SatieConfiguration
 Section:: First steps
 
 NOTE::SATIE takes advantage of parrallel processing provided by supernova server therefore it is a preferred setup and examples use it by default. ::
-Before using SATIE, we need to create a configuration. The configuration will typically define the number of speakers and their layout, number of effect busses to use etc. We can also configure the supernova server options, which are held in serverOptions variable. We will also define which audio "plugins" (audio sources and effects) we will use (more on the format of plugins in link::Examples/Plugins::). SATIE will prepare the synthdefs on the server and later we will be able to control their life cycle.
+Before using SATIE, we need to create a configuration. The configuration will typically specify the speaker layout, number of effect busses to use etc. We can also configure the supernova server options, which are held in serverOptions variable. SATIE will prepare the synthdefs on the server and later we will be able to control their life cycle.
 
 code::
 (
@@ -14,6 +14,8 @@ code::
 s = Server.supernova.local;
 // instantiate a SatieConfiguration. Here we will use a stereo spatializer
 ~satieConfiguration = SatieConfiguration.new(s, [\stereoListener]);
+// list possible listeners:
+~satieConfiguration.spatPlugins.keys;
 // Change SuperCollider's block size (jack server's blocksize must be multiple of this value)
 ~satieConfiguration.serverOptions.blockSize = 1024;
 // instantiate SATIE renderer and pass it the configuration
@@ -39,7 +41,7 @@ code::
 20.do( { arg item;
 	var nodename=("testNode"++"_"++item).asSymbol;
 	var synth;
-	synth = ~satie.makeInstance(nodename.asSymbol, \misDrone, \default, synthArgs: [\dur: 8500]);
+	synth = ~satie.makeSourceInstance(nodename.asSymbol, \misDrone, \default, synthArgs: [\dur: 8500]);
 	synth.set(\gainDB, rrand(-70, -18), \sfreq, rrand(100, 1000));
 });
 )
@@ -75,16 +77,21 @@ code::
 
 ::
 
-And of course we can do all that in one message:
+And of course we can change all spatialization parameters in one message:
 
 code::
 (
 20.do( {|item|
 	var nodename=("testNode"++"_"++item);
 	~satie.groupInstances[\default][nodename.asSymbol].set(
-		\freq, rrand(200, 2000),
 		\gainDB, rrand(-50, -10),
-		\aziDeg, rrand(-90, 90));
+		\aziDeg, rrand(-90, 90),
+		\eleDeg, rrand(-90, 90),
+		\delayMs, rrand(1,100),
+		\lpHz, rrand(10000, 22050),
+		\hpHz, rrand(0.5, 200),
+		\spread, rrand(0, 1)
+	);
 });
 )
 ::
@@ -110,7 +117,7 @@ code::
 20.do( { arg item;
 	var nodename=("test_tone"++"_"++item).asSymbol;
 	var synth;
-	synth = ~satie.makeInstance(nodename.asSymbol, \testtone, \synths, synthArgs: [
+	synth = ~satie.makeSourceInstance(nodename.asSymbol, \testtone, \synths, synthArgs: [
 		\sfreq, rrand(200, 800),
 		\gainDB, rrand(-60, -30),
 		\azideg, rrand(-90, 90)]);
@@ -123,7 +130,7 @@ code::
 ~satie.groups[\synths].set(\sfreq, 360);
 
 // add another instance of a synth to the group
-~satie.makeInstance(\solo, \misDrone, \synths, [\gainDB, -20]);
+~satie.makeSourceInstance(\solo, \misDrone, \synths, [\gainDB, -20]);
 
 // set parameters of one instance
 ~satie.groupInstances[\synths][\solo].set(\freq, 800);

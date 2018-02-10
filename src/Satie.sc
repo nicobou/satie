@@ -28,6 +28,7 @@ Satie {
 	var <>spatPlugins;
 	var <>mapperPlugins;
 	var <>postprocessorPlugins;
+	var <mastering;
 
 	/*    RENDERER     */
 	// buses
@@ -36,7 +37,7 @@ Satie {
 	// compiled definitions
 	var <generators, <effects, <processes;
 	// instantiated
-	var <groups, <groupInstances;
+	var <groups, <groupInstances, <processInstances;
 
 	var <osc;
 
@@ -66,12 +67,11 @@ Satie {
 		postProcessors = Dictionary.new();
 		groups = Dictionary.new();
 		groupInstances = Dictionary.new();
+		processInstances = Dictionary.new();
 		generators = IdentityDictionary.new();
 		effects = IdentityDictionary.new();
 		processes = Dictionary.new();
-
-		osc = SatieOSC(this);
-		inspector = SatieIntrospection.new(this);
+		mastering = Dictionary.new();
 	}
 
 	// public method
@@ -110,18 +110,24 @@ Satie {
 					// collecting spatializers
 					pipeline.do { arg item;
 						previousSynth = SynthDef.wrap(postprocessorPlugins.at(item).function, prependArgs: [previousSynth]);
+						// add individual pipeline item to the dictionaries used by introspection
+						groupInstances[\postProc].put(item.asSymbol, previousSynth);
+						mastering.put(item.asSymbol, item.asSymbol);
 					};
 					ReplaceOut.ar(outputIndex, previousSynth);
 			}).add;
 			satieConfiguration.server.sync;
 			postProcessors.at(postprocname.asSymbol).free();
 			postProcessors.put(postprocname.asSymbol, Synth(postprocname.asSymbol, args: defaultArgs, target: postProcGroup));
+
 		});
 	}
 
 	// private method
 	makePostProcGroup {
 		postProcGroup = ParGroup(1,\addToTail);
+		groups.put(\postProc, postProcGroup);
+		groupInstances.put(\postProc, Dictionary.new());
 	}
 
 	setAuxBusses {
@@ -160,10 +166,13 @@ Satie {
 
 		// generate synthdefs
 		audioPlugins.do { arg item;
-			this.makeSynthDef(item.name,item.name, [], [], satieConfiguration.listeningFormat, [satieConfiguration.outBusIndex]);
+			this.makeSynthDef(item.name,item.name, [], [], satieConfiguration.listeningFormat, satieConfiguration.outBusIndex);
 		};
+
 		generatedSynthDefs = audioPlugins.keys;
 
 		satieConfiguration.server.sync;
+		osc = SatieOSC(this);
+		inspector = SatieIntrospection.new(this);
 	}
 }

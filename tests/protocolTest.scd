@@ -207,7 +207,7 @@ b.sendMsg("/satie/source/update", "resonance_SC", 0,0, -15,0,15000,20);   //upda
 // Evaluate this to load Satie4Unity state
 s.quit;
 ~listeningFormat = \stereoListener;  // set listener here
-("~/".standardizePath++"src/satie4UnityExample/satieProject/satie4unityExample.scd").load;    // assumes that the satie4Unity project is located in  ~/src
+("~/".standardizePath++"src/satie4unityExample/satieProject/satie4unityExample.scd").load;    // assumes that the satie4Unity project is located in  ~/src
 b = NetAddr.new("127.0.0.1", 18032);    // connect to satie's RX port
 )
 

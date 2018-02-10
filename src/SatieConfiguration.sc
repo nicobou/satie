@@ -32,7 +32,7 @@ SatieConfiguration {
 	var <>orientationOffsetDeg;
 
 	*new {| server, listeningFormat = #[\stereoListener, \stereoListener], numAudioAux = 0, outBusIndex = #[0], hrtfPath = nil |
-		server = server ? Server.supernova;
+		server = server;
 		^super.newCopyArgs(server, listeningFormat, numAudioAux, outBusIndex, hrtfPath).init;
 	}
 
@@ -60,12 +60,10 @@ SatieConfiguration {
 		});
 		this.handleSpatFormat(listeningFormat);
 		orientationOffsetDeg = [0, 0];
-
-
 	}
 
 	handleSpatFormat { arg format;
-		serverOptions.numOutputBusChannels = 0;
+		serverOptions.numOutputBusChannels = outBusIndex.minItem;
 
 		format.do { arg item, i;
 			var spatPlugin = this.spatPlugins[item.asSymbol];
@@ -83,12 +81,3 @@ SatieConfiguration {
 		};
 	}
 }
-
-
-
-
-
-
-
-
-

@@ -15,6 +15,6 @@
 
 // default mapper does nothing. It could have been named 'identity'
 ~function = {
-			| aziDeg = 0, eleDeg = 0, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 0.5, spread = 1 |
-			[aziDeg, eleDeg, gainDB, delayMs, lpHz, hpHz, spread];
+			| aziDeg = 0, eleDeg = 0, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 0.5, spread = 1, nfIndex = 0 |
+			[aziDeg, eleDeg, gainDB, delayMs, lpHz, hpHz, spread, nfIndex];
 		};

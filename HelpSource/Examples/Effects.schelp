@@ -10,17 +10,13 @@ code::
 (
 // define a server, SATIE needs it
 s = Server.supernova.local;
-// instantiate a SatieConfiguration. Here we will use a stereo spatializer
+// Configure SATIE to use 2 auxiliary internal audio busses for the sources to send audio
+// to spatialized effects
 ~satieConfiguration = SatieConfiguration.new(s, [\stereoListener], numAudioAux: 2);
-// Change SuperCollider's block size (jack server's blocksize must be multiple of this value)
-~satieConfiguration.serverOptions.blockSize = 1024;
-// instantiate SATIE renderer and pass it the configuration
 ~satie = Satie.new(~satieConfiguration);
+~satie.boot();
 s.waitForBoot({
-	// create a default group
-	~satie.makeSatieGroup(\default);
-	~satie.makeSatieGroup(\defaultFx, addAction: \addToTail);
-	// define some synths
+	// define a synth with effect on pre- and post- bus.
 	~satie.makeSynthDef(\string_with_effects, \zkarpluck1, [~satie.aux[0]], [~satie.aux[1]], ~satieConfiguration.listeningFormat, [0]);
 	// spatialized reverb effect (input will be set at creation):
 	~satie.makeSynthDef(\busreverb, \freeverb, [], [], ~satieConfiguration.listeningFormat, [0]);
@@ -38,15 +34,16 @@ section::Spatialized effects (read audio from a bus)
 code::
 // making two trigered sound source
 (
-~satie.makeInstance(\test_src, \string_with_effects);
+~satie.makeSourceInstance(\test_src, \string_with_effects);
 ~satie.groups[\default].set(\gainDB, -20);
 
 ~satie.groupInstances[\default][\test_src].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
 )
 
-// Adding reverb to the pre bus (left).
+// Adding reverb to the pre bus (panned hard left). The pre-bus takes the input signal regardless of the
+// source position
 (
-~satie.makeInstance(\rev_pre, \busreverb, \defaultFx);   // use default effects group to make sure synth is created at the end of the DSP chain
+~satie.makeFxInstance(\rev_pre, \busreverb, \boo);   // use default effects group to make sure synth is created at the end of the DSP chain
 ~satie.groupInstances[\defaultFx][\rev_pre].set(\in, ~satie.aux[0]);  // attached to source Pre bus
 // Note the volume of the effect is reduced since it is reading the
 // "raw" audio from the pre bus, where sound source volume control has no effect:
@@ -55,14 +52,18 @@ code::
 ~satie.groupInstances[\default][\test_src].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5);
 )
 
-// Adding reverb to the post bus (right).
+// Adding reverb to the post bus (panned hard right). Post bus input gain depends on the source position
 (
-~satie.makeInstance(\rev_post, \busreverb, \defaultFx);
+~satie.makeFxInstance(\rev_post, \busreverb, \defaultFx);
 ~satie.groupInstances[\defaultFx][\rev_post].set(\in, ~satie.aux[1]);  // attached to source Post bus
 ~satie.groupInstances[\defaultFx][\rev_post].set(\mix, 1 /*wet only*/, \room, 0.9, \damp, 1, \aziDeg, 180/*right*/, \gainDB, 0);
 // listen: post reverb is on the right
-~satie.groupInstances[\default][\test_src].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5, \aziDeg, 130);
+~satie.groupInstances[\default][\test_src].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5, \aziDeg, 130, \gainDB, -10);
 )
+
+// we can still hear pre-bus effect with no gain on the source
+~satie.groupInstances[\default][\test_src].set(\gainDB, -99, \t_trig, 1, \note, rrand(42,72), 1, 0.5, \aziDeg, 130);
+
 ::
 
 Go back to link::Overview/SATIE-Overview::

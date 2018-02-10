@@ -28,7 +28,9 @@
 			{
 				dico = satieConfiguration.audioPlugins;
 				generators.add(id.asSymbol -> srcName.asSymbol);
-			},
+			}
+		);
+		if(satieConfiguration.fxPlugins.at(srcName) != nil,
 			{
 				dico = satieConfiguration.fxPlugins;
 				effects.add(id.asSymbol -> srcName.asSymbol);
@@ -56,8 +58,27 @@
 
 	makeInstance {| name, synthDefName, group = \default, synthArgs = #[] |
 		var synth = Synth(synthDefName, args: synthArgs, target: groups[group], addAction: \addToHead);
+		if (groupInstances[group][name] != nil,
+			{
+				this.cleanInstance(name, group: group);
+			}
+		);
 		groupInstances[group].put(name, synth);
 		^synth;
+	}
+
+	makeFxInstance{| name, synthDefName, group = \defaultFx, synthArgs = #[] |
+		var fx;
+		this.makeSatieGroup(group.asSymbol, \addToEffects);
+		fx = this.makeInstance(name, synthDefName, group, synthArgs);
+		^fx;
+	}
+
+	makeSourceInstance{| name, synthDefName, group = \default, synthArgs = #[] |
+		var src;
+		this.makeSatieGroup(group.asSymbol);
+		src = this.makeInstance(name, synthDefName, group, synthArgs);
+		^src;
 	}
 
 	makeKamikaze {| name, synthDefName, group = \default, synthArgs = #[] |
@@ -68,16 +89,20 @@
 	makeSatieGroup { |  name, addAction = \addToHead |
 		var group;
 		//"Creating group %".format(name).postln;
-		if (addAction == \addToEffects,
+		if ( groups.includesKey(name.asSymbol) == false,
 			{
-				group = ParGroup.new(groups[\defaultFx], \addAfter);
-			},
-			{
-				group = ParGroup.new(addAction: addAction);
-		});
-		groups.put(name.asSymbol, group);
-		groupInstances.put(name.asSymbol, Dictionary.new);
-		^group;
+				if (addAction == \addToEffects,
+					{
+						group = ParGroup.new(groups[\defaultFx], \addAfter);
+					},
+					{
+						group = ParGroup.new(addAction: addAction);
+					});
+				groups.put(name.asSymbol, group);
+				groupInstances.put(name.asSymbol, Dictionary.new);
+				^group;
+			}
+		);
 	}
 
 	killSatieGroup { | name |
@@ -117,7 +142,7 @@
 	cloneProcess { | processName |
 		var processClone = nil;
 
-		if (processes.includesKey(processName.asSymbol),
+		if (processes.includesKey(processName),
 			{
 				var temp = processes.at(processName.asSymbol);
 				processClone = temp.copy;
@@ -127,5 +152,23 @@
 				processClone = nil;
 		});
 		^processClone;
+	}
+
+	// instantiate a process - also creates a unique group
+	makeProcessInstance { | id, processName, addAction=\addToHead |
+		var groupName, myProcess;
+		groupName = (id++"_group").asSymbol;
+		this.makeSatieGroup(groupName, addAction);
+		myProcess = this.cloneProcess(processName.asSymbol);
+		processInstances.put(id, myProcess);
+		processInstances[id].setup(id, groupName);
+		^processInstances;
+	}
+
+	cleanProcessInstance {  | id |
+		var name = id;
+		processInstances[name].cleanup;
+		this.killSatieGroup((name++"_group").asSymbol);
+		processInstances.removeAt(name);
 	}
 }

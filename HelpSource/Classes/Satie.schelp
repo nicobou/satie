@@ -39,6 +39,17 @@ Array: Synth properties to be taken intio account at instantiation time. All set
 
 returns:: a link::Classes/Synth::
 
+METHOD:: makeSourceInstance
+A wrapper around link::makeInstance:: to explicitly create an audio source
+
+returns:: a link::Classes/Synth::
+
+METHOD:: makeFxInstance
+A wrapper around link::#makeInstance:: to explicitly create an audio effect
+
+returns:: a link::Classes/Synth::
+
+
 METHOD:: replacePostProcessor
 Replaces post-processor pipeline at the output of the spatializer.
 

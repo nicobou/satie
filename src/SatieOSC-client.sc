@@ -33,7 +33,7 @@
 					this.setResponderAddress(addr);
 				}
 			);
-			json = satie.inspector.getInstancesJSON();
+			json = satie.inspector.getCompiledPluginsJSON();
 			if(satie.satieConfiguration.debug, {"% json: %".format(this.class.getBackTrace, json).postln;});
 			returnAddress.sendMsg("/plugins", json);
 		}
@@ -49,7 +49,22 @@
 					this.setResponderAddress(addr);
 				}
 			);
-			json = satie.inspector.getInstanceInfoJSON(pluginName);
+			json = satie.inspector.getSynthDefInfoJSON(pluginName);
+			returnAddress.sendMsg("/arguments", json);
+		}
+	}
+
+	getPluginDetails {
+		^{| args, time, addr, recvPort |
+			var pluginName, json;
+			pluginName = args[1];
+			if(satie.satieConfiguration.debug, {"% arguments: %".format(this.class.getBackTrace, args).postln;});
+			if (dynamicResponder,
+				{
+					this.setResponderAddress(addr);
+				}
+			);
+			json = satie.inspector.getSynthDefParametersJSON(pluginName);
 			returnAddress.sendMsg("/arguments", json);
 		}
 	}

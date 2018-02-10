@@ -1,6 +1,7 @@
 SatieIntrospection {
 	var context;
-	var pluginsList;
+	var allPlugins;
+	var spatList;
 
 	*new {|satieContext|
 		if (satieContext.class == Satie,
@@ -19,7 +20,7 @@ SatieIntrospection {
 	*
 	*/
 	updatePluginsList{
-		pluginsList = [context.audioPlugins, context.fxPlugins];
+		allPlugins = context.audioPlugins.merge(context.fxPlugins).merge(context.postprocessorPlugins);
 	}
 
 	// return a dictionary audio plugins. Key is the type of plugin, value a Set of names.
@@ -27,50 +28,57 @@ SatieIntrospection {
 		var ret = Dictionary.new();
 		ret.add(\generators -> context.audioPlugins.keys);
 		ret.add(\effects -> context.fxPlugins.keys);
+		ret.add(\mastering -> context.postprocessorPlugins);
 		^ret;
 	}
 
 	pluginListJSON {
 		^ToJSON.stringify(this.getPluginList);
 	}
+
 	// @plugin
 	getPluginArguments { | plugin |
 		var argnames, plugs;
 		this.updatePluginsList;
-		pluginsList.do({|coll|
-			if(coll.keys.includes(plugin.asSymbol),
+ 		allPlugins.keysDo({|key|
+			if(key === plugin.asSymbol,
 				{
-					^argnames = coll[plugin].function.def.keyValuePairsFromArgs;
+
+					^argnames = allPlugins[key].function.def.keyValuePairsFromArgs;
 				},
 				{
 					if(context.satieConfiguration.debug,
-						{"% tried % in % and found none...".format(this.class.getBackTrace, plugin, pluginsList).warn}
+						{"% tried % in % and found none...\n".format(this.class.getBackTrace, plugin, allPlugins).warn}
 					);
-					^argnames = "null";
+					argnames = "null";
 				}
 			);
 		});
+		^argnames;
 	}
 
 	getPluginDescription { | plugin |
+		//  plugin: symbol - synthdef name
 		var description;
 		this.updatePluginsList;
-		pluginsList.do({|coll|
-			if(coll.keys.includes(plugin.asSymbol),
+		allPlugins.keysDo({|key|
+			if(key === plugin.asSymbol,
 				{
-					^description = coll[plugin].description;
+					^description = allPlugins[key.asSymbol].description;
 				},
 				{
 					if(context.satieConfiguration.debug,
-						{"% tried % in % and found none...".format(this.class.getBackTrace, plugin, pluginsList).warn}
+						{"% tried % in % and found none...".format(this.class.getBackTrace, plugin, allPlugins).warn}
 					);
-					^description = "null";
+					description = "null";
 				}
 			);
 		});
+		^description;
 	}
 
 	getPluginInfo { | plugin |
+		//  plugin: symbol - synthdef name
 		var description, arguments, dico;
 		dico = Dictionary.new();
 		description = this.getPluginDescription(plugin);
@@ -86,6 +94,56 @@ SatieIntrospection {
 		^ToJSON.stringify(dico);
 	}
 
+	// we will probably want to get other available fields of a plugin, we can list them here
+	getPluginFields { | plugin |
+		var fields, plugClass, plugInstance, ret;
+		fields = Dictionary.new();
+		ret = Dictionary.new();
+		this.updatePluginsList;
+		allPlugins.keysDo {| key |
+			if(key === plugin.asSymbol,
+				{
+					plugInstance = allPlugins[key.asSymbol];
+					plugClass = plugInstance.class;
+					plugClass.instVarNames.do({|item, i|
+						fields.add(item.asSymbol -> plugInstance.instVarAt(i).asCompileString);
+					});
+				},
+				{
+					if(context.satieConfiguration.debug,
+						{"% tried % in % and found none...".format(this.class.getBackTrace, plugin, allPlugins).warn}
+					);
+				}
+			)
+		};
+		ret.add(plugin.asSymbol -> fields);
+		^ret;
+	}
+
+	getPluginFieldsJSON {|spatPlug|
+		^ToJSON.stringify(this.getPluginFields(spatPlug.asSymbol));
+	}
+
+	getSpatializerArguments {| spatPlug |
+		var argnames;
+		this.updateSpatList();
+		if(spatList.keys.includes(spatPlug.asSymbol),
+			{
+				^argnames = spatList[spatPlug.asSymbol].function.def.keyValuePairsFromArgs;
+			},
+			{
+				if(context.satieConfiguration.debug,
+					{"% tried % in % and found none...\n".format(this.class.getBackTrace, spatPlug, spatList).warn}
+				);
+				argnames = "null";
+			}
+		);
+		^argnames;
+	}
+
+	updateSpatList {
+		spatList = context.spatPlugins;
+	}
 
 	/* *****
 	*	queries about compiled synths & effects
@@ -105,33 +163,62 @@ SatieIntrospection {
 		^context.effects;
 	}
 
+	getPostProcessors {
+		^context.mastering;
+	}
+
 	// grouped by generators and effects
-	getInstances {
+	getSynthDefs {
 		var instances = Dictionary.new();
-		instances.add(\synths -> this.getGenerators());
+		instances.add(\generators -> this.getGenerators());
 		instances.add(\effects -> this.getEffects());
+		instances.add(\mastering -> this.getPostProcessors());
 		^instances;
 	}
 
-	getInstancesJSON {
-		^ToJSON.stringify(this.getInstances);
+	getSynthDefsJSON {
+		^ToJSON.stringify(this.getSynthDefs);
 	}
 
-	getInstanceInfo { | id |
+	getCompiledPlugins {
+		var infos, synthdefs;
+		infos = Dictionary.new();
+		synthdefs = this.getSynthDefs();
+		this.updatePluginsList();
+		synthdefs.keysDo({|key|
+			var temp = Dictionary.new();
+			infos[key.asSymbol] = Dictionary.new();
+			synthdefs[key].keysDo({|item|
+				var plugInfo = allPlugins[synthdefs[key.asSymbol][item.asSymbol]];
+				temp[item.asSymbol] = Dictionary.newFrom(List[
+					\type, plugInfo.name,
+					\description, plugInfo.description
+				]);
+			});
+			infos[key.asSymbol] = temp;
+		});
+		^infos;
+	}
+
+	getCompiledPluginsJSON{
+		^ToJSON.stringify(this.getCompiledPlugins());
+	}
+
+	getSynthDefInfo { | synthName |
 		var srcName, description, arguments, ret;
 		description = Dictionary.new();
 		arguments = Dictionary.new();
-
-		this.getInstances.keysValuesDo({| category, instances |
+		"Deprecation warning: this method may be phased out with time. Please use getSynthDefParameters (or /satie/plugindetails via OSC)".warn;
+		this.getSynthDefs.keysValuesDo({| category, instances |
 			instances.keysValuesDo({| name, srcName |
-				if (id.asSymbol == name.asSymbol,
+				if (synthName.asSymbol == name.asSymbol,
 					{
 						var plug = this.getPluginInfo(srcName.asSymbol);
 						ret = Dictionary.new();
 						description = plug[\description];
 						arguments = plug[\arguments];
 						srcName = srcName.asSymbol;
-						ret.add(id.asSymbol -> Dictionary.with(*[
+						ret.add(synthName.asSymbol -> Dictionary.with(*[
 							\srcName -> srcName,
 							\description -> description,
 							\arguments -> arguments])
@@ -140,7 +227,7 @@ SatieIntrospection {
 					},
 					{
 						if (context.satieConfiguration.debug,
-							{"% did not find % in %".format(this.class.getBackTrace, id, instances).postln});
+							{"% did not find % in %".format(this.class.getBackTrace, synthName, instances).postln});
 						ret = "null";
 					}
 				);
@@ -149,7 +236,70 @@ SatieIntrospection {
 		^ret;
 	}
 
-	getInstanceInfoJSON { | id |
-		^ToJSON.stringify(this.getInstanceInfo(id));
+	getSynthDefInfoJSON { | id |
+		^ToJSON.stringify(this.getSynthDefInfo(id));
+	}
+
+	getSynthDefParameters { | synthName |
+		var srcName, description, arguments, ret;
+		description = Dictionary.new();
+		arguments = Array.new();
+
+		this.getSynthDefs.keysValuesDo({| category, instances |
+			instances.keysValuesDo({| name, srcName |
+				if (synthName.asSymbol == name.asSymbol,
+					{
+						var plug = this.getPluginInfo(srcName.asSymbol);
+						ret = Dictionary.new();
+						description = plug[\description];
+						arguments = this.buildArgStruct(plug[\arguments]);
+						srcName = srcName.asSymbol;
+						ret.add(synthName.asSymbol -> Dictionary.with(*[
+							\srcName -> srcName,
+							\description -> description,
+							\arguments -> arguments])
+						);
+						^ret;
+					},
+					{
+						if (context.satieConfiguration.debug,
+							{"% did not find % in %".format(this.class.getBackTrace, synthName, instances).postln});
+						ret = "null";
+					}
+				);
+			});
+		});
+		^ret;
+	}
+
+	getSynthDefParametersJSON{ | id |
+		^ToJSON.stringify(this.getSynthDefParameters(id));
+	}
+
+	buildArgStruct { | argDico |
+		var ret, dico;
+		ret = Array.new();
+		argDico.keysDo({ | key|
+			dico = Dictionary.new();
+			dico.add(\name -> key);
+			dico.add(\value -> this.checkForNil(argDico[key]));
+			dico.add(\type -> argDico[key].class.asString);
+			ret = ret.add(dico);
+		});
+		^ret;
+	}
+
+
+	checkForNil {|val|
+		var ret;
+		if (val != nil,
+			{
+				ret = val;
+			},
+			{
+				ret = "unused".quote;
+			}
+		);
+		^ret;
 	}
 }
