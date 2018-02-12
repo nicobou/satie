@@ -29,11 +29,8 @@
 	dbOffset = nfScaler.ampdb;
 	newGainDB = gainDB + dbOffset;
 
-
-
 	// output modified spatializer parameters
-
-	[aziDeg, eleDeg, newGainDB, delayMs, lpHz, hpHz, spread];
+	[[aziDeg, eleDeg, newGainDB, delayMs, lpHz, hpHz, spread]];
 };
 
 
