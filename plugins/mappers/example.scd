@@ -26,6 +26,8 @@
 	newAzi = aziDeg + aziDegShift;
 	newEle = eleDeg + eleDegShift;
 	// forwarding required spatializer parameters only,
-	// here aziDeg and eleDeg has been replaced by the computed values:
-	[newAzi, newEle, gainDB, delayMs, lpHz, hpHz, spread];
+	// here aziDeg and eleDeg has been replaced by the computed values
+	// Note that mapper must return an array of array(s), allowing specific mapping for
+	// specific spatializer, see the nearFarField.scd file for an example
+	[[newAzi, newEle, gainDB, delayMs, lpHz, hpHz, spread]];
 };

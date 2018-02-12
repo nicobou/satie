@@ -41,7 +41,7 @@ SatieFactory {
 				// collecting spatializers
 				out = Array.newClear(spatializerArray.size());
 				spatializerArray.do { arg item, i;
-					out.put(i, env * SynthDef.wrap(item, prependArgs: [in] ++ mapped));
+					out.put(i, env * SynthDef.wrap(item, prependArgs: [in] ++ mapped.at(i.mod(mapped.size))));
 				};
 				// sending sum of first spatializer to the post busses
 				postBusArray.do { arg item;
@@ -73,7 +73,7 @@ SatieFactory {
 				// collecting spatializers
 				out = Array.newClear(spatializerArray.size());
 				spatializerArray.do { arg item, i;
-					out.put(i, env * SynthDef.wrap(item, prependArgs: [in] ++ mapped));
+					out.put(i, env * SynthDef.wrap(item, prependArgs: [in] ++ mapped.at(i.mod(mapped.size))));
 				};
 				// sending sum of first spatializer to the post busses
 				postBusArray.do { arg item;
