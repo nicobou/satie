@@ -11,17 +11,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*       Spatializer plugin definition 
+/*       Spatializer plugin definition
 
 	Each spatializer plugin should define the following global variables:
     ~name: (symbol) name of the spatializer
 	~description: (string) a short description
 	~numChannels: (int) number of channels
 	~function: the definition of the spatializer
-	
+
 	where function should use the following input arguments:
 
-	in 
+	in
 	aziDeg degrees (-180 to 180)
 	elevDeg   degrees (-180 to 180)
 	gainDB  decibels
@@ -36,7 +36,7 @@
 ~numChannels = 2;
 
 
-~function = {|in = 0, aziDeg = 0, eleDeg = 0, gainDB = -99, delayMs = 1, lpHz = 22050, hpHz = 0.5, spread = 1 |
+~function = {|in = 0, aziDeg = 0, eleDeg = 0, gainDB = -99, delayMs = 1, lpHz = 22050, hpHz = 0.5, spread = 1, nfIndex = 0 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP
 	var delay = delayMs * 0.001;    // convert to seconds
 	var slewDelay = 0.3; //  note: this needs to be improved ... smoother
@@ -45,9 +45,12 @@
 	var slewPanning = 0.030;
 	var panWeights;
 
+	var nfScaler = (0.8 + (0.2 * nfIndex ));    // note: this defines the amount of "cross talk" in the far field
 	var aziScale = 0.01 * (100 - spread);
 	var theta = aziScale * aziDeg *  0.01745329251994;  // radians
 	var index = SinOsc.kr(0, theta );
+	var panIndex = index*nfScaler;
+
 	var outsig;
 
 	outsig =  LPF.ar(DelayC.ar(
@@ -57,7 +60,7 @@
 
 	outsig = BHiPass.ar(outsig, VarLag.kr(hpHz, slewFilter )  );
 
-	Pan2.ar(outsig, index );
+	Pan2.ar(outsig, panIndex );
 };
 
 /*
