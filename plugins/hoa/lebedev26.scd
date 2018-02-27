@@ -12,9 +12,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-~name = \HOADecLebedev26;
-~description = "Lebedev26 ambisonic decoder";
+~name = \Binaural26;
+~description = "Binaural decoder based on Lebedev26";
 
 ~function = {|in = 0, order |
-HOADecLebedev26.ar(order, in, hrir_Filters: 0);
+HOADecLebedev26.ar(order, in, hrir_Filters: 1);
 };
