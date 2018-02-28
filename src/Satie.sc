@@ -190,10 +190,8 @@ Satie {
 		this.setAuxBusses();
 		this.setAmbiBusses();
 		// loading HRIR filters
-		// FIXME the following seems to enable binaural
-		// HOADecLebedev06.loadHrirFilters(satieConfiguration.server, satieConfiguration.hrirPath);
-		// HOADecLebedev26.loadHrirFilters(satieConfiguration.server, satieConfiguration.hrirPath);
-		// HOADecLebedev50.loadHrirFilters(satieConfiguration.server, satieConfiguration.hrirPath);
+		HOADecLebedev06.loadHrirFilters(satieConfiguration.server, satieConfiguration.hrirPath);
+		HOADecLebedev26.loadHrirFilters(satieConfiguration.server, satieConfiguration.hrirPath);
 
 		// execute setup functions for spatializers
 		satieConfiguration.listeningFormat.do { arg item, i;

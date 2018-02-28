@@ -135,7 +135,7 @@ SatieFactory {
 					gainDB, plane_spherical, radius, speaker_radius);
 				};
 
-				out = env * SynthDef.wrap(encoder, prependArgs: [in, ambiOrder] ++ mapped);
+				out = env * SynthDef.wrap(encoder, prependArgs: [in, ambiOrder] ++ mapped.at(0));
 				postBusArray.do { arg item;
 					Out.ar(item, postBus_gainDB.dbamp * env * NumChannels.ar(out,numChannels: 1, mixdown: false));
 				};
@@ -182,7 +182,7 @@ SatieFactory {
 					gainDB, plane_spherical, radius, speaker_radius);
 				};
 
-				out = env * SynthDef.wrap(encoder, prependArgs: [in, ambiOrder] ++ mapped);
+				out = env * SynthDef.wrap(encoder, prependArgs: [in, ambiOrder] ++ mapped.at(0));
 				postBusArray.do { arg item;
 					Out.ar(item, postBus_gainDB.dbamp * env * NumChannels.ar(out,numChannels: 1, mixdown: false));
 				};
