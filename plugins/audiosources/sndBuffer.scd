@@ -13,13 +13,13 @@
 // };
 //
 
-/*       Audio plugin definition 
+/*       Audio plugin definition
 
 	Each audio plugin should define the following global variables:
     ~name: (symbol) name of the spatializer
 	~description: (string) a short description
 	~function: the actual definition of the plugin
-	
+
 */
 
 
@@ -28,6 +28,8 @@
 
 // note:  bufnum must be first arg !!
 ~description = "Play a buffer";
+~channelLayout = \mono;
+
 
 ~function = { | bufnum = 0, loop = 0, startPos=0, rate = 1, t_trig=0, trimDB=0, tone=1,  amp=1 |
 	var lpassFq;

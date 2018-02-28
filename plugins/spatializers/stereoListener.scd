@@ -33,6 +33,8 @@
 
 ~name = \stereoListener;
 ~description = "A stereo panner";
+~channelLayout = \mono;
+
 ~numChannels = 2;
 
 

@@ -24,6 +24,7 @@ Each audio plugin should define the following global variables:
 
 ~name = \syncSamp1;
 ~description = "Play a sample buffer using global synchronization index";
+~channelLayout = \mono;
 
 // args:   midiPitch60 == no transposition,  force & incidence  between -1 and 1
 // pitch disabled

@@ -11,19 +11,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*       Audio plugin definition
 
-	Each audio plugin should define the following global variables:
-    ~name: (symbol) name of the spatializer
-	~description: (string) a short description
-	~function: the actual definition of the plugin
+~name = \Binaural06;
+~description = "Binaural decoder based on Lebedev06";
 
-*/
-
-~name = \PinkSin;
-~description = "Mix of pink noise and sine wave";
-~channelLayout = \mono;
-
-~function = {| sfreq = 200 |
-	PinkNoise.ar() + FSinOsc.ar(sfreq)
+~function = {|in = 0, order |
+HOADecLebedev06.ar(order, in, hrir_Filters: 1);
 };

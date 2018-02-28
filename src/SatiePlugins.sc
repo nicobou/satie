@@ -32,9 +32,9 @@ SatiePlugins : Dictionary {
 	audioPath { arg path;
 		path.pathMatch.do{arg item;
 			item.loadPaths;
-			this.add(~name.asSymbol -> SatiePlugin.new(~name, ~description, ~function));
+			this.add(~name.asSymbol -> SatiePlugin.new(~name, ~description, ~function, ~channelLayout));
 			// reset global variables
-			~name = ~description = ~function = nil;
+			~name = ~description = ~function = ~channelLayout = nil;
 		};
 
 	}
@@ -42,26 +42,27 @@ SatiePlugins : Dictionary {
 	spatializerPath { arg path;
 		path.pathMatch.do{arg item;
 			item.loadPaths;
-			this.add(~name.asSymbol -> SpatializerPlugin.new(~name, ~description, ~function, ~numChannels, ~setup));
+			this.add(~name.asSymbol -> SpatializerPlugin.new(~name, ~description, ~function, ~channelLayout, ~numChannels, ~setup));
 			// reset global variables
-			~name = ~description = ~function = ~numChannels = ~setup = nil;
+			~name = ~description = ~function = ~channelLayout = ~numChannels = ~setup = nil;
 		};
 	}
-		sourcePath { arg path;
+	sourcePath { arg path;
 		path.pathMatch.do{arg item;
 			item.loadPaths;
-			this.add(~name.asSymbol -> SourcePlugin.new(~name, ~description, ~function, ~setup));
+			this.add(~name.asSymbol -> SourcePlugin.new(~name, ~description, ~function, ~channelLayout, ~setup));
 			// reset global variables
-			~name = ~description = ~function = ~setup = nil;
+			~name = ~description = ~function = ~channelLayout = ~setup = nil;
 		};
 	}
 
 	addAudioPlugin { | env |
-		var name, description, function;
+		var name, description, function, type;
 		name = env[\name];
 		description = env[\description];
 		function = env[\function];
-		this.add(name.asSymbol -> SatiePlugin.new(name.asSymbol, description, function));
+		type = env[\function];
+		this.add(name.asSymbol -> SatiePlugin.new(name.asSymbol, description, function, type));
 	}
 
 	showPlugins {

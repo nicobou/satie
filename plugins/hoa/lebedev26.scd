@@ -11,16 +11,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-//
-// ~name = \PinkSin;
-// ~description = "Mix of pink noise and sine wave";
-// ~function = {| sfreq = 200 |
-// 	PinkNoise.ar() + FSinOsc.ar(sfreq)
-// };
-//
-//
-// PinkSin : SatiePlugin {
-// 	var name, description, src;
-//
-// 	*new(|
-// 	}
+
+~name = \Binaural26;
+~description = "Binaural decoder based on Lebedev26";
+
+~function = {|in = 0, order |
+HOADecLebedev26.ar(order, in, hrir_Filters: 1);
+};

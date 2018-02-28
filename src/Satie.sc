@@ -28,6 +28,7 @@ Satie {
 	var <>spatPlugins;
 	var <>mapperPlugins;
 	var <>postprocessorPlugins;
+	var <>hoaPlugins;
 	var <mastering;
 
 	/*    RENDERER     */
@@ -48,6 +49,8 @@ Satie {
 	// mastering spatialisation. one unique synth is generater per spatializer
 	var <postProcessors;
 	var postProcGroup;
+	var <ambiPostProcessors;
+	var ambiPostProcGroup;
 
 	*new {|satieConfiguration|
 		^super.newCopyArgs(satieConfiguration).initRenderer;
@@ -56,6 +59,7 @@ Satie {
 
 	// Private method
 	initRenderer {
+		// FIXME, remove those member duplication and rename satieConfiguration into a shorter name:
 		options = satieConfiguration.serverOptions;
 		satieRoot = satieConfiguration.satieRoot;
 		debug = satieConfiguration.debug;
@@ -65,13 +69,14 @@ Satie {
 		mapperPlugins = satieConfiguration.mapperPlugins;
 		postprocessorPlugins = satieConfiguration.postprocessorPlugins;
 		postProcessors = Dictionary.new();
+		ambiPostProcessors = Dictionary.new();
 		groups = Dictionary.new();
 		groupInstances = Dictionary.new();
 		processInstances = Dictionary.new();
 		generators = IdentityDictionary.new();
 		effects = IdentityDictionary.new();
 		processes = Dictionary.new();
-		mastering = Dictionary.new();
+		mastering = Dictionary.new();  // FIXME what is this for ? it seems useless
 	}
 
 	// public method
@@ -123,8 +128,43 @@ Satie {
 		});
 	}
 
+	replaceAmbiPostProcessor{ | pipeline, order = 1, outputIndex = 0, defaultArgs = #[] |
+		satieConfiguration.server.doWhenBooted({
+			var ambiPostProcName = "satie_ambi_post_processor_"++order;
+			var bformatBus = 0;
+			satieConfiguration.ambiOrders.do { |item, i|
+				if (item.asInt == order, {
+					bformatBus = satieConfiguration.ambiBusIndex[i];
+				});
+			};
+			SynthDef(ambiPostProcName,
+				{
+					var previousSynth = SynthDef.wrap({
+						In.ar(bus: bformatBus.index, numChannels: (order+1).pow(2).asInt);
+					});
+					// backing the hoa pipeline
+					pipeline.do { arg item;
+						previousSynth = SynthDef.wrap(
+							satieConfiguration.hoaPlugins.at(item).function,
+						prependArgs: [previousSynth, order]);
+						// add individual pipeline item to the dictionaries used by introspection
+						groupInstances[\ambiPostProc].put(item.asSymbol, previousSynth);
+					};
+					Out.ar(outputIndex, previousSynth);
+			}).add;
+			satieConfiguration.server.sync;
+			ambiPostProcessors.at(ambiPostProcName.asSymbol).free();
+			ambiPostProcessors.put(
+				ambiPostProcName.asSymbol,
+				Synth(ambiPostProcName.asSymbol, args: defaultArgs, target: ambiPostProcGroup));
+		});
+	}
+
 	// private method
 	makePostProcGroup {
+		ambiPostProcGroup = ParGroup(1,\addToTail);
+		groups.put(\ambiPostProc, ambiPostProcGroup);
+		groupInstances.put(\ambiPostProc, Dictionary.new());
 		postProcGroup = ParGroup(1,\addToTail);
 		groups.put(\postProc, postProcGroup);
 		groupInstances.put(\postProc, Dictionary.new());
@@ -137,10 +177,21 @@ Satie {
 
 		aux = Array.fill(satieConfiguration.numAudioAux, {arg i; auxbus.index + i});
 	}
+	setAmbiBusses {
+		satieConfiguration.ambiBusIndex = Array.newClear(satieConfiguration.ambiOrders.size());
+		satieConfiguration.ambiOrders.do { arg item, i;
+			satieConfiguration.ambiBusIndex[i] = Bus.audio(satieConfiguration.server, (item+1).pow(2));
+		};
+	}
+
 	// private method
 	postExec {
 		// execute any code needed after the server has been booted
 		this.setAuxBusses();
+		this.setAmbiBusses();
+		// loading HRIR filters
+		HOADecLebedev06.loadHrirFilters(satieConfiguration.server, satieConfiguration.hrirPath);
+		HOADecLebedev26.loadHrirFilters(satieConfiguration.server, satieConfiguration.hrirPath);
 
 		// execute setup functions for spatializers
 		satieConfiguration.listeningFormat.do { arg item, i;
@@ -167,8 +218,10 @@ Satie {
 		// generate synthdefs
 		audioPlugins.do { arg item;
 			this.makeSynthDef(item.name,item.name, [], [], satieConfiguration.listeningFormat, satieConfiguration.outBusIndex);
+			satieConfiguration.ambiOrders.do { |order, i|
+				this.makeAmbi((item.name ++ "Ambi" ++ order.asSymbol), item.name, [], [], order, [], satieConfiguration.ambiBusIndex[i]);
+			};
 		};
-
 		generatedSynthDefs = audioPlugins.keys;
 
 		satieConfiguration.server.sync;

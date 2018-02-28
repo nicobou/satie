@@ -26,6 +26,10 @@
 		var dico;
 		if(satieConfiguration.audioPlugins.at(srcName) != nil,
 			{
+				if(satieConfiguration.audioPlugins.at(srcName).type != \mono, {
+					"makesynthDef failed: audio source must be mono (% is not mono)".format(srcName).warn;
+					^0;
+				});
 				dico = satieConfiguration.audioPlugins;
 				generators.add(id.asSymbol -> srcName.asSymbol);
 			}
@@ -41,6 +45,12 @@
 				"params mapper %".format(paramsMapper).postln;
 			}
 		);
+		spatSymbolArray.collect({|item, i|
+			if(satieConfiguration.spatPlugins.at(item).type != \mono, {
+				"makesynthDef failed: spatializer must be mono (% is not mono)".format(item).warn;
+				^0;
+			});
+		});
 
 		SatieFactory.makeSynthDef(
 			id,
@@ -54,6 +64,53 @@
 			satieConfiguration.mapperPlugins.at(paramsMapper).function,
 			synthArgs
 		);
+	}
+
+	makeAmbi {|
+		name,
+		srcName,
+		preBusArray,
+		postBusArray,
+		ambiOrder,
+		ambiEffectPipeline = #[],
+		ambiBusIndex = 0,
+		paramsMapper = \defaultMapper,
+		synthArgs = #[] |
+
+		var dico;
+		if(satieConfiguration.audioPlugins.at(srcName) != nil,
+			{
+				dico = satieConfiguration.audioPlugins;
+				generators.add(name.asSymbol -> srcName.asSymbol);
+			}
+		);
+		if(satieConfiguration.fxPlugins.at(srcName) != nil,
+			{
+				dico = satieConfiguration.fxPlugins;
+				effects.add(name.asSymbol -> srcName.asSymbol);
+			}
+		);
+		if (satieConfiguration.debug,
+			{
+				"params mapper %".format(paramsMapper).postln;
+			}
+		);
+
+		if(satieConfiguration.audioPlugins.at(srcName).type == \mono, {
+			SatieFactory.makeAmbiFromMono(
+				name,
+				dico.at(srcName).function,
+				preBusArray,
+				postBusArray,
+				ambiOrder,
+				ambiEffectPipeline,
+				ambiBusIndex,
+				satieConfiguration.mapperPlugins.at(paramsMapper).function,
+				synthArgs);
+		},{ // else
+			"makeAmbi failed: audio source must be mono (% is not mono)".format(srcName).warn;
+			^0;
+		});
 	}
 
 	makeInstance {| name, synthDefName, group = \default, synthArgs = #[] |

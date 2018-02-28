@@ -7,17 +7,19 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-/*       Audio plugin definition 
+/*       Audio plugin definition
 
 	Each audio plugin should define the following global variables:
     ~name: (symbol) name of the spatializer
 	~description: (string) a short description
 	~function: the actual definition of the plugin
-	
+
 */
 
 ~name = \sndFile;
 ~description = "Stream a soundfile from disk";
+~channelLayout = \mono;
+
 ~function = { | bufnum = 0, loop = 0 |
 	DiskIn.ar(1, bufnum, loop = loop);
 };

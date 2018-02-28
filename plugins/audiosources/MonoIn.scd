@@ -18,6 +18,8 @@
 
 ~name = \MonoIn;
 ~description = "A direct input";
+~channelLayout = \mono;
+
 ~function = {
 	|t_trig = 0, bus = 0|
 	var env = Env([0,1], [1, 1]);
