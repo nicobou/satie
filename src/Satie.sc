@@ -217,7 +217,8 @@ Satie {
 
 		// generate synthdefs
 		audioPlugins.do { arg item;
-			this.makeSynthDef(item.name,item.name, [], [], satieConfiguration.listeningFormat, satieConfiguration.outBusIndex);
+			if ((item.type == \mono).asBoolean,
+				{ this.makeSynthDef(item.name,item.name, [], [], satieConfiguration.listeningFormat, satieConfiguration.outBusIndex); });
 			satieConfiguration.ambiOrders.do { |order, i|
 				this.makeAmbi((item.name ++ "Ambi" ++ order.asSymbol), item.name, [], [], order, [], satieConfiguration.ambiBusIndex[i]);
 			};

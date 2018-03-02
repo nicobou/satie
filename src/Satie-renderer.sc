@@ -107,9 +107,17 @@
 				ambiBusIndex,
 				satieConfiguration.mapperPlugins.at(paramsMapper).function,
 				synthArgs);
-		},{ // else
-			"makeAmbi failed: audio source must be mono (% is not mono)".format(srcName).warn;
-			^0;
+		},{ // else  (assuming type is \ambi
+			SatieFactory.makeAmbi(
+				name,
+				dico.at(srcName).function,
+				preBusArray,
+				postBusArray,
+				ambiOrder,
+				ambiEffectPipeline,
+				ambiBusIndex,
+				satieConfiguration.mapperPlugins.at(paramsMapper).function,
+				synthArgs);
 		});
 	}
 

@@ -23,5 +23,5 @@
 ~function = {
 	|t_trig = 0, bus = 0|
 	var env = Env([0,1], [1, 1]);
-	AudioIn.ar(bus, EnvGen.kr(env, t_trig));
+	SoundIn.ar(bus, EnvGen.kr(env, t_trig));
 }

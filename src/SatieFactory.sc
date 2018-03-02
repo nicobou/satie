@@ -191,4 +191,64 @@ SatieFactory {
 		}).add;
 
 	}
+
+	// make Ambi is dedicated to src function with channelLayout set to \ambi
+	*makeAmbi{|
+		name,
+		src,
+		preBusArray,
+		postBusArray,
+		ambiOrder,
+		ambiEffectPipeline,
+		ambiBusIndex,
+		paramsMapper,
+		synthArgs |
+
+		SynthDef(name,
+			{| synth_gate = 1, preBus_gainDB = 0, postBus_gainDB = 0  |
+				var in, env, out, mapped, encoder;
+				// install first the mapper with spatialization parameters, allowing it to take control
+				// over all defined parameter
+				mapped = SynthDef.wrap(paramsMapper);
+				// in
+				in = SynthDef.wrap(src, prependArgs:  [ambiOrder] ++ synthArgs);
+				// fade in set to as short as possible for percussive cases
+				env = EnvGen.kr(Env.cutoff(0.01, 1, 2),  synth_gate, doneAction: 2);
+				// in -> busses (busses are taking raw input)
+				preBusArray.do {arg item;
+					Out.ar(item, preBus_gainDB.dbamp * env * in);
+				};
+				out = env * in;
+				postBusArray.do { arg item;
+					Out.ar(item, postBus_gainDB.dbamp * env * NumChannels.ar(out,numChannels: 1, mixdown: false));
+				};
+				// sending to out
+				Out.ar(ambiBusIndex, out);
+		}).add;
+
+		SynthDef(name ++ "_kamikaze",
+			{| synth_gate = 1, preBus_gainDB = 0, postBus_gainDB = 0  |
+				var in, env, out, mapped, encoder;
+				// install first the mapper with spatialization parameters, allowing it to take control
+				// over all defined parameter
+				mapped = SynthDef.wrap(paramsMapper);
+				// in
+				in = SynthDef.wrap(src, prependArgs: [ambiOrder] ++ synthArgs);
+				DetectSilence.ar(in, doneAction: 2);
+				// fade in set to as short as possible for percussive cases
+				env = EnvGen.kr(Env.cutoff(0.01, 1, 2),  synth_gate, doneAction: 2);
+				// in -> busses (busses are taking raw input)
+				preBusArray.do {arg item;
+					Out.ar(item, preBus_gainDB.dbamp * env * in);
+				};
+				out = env * in;
+				postBusArray.do { arg item;
+					Out.ar(item, postBus_gainDB.dbamp * env * NumChannels.ar(out,numChannels: 1, mixdown: false));
+				};
+				// sending to out
+				Out.ar(ambiBusIndex, out);
+		}).add;
+
+
+	}
 }
