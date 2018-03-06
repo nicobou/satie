@@ -104,7 +104,7 @@ Satie {
 
 	replacePostProcessor{ | pipeline, outputIndex = 0, spatializerNumber = 0, defaultArgs = #[] |
 		satieConfiguration.server.doWhenBooted({
-			var postprocname = "satie_post_processor_"++spatializerNumber;
+			var postprocname = "post_proc_"++spatializerNumber;
 			SynthDef(postprocname,
 				{
 					var previousSynth = SynthDef.wrap({
@@ -128,9 +128,9 @@ Satie {
 		});
 	}
 
-	replaceAmbiPostProcessor{ | pipeline, order = 1, outputIndex = 0, defaultArgs = #[] |
+	replaceAmbiPostProcessor{ | pipeline, order = 1, outputIndex = 0, spatializerNumber = 0, defaultArgs = #[] |
 		satieConfiguration.server.doWhenBooted({
-			var ambiPostProcName = "satie_ambi_post_processor_"++order;
+			var ambiPostProcName = "ambi_post_proc_"++"_spat"++spatializerNumber++"_order"++order;
 			var bformatBus = 0;
 			satieConfiguration.ambiOrders.do { |item, i|
 				if (item.asInt == order, {
