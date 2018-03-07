@@ -128,9 +128,13 @@ Satie {
 		});
 	}
 
+	makeAmbiPostProcName{ | order = 1, spatializerNumber = 0 |
+		^("ambipost_"++"_s"++spatializerNumber++"_o"++order).asString;
+	}
+
 	replaceAmbiPostProcessor{ | pipeline, order = 1, outputIndex = 0, spatializerNumber = 0, defaultArgs = #[] |
 		satieConfiguration.server.doWhenBooted({
-			var ambiPostProcName = "ambi_post_proc_"++"_spat"++spatializerNumber++"_order"++order;
+			var ambiPostProcName = this.makeAmbiPostProcName(order, spatializerNumber);
 			var bformatBus = 0;
 			satieConfiguration.ambiOrders.do { |item, i|
 				if (item.asInt == order, {
@@ -158,6 +162,10 @@ Satie {
 				ambiPostProcName.asSymbol,
 				Synth(ambiPostProcName.asSymbol, args: defaultArgs, target: ambiPostProcGroup));
 		});
+	}
+
+	getAmbiPostProc{ | order = 1, spatializerNumber = 0 |
+		^ambiPostProcessors.at(this.makeAmbiPostProcName(order, spatializerNumber).asSymbol);
 	}
 
 	// private method
