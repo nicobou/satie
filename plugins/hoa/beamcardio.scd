@@ -16,5 +16,5 @@
 ~description = "Filters along a specifed direction (hyper cardioid pattern). Az from -180 to 180, ele from -90 to 90. Hyper cardioid pattern from 1 to 3.";
 
 ~function = {|in = 0, order = 1, beamCardioAziDeg = 0, beamCardioEleDeg = 0, beamCardioCardOrder = 1 |
-HOABeamHCard2Hoa.ar(order, in,  beamCardioAzi * pi / 180, beamCardioEle * pi / 180, beamCardioCardOrder);
+HOABeamHCard2Hoa.ar(order, in,  beamCardioAziDeg * pi / 180, beamCardioEleDeg * pi / 180, beamCardioCardOrder);
 };
