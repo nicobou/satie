@@ -51,6 +51,8 @@ DEFINITIONLIST::
 || How to talk (and listen) to SATIE via OSC
 ## LINK::Examples/Plugins::
 || Description of SATIE plugins
+## LINK::Examples/Ambi::
+|| Ambisonic support in SATIE
 ::
 
 SECTION:: Classes

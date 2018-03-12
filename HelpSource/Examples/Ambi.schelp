@@ -1,0 +1,147 @@
+TITLE:: Ambisonics with SATIE
+summary:: Use of ambisonic with SATIE, simultaneously with other spatialization
+categories:: Libraries
+related:: Overview/SATIE-Overview, Classes/SatieConfiguration
+
+Section:: Overview
+An ambisonic pipeline can be used simultaneously and in parallel with the usual spatialization pipeline. Here we provide examples of use that include:
+list::
+## configuration of ambisonic pipelines for decoding b-format produced by sound objects
+## Get ambisonic encoding with existing source plugin (mono)
+## Use of ambisonic live input
+## Use of several ambisonic effects when decoding the soundfield (rotations, mirror and beam forming)
+::
+
+Thanks to the SC-HOA library, current implementation supports ambisonic from order 1 to 5.
+
+Section:: Start the server
+code::
+(
+s = Server.supernova.local;
+// instantiate a SatieConfiguration. Here we will use two stereo spatializer
+~satieConfiguration = SatieConfiguration.new(
+	s,
+	[\stereoListener, \stereoListener],  // using two renderers
+	outBusIndex: [0],
+	ambiOrders: [1, 2, 3]  // list ambisonic order handled by this satie instance
+);
+// list possible listeners:
+~satieConfiguration.spatPlugins.keys;
+// Change SuperCollider's block size (jack server's blocksize must be multiple of this value)
+~satieConfiguration.serverOptions.blockSize = 512;
+~satieConfiguration.serverOptions.numOutputBusChannels = 64;
+~satieConfiguration.serverOptions.numInputBusChannels = 8;
+~satieConfiguration.serverOptions.memSize = 2.pow(18);
+~satieConfiguration.serverOptions.numWireBufs = 64 * 16;
+// instantiate SATIE renderer and pass it the configuration
+~satie = Satie.new(~satieConfiguration);
+~satie.boot();
+)
+::
+
+code::
+(
+s.waitForBoot({
+	// instantiate ambisonic two decoders for order 1
+	~satie.replaceAmbiPostProcessor([\Binaural26], spatializerNumber: 0, order: 1, outputIndex: ~satieConfiguration.outBusIndex);
+	~satie.replaceAmbiPostProcessor([\Binaural26], spatializerNumber: 1, order: 1, outputIndex: ~satieConfiguration.outBusIndex + 2);
+	// list names of generated synthDef
+	~satie.generatedSynthDefs;
+    // display some information
+	s.meter;
+	s.plotTree;
+});
+)
+::
+
+Section:: Instantiate some sources
+
+We can get usual mono sources encoded into b-format. Synthdefs are automatically generated according to the ambisonics orders selected in SatieConfiguration. For instance for the misDrone mono source, only order 1, 2 and 3 are generated and named as follows:
+list::
+## misDroneAmbi1
+## misDroneAmbi2
+## misDroneAmbi3
+## misDroneAmbi1_kamikaze
+## misDroneAmbi2_kamikaze
+## misDroneAmbi3_kamikaze
+::
+
+Here we instantiate a misDroneAmbi1_kamikaze
+code::
+(
+~testSynth2.free;
+~satieConfiguration.ambiBusIndex[0].do {|item| item.scope;};
+~testSynth2 = ~satie.makeSourceInstance(\testSynth2, \misDroneAmbi1_kamikaze);
+~testSynth2.set(\gainDB, 0, \aziDeg,  0, \eleDeg, 0);
+~testSynth2.set(\gainDB, 0, \aziDeg,  45, \eleDeg, 45);
+)
+::
+
+We can also read ambisonic live input. ambiIn source reads ACN_N3D format, but AcnSn3dIn and FuMaIn are able to read other ambisonic formats.
+
+NOTE:: In order to hear this example, you need to send ambisonic to the first input of Supercollider. This can be done downloading b-format files from the web and reading it from a sequencer, like reaper of ardour.::
+
+code::
+(
+~testSynth.free;
+~satieConfiguration.ambiBusIndex[0].do {|item| item.scope;};
+~testSynth = ~satie.makeSourceInstance(\testSynth2, \ambiInAmbi1, \default, synthArgs: [\bus: 0, \t_trig: 1, \gain: 0]);
+)
+::
+
+Section:: Ambisonic decoding pipeline
+
+Decoding pipeline decodes the mix of b-format sound sources. The decode pipelines can be replaced while running, with the addition of the following effects:
+list::
+## Rotate along the Z axis
+## Rotate
+## Mirror
+## Dirac beam forming
+## Cardioid beam forming
+::
+
+
+code::
+(  // RotateAz
+~satie.replaceAmbiPostProcessor([\RotateAz, \Binaural26], spatializerNumber: 0, order: 1, outputIndex: ~satieConfiguration.outBusIndex);
+~ambipost = ~satie.getAmbiPostProc(order: 1, spatializerNumber: 0);
+~ambipost.set(\rotateAziDeg, -180);
+~ambipost.set(\rotateAziDeg, 90);
+~ambipost.set(\rotateAziDeg, 180);
+)
+
+(  // Rotate
+~satie.replaceAmbiPostProcessor([\Rotate, \Binaural26], spatializerNumber: 0, order: 1, outputIndex: ~satieConfiguration.outBusIndex);
+~ambipost = ~satie.getAmbiPostProc(order: 1, spatializerNumber: 0);
+~ambipost.set(\rotatePitchDeg, 0, \rotateRollDeg, 0, \rotateYawDeg, 0);
+~ambipost.set(\rotatePitchDeg, 180, \rotateRollDeg, 180, \rotateYawDeg, 180);
+)
+
+(  // Mirror
+~satie.replaceAmbiPostProcessor([\Mirror, \Binaural26], spatializerNumber: 0, order: 1, outputIndex: ~satieConfiguration.outBusIndex);
+~ambipost = ~satie.getAmbiPostProc(order: 1, spatializerNumber: 0);
+~ambipost.set(\mirrorFrontBack, 0);
+~ambipost.set(\mirrorFrontBack, 1);
+~ambipost.set(\mirrorLeftRight, 0);
+~ambipost.set(\mirrorLeftRight, 1);
+~ambipost.set(\mirrorUpDown, 0);
+~ambipost.set(\mirrorUpDown, 1);
+)
+
+(  // Beam forming Dirac
+~satie.replaceAmbiPostProcessor([\BeamDirac, \Binaural26], spatializerNumber: 0, order: 1, outputIndex: ~satieConfiguration.outBusIndex);
+~ambipost = ~satie.getAmbiPostProc(order: 1, spatializerNumber: 0);
+~ambipost.set(\beamDiracAziDeg, 0, \beamDiracEleDeg, 0);
+~ambipost.set(\beamDiracAziDeg, 180, \beamDiracEleDeg, 45);
+)
+
+(  // Beam forming Hyper Cardioid
+~satie.replaceAmbiPostProcessor([\BeamCardio, \Binaural26], spatializerNumber: 0, order: 1, outputIndex: ~satieConfiguration.outBusIndex);
+~ambipost = ~satie.getAmbiPostProc(order: 1, spatializerNumber: 0);
+~ambipost.set(\cardOrder, 3);
+~ambipost.set(\beamCardioAzi, 0, \beamCardioEle, 0);
+~ambipost.set(\beamCardioAzi, 180, \beamCardioEle, 45);
+)
+::
+
+Go back to link::Overview/SATIE-Overview::
