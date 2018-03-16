@@ -21,9 +21,10 @@ s = Server.supernova.local;
 // instantiate a SatieConfiguration. Here we will use two stereo spatializer
 ~satieConfiguration = SatieConfiguration.new(
 	s,
-	[\stereoListener, \stereoListener],  // using two renderers
+	[],
 	outBusIndex: [0],
-	ambiOrders: [1, 2, 3]  // list ambisonic order handled by this satie instance
+	ambiOrders: [1, 2, 3],  // list ambisonic order handled by this satie instance
+	minOutputBusChannels: 4
 );
 // list possible listeners:
 ~satieConfiguration.spatPlugins.keys;
@@ -42,6 +43,7 @@ s = Server.supernova.local;
 code::
 (
 s.waitForBoot({
+
 	// instantiate ambisonic two decoders for order 1
 	~satie.replaceAmbiPostProcessor([\Binaural26], spatializerNumber: 0, order: 1, outputIndex: ~satieConfiguration.outBusIndex);
 	~satie.replaceAmbiPostProcessor([\Binaural26], spatializerNumber: 1, order: 1, outputIndex: ~satieConfiguration.outBusIndex + 2);
