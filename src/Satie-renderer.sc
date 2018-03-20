@@ -24,6 +24,9 @@
 		synthArgs = #[]|
 
 		var dico;
+		if(spatSymbolArray.isEmpty, {
+			^0;
+		});
 		if(satieConfiguration.audioPlugins.at(srcName) != nil,
 			{
 				if(satieConfiguration.audioPlugins.at(srcName).type != \mono, {

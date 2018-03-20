@@ -18,6 +18,7 @@ SatieConfiguration {
 	var <outBusIndex;
 	var <>hrirPath;
 	var <ambiOrders;  // array of wanted orders. Available orders are 1 to 5
+	var <minOutputBusChannels;
 	var <>ambiBusIndex; // array of bus indexes, related to the wanted orders specifyed in ambiOrders
 	var <>debug = false;
 	var <satieRoot;
@@ -34,9 +35,9 @@ SatieConfiguration {
 	// other options
 	var <>orientationOffsetDeg;
 
-	*new {| server, listeningFormat = #[\stereoListener, \stereoListener], numAudioAux = 0, outBusIndex = #[0], hrirPath = "~/.local/share/satie/ambitools/FIR/hrir/hrir_ku100_lebedev50/", ambiOrders = #[] |
+	*new {| server, listeningFormat = #[\stereoListener, \stereoListener], numAudioAux = 0, outBusIndex = #[0], hrirPath = "~/.local/share/satie/ambitools/FIR/hrir/hrir_ku100_lebedev50/", ambiOrders = #[], minOutputBusChannels = 0 |
 		server = server;
-		^super.newCopyArgs(server, listeningFormat, numAudioAux, outBusIndex, hrirPath.asString, ambiOrders).init;
+		^super.newCopyArgs(server, listeningFormat, numAudioAux, outBusIndex, hrirPath.asString, ambiOrders, minOutputBusChannels).init;
 	}
 
 	init{
@@ -80,5 +81,6 @@ SatieConfiguration {
 				});
 			});
 		};
+		if (serverOptions.numOutputBusChannels < this.minOutputBusChannels,  {serverOptions.numOutputBusChannels = this.minOutputBusChannels;});
 	}
 }
