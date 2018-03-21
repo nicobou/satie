@@ -10,20 +10,12 @@ SATIE listens to OSC messages on port 18032 by default and will occasionnaly res
 The following sections document several level of access and control:
 
 DEFINITIONLIST::
-## link::#Project Messages::
-|| Project level commands
 ## link::#Scene Messages::
 || Handles creation and destruction of various SATIE entities.
 ## link::#Node Messages::
 || Handles maipulation of instances of SATIE entities.
 ## link::#Introspection::
 || Query SATIE about its internal state
-::
-subsection:: Project Messages
-
-definitionlist::
-##/satie/project/projectName setProjectDir
-||full path to supercollider resources, such as soundfiles or midi files
 ::
 
 subsection:: Scene Messages
