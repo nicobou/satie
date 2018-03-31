@@ -68,4 +68,10 @@
 			returnAddress.sendMsg("/arguments", json);
 		}
 	}
+
+	triggerHandler {
+		^{| args, time, addre, recvPort |
+			"%".format(args).postln;
+		}
+	}
 }
