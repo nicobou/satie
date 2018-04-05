@@ -25,6 +25,7 @@
 
 		var dico;
 		if(spatSymbolArray.isEmpty, {
+			"there are no spatialisers specified. Cannot continue".warn;
 			^0;
 		});
 		if(satieConfiguration.audioPlugins.at(srcName) != nil,
