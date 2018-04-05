@@ -21,7 +21,7 @@ SatiePlugins : Dictionary {
 		^super.new.spatializerPath(path);
 	}
 
-		*newSource {|path|
+	*newSource {|path|
 		^super.new.sourcePath(path);
 	}
 
