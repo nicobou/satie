@@ -18,6 +18,8 @@ SatieFactory {
 		src,
 		preBusArray,
 		postBusArray,
+		preMonitorArray,				// pre-bus monitoring/analysis functions
+		postMonitoArray,				// post-bus monitoring/analysis functions
 		spatializerArray,
 		firstOutputIndexArray,
 		paramsMapper,
@@ -25,7 +27,7 @@ SatieFactory {
 
 		SynthDef(name,
 			{| synth_gate = 1, preBus_gainDB = 0, postBus_gainDB = 0  |
-				var in, env, out, mapped;
+				var in, env, sidechain, out, mapped;
 				// install first the mapper with spatialization parameters, allowing it to take control
 				// over all defined parameter
 				mapped = SynthDef.wrap(paramsMapper);
@@ -33,6 +35,12 @@ SatieFactory {
 				in = SynthDef.wrap(src, prependArgs:  synthArgs);
 				// fade in set to as short as possible for percussive cases
 				env = EnvGen.kr(Env.cutoff(0.01, 1, 2),  synth_gate, doneAction: 2);
+				// open a side-chain. Side-chain consumes an audio input and does analysis on it.
+				sidechain = Array.newClear(preMonitorArray.size());
+				preMonitorArray.do {arg item, i;
+					sidechain.put(i, SynthDef.wrap(item, prependArgs: [in]));
+				};
+
 				// in -> busses (busses are taking raw input)
 				preBusArray.do {arg item;
 					Out.ar(item, preBus_gainDB.dbamp * env * in);

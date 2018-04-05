@@ -18,6 +18,8 @@
 		srcName,
 		srcPreToBusses,
 		srcPostToBusses,
+		srcPreMonitorFuncsArray,
+		srcPostMonitorFuncsArray,
 		spatSymbolArray,
 		firstOutputIndexes = #[0],
 		paramsMapper = \defaultMapper,
@@ -61,6 +63,12 @@
 			dico.at(srcName).function,
 			srcPreToBusses,
 			srcPostToBusses,
+			srcPreMonitorFuncsArray.collect({|item, i|
+				satieConfiguration.monitoringPlugins.at(item).function;
+			}),
+			srcPostMonitorFuncsArray.collect({|item, i|
+				satieConfiguration.monitoringPlugins.at(item).function;
+			}),
 			spatSymbolArray.collect({|item, i|
 				satieConfiguration.spatPlugins.at(item).function
 			}),
