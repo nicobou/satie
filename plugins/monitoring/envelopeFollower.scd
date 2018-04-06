@@ -27,7 +27,7 @@
 	var mic = in,
 	amplitude = Amplitude.kr(mic),
 	env = EnvFollow.kr(mic, 0.999),
-	trig = amplitude > triggerLevel;
+	trig = amplitude > envFollow_triggerLevel;
 	SendTrig.kr(trig, 0, env);
 	[amplitude, env].scope(1);
     };

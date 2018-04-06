@@ -27,12 +27,11 @@
 	var mic = in,
 	amplitude = Amplitude.kr(mic),
 	env = EnvFollow.kr(mic, 0.999),
-	trig = amplitude > triggerLevel,
+	trig = amplitude > envTrigger_triggerLevel,
 	timer = Timer.kr(trig),
-	filteredTrig = (timer > debounce); //* trig;
+	filteredTrig = (timer > envTrigger_debounce); //* trig;
 	SendTrig.kr(filteredTrig, 0, env);
 	[amplitude, env].scope(1);
-	// 0.0.ampdb * mic; // need to return a signal to satisfy DetectSilence...
     };
 
 ~setup = nil;
