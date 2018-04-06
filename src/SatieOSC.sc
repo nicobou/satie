@@ -99,6 +99,7 @@ SatieOSC {
 		// We use OSCdef directly because currently newOSC custom method does not give us full control over
 		// OSCdef instance.
 		OSCdef(\satieTrigger, this.triggerHandler, "/tr", satie.satieConfiguration.server.addr);
+		// OSCdef(\satieNodeInfo, this.nodeInfoHandler, "/g_queryTree.reply", satie.satieConfiguration.server.addr);
 	}
 
 	/*      create a new OSC definition*/

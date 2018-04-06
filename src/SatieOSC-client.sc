@@ -74,4 +74,10 @@
 			"%".format(args).postln;
 		}
 	}
+
+	nodeInfoHandler {
+		^{| args, time, addre, recvPort |
+			"from node...... %".format(args).postln;
+		}
+	}
 }
