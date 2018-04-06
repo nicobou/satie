@@ -20,16 +20,19 @@
 	~setup: optional function that will set up the plugin before server boots
 */
 
-~name = \envFollow;
-~description = "Send amplitude envelop stream";
+~name = \envTrigger;
+~description = "Send a trigger based on envelope threshold";
 
-~function = { arg in, envFollow_triggerLevel=0.2;
+~function = { arg in, envTrigger_triggerLevel=0.2, envTrigger_debounce=1 ;
 	var mic = in,
 	amplitude = Amplitude.kr(mic),
 	env = EnvFollow.kr(mic, 0.999),
-	trig = amplitude > triggerLevel;
-	SendTrig.kr(trig, 0, env);
+	trig = amplitude > triggerLevel,
+	timer = Timer.kr(trig),
+	filteredTrig = (timer > debounce); //* trig;
+	SendTrig.kr(filteredTrig, 0, env);
 	[amplitude, env].scope(1);
+	// 0.0.ampdb * mic; // need to return a signal to satisfy DetectSilence...
     };
 
 ~setup = nil;
