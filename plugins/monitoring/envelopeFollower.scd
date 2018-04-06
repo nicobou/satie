@@ -31,6 +31,7 @@
 	timer = Timer.kr(trig),
 	filteredTrig = (timer > debounce); //* trig;
 	SendTrig.kr(filteredTrig, 0, env);
+	mic.scope;
 	[amplitude, env].scope(1);
 	// 0.0.ampdb * mic; // need to return a signal to satisfy DetectSilence...
     };
