@@ -70,8 +70,32 @@
 	}
 
 	triggerHandler {
-		^{| args, time, addre, recvPort |
+		^{| args, time, addr, recvPort |
+
 			"%".format(args).postln;
+			TreeSnapshot.get({
+				|snapshot|
+				snapshot.nodes.do({|node|
+					if (node.isSynth && node.nodeId.asInt == args[1].asInt) {
+						"Synth: % -> envelope trigger: %".format(node.defName, args[3]).postln;
+					}
+				});
+			});
+		}
+	}
+
+	envelopeHandler {
+		^{| args, time, addr, recvPort |
+
+			"%".format(args).postln;
+			TreeSnapshot.get({
+				|snapshot|
+				snapshot.nodes.do({|node|
+					if (node.isSynth && node.nodeId.asInt == args[1].asInt) {
+						"Synth: % -> envelope: %".format(node.defName, args[3]).postln;
+					}
+				});
+			});
 		}
 	}
 
