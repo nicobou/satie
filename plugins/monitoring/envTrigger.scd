@@ -29,9 +29,8 @@
 	env = EnvFollow.kr(mic, 0.999),
 	trig = amplitude > envTrigger_triggerLevel,
 	timer = Timer.kr(trig),
-	filteredTrig = (timer > envTrigger_debounce); //* trig;
+	filteredTrig = (timer > envTrigger_debounce);
 	SendTrig.kr(filteredTrig, 0, env);
-	[amplitude, env].scope(1);
     };
 
 ~setup = nil;
