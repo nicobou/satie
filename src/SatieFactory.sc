@@ -33,7 +33,6 @@ SatieFactory {
 				mapped = SynthDef.wrap(paramsMapper);
 				// in
 				in = SynthDef.wrap(src, prependArgs:  synthArgs);
-				in.scope;
 				// fade in set to as short as possible for percussive cases
 				env = EnvGen.kr(Env.cutoff(0.01, 1, 2),  synth_gate, doneAction: 2);
 				// open a side-chain. Side-chain consumes an audio input and does analysis on it.
