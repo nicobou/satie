@@ -21,15 +21,13 @@
 */
 
 ~name = \envFollow;
-~description = "Send amplitude envelop stream";
+~description = "Send amplitude envelope stream";
 
-~function = { arg in, envFollow_triggerLevel=0.2;
+~function = { arg in, envFollow_rate=60;
 	var mic = in,
-	amplitude = Amplitude.kr(mic),
 	env = EnvFollow.kr(mic, 0.999),
-	trig = amplitude > envFollow_triggerLevel;
-	SendTrig.kr(trig, 0, env);
-	[amplitude, env].scope(1);
+	trig = Impulse.kr(envFollow_rate);
+	SendReply.kr(trig, "/envelope", env);
     };
 
 ~setup = nil;
