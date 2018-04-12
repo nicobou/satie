@@ -71,7 +71,7 @@
 
 	triggerHandler {
 		^{| args, time, addr, recvPort |
-
+			var id, name, val;
 			"%".format(args).postln;
 			TreeSnapshot.get({
 				|snapshot|
@@ -87,12 +87,21 @@
 	envelopeHandler {
 		^{| args, time, addr, recvPort |
 
-			"%".format(args).postln;
+			// "%".format(args).postln;
 			TreeSnapshot.get({
 				|snapshot|
 				snapshot.nodes.do({|node|
-					if (node.isSynth && node.nodeId.asInt == args[1].asInt) {
-						"Synth: % -> envelope: %".format(node.defName, args[3]).postln;
+					var id, instanceName;
+					id = node.nodeId.asInt;
+					if (node.isSynth && id == args[1].asInt) {
+						satie.namesIds.keysValuesDo({
+							|key, value|
+							if (value == id) {
+								instanceName = key;
+							}
+						});
+						// "Synth: % -> envelope: %".format(node.defName, args[3]).postln;
+						returnAddress.sendMsg("/envelope", instanceName, args[3]);
 					}
 				});
 			});
