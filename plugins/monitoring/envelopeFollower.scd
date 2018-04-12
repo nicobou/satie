@@ -23,7 +23,7 @@
 ~name = \envFollow;
 ~description = "Send amplitude envelope stream";
 
-~function = { arg in, envFollow_rate=60;
+~function = { arg in, envFollow_rate=10;
 	var mic = in,
 	env = EnvFollow.kr(mic, 0.999),
 	trig = Impulse.kr(envFollow_rate);
