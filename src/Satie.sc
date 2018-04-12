@@ -1,4 +1,4 @@
-// This program is free software: you can redistribute it and/or modify
+//  This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
@@ -39,7 +39,9 @@ Satie {
 	var <generators, <effects, <processes;
 	// instantiated
 	var <groups, <groupInstances, <processInstances;
-
+	// id associations: Synth.nodeID -> instance.name
+	var <namesIds;
+	// OSC
 	var <osc;
 
 	// introspection
@@ -77,6 +79,7 @@ Satie {
 		effects = IdentityDictionary.new();
 		processes = Dictionary.new();
 		mastering = Dictionary.new();  // FIXME what is this for ? it seems useless
+		namesIds = Dictionary.new();
 	}
 
 	// public method

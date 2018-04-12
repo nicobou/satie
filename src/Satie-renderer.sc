@@ -134,12 +134,15 @@
 	}
 
 	makeInstance {| name, synthDefName, group = \default, synthArgs = #[] |
-		var synth = Synth(synthDefName, args: synthArgs, target: groups[group], addAction: \addToHead);
+		var synth, nodeID;
+		synth = Synth(synthDefName, args: synthArgs, target: groups[group], addAction: \addToHead);
 		if (groupInstances[group][name] != nil,
 			{
 				this.cleanInstance(name, group: group);
 			}
 		);
+		nodeID = satieConfiguration.server.nextNodeID - 1; // FIXME: this is hack, but is it reliable?
+		namesIds.put(name, nodeID);
 		groupInstances[group].put(name, synth);
 		^synth;
 	}
@@ -192,6 +195,7 @@
 	cleanInstance {|name, group = \default |
 		groupInstances[group][name].free();
 		groupInstances[group].removeAt(name);
+		namesIds.removeAt(name);
 	}
 
 	pauseInstance {|name, group = \default |
