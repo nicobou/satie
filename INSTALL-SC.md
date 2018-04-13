@@ -32,7 +32,7 @@ sudo make install
 
 ### sc3-plugins
 ```
-git clone https://gitlab.com/sat-metalab_forks/sc3-plugin-with-HOA.git
+git clone https://gitlab.com/sat-metalab/forks/sc3-plugin-with-HOA
 cd sc3-plugin-with-HOA
 git checkout feat/sc-hoa
 git submodule init && git submodule update
