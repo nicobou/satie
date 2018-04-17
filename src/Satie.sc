@@ -230,10 +230,10 @@ Satie {
 		audioPlugins.do { arg item;
 			if ((item.type == \mono).asBoolean,
 				{ "skipping default compilation".warn; // FIXME: remove this warning and uncomment when monitoring plugins ready
-					// this.makeSynthDef(item.name,item.name, [],[],[], [], satieConfiguration.listeningFormat, satieConfiguration.outBusIndex);
+					this.makeSynthDef(item.name,item.name, [],[],[], satieConfiguration.listeningFormat, satieConfiguration.outBusIndex);
 				});
 			satieConfiguration.ambiOrders.do { |order, i|
-				this.makeAmbi((item.name ++ "Ambi" ++ order.asSymbol), item.name, [], [], order, [], satieConfiguration.ambiBusIndex[i]);
+				this.makeAmbi((item.name ++ "Ambi" ++ order.asSymbol), item.name, [], [], [], order, [], satieConfiguration.ambiBusIndex[i]);
 			};
 		};
 		generatedSynthDefs = audioPlugins.keys;
