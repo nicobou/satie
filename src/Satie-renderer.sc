@@ -19,7 +19,6 @@
 		srcPreToBusses,
 		srcPostToBusses,
 		srcPreMonitorFuncsArray,
-		srcPostMonitorFuncsArray,
 		spatSymbolArray,
 		firstOutputIndexes = #[0],
 		paramsMapper = \defaultMapper,
@@ -66,9 +65,6 @@
 			srcPreMonitorFuncsArray.collect({|item, i|
 				satieConfiguration.monitoringPlugins.at(item).function;
 			}),
-			srcPostMonitorFuncsArray.collect({|item, i|
-				satieConfiguration.monitoringPlugins.at(item).function;
-			}),
 			spatSymbolArray.collect({|item, i|
 				satieConfiguration.spatPlugins.at(item).function
 			}),
@@ -83,6 +79,7 @@
 		srcName,
 		preBusArray,
 		postBusArray,
+		srcPreMonitorFuncsArray,
 		ambiOrder,
 		ambiEffectPipeline = #[],
 		ambiBusIndex = 0,
@@ -114,6 +111,9 @@
 				dico.at(srcName).function,
 				preBusArray,
 				postBusArray,
+				srcPreMonitorFuncsArray.collect({|item, i|
+					satieConfiguration.monitoringPlugins.at(item).function;
+				}),
 				ambiOrder,
 				ambiEffectPipeline,
 				ambiBusIndex,
@@ -125,6 +125,9 @@
 				dico.at(srcName).function,
 				preBusArray,
 				postBusArray,
+				srcPreMonitorFuncsArray.collect({|item, i|
+					satieConfiguration.monitoringPlugins.at(item).function;
+				}),
 				ambiOrder,
 				ambiEffectPipeline,
 				ambiBusIndex,

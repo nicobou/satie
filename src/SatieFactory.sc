@@ -19,7 +19,6 @@ SatieFactory {
 		preBusArray,
 		postBusArray,
 		preMonitorArray,				// pre-bus monitoring/analysis functions
-		postMonitoArray,				// post-bus monitoring/analysis functions
 		spatializerArray,
 		firstOutputIndexArray,
 		paramsMapper,
@@ -36,7 +35,6 @@ SatieFactory {
 				// fade in set to as short as possible for percussive cases
 				env = EnvGen.kr(Env.cutoff(0.01, 1, 2),  synth_gate, doneAction: 2);
 				// open a side-chain. Side-chain consumes an audio input and does analysis on it.
-				sidechain = Array.newClear(preMonitorArray.size());
 				preMonitorArray.do {arg item, i;
 					SynthDef.wrap(item, prependArgs: [in*env]);
 				};
@@ -73,6 +71,10 @@ SatieFactory {
 				DetectSilence.ar(in, doneAction: 2);
 				// fade in set to as short as possible for percussive cases
 				env = EnvGen.kr(Env.cutoff(0.01, 1, 2),  synth_gate, doneAction: 2);
+				// open a side-chain. Side-chain consumes an audio input and does analysis on it.
+				preMonitorArray.do {arg item, i;
+					SynthDef.wrap(item, prependArgs: [in*env]);
+				};
 				// in -> busses (busses are taking raw input)
 				preBusArray.do {arg item;
 					Out.ar(item, preBus_gainDB.dbamp * env * in);
@@ -99,6 +101,7 @@ SatieFactory {
 		src,
 		preBusArray,
 		postBusArray,
+		preMonitorArray,
 		ambiOrder,
 		ambiEffectPipeline,
 		ambiBusIndex,
@@ -115,6 +118,10 @@ SatieFactory {
 				in = SynthDef.wrap(src, prependArgs:  synthArgs);
 				// fade in set to as short as possible for percussive cases
 				env = EnvGen.kr(Env.cutoff(0.01, 1, 2),  synth_gate, doneAction: 2);
+				// open a side-chain. Side-chain consumes an audio input and does analysis on it.
+				preMonitorArray.do {arg item, i;
+					SynthDef.wrap(item, prependArgs: [in*env]);
+				};
 				// in -> busses (busses are taking raw input)
 				preBusArray.do {arg item;
 					Out.ar(item, preBus_gainDB.dbamp * env * in);
@@ -162,6 +169,10 @@ SatieFactory {
 				DetectSilence.ar(in, doneAction: 2);
 				// fade in set to as short as possible for percussive cases
 				env = EnvGen.kr(Env.cutoff(0.01, 1, 2),  synth_gate, doneAction: 2);
+				// open a side-chain. Side-chain consumes an audio input and does analysis on it.
+				preMonitorArray.do {arg item, i;
+					SynthDef.wrap(item, prependArgs: [in*env]);
+				};
 				// in -> busses (busses are taking raw input)
 				preBusArray.do {arg item;
 					Out.ar(item, preBus_gainDB.dbamp * env * in);
@@ -206,6 +217,7 @@ SatieFactory {
 		src,
 		preBusArray,
 		postBusArray,
+		preMonitorArray,
 		ambiOrder,
 		ambiEffectPipeline,
 		ambiBusIndex,
@@ -222,6 +234,10 @@ SatieFactory {
 				in = SynthDef.wrap(src, prependArgs:  [ambiOrder] ++ synthArgs);
 				// fade in set to as short as possible for percussive cases
 				env = EnvGen.kr(Env.cutoff(0.01, 1, 2),  synth_gate, doneAction: 2);
+				// open a side-chain. Side-chain consumes an audio input and does analysis on it.
+				preMonitorArray.do {arg item, i;
+					SynthDef.wrap(item, prependArgs: [in*env]);
+				};
 				// in -> busses (busses are taking raw input)
 				preBusArray.do {arg item;
 					Out.ar(item, preBus_gainDB.dbamp * env * in);
@@ -245,6 +261,10 @@ SatieFactory {
 				DetectSilence.ar(in, doneAction: 2);
 				// fade in set to as short as possible for percussive cases
 				env = EnvGen.kr(Env.cutoff(0.01, 1, 2),  synth_gate, doneAction: 2);
+				// open a side-chain. Side-chain consumes an audio input and does analysis on it.
+				preMonitorArray.do {arg item, i;
+					SynthDef.wrap(item, prependArgs: [in*env]);
+				};
 				// in -> busses (busses are taking raw input)
 				preBusArray.do {arg item;
 					Out.ar(item, preBus_gainDB.dbamp * env * in);
