@@ -101,7 +101,7 @@
 							}
 						});
 						// "Synth: % -> envelope: %".format(node.defName, args[3]).postln;
-						returnAddress.sendMsg("/envelope", instanceName, args[3]);
+						returnAddress.sendMsg("/analysis", instanceName, args[3]);
 					}
 				});
 			});
