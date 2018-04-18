@@ -100,8 +100,7 @@ SatieOSC {
 		// OSCdef instance.
 		OSCdef(\satieTrigger, this.triggerHandler, "/tr", satie.satieConfiguration.server.addr);
 		// and another receiver for SendReply attached tot he envelope follower
-		OSCdef, newMatching(\satieEnvelope, this.envelopeHandler, "/analysis", satie.satieConfiguration.server.addr);
-		// OSCdef(\satieNodeInfo, this.nodeInfoHandler, "/g_queryTree.reply", satie.satieConfiguration.server.addr);
+		OSCdef(\satieEnvelope, this.envelopeHandler, "/analysis", satie.satieConfiguration.server.addr);
 	}
 
 	/*      create a new OSC definition*/
