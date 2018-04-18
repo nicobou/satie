@@ -16,6 +16,8 @@ DEFINITIONLIST::
 || Handles maipulation of instances of SATIE entities.
 ## link::#Introspection::
 || Query SATIE about its internal state
+## link::#Monitoring/Analysis::
+|| Getting infor from running synths
 ::
 
 subsection:: Scene Messages
@@ -198,14 +200,29 @@ TELETYPE::
 ::
 
 
-note:: by default, the response is sent to ip:port of the sender. It can be set permanently for the duration of the session via by sending code::/satie/responder:: a message containing IP and port::
+note:: by default, the response is sent to ip:port of the sender. It can be set permanently for the duration of the session via by sending code::/satie/responder:: a message containing IP and port.::
 
 definitionlist::
 ##/satie/responder ip port
 || ip, port are a string and int
 ::
 
-The folloing example sets up a SATIE system, sets return address to localhost and fix port and queries some plugins:
+WARNING:: Keep in mind, however, that prior to any OSC communication, the default destination address is localhost:18060. If SATIE server is not being controlled, messages from LINK::#Monitoring/Analysis:: will be sent to that destination::
+
+SUBSECTION::Monitoring/Analysis
+
+There are two other OSC handlers available:
+
+DEFINITIONLIST::
+## /trigger
+|| forward trigger messages from LINK::Classes/SendTrig::
+## /analysis
+|| forward messages received from LINK::Classes/SendReply::
+::
+
+These two are provided as convenience functionality for getting information from running synths. The SendTrig and SendReply UGens can, of course, be used in your SynthDefs but SATIE can load plugins specially designed to measure signals and send triggers or streams of measured data. See example in LINK::Examples/Plugins#Analysers::
+
+The following example sets up a SATIE system, sets return address to localhost and fix port and queries some plugins:
 
 code::
 // prepare server
