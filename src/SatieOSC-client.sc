@@ -71,23 +71,6 @@
 
 	triggerHandler {
 		^{| args, time, addr, recvPort |
-			var id, name, val;
-			"%".format(args).postln;
-			TreeSnapshot.get({
-				|snapshot|
-				snapshot.nodes.do({|node|
-					if (node.isSynth && node.nodeId.asInt == args[1].asInt) {
-						"Synth: % -> envelope trigger: %".format(node.defName, args[3]).postln;
-					}
-				});
-			});
-		}
-	}
-
-	envelopeHandler {
-		^{| args, time, addr, recvPort |
-
-			// "%".format(args).postln;
 			TreeSnapshot.get({
 				|snapshot|
 				snapshot.nodes.do({|node|
@@ -100,17 +83,33 @@
 								instanceName = key;
 							}
 						});
-						// "Synth: % -> envelope: %".format(node.defName, args[3]).postln;
-						returnAddress.sendMsg("/analysis", instanceName, args[3]);
+						returnAddress.sendMsg("/trigger", instanceName, args[3]);
 					}
 				});
 			});
 		}
 	}
 
-	nodeInfoHandler {
-		^{| args, time, addre, recvPort |
-			"from node...... %".format(args).postln;
+	envelopeHandler {
+		^{| args, time, addr, recvPort |
+			TreeSnapshot.get({
+				|snapshot|
+				snapshot.nodes.do({|node|
+					var id, instanceName, restArgs;
+					id = node.nodeId.asInt;
+					if (node.isSynth && id == args[1].asInt) {
+						satie.namesIds.keysValuesDo({
+							|key, value|
+							if (value == id) {
+								instanceName = key;
+							}
+						});
+						// because SendReply allows for a list of values to be sent...
+						restArgs = args.copyRange(3, args.size() -1);
+						returnAddress.sendMsg("/analysis", instanceName, *restArgs);
+					}
+				});
+			});
 		}
 	}
 }
