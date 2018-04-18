@@ -13,11 +13,13 @@
 
 /*       Monitoring/analysis plugin definition
 
-	Each audio plugin should define the following global variables:
+	Each monitoring/analyser plugin should define the following global variables:
     ~name: (symbol) name of the spatializer
 	~description: (string) a short description
 	~function: the actual definition of the plugin
 	~setup: optional function that will set up the plugin before server boots
+
+	It should not return any audio
 */
 
 ~name = \envFollow;
@@ -27,7 +29,7 @@
 	var mic = in,
 	env = EnvFollow.kr(mic, 0.999),
 	trig = Impulse.kr(envFollow_rate);
-	SendReply.kr(trig, "/envelope", env);
+	SendReply.kr(trig, "/analysis", env);
     };
 
 ~setup = nil;
