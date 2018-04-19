@@ -28,6 +28,7 @@ SendTrig.kr(Impulse.kr(1), 0, freq);  //  in synthdef
 
 
 ~name = \zparticle1;
+~channelLayout = \mono;
 
 ~function = {|outbus, t_trig = 0, randTrigMaxMs = 300, attackMs = 10, durMs = 100, centerPitch = 70, pitchRange = 30, attackBend = 3, glissRange = 24,  i_doneAction = 0|
 	var durSecs = durMs*0.001;

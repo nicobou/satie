@@ -11,16 +11,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-//
-// ~name = \PinkSin;
-// ~description = "Mix of pink noise and sine wave";
-// ~function = {| sfreq = 200 |
-// 	PinkNoise.ar() + FSinOsc.ar(sfreq)
-// };
-//
-//
-// PinkSin : SatiePlugin {
-// 	var name, description, src;
-//
-// 	*new(|
-// 	}
+
+~name = \Mirror;
+~description = "Mirror soundfield";
+
+~function = {|in = 0, order = 1, mirrorFrontBack = 0, mirrorLeftRight = 0, mirrorUpDown = 0 |
+HOATransMirror.ar(order, in, mirrorFrontBack, mirrorLeftRight, mirrorUpDown);
+};

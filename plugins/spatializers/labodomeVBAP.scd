@@ -35,6 +35,7 @@ spread  units  (0 == directional, ....,  100 == omni)
 ~name = \labodomeVBAP;
 ~description = "24 channel speaker layout on a sphere (minidome at the SAT)";
 ~numChannels = 24;
+~channelLayout = \mono;
 
 
 	~spk24 = VBAPSpeakerArray.new(3, [

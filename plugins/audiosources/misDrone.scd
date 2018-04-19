@@ -11,19 +11,21 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*       Audio plugin definition 
+/*       Audio plugin definition
 
 	Each audio plugin should define the following global variables:
     ~name: (symbol) name of the spatializer
 	~description: (string) a short description
 	~function: the actual definition of the plugin
-	
+
 */
 
 
 
 ~name = \misDrone;
 ~description = "a rich drone sound";
+~channelLayout = \mono;
+
 ~function = { | freq = 200, dur = 22, amp = 0.75|
 	var bnq = Array.with(
 		1-SinOsc.ar(freq, mul: 0.7),

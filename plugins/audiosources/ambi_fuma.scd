@@ -7,21 +7,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*       Audio plugin definition
 
-	Each audio plugin should define the following global variables:
-    ~name: (symbol) name of the spatializer
-	~description: (string) a short description
-	~function: the actual definition of the plugin
+~name = \FuMaIn;
+~description = "A live ambisonic input (ACN_FuMa)";
+~channelLayout = \ambi;
 
-*/
-
-~name = \MonoIn;
-~description = "A direct input";
-~channelLayout = \mono;
-
-~function = {
-	|t_trig = 0, bus = 0|
+~function = {|order=1, t_trig = 0, bus = 0 |
 	var env = Env([0,1], [1, 1]);
-	SoundIn.ar(bus, EnvGen.kr(env, t_trig));
+	HOAConverterFuma2AcnN3d.ar(
+		order,
+		SoundIn.ar(Array.series((order + 1).pow(2), bus, 1), EnvGen.kr(env, t_trig))
+	);
 }

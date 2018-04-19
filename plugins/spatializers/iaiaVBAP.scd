@@ -35,6 +35,7 @@ spread  units  (0 == directional, ....,  100 == omni)
 ~name = \iaiaVBAP;
 ~description = "24 channel speaker layout on a sphere ( digital dome at IAIA)";
 ~numChannels = 24;
+~channelLayout = \mono;
 
 ~spkIAIA_24 = VBAPSpeakerArray.new(3, [
 

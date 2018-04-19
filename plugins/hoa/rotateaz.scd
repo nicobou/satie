@@ -11,9 +11,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-~name = \defaultMapper;
 
-// default mapper does nothing. It could have been named 'identity'
-~function = { | aziDeg = 0, eleDeg = 0, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 0.5, spread = 1, nfIndex = 0 |
-	[[aziDeg, eleDeg, gainDB, delayMs, lpHz, hpHz, spread, nfIndex]];
-		};
+~name = \RotateAz;
+~description = "Rotation around the z-axis (angle from -180 to 180)";
+
+~function = {|in = 0, order = 1, rotateAziDeg = 0 |
+HOATransMirror.ar(order, in, rotateAziDeg * pi / 180.0);
+};

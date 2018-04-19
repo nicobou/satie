@@ -35,5 +35,5 @@
 	newEle =  eleDeg + (randOffsetElev * cloudElevScale);
 	// forwarding required spatializer parameters only,
 	// here aziDeg and eleDeg has been replaced by the computed values:
-	[newAzi, newEle, gainDB, delayMs, lpHz, hpHz, spread];
+	[[newAzi, newEle, gainDB, delayMs, lpHz, hpHz, spread]];
 };

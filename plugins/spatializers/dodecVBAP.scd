@@ -33,6 +33,7 @@
 ~name = \dodecVBAP;
 ~description = "20 channel layout (3D)";
 ~numChannels = 20;
+~channelLayout = \mono;
 
 
 ~spk20 = VBAPSpeakerArray.new(3, [

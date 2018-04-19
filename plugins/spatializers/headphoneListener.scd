@@ -35,7 +35,7 @@
 ~name = \headphoneListener;
 ~description = "a stereo listener with near-field rendering";
 ~numChannels = 2;
-
+~channelLayout = \mono;
 
 ~function = {|in = 0, aziDeg = 0, eleDeg = 0, gainDB = -99, delayMs = 1, lpHz = 22050, hpHz = 0.5, spread = 1, nfIndex = 0 |
 	var i_headWidth = 22;   // centimeters -  22-23cm ->    660 μs ITD  -  Woodworth (1938)

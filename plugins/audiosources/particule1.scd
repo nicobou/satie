@@ -11,19 +11,21 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*       Audio plugin definition 
+/*       Audio plugin definition
 
 	Each audio plugin should define the following global variables:
     ~name: (symbol) name of the spatializer
 	~description: (string) a short description
 	~function: the actual definition of the plugin
-	
+
 */
 
 
 
 ~name = \particule1;
 ~description = "a particule";
+~channelLayout = \mono;
+
 ~function = {| t_trig = 0, attackDB = -100,  decayMs = 1000, force = 0.75, incidence = 0.75,  pitch = 60, i_blockDelay = 2 |
 	var outsig, z,ampScaler, hfqRolloffAmp, outGainBias;
 	var freqscale, excitationSig, attackSecs,excitationAmp;

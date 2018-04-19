@@ -11,17 +11,19 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*       Audio plugin definition 
+/*       Audio plugin definition
 
 	Each audio plugin should define the following global variables:
     ~name: (symbol) name of the spatializer
 	~description: (string) a short description
 	~function: the actual definition of the plugin
-	
+
 */
 
 ~name = \zkarpluck0;
 ~description = "another variation of a plucked string";
+~channelLayout = \mono;
+
 ~function = { arg outputDB = 0, lpFq = 12000, pWidth = 0,  combRTsec = 0.1, attkRiseMs = 0, attkDurMs = 0.1,  t_gate = 0, note = #[60,1];  // note gain
 	var hpFq = 20;   // highpass for fb delay.
 	var burstEnv,attkSig;

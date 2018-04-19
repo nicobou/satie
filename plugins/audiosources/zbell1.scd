@@ -11,17 +11,19 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*       Audio plugin definition 
+/*       Audio plugin definition
 
 	Each audio plugin should define the following global variables:
     ~name: (symbol) name of the spatializer
 	~description: (string) a short description
 	~function: the actual definition of the plugin
-	
+
 */
 
 ~name = \zbell1;
 ~description = "synthesized bell sound using a bank of resonant filers";
+~channelLayout = \mono;
+
 ~function = {   arg outbus, t_trig = 0, note = #[60, 1, 0.5], decay = 0.3, lag = 0.01, i_doneAction = 0 ;
 	var freq = note[0].midicps;
 	var amp = note[1];

@@ -11,9 +11,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-~name = \defaultMapper;
 
-// default mapper does nothing. It could have been named 'identity'
-~function = { | aziDeg = 0, eleDeg = 0, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 0.5, spread = 1, nfIndex = 0 |
-	[[aziDeg, eleDeg, gainDB, delayMs, lpHz, hpHz, spread, nfIndex]];
-		};
+~name = \BeamCardio;
+~description = "Filters along a specifed direction (hyper cardioid pattern). Az from -180 to 180, ele from -90 to 90. Hyper cardioid pattern from 1 to 3.";
+
+~function = {|in = 0, order = 1, beamCardioAziDeg = 0, beamCardioEleDeg = 0, beamCardioCardOrder = 1 |
+HOABeamHCard2Hoa.ar(order, in,  beamCardioAziDeg * pi / 180, beamCardioEleDeg * pi / 180, beamCardioCardOrder);
+};

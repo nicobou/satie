@@ -32,9 +32,9 @@ sudo make install
 
 ### sc3-plugins
 ```
-git clone https://github.com/supercollider/sc3-plugins.git
-cd sc3-plugins
-git checkout 3.9
+git clone https://gitlab.com/sat-metalab/forks/sc3-plugin-with-HOA
+cd sc3-plugin-with-HOA
+git checkout feat/sc-hoa
 git submodule init && git submodule update
 mkdir build
 cd build
@@ -47,26 +47,31 @@ Then type `scide` (the SuperCollider IDE) and check the console to see if everyt
 
 SATIE is a SuperCollider Quark and it depends on the following Quarks:
 
-- UnitTesting
-- AmbIEM
-- Ctk
-- Atk
+- SC-HOA
 
+Building for OSX
+-------------------------
 
 ####  plugin locations for OSX
 The supercollider plugins should be located in:
 
 `/Library/Application Support/SuperCollider/Extensions/plugins`
 or
-
 `~/Library/Application Support/SuperCollider/Extensions/plugins`
 
-## Binaural Rendering
-SATIE provides two binaural rendering options. Using HRTF filtering, the chosen renderer will convert the multi-channel spatialized output signal of each sound source to a stereo binaural signal. Both options depend on non-kernal resources that need to be installed for use. The installation and configuration details for each option are shown below:
-#### ambi1
-First order ambisonics method, using the ATK [Ambisonic Tool Kit] (http://www.ambisonictoolkit.net/)  package that is a standard sc3-plugin. To use this, the `Ctk` (Composers Tool Kit) quark must be installed. Follow directions in the following section.
-#### ambi3
-Third order ambisonics method, using the [AmbIEM package](http://sonenvir.at/downloads/sc3/ambiem/). To use this, the `AmbIEM` quark must be installed. Follow directions in the following section.
+Adding dependencies
+-------------------------
+### Binaural kernels for SC_HOA
+Binaural rendering is made possible through the ambitools HRIR Filters. Here follows how to download and make available the HRIR files.
+
+~~~~
+mkdir -p ~/.local/share/satie/
+cd ~/.local/share/satie/
+git clone https://github.com/sekisushai/ambitools.git
+~~~~
+
+Then, the HRIR files for ku100 are located in `~/.local/share/satie/ambitools/FIR/hrir/hrir_ku100_lebedev50/`, which is the default configuration path for SATIE.
+
 ### Installing quarks
 Quarks can be installed in a number of ways. Here are two ways to do it (in supercollider):
 
@@ -75,8 +80,7 @@ Quarks can be installed in a number of ways. Here are two ways to do it (in supe
 Quarks.gui
 
 // installation via command:
-Quarks.install("AmbIEM");
-Quarks.install("Ctk");
+Quarks.install("SC-HOA");
 ~~~~
 
 note:  once you have installed the quark(s) in supercollider, you will need to evaluate the following lines so that supercollider remembers.
@@ -85,10 +89,3 @@ note:  once you have installed the quark(s) in supercollider, you will need to e
 LanguageConfig.includePaths
 LanguageConfig.store
 ~~~~
-
-### HRTF data resources
-Each option depends on a corresponding set of HRTF data. SATIE provides submodules with copies of these databases, which will be installed automatically when using the `git clone --recursive` flag. For more information on the subject:
-
-[ATK] (http://www.ambisonictoolkit.net/documentation/supercollider)
-
-[AmbIEM] (http://alumni.media.mit.edu/~kdm/hrtfdoc/hrtfdoc.html)
