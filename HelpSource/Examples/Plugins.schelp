@@ -99,5 +99,5 @@ s = Server.supernova.local;
 // add it to the list of registered plugins
 ~satie.audioPlugins.addAudioPlugin(~instr);
 // compile the synthdef for use with SATIE
-~satie.makeSynthDef(\mySound, \simpleOSC, [], [~satie.aux[0]], ~satieConfiguration.listeningFormat, [0]);
+~satie.makeSynthDef(\mySound, \simpleOSC, [], [~satie.aux[0]], [],~satieConfiguration.listeningFormat, [0]);
 ::
