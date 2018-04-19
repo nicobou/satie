@@ -2,6 +2,7 @@
 
 * Make sure `develop` branch reflects the desired `master`
 * Increase the _version_ string in the .quark file
+* Create a new entry in the NEWS.md file (top of the file) with version number, date and description of changes
 * Commit and push, open a code review
 * Merge via the web interface or CLI:
   `git checkout master && git merge --no-ff develop`
