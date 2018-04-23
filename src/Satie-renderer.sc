@@ -144,7 +144,7 @@
 				this.cleanInstance(name, group: group);
 			}
 		);
-		nodeID = satieConfiguration.server.nextNodeID - 1; // FIXME: this is hack, but is it reliable?
+		nodeID = synth.nodeID;
 		namesIds.put(name, nodeID);
 		groupInstances[group].put(name, synth);
 		^synth;
