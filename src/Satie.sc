@@ -229,7 +229,7 @@ Satie {
 		// generate synthdefs
 		audioPlugins.do { arg item;
 			if ((item.type == \mono).asBoolean,
-				{ "skipping default compilation".warn; // FIXME: remove this warning and uncomment when monitoring plugins ready
+				{
 					this.makeSynthDef(item.name,item.name, [],[],[], satieConfiguration.listeningFormat, satieConfiguration.outBusIndex);
 				});
 			satieConfiguration.ambiOrders.do { |order, i|

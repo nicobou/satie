@@ -92,9 +92,6 @@ SatieOSC {
 		this.newOSC(\satieRendererSetOutputDim, this.setOutputDimHandler, "/satie/renderer/setOutputDim");
 		this.newOSC(\satieRendererFreeSynths, this.freeSynthsHandler, "/satie/renderer/freeSynths");
 
-		// TODO: this last section should change/evolve along with the architecture for monitoring plugins
-		// TODO: modify newOSC method to allow more control over OSCdef instancing.
-		//
 		// This is for the exclusive use of SendTrig, which (invariably) sends a trigger message to '/tr' path.
 		// We use OSCdef directly because currently newOSC custom method does not give us full control over
 		// OSCdef instance.
