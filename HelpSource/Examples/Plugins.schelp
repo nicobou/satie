@@ -5,9 +5,58 @@ related:: Overview/SATIE-Overview, Classes/Satie, Classes/SatiePlugin, Classes/S
 
 DESCRIPTION::
 
-SATIE plugins are SuperCollider functions. They are later wrapped together in order to generate several synths.
+SATIE plugins are SuperCollider functions. They are later wrapped together in order to generate several synths. There are three categories of plugins:
 
-All SATIE plugins (audiosources, effects, mappers, postprocessors, spatializers) reside in the plugin directory within the SATIE tree. Other plugins can be added from, arbitrary location, by adding to the appropriate dictionaries (see SatiePlugins and SatieConfiguration).
+
+SUBSECTION::Audio plugins
+Are inserted into the signal chain and provide either a sound source or effect. Usually they generate audio signals. The following families of plugins fall into this category:
+LIST::
+## audiosources (generators)
+## effects
+## post-processors
+## spatializers
+::
+SUBSECTION::Mappers
+Their purpose is to apply mappings (i.e. via functions) to audio plugins' paramers
+SUBSECTION::Analysers
+Plugins that are inserted into audio plugins signal path, before spatialization stage, and their sole purpose is to analyse some signal feature (i.e. envelope, pitch, etc.) and forward it via OSC. See link::Examples/OSC:: for the OSC message description and an example use. These plugins should not return any audio but should make use of LINK::Classes/SendTrig:: and LINK::Classes/SendReply:: UGens to send triggers or streams of desired information.
+ANCHOR::analysers example::
+CODE::
+(
+s.reboot;
+s = Server.scsynth.local;
+~satieConfiguration = SatieConfiguration.new(s, [], outBusIndex: [0], ambiOrders: [1,2,3], minOutputBusChannels: 4);
+~satie = Satie.new(~satieConfiguration);
+~satie.boot();
+)
+// use some GUI if you need to
+s.meter;
+s.makeGui;
+s.plotTree;
+
+// set up an OSC client to receive on port 18060
+// then execute the following lines
+~satie.makeAmbi(\input1,\MonoIn,[],[], [\envTrigger],2,[~satie.satieConfiguration.ambiBusIndex[0]] );
+~satie.makeAmbi(\drone,\misDrone,[],[], [\envFollow],2,[~satie.satieConfiguration.ambiBusIndex[0]] );
+
+~satie.makeSourceInstance(\in1, \input1, \default)
+~satie.groupInstances[\default][\in1].set(\t_trig, 1, \aziDeg, 30, \eleDeg, 30,\gainDB, -10, \envTrigger_triggerLevel, 0.12)
+
+~satie.makeSourceInstance(\droney, \drone_kamikaze, \default)
+~satie.groupInstances[\default][\droney].set(\t_trig, 1, \aziDeg, -30, \eleDeg, 30,\gainDB, -10, \envTrigger_triggerLevel, 0.12)
+::
+
+The plugins are kept in SOFT::plugins:: directory within SATIE tree. They are further organized in directories by family and all plugins are loaded at configuration time and are kept in the following LINK::Classes/SatieConfiguration:: members:
+List::
+## .audioPlugins
+## .fxPlugins
+## .spatPlugins
+## .mapperPlugins
+## .postprocessorPlugins
+## .monitoringPlugins
+::
+
+Other plugins can be added from, arbitrary location, by adding to the appropriate dictionaries (see SatiePlugins and SatieConfiguration).
 Every plugin should follow the following format:
 code::
 // Mandatory "fields" of a plugin:
@@ -50,5 +99,5 @@ s = Server.supernova.local;
 // add it to the list of registered plugins
 ~satie.audioPlugins.addAudioPlugin(~instr);
 // compile the synthdef for use with SATIE
-~satie.makeSynthDef(\mySound, \simpleOSC, [], [~satie.aux[0]], ~satieConfiguration.listeningFormat, [0]);
+~satie.makeSynthDef(\mySound, \simpleOSC, [], [~satie.aux[0]], [],~satieConfiguration.listeningFormat, [0]);
 ::

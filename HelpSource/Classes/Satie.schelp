@@ -40,7 +40,7 @@ Array: Synth properties to be taken intio account at instantiation time. All set
 returns:: a link::Classes/Synth::
 
 METHOD:: makeSourceInstance
-A wrapper around link::makeInstance:: to explicitly create an audio source
+A wrapper around link::#makeInstance:: to explicitly create an audio source
 
 returns:: a link::Classes/Synth::
 
@@ -54,7 +54,7 @@ METHOD:: replacePostProcessor
 Replaces post-processor pipeline at the output of the spatializer.
 
 ARGUMENT:: pipeline
-a list of symbols representing the post-processor names. See link::Classes/Plugins:: and link::Examples/Plugins:: for more information on SATIE plugins
+a list of symbols representing the post-processor names. See link::Classes/SatiePlugins:: and link::Examples/Plugins:: for more information on SATIE plugins
 
 ARGUMENT:: outputIndex
 Output channel index from which this post-processor will take effect, default 0
@@ -64,8 +64,6 @@ Index number of the spatializer to which the post-process will be attached. Defa
 
 ARGUMENT:: defaultArgs
 An array of arguments, if any
-
-
 
 METHOD:: fxPlugins
 a dictionary containing effects plugins definitions
@@ -113,11 +111,6 @@ METHOD:: spat
 Instance variable that holds the name of the curently used spatializer.
 
 returns:: Symbol
-
-METHOD:: server
-Holds the server instance.
-
-returns:: SuperCollider server
 
 METHOD:: makeProcess
 Creates a process. See link::Examples/Processes:: for an example about processes.
@@ -185,7 +178,7 @@ METHOD:: initRenderer
 returns:: (describe returnvalue here)
 
 METHOD:: makeSynthDef
-Calls link::Classes/SatieFactory#makeSynthDef:: method and creates references to compiled SynthDefs
+Calls link::Classes/SatieFactory#makeSynthDef:: method and creates references to compiled SynthDefs for use with VBAP sptialization methods
 
 ARGUMENT:: id
 (Symbol) The SynthDef's unique name on the server
@@ -199,11 +192,49 @@ ARGUMENT:: srcPreToBusses
 ARGUMENT:: srcPostToBusses
 (Array) Passed to post-process busses (see link::Classes/SatieFactory::)
 
+ARGUMENT:: srcPreMonitorFuncsArray
+(Array) Analysis/Monitoring plugins to be wrapped in the SynthDef (see link::Classes/SatieFactory:: and link::Examples/Plugins::)
+
 ARGUMENT:: spatSymbolArray
 (Array) Passed to spatialiser array (see link::Classes/SatieFactory::)
 
 ARGUMENT:: firstOutputIndexes
 (Array) Start output bus index (see link::Classes/SatieFactory::)
+
+ARGUMENT:: paramsMapper
+(Array) Parameter mapper plugins (see link::Classes/SatieFactory::)
+
+ARGUMENT:: synthArgs
+Custom synth arguments passed to link::Classes/SatieFactory::
+
+returns:: a Synth
+
+METHOD:: makeAmbi
+Calls link::Classes/SatieFactory#makeAmbi:: method and creates references to compiled SynthDefs for use with ambisonic spatialization methods.
+
+ARGUMENT:: name
+(Symbol) The SynthDef's unique name on the server
+
+ARGUMENT:: srcName
+(Symbol) The name of the source (see link::Examples/Plugins::)
+
+ARGUMENT:: preBusArray
+(Array) Passed to pre-process busses (see link::Classes/SatieFactory::)
+
+ARGUMENT:: postBusArray
+(Array) Passed to post-process busses (see link::Classes/SatieFactory::)
+
+ARGUMENT:: srcPreMonitorFuncsArray
+(Array) Analysis/Monitoring plugins to be wrapped in the SynthDef (see link::Classes/SatieFactory:: and link::Examples/Plugins::)
+
+ARGUMENT:: ambiOrder
+(int) Ambisonic Order (see link::Classes/SatieFactory::)
+
+ARGUMENT:: ambiEffectPipeline
+(Array) A pipeline of ambisonic effects (see link::Classes/SatieFactory::)
+
+ARGUMENT:: ambiBusIndex
+(int) Start output bus index (see link::Classes/SatieFactory::)
 
 ARGUMENT:: paramsMapper
 (Array) Parameter mapper plugins (see link::Classes/SatieFactory::)

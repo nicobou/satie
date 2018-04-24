@@ -31,6 +31,7 @@ SatieConfiguration {
 	var <>mapperPlugins;
 	var <>postprocessorPlugins;
 	var <>hoaPlugins;
+	var <>monitoringPlugins;
 
 	// other options
 	var <>orientationOffsetDeg;
@@ -58,6 +59,8 @@ SatieConfiguration {
 		mapperPlugins = SatiePlugins.newAudio(pluginsPath++"/mappers/*.scd");
 		postprocessorPlugins = SatiePlugins.newAudio(pluginsPath++"/postprocessors/*.scd");
 		hoaPlugins = SatiePlugins.newAudio(pluginsPath++"/hoa/*.scd");
+		monitoringPlugins = SatiePlugins.newAudio(pluginsPath++"/monitoring/*.scd");
+
 		if (debug, {
 			"New configuration: \nRoot: %\nSpat: %\nPlugins: %, %, %, %".format(
 				this.satieRoot, listeningFormat, this.audioPlugins, this.fxPlugins, this.spatPlugins, this.mapperPlugins, this.postprocessorPlugins

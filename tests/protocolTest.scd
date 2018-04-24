@@ -13,7 +13,7 @@
 //~listeningFormat = \ambi1;
 //~listeningFormat = \ambi3;
 //~listeningFormat = \domeVBAP;
-~listeningFormat = \labodomeVBAP;
+// ~listeningFormat = \labodomeVBAP;
 //~listeningFormat = \octoVBAP;
 //~listeningFormat = \stereoListener;
 
@@ -47,8 +47,8 @@ s = Server.supernova.local;
 	~satie.makeSynthDef(\busgverb, \gverb,  [], [], ~satie.satieConfiguration.listeningFormat, [~satie.satieConfiguration.outBusIndex[0]]);
 	~satie.makeSynthDef(\zkarpluck1, \zkarpluck1, [~satie.aux[0]], [], ~satie.satieConfiguration.listeningFormat, [~satie.satieConfiguration.outBusIndex[0]] );   // sends to effects bus, pre-spatializer
 
-	~satie.makeSynthDef(\nearTest, \default,   [~satie.aux[0]],  [],~satie.satieConfiguration.listeningFormat,  [~satie.satieConfiguration.outBusIndex[0]], \nearField1);  // for mapping distances
-	~satie.makeSynthDef(\farTest, \default,   [~satie.aux[0]],  [],~satie.satieConfiguration.listeningFormat,  [~satie.satieConfiguration.outBusIndex[0]], \farField1);  // for mapping distances
+	// ~satie.makeSynthDef(\nearTest, \default,   [~satie.aux[0]],  [],~satie.satieConfiguration.listeningFormat,  [~satie.satieConfiguration.outBusIndex[0]], \nearField1);  // for mapping distances
+	// ~satie.makeSynthDef(\farTest, \default,   [~satie.aux[0]],  [],~satie.satieConfiguration.listeningFormat,  [~satie.satieConfiguration.outBusIndex[0]], \farField1);  // for mapping distances
 
 	~satie.satieConfiguration.server.sync;
 

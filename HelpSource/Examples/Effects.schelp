@@ -17,9 +17,9 @@ s = Server.supernova.local;
 ~satie.boot();
 s.waitForBoot({
 	// define a synth with effect on pre- and post- bus.
-	~satie.makeSynthDef(\string_with_effects, \zkarpluck1, [~satie.aux[0]], [~satie.aux[1]], ~satieConfiguration.listeningFormat, [0]);
+	~satie.makeSynthDef(\string_with_effects, \zkarpluck1, [~satie.aux[0]], [~satie.aux[1]], [],~satieConfiguration.listeningFormat, [0]);
 	// spatialized reverb effect (input will be set at creation):
-	~satie.makeSynthDef(\busreverb, \freeverb, [], [], ~satieConfiguration.listeningFormat, [0]);
+	~satie.makeSynthDef(\busreverb, \freeverb, [], [], [], ~satieConfiguration.listeningFormat, [0]);
 	// display some information
 	s.meter;
 	s.makeGui;

@@ -18,6 +18,7 @@
 		srcName,
 		srcPreToBusses,
 		srcPostToBusses,
+		srcPreMonitorFuncsArray,
 		spatSymbolArray,
 		firstOutputIndexes = #[0],
 		paramsMapper = \defaultMapper,
@@ -25,6 +26,7 @@
 
 		var dico;
 		if(spatSymbolArray.isEmpty, {
+			"Running with no legacy sptializers".debug;
 			^0;
 		});
 		if(satieConfiguration.audioPlugins.at(srcName) != nil,
@@ -60,6 +62,9 @@
 			dico.at(srcName).function,
 			srcPreToBusses,
 			srcPostToBusses,
+			srcPreMonitorFuncsArray.collect({|item, i|
+				satieConfiguration.monitoringPlugins.at(item).function;
+			}),
 			spatSymbolArray.collect({|item, i|
 				satieConfiguration.spatPlugins.at(item).function
 			}),
@@ -74,6 +79,7 @@
 		srcName,
 		preBusArray,
 		postBusArray,
+		srcPreMonitorFuncsArray,
 		ambiOrder,
 		ambiEffectPipeline = #[],
 		ambiBusIndex = 0,
@@ -105,6 +111,9 @@
 				dico.at(srcName).function,
 				preBusArray,
 				postBusArray,
+				srcPreMonitorFuncsArray.collect({|item, i|
+					satieConfiguration.monitoringPlugins.at(item).function;
+				}),
 				ambiOrder,
 				ambiEffectPipeline,
 				ambiBusIndex,
@@ -116,6 +125,9 @@
 				dico.at(srcName).function,
 				preBusArray,
 				postBusArray,
+				srcPreMonitorFuncsArray.collect({|item, i|
+					satieConfiguration.monitoringPlugins.at(item).function;
+				}),
 				ambiOrder,
 				ambiEffectPipeline,
 				ambiBusIndex,
@@ -125,12 +137,15 @@
 	}
 
 	makeInstance {| name, synthDefName, group = \default, synthArgs = #[] |
-		var synth = Synth(synthDefName, args: synthArgs, target: groups[group], addAction: \addToHead);
+		var synth, nodeID;
+		synth = Synth(synthDefName, args: synthArgs, target: groups[group], addAction: \addToHead);
 		if (groupInstances[group][name] != nil,
 			{
 				this.cleanInstance(name, group: group);
 			}
 		);
+		nodeID = synth.nodeID;
+		namesIds.put(name, nodeID);
 		groupInstances[group].put(name, synth);
 		^synth;
 	}
@@ -183,6 +198,7 @@
 	cleanInstance {|name, group = \default |
 		groupInstances[group][name].free();
 		groupInstances[group].removeAt(name);
+		namesIds.removeAt(name);
 	}
 
 	pauseInstance {|name, group = \default |
