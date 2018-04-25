@@ -1,6 +1,6 @@
 TITLE:: SATIE Overview
 summary:: Spatial Audio Toolkit for Immersive Environments
-categories:: Libraries
+categories:: Libraries>SATIE
 
 DESCRIPTION::
 SATIE is an audio spacialization engine developed for realtime rendering of dense audio scenes to large multi-channel loudspeaker systems. It is a lower-level audio rendering process that maintains a dynamic DSP graph which is created and controlled via OSC messages from an external process. SATIE’s modular development environment provides for optimized real-time audio scene and resource management. There is no geometry per se in SATIE, rather, SATIE maintains a DSP graph of source nodes that are accumulated to a single "listener", corresponding to the renderer’s output configuration (stereo and/or multi-channel).
@@ -43,6 +43,8 @@ The examples below show various facets of SATIE's functionality.
 DEFINITIONLIST::
 ## LINK::Examples/Basics::
 || Progressive examples of SATIE functionnality, how to use it from scide.
+## LINK::Overview/Spatializers::
+|| Overview of available spatializers
 ## LINK::Examples/Processes::
 || Example of SATIE processes
 ## LINK::Examples/Effects::
