@@ -1,0 +1,46 @@
+TITLE:: SATIE Spatializers
+SUMMARY:: Overview of spatialization plugins in SATIE
+CATEGORIES:: Libraries>SATIE, Libraries>HOA, UGens > Multichannel > Panners
+RELATED:: Overview/SATIE-Overview, Classes/SpatializerPlugin, Examples/Ambi
+
+SECTION:: Overview
+
+SATIE provides two types of spatializers: VBAP and higher order ambisonics (up to the 5th order). The lists of available plugins in each category follows:
+
+SUBSECTION:: VBAP spatializers
+
+TABLE::
+##  STRONG::Name::|| STRONG::Number of channels::||STRONG::Description::
+##  exaVBAP || 6 || 6 channel ring (2D)
+##  _1474_VBAP || 16 || 16 channel dome (IEM)
+##  emptySpat || 0 || No spat. Expect nothing.
+##  dodecVBAP || 20 || 20 channel layout (3D)
+##  domeVBAP || 31 || 31 channel sphere (SAT dome)
+##  labodomeVBAP || 24 || 24 channel speaker layout on a sphere (minidome at the SAT)
+##  stereoPanner || nil || Another stereo panner (use stereoListener)
+##  stereoListener || 2 || A stereo panner
+##  headphoneListener || 2 || a stereo listener with near-field rendering
+##  cube || 8 || 8 channel 3D layout (Cube corners)
+##  monoSpat || 1 || Mono spat
+##  iaiaVBAP || 24 || 24 channel speaker layout on a sphere ( digital dome at IAIA)
+##  octoVBAP || 8 || 8 channel ring (2D)
+::
+
+SUBSECTION:: HOA Plugins
+SUBSECTION:: HOA Spatializers
+TABLE::
+## STRONG::Name:: || STRONG::Description::
+##  Satosphere || Satosphere ambisonic decoder
+##  Binaural26 || Binaural decoder based on Lebedev26
+##  Binaural06 || Binaural decoder based on Lebedev06
+::
+
+SUBSECTION:: HOA Processing plugins
+TABLE::
+## STRONG::Name:: || STRONG::Description::
+##  Rotate || Rotate the sound field (args in degree from -180 to 180)
+##  BeamDirac || Filters along a specifed direction (truncated Dirac). Az from -180 to 180, ele from -90 to 90
+##  BeamCardio || Filters along a specifed direction (hyper cardioid pattern). Az from -180 to 180, ele from -90 to 90. Hyper cardioid pattern from 1 to 3.
+##  Mirror || Mirror soundfield
+##  RotateAz || Rotation around the z-axis (angle from -180 to 180)
+::
