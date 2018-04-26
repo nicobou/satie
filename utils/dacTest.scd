@@ -48,7 +48,8 @@ SynthDef(\speakerMapTest, { |out, gate=1|
 	Platform.case(
 		\osx, {
 			var deviceName = ~usingServer;
-			o.device = deviceName;
+			deviceName.postln;
+			Server.local.options.device = deviceName;
 			("booting with: "++deviceName).postln;
 	});
 	s.reboot;
