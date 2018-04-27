@@ -22,7 +22,7 @@ TABLE::
 ##  headphoneListener || 2 || a stereo listener with near-field rendering
 ##  cube || 8 || 8 channel 3D layout (Cube corners)
 ##  monoSpat || 1 || Mono spat
-##  iaiaVBAP || 24 || 24 channel speaker layout on a sphere ( digital dome at IAIA)
+##  iaiaVBAP || 24 || 24 channel speaker layout on a sphere (digital dome at IAIA)
 ##  octoVBAP || 8 || 8 channel ring (2D)
 ::
 
