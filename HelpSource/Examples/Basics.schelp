@@ -22,8 +22,6 @@ s = Server.supernova.local;
 ~satie = Satie.new(~satieConfiguration);
 ~satie.boot();
 s.waitForBoot({
-	// list names of generated synthDef
-	~satie.generatedSynthDefs;
 	// display some information
 	s.meter;
 	s.makeGui;
