@@ -20,6 +20,11 @@
 	~setup: optional function that will set up the plugin before server boots
 
 	It should not return any audio
+
+	envAndPitch: track envelope and pitch. Sends a message with:
+	- hasFreq: bool
+	- env: float
+	- freq: float
 */
 
 ~name = \envAndPitch;
