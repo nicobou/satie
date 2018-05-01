@@ -144,7 +144,7 @@ code::
 
 ::
 
-Section:: User case
+Section:: Use case: Reading 5.1 audio input
 
 This example converts a 6 channel audio input that corresponds to 5.1 to stereo. The 5.1 channels should be in this order: Front-L, Center, Front-R, Surround-L, Surround-R, LFE.
 
