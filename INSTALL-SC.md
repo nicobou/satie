@@ -83,6 +83,12 @@ Quarks.gui
 Quarks.install("SC-HOA");
 ~~~~
 
+You will also have to intall the SATIE quark. From the quark installation menu on the gui, click "install a folder" and select the SATIE folder.
+
+or
+~~~~
+Quarks.install("https://gitlab.com/sat-metalab/SATIE")
+~~~~
 note:  once you have installed the quark(s) in supercollider, you will need to evaluate the following lines so that supercollider remembers.
 
 ~~~~

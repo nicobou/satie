@@ -22,8 +22,6 @@ s = Server.supernova.local;
 ~satie = Satie.new(~satieConfiguration);
 ~satie.boot();
 s.waitForBoot({
-	// list names of generated synthDef
-	~satie.generatedSynthDefs;
 	// display some information
 	s.meter;
 	s.makeGui;
@@ -141,6 +139,57 @@ code::
 // delete the group and all its children
 ~satie.killSatieGroup(\synths);
 
+
+::
+
+Section:: Use case: Reading 5.1 audio input
+
+This example converts a 6 channel audio input that corresponds to 5.1 to stereo. The 5.1 channels should be in this order: Front-L, Center, Front-R, Surround-L, Surround-R, LFE.
+
+code::
+
+(
+// define a server, SATIE needs it
+s = Server.supernova.local;
+// instantiate a SatieConfiguration. Here we will use a stereo spatializer
+~satieConfiguration = SatieConfiguration.new(s, [\stereoListener]);
+// list possible listeners:
+~satieConfiguration.spatPlugins.keys;
+// Change SuperCollider's block size (jack server's blocksize must be multiple of this value)
+~satieConfiguration.serverOptions.blockSize = 1024;
+
+// change input/output channels
+~satieConfiguration.serverOptions.numOutputBusChannels = 2;
+~satieConfiguration.serverOptions.numInputBusChannels = 6;
+
+// instantiate SATIE renderer and pass it the configuration
+~satie = Satie.new(~satieConfiguration);
+~satie.boot();
+s.waitForBoot({
+    // list names of generated synthDef
+    ~satie.generatedSynthDefs;
+    // display some information
+    s.meter;
+    s.makeGui;
+    s.plotTree;
+})
+)
+
+// Create 1 input for each channel
+6.do({|item|
+	~satie.makeSourceInstance(("channel_"++item).asSymbol, \MonoIn, \default, synthArgs:[\bus:item]);
+});
+
+// Change the azimuth for every mono channel to the corresponding position in 5.1
+~satie.groupInstances[\default][\channel_0].set(\aziDeg,-30);
+~satie.groupInstances[\default][\channel_1].set(\aziDeg,0);
+~satie.groupInstances[\default][\channel_2].set(\aziDeg,30);
+~satie.groupInstances[\default][\channel_3].set(\aziDeg,-110);
+~satie.groupInstances[\default][\channel_4].set(\aziDeg,110);
+~satie.groupInstances[\default][\channel_5].set(\aziDeg,0);
+
+// Start the playback
+~satie.groups[\default].set(\gainDB, -4.77, \t_trig, 1);
 
 ::
 
