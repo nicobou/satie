@@ -7,7 +7,8 @@ SATIE is an audio spacialization engine developed for realtime rendering of dens
 
 Its aim is to facilitate using 3D space in audio music/audio composition and authoring and to play well with 3D audio engines (so far it has been used with Blender and Unity3D) and could also serve as volumetric audio spacialization addition to more traditional desktop DAW systems.
 
-For more information visit https://gitlab.com/sat-metalab/SATIE-quark
+For more information visit LINK::https://gitlab.com/sat-metalab/SATIE##SATIE:: website.
+
 
 SECTION:: Basic workflow
 
@@ -49,7 +50,7 @@ DEFINITIONLIST::
 || Example of SATIE processes
 ## LINK::Examples/Effects::
 || Introduction to using effects
-## LINK::Examples/OSC::
+## LINK::Examples/OSC:: LINK::Examples/OSC-API.html##SATIE OSC protocol (html)::
 || How to talk (and listen) to SATIE via OSC
 ## LINK::Examples/Plugins::
 || Description of SATIE plugins

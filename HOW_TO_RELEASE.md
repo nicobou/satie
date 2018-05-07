@@ -9,4 +9,11 @@
   then: `git tag -a vX.X.X -m"Short message that explains the new version"`
   `git push origin master --tags`
 
+## Optional steps
+If changes include changes to the OSC protocol, document your OSC messages in [SATIE OSC API](./SATIE-OSC-API.md). Make sure you have _pandoc_ installed:
+`sudo apt install pandoc`
+
+and run the following command from the root of the directory:
+```pandoc -s --toc -c doc.css -f markdown -t html SATIE-OSC-API.md -o HelpSource/Examples/OSC-API.html```
+
 You're done.
