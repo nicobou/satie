@@ -75,12 +75,12 @@ if  ( ~channelCount == 32,
 
 SynthDef(\speakerMapTest, { |out, gate=1|
     Out.ar(out, WhiteNoise.ar(1) * EnvGen.kr(Env.asr(0.03, 0.3, 0.01), gate, doneAction:2));
-}).store; // use store for compatibility with pattern example below
+}).store(); // use store for compatibility with pattern example below
 
 ~task= Task({
     loop {
 		~channelCount .do({ arg item;
-			~dacTestSyn = Synth(\speakerMapTest, [\out, item,]); // play out through hardware output bus 0 (see Out.help)
+			~dacTestSyn = Synth(\speakerMapTest, [\out, item]); // play out through hardware output bus 0 (see Out.help)
             ~panDur.wait;
 			~dacTestSyn.release;
         });
@@ -95,11 +95,11 @@ SynthDef(\speakerMapTest, { |out, gate=1|
 			Server.local.options.device = deviceName;
 			("booting with: "++deviceName).postln;
 		});
+	Server.local.options.numOutputBusChannels = ~channelCount;
 	s.reboot;
     ("THE SERVER IS :  "++s).postln;
     Server.allRunningServers.postln;
 };
-
 
 // UI
 ~dacTestWindow=Window.new("dac testing", Rect(30, 30, 400, 130)).front;
