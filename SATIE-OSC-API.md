@@ -8,7 +8,7 @@ These messages create and manage scene content.
 #### /satie/load filename
 Load and evaluate a file in supercollider. Filename must be a full file path to a file located on the audiorendering machine
 
-#### /satie/scene/createSource nodeName synthdefName <groupName>
+#### /satie/scene/createSource nodeName synthdefName \<groupName\>
 Instantiate an audio generator plugin.
 
 - nodeName : the name of the instance.
@@ -131,7 +131,8 @@ Invoke a process function with zero or more arguments
 
 You can query SATIE via OSC and get some information. SATIE responds to the following messages:
 
-#### /satie/plugins // get existing synthdefs
+#### /satie/plugins
+get existing synthdefs
 
 SATIE responds with an osc message: /plugins JSON string containing 3 objects: generators, effects and mastering, each being a JSON object name: {type, description} (where name = the "id" passed to Satie::makeSynthDef, type = SatiePlugin
 
