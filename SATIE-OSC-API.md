@@ -15,7 +15,7 @@ Instantiate an audio generator plugin.
 - synthDefName : the name of the synthdef registered with the system.
 - groupName : (optional) the name of the group. Default: '\\default'
 
-#### /satie/scene/createEffect nodeName synthdefName <groupName> <auxBus>
+#### /satie/scene/createEffect nodeName synthdefName \<groupName\> \<auxBus\>
    Instantiate an audio effect plugin
 
 -  nodeName : the name of the instance.
@@ -23,7 +23,7 @@ Instantiate an audio generator plugin.
 -  groupName : (optional) the name of the group. Default: '\defaultFx'
 -  auxBus: (optional) number of aux bus for the effect's input. Default: '0'
 
-#### /satie/scene/createProcess nodeName processName <optargs>
+#### /satie/scene/createProcess nodeName processName \<optargs\>
 Create/instantiate a `process`
 
 -  nodeName : the name of the instance.
@@ -70,18 +70,18 @@ Nodes are instances of audiosources, effects or processes. Nodes also belong to 
 -   group
 -   process
 
-#### /satie/<nodeType>/state nodeName value
+#### /satie/\<nodeType\>/state nodeName value
 Node state (whether it is playing/computing or not): 1 = active, 0 = inactive
 
-#### /satie/<nodeType>/event nodeName eventName <opt> atom1 atom2...atomN
+#### /satie/\<nodeType\>/event nodeName eventName \<opt\> atom1 atom2...atomN
 Some event
 
 For specific sources, effects and processes, consult the sources located in the *plugins* directory. Also, see Introspection section for other means of getting information from SATIE.
 
-#### /satie/<nodeType>/set nodeName key1 val1 key2 val2 .... keyN valN
+#### /satie/\<nodeType\>/set nodeName key1 val1 key2 val2 .... keyN valN
 Set a property
 
-#### /satie/<nodeType>/setvec nodeName key val1 ..... valN
+#### /satie/\<nodeType\>/setvec nodeName key val1 ..... valN
 Set a vector
 
 <pre class=note>
@@ -104,7 +104,7 @@ Spatializer properties (contained in most spatializers)
 
 ## Only for nodeTypes: source and process
 
-#### /satie/<nodeType>/update nodeName azimuthDegrees elevationDegrees gainDB delayMS lpHZ distance
+#### /satie/\<nodeType\>/update nodeName azimuthDegrees elevationDegrees gainDB delayMS lpHZ distance
 Update many essential properties at once. This message is typically sent every frame, all properties relate to node's position. `distance` applies only to processes.
 
 -  nodeName : name of the node
