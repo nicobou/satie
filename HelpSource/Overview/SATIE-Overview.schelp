@@ -50,7 +50,7 @@ DEFINITIONLIST::
 || Example of SATIE processes
 ## LINK::Examples/Effects::
 || Introduction to using effects
-## LINK::Examples/OSC:: LINK::Examples/OSC-API.html##SATIE OSC protocol (html)::
+## LINK::Examples/OSC-API.html##SATIE OSC protocol (html)::
 || How to talk (and listen) to SATIE via OSC
 ## LINK::Examples/Plugins::
 || Description of SATIE plugins

@@ -64,14 +64,14 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>A &quot;scene&quot; contains source/effect/process nodes which are kept in groups. These messages create and manage scene content.</p>
 <h4 id="satieload-filename">/satie/load filename</h4>
 <p>Load and evaluate a file in supercollider. Filename must be a full file path to a file located on the audiorendering machine</p>
-<h4 id="satiescenecreatesource-nodename-synthdefname">/satie/scene/createSource nodeName synthdefName <groupName></h4>
+<h4 id="satiescenecreatesource-nodename-synthdefname-groupname">/satie/scene/createSource nodeName synthdefName &lt;groupName&gt;</h4>
 <p>Instantiate an audio generator plugin.</p>
 <ul>
 <li>nodeName : the name of the instance.</li>
 <li>synthDefName : the name of the synthdef registered with the system.</li>
 <li>groupName : (optional) the name of the group. Default: '\default'</li>
 </ul>
-<h4 id="satiescenecreateeffect-nodename-synthdefname">/satie/scene/createEffect nodeName synthdefName <groupName> <auxBus></h4>
+<h4 id="satiescenecreateeffect-nodename-synthdefname-groupname-auxbus">/satie/scene/createEffect nodeName synthdefName &lt;groupName&gt; &lt;auxBus&gt;</h4>
 <p>Instantiate an audio effect plugin</p>
 <ul>
 <li>nodeName : the name of the instance.</li>
@@ -79,7 +79,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li>groupName : (optional) the name of the group. Default: ''</li>
 <li>auxBus: (optional) number of aux bus for the effect's input. Default: '0'</li>
 </ul>
-<h4 id="satiescenecreateprocess-nodename-processname">/satie/scene/createProcess nodeName processName <optargs></h4>
+<h4 id="satiescenecreateprocess-nodename-processname-optargs">/satie/scene/createProcess nodeName processName &lt;optargs&gt;</h4>
 <p>Create/instantiate a <code>process</code></p>
 <ul>
 <li>nodeName : the name of the instance.</li>
@@ -122,14 +122,14 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li>group</li>
 <li>process</li>
 </ul>
-<h4 id="satiestate-nodename-value">/satie/<nodeType>/state nodeName value</h4>
+<h4 id="satienodetypestate-nodename-value">/satie/&lt;nodeType&gt;/state nodeName value</h4>
 <p>Node state (whether it is playing/computing or not): 1 = active, 0 = inactive</p>
-<h4 id="satieevent-nodename-eventname-atom1-atom2...atomn">/satie/<nodeType>/event nodeName eventName <opt> atom1 atom2...atomN</h4>
+<h4 id="satienodetypeevent-nodename-eventname-opt-atom1-atom2...atomn">/satie/&lt;nodeType&gt;/event nodeName eventName &lt;opt&gt; atom1 atom2...atomN</h4>
 <p>Some event</p>
 <p>For specific sources, effects and processes, consult the sources located in the <em>plugins</em> directory. Also, see Introspection section for other means of getting information from SATIE.</p>
-<h4 id="satieset-nodename-key1-val1-key2-val2-....-keyn-valn">/satie/<nodeType>/set nodeName key1 val1 key2 val2 .... keyN valN</h4>
+<h4 id="satienodetypeset-nodename-key1-val1-key2-val2-....-keyn-valn">/satie/&lt;nodeType&gt;/set nodeName key1 val1 key2 val2 .... keyN valN</h4>
 <p>Set a property</p>
-<h4 id="satiesetvec-nodename-key-val1-.....-valn">/satie/<nodeType>/setvec nodeName key val1 ..... valN</h4>
+<h4 id="satienodetypesetvec-nodename-key-val1-.....-valn">/satie/&lt;nodeType&gt;/setvec nodeName key val1 ..... valN</h4>
 <p>Set a vector</p>
 <pre class=note>
 <span class=note text>NOTE:<span> `set` and `setvec` messages are used to address specific properties. Each node has two groups of properties: those provided by the spatializer and those specific to the node. The latter vary from node to node.
@@ -150,7 +150,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li>spread (range (0 to 100)) default = 1</li>
 </ul>
 <h2 id="only-for-nodetypes-source-and-process">Only for nodeTypes: source and process</h2>
-<h4 id="satieupdate-nodename-azimuthdegrees-elevationdegrees-gaindb-delayms-lphz-distance">/satie/<nodeType>/update nodeName azimuthDegrees elevationDegrees gainDB delayMS lpHZ distance</h4>
+<h4 id="satienodetypeupdate-nodename-azimuthdegrees-elevationdegrees-gaindb-delayms-lphz-distance">/satie/&lt;nodeType&gt;/update nodeName azimuthDegrees elevationDegrees gainDB delayMS lpHZ distance</h4>
 <p>Update many essential properties at once. This message is typically sent every frame, all properties relate to node's position. <code>distance</code> applies only to processes.</p>
 <ul>
 <li>nodeName : name of the node</li>
@@ -174,7 +174,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </ul>
 <h2 id="introspection">Introspection</h2>
 <p>You can query SATIE via OSC and get some information. SATIE responds to the following messages:</p>
-<h4 id="satieplugins-get-existing-synthdefs">/satie/plugins // get existing synthdefs</h4>
+<h4 id="satieplugins">/satie/plugins</h4>
+<p>get existing synthdefs</p>
 <p>SATIE responds with an osc message: /plugins JSON string containing 3 objects: generators, effects and mastering, each being a JSON object name: {type, description} (where name = the &quot;id&quot; passed to Satie::makeSynthDef, type = SatiePlugin</p>
 <p>Example output (line wrapped for readability):</p>
 <div class="sourceCode"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="op">{</span> <span class="st">&quot;generators&quot;</span><span class="op">:</span>
