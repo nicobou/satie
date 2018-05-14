@@ -43,3 +43,5 @@ EZSlider( w,
 );
 
 )
+
+~satie.postProcessors[\post_proc_1].set(\amp, 1.0, \decaycoeff, 0.99999999, \post_lpHz, 20)
