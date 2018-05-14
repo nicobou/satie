@@ -15,6 +15,6 @@
 ~name = \envfol;
 ~description = "Envelope follower (audio rate)";
 
-~function = {|in = 0, decaycoeff = 0.99 |
-	EnvFollow.ar(in, decaycoeff);
+~function = {|in = 0, decaycoeff = 0.99, amp = 1.0, post_lpHz = 100 |
+	LPF.ar(EnvFollow.ar(in, decaycoeff, mul: amp), freq: post_lpHz);
 };
