@@ -199,7 +199,7 @@
 			// flush all nodes
 			satie.groups.keysDo ({ |group |
 				satie.groupInstances[group.asSymbol].do({|key|
-					// TODO: handle postProc group case where the key potins to a list of dictionaries
+					// TODO: handle postProc and ambiPostProc groups case where the key potins to a list of dictionaries
 					key.free();
 				})
 			});
@@ -210,7 +210,7 @@
 			satie.groupInstances[\defaultFx] = Dictionary.new;
 
 			satie.groups.keysDo({|item|
-				if ((item.asSymbol == \default) || (item.asSymbol == \defaultFx) || (item.asSymbol == \postProc) == false,
+				if ((item.asSymbol == \default) || (item.asSymbol == \defaultFx) || (item.asSymbol == \postProc)  || (item.asSymbol == \ambiPostProc) == false,
 					{
 						satie.killSatieGroup(item);
 					}
