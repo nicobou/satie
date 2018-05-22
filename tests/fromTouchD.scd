@@ -41,6 +41,7 @@ w.view.decorator = FlowLayout(w.view.bounds);
 ~acts.keysValuesDo({|key, synth|
 	EZSlider( w,
 		300@20,
+		controlSpec: ControlSpec(-1.0, 1.0, \lin, 0.01, 0.001),
 		label: key,
 		action: {|ez| synth.set(\val, ez.value)}
 	);
