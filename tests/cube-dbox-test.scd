@@ -44,7 +44,7 @@ EZSlider( w,
 
 )
 
-~satie.postProcessors[\post_proc_1].set(\amp, 1.0, \decaycoeff, 0.99999999 )
+~satie.postProcessors[\post_proc_1].set(\amp, 2.0, \decaycoeff, 0.99999999, \lag, 5 )
 
 
-~satie.groupInstances[\default][\micro].set(\aziDeg, 90, \aziEle, 10, \gainDB, -80, \nfIndex, 0.01, \t_trig, 1, \amp, 1.0);
+~satie.groupInstances[\default][\micro].set(\aziDeg, -90, \aziEle, 10, \gainDB, -80, \nfIndex, 0.01, \t_trig, 1);
