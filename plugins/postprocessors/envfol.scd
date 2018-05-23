@@ -15,6 +15,11 @@
 ~name = \envfol;
 ~description = "Envelope follower (audio rate)";
 
-~function = {|in = 0, decaycoeff = 0.99, amp = 2.0 |
-	K2A.ar(EnvFollow.ar(in, decaycoeff, mul: amp, add: -0.5)).scope;
+~function = {|in = 0, decaycoeff = 0.99, amp = 2.0, lag = 10 |
+	var env, out;
+	in.scope;
+	env = EnvFollow.ar(in, decaycoeff, mul: amp, add: -0.5);
+	out = Lag.ar(K2A.ar(env), lagTime: lag);
+	out.scope;
+	out;
 };
