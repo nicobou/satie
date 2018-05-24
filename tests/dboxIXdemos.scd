@@ -17,7 +17,7 @@ s = Server.supernova.local;
 	s.meter;
 	s.plotTree;
 };
-
+l
 )
 
 // Start Manual control
@@ -32,7 +32,7 @@ SynthDef(\signal,
 		var sig;
 		sig = K2A.ar(val);
 		sig.scope;
-		Out.ar(out,sig);
+		Out.ar(out,Lag(sig));
 	}).add;
 )
 
@@ -41,7 +41,7 @@ SynthDef(\signal,
 	var name, synth;
 	name = "sig_" ++ item;
 	synth = Synth(\signal);
-	synth.set(\out, item);
+	synth.set(\out, item+8);
 	~acts.add(name.asSymbol -> synth);
 });
 )
