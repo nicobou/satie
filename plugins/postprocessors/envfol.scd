@@ -18,7 +18,7 @@
 ~function = {|in = 0, decaycoeff = 0.99, amp = 2.0, lag = 10 |
 	var env, out;
 	in.scope;
-	env = EnvFollow.ar(in, decaycoeff, mul: amp, add: -1.0);
+	env = EnvFollow.ar(LPF(in, 10), decaycoeff, mul: amp, );
 	env.scope;
 	out = Lag.ar(K2A.ar(env), lag);
 	out.scope;
