@@ -18,10 +18,10 @@ s = Server.supernova.local;
 	s.plotTree;
 };
 
-)
+
 
 // Start Manual control
-(
+
 ~acts = Dictionary.new();
 ~idx = 0;
 
@@ -32,9 +32,9 @@ SynthDef(\signal,
 		sig = K2A.ar(val);
 		Out.ar(out,Lag.ar(sig, lag));
 	}).add;
-)
 
-(
+
+
 3.do({|item|
 	var name, synth;
 	name = "sig_" ++ item;
@@ -42,12 +42,12 @@ SynthDef(\signal,
 	synth.set(\out, item+8);
 	~acts.add(name.asSymbol -> synth);
 });
-)
-)
+
+
 
 // GUI
 
-(
+
 w = Window.new.front;
 w.view.decorator = FlowLayout(w.view.bounds);
 
@@ -101,10 +101,10 @@ t = StaticText.new(w, 200@22);
 t.string_("OSC Rx");
 t.background = Color.grey;
 ~osc = StaticText.new(w, 200@22);
-)
+
 
 // OSC control
-(
+
 o = NetAddr.new("127.0.0.1", 18040);
 
 
