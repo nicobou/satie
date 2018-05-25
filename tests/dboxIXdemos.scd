@@ -1,6 +1,12 @@
 // start SATIE
 
 (
+
+
+~aziSpec = ControlSpec(-180, 180, \linear, 0.01);
+~eleSpec = ControlSpec(-90, 90, \linear, 0.01);
+
+
 s = Server.supernova.local;
 ~satieConfiguration = SatieConfiguration.new(s, [\cube, \dboxThree], 0, [0, 8]);
 ~satieConfiguration.serverOptions.blockSize = 1024;
@@ -14,36 +20,28 @@ s = Server.supernova.local;
 	~satie.makeSourceInstance(\micro, \mic, \default);
 	~satie.groupInstances[\default][\micro].set(\aziDeg, -90, \aziEle, 10, \gainDB, -80, \nfIndex, 0.1, \t_trig, 1);
 	~satie.replacePostProcessor([\envfol], 8, 1);
+	// Start Manual control
+	~satie.satieConfiguration.server.sync;
+	~acts = Dictionary.new();
+	~idx = 0;
+
+	SynthDef(\signal,
+		{
+			|out = 0, val = 0.0, lag = 0.1|
+			var sig;
+			sig = K2A.ar(val);
+			Out.ar(out,Lag.ar(sig, lag));
+	}).add;
+	~satie.satieConfiguration.server.sync;
+	3.do({|item|
+		var name, synth;
+		name = "sig_" ++ item;
+		synth = Synth(\signal);
+		synth.set(\out, item+8);
+		~acts.add(name.asSymbol -> synth);
+	});
 	s.meter;
 	s.plotTree;
-};
-
-
-
-// Start Manual control
-
-~acts = Dictionary.new();
-~idx = 0;
-
-SynthDef(\signal,
-	{
-		|out = 0, val = 0.0, lag = 0.1|
-		var sig;
-		sig = K2A.ar(val);
-		Out.ar(out,Lag.ar(sig, lag));
-	}).add;
-
-
-
-3.do({|item|
-	var name, synth;
-	name = "sig_" ++ item;
-	synth = Synth(\signal);
-	synth.set(\out, item+8);
-	~acts.add(name.asSymbol -> synth);
-});
-
-
 
 // GUI
 
@@ -84,7 +82,7 @@ w.view.decorator.nextLine;
 ~acts.keysValuesDo({|key, synth|
 	currentEnvironment[key] = EZSlider( w,
 		300@20,
-		controlSpec: ControlSpec(-1.0, 1.0, \lin, 0.01, 0.001),
+		controlSpec: ControlSpec(0.0, 1.0, \lin, 0.01, 0.001),
 		label: key,
 		action: {|ez| synth.set(\val, ez.value)}
 	);
@@ -117,5 +115,10 @@ OSCdef(\haptic,
 	'/val',
 	recvPort: 18040
 );
-
+};
 )
+
+
+// add simple 3 oscilator thing playing different low frequency (0.1 - 5 Hz) waves
+// add slider2D for spatialization control
+~satie.postProcessors[\post_proc_1].set(\amp, 20, \lag, 0.1 )
