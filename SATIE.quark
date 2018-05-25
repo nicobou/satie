@@ -3,7 +3,7 @@
   summary: "Spatial Audio Toolkit for Immersive Environments",
   version: "1.0.1",
   schelp: "HelpSource/Overview/SATIE-Overview.schelp",
-  dependencies: #[NodeSnapshot],
+  dependencies: [NodeSnapshot],
   url: "https://gitlab.com/sat-metalab/SATIE-quark",
   since: "2016",
   license: "GPL",

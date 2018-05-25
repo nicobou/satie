@@ -80,6 +80,7 @@ Quarks can be installed in a number of ways. Here are two ways to do it (in supe
 Quarks.gui
 
 // installation via command:
+Quarks.install("NodeSnapshot");
 Quarks.install("MathLib");
 Quarks.install("SC-HOA");
 ~~~~
