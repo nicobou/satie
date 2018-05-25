@@ -17,22 +17,20 @@ s = Server.supernova.local;
 	s.meter;
 	s.plotTree;
 };
-l
+
 )
 
 // Start Manual control
-
 (
 ~acts = Dictionary.new();
 ~idx = 0;
 
 SynthDef(\signal,
 	{
-		|out = 0, val = 0.0|
+		|out = 0, val = 0.0, lag = 0.1|
 		var sig;
 		sig = K2A.ar(val);
-		sig.scope;
-		Out.ar(out,Lag(sig));
+		Out.ar(out,Lag.ar(sig, lag));
 	}).add;
 )
 
@@ -54,7 +52,10 @@ w = Window.new.front;
 w.view.decorator = FlowLayout(w.view.bounds);
 
 
-
+t = StaticText.new(w, 200@22);
+t.string_("Envelope Tracking Properties");
+t.background = Color.grey;
+w.view.decorator.nextLine;
 EZSlider( w,
 	300@20,
 	label: "factor",
@@ -75,34 +76,46 @@ EZSlider( w,
 	action: {|ez| ~satie.postProcessors[\post_proc_1].set(\lag, ez.value )}
 );
 
-
-
+w.view.decorator.nextLine;
+t = StaticText.new(w, 200@22);
+t.string_("Manual Control");
+t.background = Color.grey;
+w.view.decorator.nextLine;
 ~acts.keysValuesDo({|key, synth|
-	EZSlider( w,
+	currentEnvironment[key] = EZSlider( w,
 		300@20,
 		controlSpec: ControlSpec(-1.0, 1.0, \lin, 0.01, 0.001),
 		label: key,
 		action: {|ez| synth.set(\val, ez.value)}
 	);
-	[key, synth].postln;
+	EZSlider( w,
+		300@20,
+		controlSpec: ControlSpec(0.05, 10, \lin, 0.1, 0.1),
+		label: key ++ " lag",
+		action: {|ez| synth.set(\lag, ez.value)}
+	);
 });
 
+w.view.decorator.nextLine;
+t = StaticText.new(w, 200@22);
+t.string_("OSC Rx");
+t.background = Color.grey;
+~osc = StaticText.new(w, 200@22);
 )
 
 // OSC control
 (
-o = NetAddr.new("127.0.0.1", 18040);    // connect to satie's RX port
-
-// ~osc_cb = {|msg, time, addr, recvPort|
-// 	msg.postln;
-// };
-
-OSCdef(\haptic, {|msg, time, addr, recvPort|
-	~acts[\sig_0].set(\val, msg[1]);
-	~acts[\sig_1].set(\val, msg[2]);
-	~acts[\sig_2].set(\val, msg[3]);
-}, '/val',  recvPort: 18040);
+o = NetAddr.new("127.0.0.1", 18040);
 
 
+OSCdef(\haptic,
+	{|msg, time, addr, recvPort|
+		~acts[\sig_0].set(\val, msg[1]);
+		~acts[\sig_1].set(\val, msg[2].asFloat);
+		~acts[\sig_2].set(\val, msg[3].asFloat);
+	},
+	'/val',
+	recvPort: 18040
+);
 
 )
