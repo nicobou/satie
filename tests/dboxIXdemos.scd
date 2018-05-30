@@ -3,6 +3,11 @@
 (
 
 ~osc = false;
+~sinOn = false;
+~acts = Dictionary.new();
+~sins = Dictionary.new();
+
+~idx = 0;
 ~aziSpec = ControlSpec(-180, 180, \linear, 0.01);
 ~eleSpec = ControlSpec(-90, 90, \linear, 0.01);
 
@@ -22,9 +27,33 @@ s = Server.supernova.local;
 	~satie.replacePostProcessor([\envfol], 8, 1);
 	// Start Manual control
 	~satie.satieConfiguration.server.sync;
-	~acts = Dictionary.new();
-	~idx = 0;
 
+	/*************************************
+	* sinusoids
+	*/
+	SynthDef(\sinus,
+		{
+			|out = 0, freq = 0.5, amp = 1.0, mul = 2, add = -1|
+			var sig;
+			sig = SinOsc.ar(freq * rrand(0.1, 0.5), mul: mul, add: add);
+			Out.ar(out,sig * amp.dbamp);
+	}).add;
+
+	~satie.satieConfiguration.server.sync;
+	7.do({|item|
+		var name, synth;
+		name = "sinus_" ++ item;
+		synth = Synth(\sinus);
+		synth.set(\out, item+8);
+		~sins.add(name.asSymbol -> synth);
+	});
+
+	// END sinusoids
+
+
+	/*************************************
+	* discreet signal control
+	*/
 	SynthDef(\signal,
 		{
 			|out = 0, val = 0.0, lag = 0.1|
@@ -40,12 +69,17 @@ s = Server.supernova.local;
 		synth.set(\out, item+8);
 		~acts.add(name.asSymbol -> synth);
 	});
+	// END discreet
+
 	s.meter;
 	s.plotTree;
 
-	// GUI
+	/*************************************
+	* GUI
+	*/
 
 	w = Window.new.front;
+	w.bounds = 400@900;
 	w.view.decorator = FlowLayout(w.view.bounds);
 
 	// audio tracking
@@ -73,6 +107,40 @@ s = Server.supernova.local;
 		controlSpec: ControlSpec(0, 10, \lin, 1, 2),
 		action: {|ez| ~satie.postProcessors[\post_proc_1].set(\lag, ez.value )}
 	);
+	// panning
+	~micPan = Slider2D.new(w, Rect(0, 0, 100, 100));
+	~micPan.action_(
+		{|sl|
+			~satie.groupInstances[\default][\micro].set(
+				\aziDeg, ~aziSpec.map(sl.x), \eleDeg, ~eleSpec.map(sl.y));
+	});
+	~micPan.setXY(~aziSpec.unmap(0), ~eleSpec.unmap(45));
+
+
+	// sinusoids control
+	w.view.decorator.nextLine;
+	t = StaticText.new(w, 200@22);
+	t.string_("Sinusoids ON/OFF");
+	t.background = Color.grey;
+	w.view.decorator.nextLine;
+	~sins.keysValuesDo({|key, synth|
+		currentEnvironment[key] = EZSlider( w,
+			300@20,
+			controlSpec: ControlSpec(0.001, 5.0, \lin, 0.01, 0.1),
+			label: key,
+			action: {|ez| synth.set(\freq, ez.value)}
+		);
+	});
+	EZSlider(w,
+		300@20,
+		controlSpec: \db,
+		label: "sinusoids global amplitude",
+		action: {|ez|
+			~sins.keysValuesDo({|key, synth|
+				synth.set(\amp, ez.value);
+			})
+		}
+	);
 
 	// manual control
 	w.view.decorator.nextLine;
@@ -95,15 +163,7 @@ s = Server.supernova.local;
 		);
 	});
 
-	// panning
-	~micPan = Slider2D.new(w, Rect(0, 0, 100, 100));
-	~micPan.action_(
-		{|sl|
-			~satie.groupInstances[\default][\micro].set(
-				\aziDeg, ~aziSpec.map(sl.x), \eleDeg, ~eleSpec.map(sl.y));
-	});
-	~micPan.setXY(~aziSpec.unmap(0), ~eleSpec.unmap(45));
-
+	// OSC control
 	w.view.decorator.nextLine;
 	t = StaticText.new(w, 200@22);
 	t.string_("OSC Rx");
@@ -136,4 +196,5 @@ s = Server.supernova.local;
 
 // add simple 3 oscilator thing playing different low frequency (0.1 - 5 Hz) waves
 // add slider2D for spatialization control
-~satie.postProcessors[\post_proc_1].set(\amp, 20, \lag, 0.1, \add, -10)
+~satie.postProcessors[\post_proc_1].set(\amp, 20, \lag, 1, \add, -10, \lpf, 2)
+
