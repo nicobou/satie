@@ -47,7 +47,6 @@ s = Server.supernova.local;
 		synth.set(\out, item+8);
 		~sins.add(name.asSymbol -> synth);
 	});
-
 	// END sinusoids
 
 
