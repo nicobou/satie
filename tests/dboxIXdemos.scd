@@ -13,7 +13,7 @@
 
 
 s = Server.supernova.local;
-~satieConfiguration = SatieConfiguration.new(s, [\cube, \dboxThree, \dboxThree], 0, [0, 8, 11]);
+~satieConfiguration = SatieConfiguration.new(s, [\cube, \haptic2000], 0, [0, 8]);
 ~satieConfiguration.serverOptions.blockSize = 1024;
 ~satie = Satie.new(~satieConfiguration);
 ~satie.boot();
