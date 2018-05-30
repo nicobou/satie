@@ -8,7 +8,7 @@
 
 
 s = Server.supernova.local;
-~satieConfiguration = SatieConfiguration.new(s, [\cube, \dboxThree], 0, [0, 8]);
+~satieConfiguration = SatieConfiguration.new(s, [\cube, \dboxThree, \dboxThree], 0, [0, 8, 11]);
 ~satieConfiguration.serverOptions.blockSize = 1024;
 ~satie = Satie.new(~satieConfiguration);
 ~satie.boot();
@@ -33,7 +33,7 @@ s = Server.supernova.local;
 			Out.ar(out,Lag.ar(sig, lag));
 	}).add;
 	~satie.satieConfiguration.server.sync;
-	3.do({|item|
+	7.do({|item|
 		var name, synth;
 		name = "sig_" ++ item;
 		synth = Synth(\signal);
@@ -121,6 +121,9 @@ s = Server.supernova.local;
 					~acts[\sig_0].set(\val, msg[1].asFloat);
 					~acts[\sig_1].set(\val, msg[2].asFloat);
 					~acts[\sig_2].set(\val, msg[3].asFloat);
+					~acts[\sig_3].set(\val, msg[4].asFloat);
+					~acts[\sig_4].set(\val, msg[5].asFloat);
+					~acts[\sig_5].set(\val, msg[6].asFloat);
 				}
 			);
 		},
