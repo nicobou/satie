@@ -13,7 +13,7 @@
 
 
 s = Server.supernova.local;
-~satieConfiguration = SatieConfiguration.new(s, [\cube, \haptic2000], 0, [0, 8]);
+~satieConfiguration = SatieConfiguration.new(s, [\cube, \octoVBAP], 0, [0, 8]);
 ~satieConfiguration.serverOptions.blockSize = 1024;
 ~satie = Satie.new(~satieConfiguration);
 ~satie.boot();
@@ -23,7 +23,8 @@ s = Server.supernova.local;
 	~satie.makeSynthDef(\misD, \misDrone,  [], [], [], ~satie.satieConfiguration.listeningFormat, ~satie.satieConfiguration.outBusIndex, paramsMapper: \nearFarField1);
 	~satie.satieConfiguration.server.sync;
 	~satie.makeSourceInstance(\micro, \mic, \default);
-	~satie.groupInstances[\default][\micro].set(\aziDeg, -90, \aziEle, 10, \gainDB, -80, \nfIndex, 0.1, \t_trig, 1);
+	~satie.groupInstances[\default][\micro].set(\aziDeg, -90, \aziEle, 10, \gainDB, -80, \nfIndex, 1, \t_trig, 1);
+
 	~satie.replacePostProcessor([\envfol], 8, 1);
 	// Start Manual control
 	~satie.satieConfiguration.server.sync;
@@ -112,6 +113,7 @@ s = Server.supernova.local;
 		{|sl|
 			~satie.groupInstances[\default][\micro].set(
 				\aziDeg, ~aziSpec.map(sl.x), \eleDeg, ~eleSpec.map(sl.y));
+			[~aziSpec.map(sl.x), ~eleSpec.map(sl.y)].postln;
 	});
 	~micPan.setXY(~aziSpec.unmap(0), ~eleSpec.unmap(45));
 
@@ -196,4 +198,3 @@ s = Server.supernova.local;
 // add simple 3 oscilator thing playing different low frequency (0.1 - 5 Hz) waves
 // add slider2D for spatialization control
 ~satie.postProcessors[\post_proc_1].set(\amp, 20, \lag, 1, \add, -10, \lpf, 2)
-
