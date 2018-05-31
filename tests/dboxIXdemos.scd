@@ -19,13 +19,19 @@ s = Server.supernova.local;
 ~satie.boot();
 ~satie.satieConfiguration.server.waitForBoot{
 	~satie.makeSynthDef(\mic, \MonoIn,  [], [], [], ~satie.satieConfiguration.listeningFormat, ~satie.satieConfiguration.outBusIndex, paramsMapper: \nearFarField1);
-	~satie.makeSynthDef(\test, \testtone,  [], [], [], ~satie.satieConfiguration.listeningFormat, ~satie.satieConfiguration.outBusIndex, paramsMapper: \nearFarField1);
+	~satie.makeSynthDef(\fbOscRez, \fbOscRez,  [], [], [], ~satie.satieConfiguration.listeningFormat, ~satie.satieConfiguration.outBusIndex, paramsMapper: \nearFarField1);
 	~satie.makeSynthDef(\misD, \misDrone,  [], [], [], ~satie.satieConfiguration.listeningFormat, ~satie.satieConfiguration.outBusIndex, paramsMapper: \nearFarField1);
 	~satie.satieConfiguration.server.sync;
 	~satie.makeSourceInstance(\micro, \mic, \default);
+	~satie.makeSourceInstance(\rez1, \fbOscRez, \default, synthArgs:[\freq: 120, \vibAmp: 0.7, \lpfFreq: 200, \vibAdd: 1.2, \lpfRes: 20, \amp: 0.8, \att: 2]);
 	~satie.groupInstances[\default][\micro].set(\aziDeg, -90, \aziEle, 10, \gainDB, -80, \nfIndex, 1, \t_trig, 1);
+	~satie.groupInstances[\default][\rez1].set(\aziDeg, 0, \aziEle, 10, \gainDB, -20, \nfIndex, 1);
 
 	~satie.replacePostProcessor([\envfol], 8, 1);
+
+
+
+
 	// Start Manual control
 	~satie.satieConfiguration.server.sync;
 
@@ -34,7 +40,7 @@ s = Server.supernova.local;
 	*/
 	SynthDef(\sinus,
 		{
-			|out = 0, freq = 0.5, amp = 1.0, mul = 2, add = -1|
+			|out = 0, freq = 0.5, amp = 0.0, mul = 2, add = -1|
 			var sig;
 			sig = SinOsc.ar(freq * rrand(0.1, 0.5), mul: mul, add: add);
 			Out.ar(out,sig * amp.dbamp);
@@ -84,34 +90,34 @@ s = Server.supernova.local;
 
 	// audio tracking
 	t = StaticText.new(w, 200@22);
-	t.string_("Envelope Tracking Properties");
+	t.string_("Test sound");
 	t.background = Color.grey;
 
 	w.view.decorator.nextLine;
 	EZSlider( w,
 		300@20,
 		label: "factor",
-		action: {|ez| ~satie.groupInstances[\default][\micro].set(\nfIndex, ez.value)}
+		action: {|ez| ~satie.groupInstances[\default][\rez1].set(\nfIndex, ez.value)}
 	);
 
 	EZSlider( w,
 		300@20,
 		label: "gain",
 		controlSpec: \db,
-		action: {|ez| ~satie.groupInstances[\default][\micro].set(\gainDB, ez.value)}
+		action: {|ez| ~satie.groupInstances[\default][\rez1].set(\gainDB, ez.value)}
 	);
 
 	EZSlider( w,
 		300@20,
 		label: "lag",
-		controlSpec: ControlSpec(0, 10, \lin, 1, 2),
+		controlSpec: ControlSpec(0, 10, \lin, 0.1, 0.5),
 		action: {|ez| ~satie.postProcessors[\post_proc_1].set(\lag, ez.value )}
 	);
 	// panning
 	~micPan = Slider2D.new(w, Rect(0, 0, 100, 100));
 	~micPan.action_(
 		{|sl|
-			~satie.groupInstances[\default][\micro].set(
+			~satie.groupInstances[\default][\rez1].set(
 				\aziDeg, ~aziSpec.map(sl.x), \eleDeg, ~eleSpec.map(sl.y));
 			[~aziSpec.map(sl.x), ~eleSpec.map(sl.y)].postln;
 	});
