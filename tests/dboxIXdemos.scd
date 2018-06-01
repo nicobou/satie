@@ -18,18 +18,19 @@ s = Server.supernova.local;
 ~satie = Satie.new(~satieConfiguration);
 ~satie.boot();
 ~satie.satieConfiguration.server.waitForBoot{
-	~satie.makeSynthDef(\mic, \MonoIn,  [], [], [], ~satie.satieConfiguration.listeningFormat, ~satie.satieConfiguration.outBusIndex, paramsMapper: \nearFarField1);
-	~satie.makeSynthDef(\fbOscRez, \fbOscRez,  [], [], [], ~satie.satieConfiguration.listeningFormat, ~satie.satieConfiguration.outBusIndex, paramsMapper: \nearFarField1);
+	~satie.makeSynthDef(\mic, \MonoIn,  [], [], [], ~satie.satieConfiguration.listeningFormat, ~satie.satieConfiguration.outBusIndex);
+	// ~satie.makeSynthDef(\fbOscRez, \fbOscRez,  [], [], [], ~satie.satieConfiguration.listeningFormat, ~satie.satieConfiguration.outBusIndex, paramsMapper: \nearFarField1);
 	~satie.makeSynthDef(\misD, \misDrone,  [], [], [], ~satie.satieConfiguration.listeningFormat, ~satie.satieConfiguration.outBusIndex, paramsMapper: \nearFarField1);
-	~satie.satieConfiguration.server.sync;
 	~satie.makeSourceInstance(\micro, \mic, \default);
-	~satie.makeSourceInstance(\rez1, \fbOscRez, \default, synthArgs:[\freq: 120, \vibAmp: 0.7, \lpfFreq: 200, \vibAdd: 1.2, \lpfRes: 20, \amp: 0.8, \att: 2]);
+	// ~satie.makeSourceInstance(\rez1, \fbOscRez, \default, synthArgs:[\freq: 120, \vibAmp: 0.7, \lpfFreq: 200, \vibAdd: 1.2, \lpfRes: 20, \amp: 0.8, \att: 2]);
 	~satie.groupInstances[\default][\micro].set(\aziDeg, -90, \aziEle, 10, \gainDB, -80, \nfIndex, 1, \t_trig, 1);
-	~satie.groupInstances[\default][\rez1].set(\aziDeg, 0, \aziEle, 10, \gainDB, -20, \nfIndex, 1);
-
+	// ~satie.groupInstances[\default][\rez1].set(\aziDeg, 0, \aziEle, 10, \gainDB, -20, \nfIndex, 1);
+	~satie.replacePostProcessor([\delay], 0, 0);
 	~satie.replacePostProcessor([\envfol], 8, 1);
 
-
+	~satie.postProcessors[\post_proc_0].set(\del, 0.2);
+	~satie.postProcessors[\post_proc_1].set(\lpf, 5);
+	~satie.satieConfiguration.server.sync;
 
 
 	// Start Manual control
@@ -50,7 +51,7 @@ s = Server.supernova.local;
 	7.do({|item|
 		var name, synth;
 		name = "sinus_" ++ item;
-		synth = Synth(\sinus);
+		synth = Synth.new(\sinus, addAction: \addToTail);
 		synth.set(\out, item+8);
 		~sins.add(name.asSymbol -> synth);
 	});
@@ -71,7 +72,7 @@ s = Server.supernova.local;
 	7.do({|item|
 		var name, synth;
 		name = "sig_" ++ item;
-		synth = Synth(\signal);
+		synth = Synth.new(\signal, addAction: \addToTail);
 		synth.set(\out, item+8);
 		~acts.add(name.asSymbol -> synth);
 	});
@@ -97,27 +98,27 @@ s = Server.supernova.local;
 	EZSlider( w,
 		300@20,
 		label: "factor",
-		action: {|ez| ~satie.groupInstances[\default][\rez1].set(\nfIndex, ez.value)}
+		action: {|ez| ~satie.groupInstances[\default][\micro].set(\nfIndex, ez.value)}
 	);
 
 	EZSlider( w,
 		300@20,
 		label: "gain",
 		controlSpec: \db,
-		action: {|ez| ~satie.groupInstances[\default][\rez1].set(\gainDB, ez.value)}
+		action: {|ez| ~satie.groupInstances[\default][\micro].set(\gainDB, ez.value)}
 	);
 
 	EZSlider( w,
 		300@20,
-		label: "lag",
+		label: "LPF",
 		controlSpec: ControlSpec(0, 10, \lin, 0.1, 0.5),
-		action: {|ez| ~satie.postProcessors[\post_proc_1].set(\lag, ez.value )}
+		action: {|ez| ~satie.postProcessors[\post_proc_1].set(\lpf, ez.value )}
 	);
 	// panning
 	~micPan = Slider2D.new(w, Rect(0, 0, 100, 100));
 	~micPan.action_(
 		{|sl|
-			~satie.groupInstances[\default][\rez1].set(
+			~satie.groupInstances[\default][\micro].set(
 				\aziDeg, ~aziSpec.map(sl.x), \eleDeg, ~eleSpec.map(sl.y));
 			[~aziSpec.map(sl.x), ~eleSpec.map(sl.y)].postln;
 	});
@@ -203,4 +204,4 @@ s = Server.supernova.local;
 
 // add simple 3 oscilator thing playing different low frequency (0.1 - 5 Hz) waves
 // add slider2D for spatialization control
-~satie.postProcessors[\post_proc_1].set(\amp, 20, \lag, 1, \add, -10, \lpf, 2)
+
