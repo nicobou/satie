@@ -61,7 +61,7 @@ SatiePlugins : Dictionary {
 		name = env[\name];
 		description = env[\description];
 		function = env[\function];
-		type = env[\function];
+		type = env[\channelLayout];
 		this.add(name.asSymbol -> SatiePlugin.new(name.asSymbol, description, function, type));
 	}
 
