@@ -27,8 +27,8 @@ s = Server.supernova.local;
 	// ~satie.groupInstances[\default][\rez1].set(\aziDeg, 0, \aziEle, 10, \gainDB, -20, \nfIndex, 1);
 	~satie.replacePostProcessor([\delay], 0, 0);
 	~satie.replacePostProcessor([\envfol], 8, 1);
-
-	~satie.postProcessors[\post_proc_0].set(\del, 0.2);
+	~satie.satieConfiguration.server.sync;
+	~satie.postProcessors[\post_proc_0].set(\del, 0.18);
 	~satie.postProcessors[\post_proc_1].set(\lpf, 5);
 	~satie.satieConfiguration.server.sync;
 
