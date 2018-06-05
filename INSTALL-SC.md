@@ -14,7 +14,7 @@ sudo apt-get install build-essential libqt4-dev libqtwebkit-dev \
     libjack-jackd2-dev libsndfile1-dev libasound2-dev libavahi-client-dev \
     libicu-dev libreadline6-dev libfftw3-dev libxt-dev libcwiid-dev \
     pkg-config cmake subversion git qt5-default qt5-qmake qttools5-dev qttools5-dev-tools qtdeclarative5-dev \
-    libqt5webkit5-dev qtpositioning5-dev libqt5sensors5-dev libqt5opengl5-dev libudev-dev
+    libqt5webkit5-dev qtpositioning5-dev libqt5sensors5-dev libqt5opengl5-dev libudev-dev emacs
 ```
 
 ### Building SuperCollider
@@ -80,6 +80,8 @@ Quarks can be installed in a number of ways. Here are two ways to do it (in supe
 Quarks.gui
 
 // installation via command:
+Quarks.install("NodeSnapshot");
+Quarks.install("MathLib");
 Quarks.install("SC-HOA");
 ~~~~
 
