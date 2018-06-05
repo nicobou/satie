@@ -199,7 +199,6 @@
 			// flush all nodes
 			satie.groups.keysDo ({ |group |
 				satie.groupInstances[group.asSymbol].do({|key|
-					// TODO: handle postProc and ambiPostProc groups case where the key potins to a list of dictionaries
 					key.free();
 				})
 			});
