@@ -39,7 +39,7 @@ git checkout feat/sc-hoa
 git submodule update --init
 mkdir build
 cd build
-cmake -DSC_PATH=../../supercollider/ -DSUPERNOVA=ON -DCMAKE_RELEASE_TYPE=Release -DNATIVE=ON ..
+cmake -DSC_PATH=../../supercollider/ -DSUPERNOVA=ON -DCMAKE_BUILD_TYPE=Release -DNATIVE=ON ..
 make
 sudo make install
 ```
