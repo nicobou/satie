@@ -209,8 +209,8 @@
 			satie.groupInstances[\defaultFx] = Dictionary.new;
 
 			satie.groups.keysDo({|item|
-				var group = item.asSymbol
-				if ((group == \default) || (group == \defaultFx) || (group == \postProc)  || (group == \ambiPostProc) == false,
+				var group = item.asSymbol;
+				if ((group != \default) || (group != \defaultFx) || (group != \postProc)  || (group != \ambiPostProc),
 					{
 						satie.killSatieGroup(group);
 					}
