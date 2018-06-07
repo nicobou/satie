@@ -14,7 +14,7 @@ sudo apt-get install build-essential libqt4-dev libqtwebkit-dev \
     libjack-jackd2-dev libsndfile1-dev libasound2-dev libavahi-client-dev \
     libicu-dev libreadline6-dev libfftw3-dev libxt-dev libcwiid-dev \
     pkg-config cmake subversion git qt5-default qt5-qmake qttools5-dev qttools5-dev-tools qtdeclarative5-dev \
-    libqt5webkit5-dev qtpositioning5-dev libqt5sensors5-dev libqt5opengl5-dev libudev-dev emacs
+    libqt5webkit5-dev qtpositioning5-dev libqt5sensors5-dev libqt5opengl5-dev libudev-dev
 ```
 
 ### Building SuperCollider
@@ -22,12 +22,13 @@ sudo apt-get install build-essential libqt4-dev libqtwebkit-dev \
 git clone https://github.com/supercollider/supercollider.git
 cd supercollider
 git checkout 3.9
-git submodule init && git submodule update
+git submodule update --init
 mkdir build
 cd build
-cmake ..
+cmake -DCMAKE_BUILD_TYPE=Release -DNATIVE=ON -DSC_EL=OFF ..    # turn off emacs-based IDE
 make
 sudo make install
+sudo ldconfig    # needed when building SuperCollider for the first time
 ```
 
 ### sc3-plugins
@@ -35,10 +36,10 @@ sudo make install
 git clone https://gitlab.com/sat-metalab/forks/sc3-plugin-with-HOA
 cd sc3-plugin-with-HOA
 git checkout feat/sc-hoa
-git submodule init && git submodule update
+git submodule update --init
 mkdir build
 cd build
-cmake -DSC_PATH=../../supercollider/ -DQUARKS=OFF -DSUPERNOVA=ON ..
+cmake -DSC_PATH=../../supercollider/ -DSUPERNOVA=ON -DCMAKE_BUILD_TYPE=Release -DNATIVE=ON ..
 make
 sudo make install
 ```
