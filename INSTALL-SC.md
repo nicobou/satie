@@ -36,6 +36,29 @@ sudo make install
 sudo ldconfig    # needed when building SuperCollider for the first time
 ```
 
+### Install required SuperCollider Quarks
+Before building the sc3-plugins in the next step, you will need to install a few SuperCollider Quarks and their dependancies.
+Quarks can be installed from within the SuperCollider IDE in a number of ways.
+```
+# In a terminal, open the SuperCollider IDE
+scide
+```
+Quarks can be installed via GUI, or manually by evaluating the Quarks install command. The required Quarks for SATIE are: *MathLib*, *NodeSnapshot*, and *SC-HOA*. You can run the following code by moving the cursor to the line and hitting Ctrl-Enter (Cmd-Enter on macOS):
+```
+// installation via the gui:
+Quarks.gui
+
+// installation via commands:
+Quarks.install("NodeSnapshot");
+Quarks.install("MathLib");
+Quarks.install("SC-HOA");
+
+```
+Due to a conflict between the UnitTesting Quark and SuperCollider's new built-in UnitTesting classes, you will need to exclude the UnitTesting Quark from SuperCollider's class library. This can be done with the following:
+```
+LanguageConfig.addExcludePath(Platform.userAppSupportDir ++ "/downloaded-quarks/UnitTesting").store;
+```
+
 ### Building sc3-plugins
 Run the following commands from the root of your source directory:
 ```
@@ -49,12 +72,6 @@ cmake -DSC_PATH=../../supercollider/ -DSUPERNOVA=ON -DCMAKE_BUILD_TYPE=Release -
 make
 sudo make install
 ```
-
-Then type `scide` (the SuperCollider IDE) and check the console to see if everything installed well.
-
-SATIE is a SuperCollider Quark and it depends on the following Quarks:
-
-- SC-HOA
 
 Building for OSX
 -------------------------
@@ -79,28 +96,12 @@ git clone https://github.com/sekisushai/ambitools.git
 
 Then, the HRIR files for ku100 are located in `~/.local/share/satie/ambitools/FIR/hrir/hrir_ku100_lebedev50/`, which is the default configuration path for SATIE.
 
-### Installing quarks
-Quarks can be installed in a number of ways. Here are two ways to do it (in supercollider):
-
-~~~~
-// installation via the gui:
-Quarks.gui
-
-// installation via command:
-Quarks.install("NodeSnapshot");
-Quarks.install("MathLib");
-Quarks.install("SC-HOA");
-~~~~
-
-You will also have to intall the SATIE quark. From the quark installation menu on the gui, click "install a folder" and select the SATIE folder.
-
-or
-~~~~
+### Installing SATIE
+In order to install SATIE, open the SuperCollider IDE and run the following:
+```
 Quarks.install("https://gitlab.com/sat-metalab/SATIE")
-~~~~
-note:  once you have installed the quark(s) in supercollider, you will need to evaluate the following lines so that supercollider remembers.
-
-~~~~
-LanguageConfig.includePaths
-LanguageConfig.store
-~~~~
+```
+Once the Quark has been sucessfully fetched from git, run the following so that SATIE's path will be included during SuperCollider's class library compilation:
+```
+LanguageConfig.addIncludePath(Platform.userAppSupportDir ++ "/downloaded-quarks/SATIE").store
+```
