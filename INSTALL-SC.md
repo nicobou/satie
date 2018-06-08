@@ -5,7 +5,11 @@
 Building for Ubuntu 16.04 and up
 -------------------------
 
-From a terminal, go into your source directory and type the following commands.
+Open a terminal and create a source directory inside which you will clone *SuperCollider* and *sc3-plugins*:
+```
+cd ~/	# move to the root of your user's home 
+mkdir -p source && cd source
+```
 
 ### Install dependencies
 
@@ -18,6 +22,7 @@ sudo apt-get install build-essential libqt4-dev libqtwebkit-dev \
 ```
 
 ### Building SuperCollider
+Run the following commands from the root of your source directory:
 ```
 git clone https://github.com/supercollider/supercollider.git
 cd supercollider
@@ -31,7 +36,8 @@ sudo make install
 sudo ldconfig    # needed when building SuperCollider for the first time
 ```
 
-### sc3-plugins
+### Building sc3-plugins
+Run the following commands from the root of your source directory:
 ```
 git clone https://gitlab.com/sat-metalab/forks/sc3-plugin-with-HOA
 cd sc3-plugin-with-HOA
