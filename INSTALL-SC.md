@@ -38,26 +38,21 @@ sudo ldconfig    # needed when building SuperCollider for the first time
 
 ### Install required SuperCollider Quarks
 Before building the sc3-plugins in the next step, you will need to install a few SuperCollider Quarks and their dependancies.
-Quarks can be installed from within the SuperCollider IDE in a number of ways.
+In a terminal, open the SuperCollider IDE by using the following command:
 ```
-# In a terminal, open the SuperCollider IDE
 scide
 ```
-Quarks can be installed via GUI, or manually by evaluating the Quarks install command. The required Quarks for SATIE are: *MathLib*, *NodeSnapshot*, and *SC-HOA*. You can run the following code by moving the cursor to the line and hitting Ctrl-Enter (Cmd-Enter on macOS):
+Once the IDE is open, you can install Quarks by typing the `Quarks.install` command and evaluating it. You can run commands by moving the cursor to a line and hitting Ctrl-Enter (Cmd-Enter on macOS). The required Quarks for SATIE are: *MathLib*, *NodeSnapshot*, and *SC-HOA*. 
+Evaluate the following lines one at a time:
 ```
-// installation via the gui:
-Quarks.gui
-
-// installation via commands:
 Quarks.install("NodeSnapshot");
 Quarks.install("MathLib");
 Quarks.install("SC-HOA");
+LanguageConfig.addExcludePath(Platform.userAppSupportDir ++ "/downloaded-quarks/UnitTesting").store;
 
 ```
-Due to a conflict between the UnitTesting Quark and SuperCollider's new built-in UnitTesting classes, you will need to exclude the UnitTesting Quark from SuperCollider's class library. This can be done with the following:
-```
-LanguageConfig.addExcludePath(Platform.userAppSupportDir ++ "/downloaded-quarks/UnitTesting").store;
-```
+Running the last line is required due to a conflict between the UnitTesting Quark and SuperCollider's new built-in UnitTesting classes. The UnitTesting Quark's path needs to be excluded in order for SuperCollider's class library to successfully compile.
+If UnitTesting is causing `duplicate Class found` errors when starting SC or recompiling the class library, you will need to manually delete it from your system. In the IDE's menu, click *File->Open user support directory* then navigate to the `downloaded-quarks` folder and delete the folder called `UnitTesting`.
 
 ### Building sc3-plugins
 Run the following commands from the root of your source directory:

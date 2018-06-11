@@ -26,7 +26,7 @@
 
 		var dico;
 		if(spatSymbolArray.isEmpty, {
-			"Running with no legacy sptializers".debug;
+			"Running with no legacy spatializers".debug;
 			^0;
 		});
 		if(satieConfiguration.audioPlugins.at(srcName) != nil,
