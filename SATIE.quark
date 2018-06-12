@@ -7,7 +7,7 @@
     "NodeSnapshot",
     "SC-HOA"
   ],
-  url: "https://gitlab.com/sat-metalab/SATIE-quark",
+  url: "https://gitlab.com/sat-metalab/SATIE",
   since: "2016",
   license: "GPL",
   copyright: "Nicolas Bouillot, Michal Seta, Zack Settel"
