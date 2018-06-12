@@ -260,7 +260,6 @@ code::
 // prepare the server
 s = Server.supernova.local;
 ~satieConfiguration = SatieConfiguration.new(s, [\stereoListener]);
-~satieConfiguration.serverOptions.blockSize = 1024;
 ~satie = Satie.new(~satieConfiguration);
 ~satie.boot();
 s.waitForBoot({

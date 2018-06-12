@@ -27,7 +27,7 @@ s = Server.supernova.local;
 // postprocessors - mastering
 // spatializers - duh...
 // s.options are exposed via the instance variable serverOptions of the SatieConfiguration class
-~satieConfiguration.serverOptions.blockSize = 1024;
+~satieConfiguration.serverOptions.numOutputBusChannels = 2;
 // now we can boot SATIE
 ~satie = Satie.new(~satieConfiguration);
 ~satie.boot();
