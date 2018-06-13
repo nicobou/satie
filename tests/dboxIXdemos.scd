@@ -13,8 +13,7 @@
 
 
 s = Server.supernova.local;
-~satieConfiguration = SatieConfiguration.new(s, [\cube, \octoVBAP], 0, [0, 8]);
-~satieConfiguration.serverOptions.blockSize = 1024;
+~satieConfiguration = SatieConfiguration.new(s, [\cube, \haptic2000], 0, [0, 8]);
 ~satie = Satie.new(~satieConfiguration);
 ~satie.boot();
 ~satie.satieConfiguration.server.waitForBoot{
@@ -23,7 +22,7 @@ s = Server.supernova.local;
 	~satie.makeSynthDef(\misD, \misDrone,  [], [], [], ~satie.satieConfiguration.listeningFormat, ~satie.satieConfiguration.outBusIndex, paramsMapper: \nearFarField1);
 	~satie.makeSourceInstance(\micro, \mic, \default);
 	// ~satie.makeSourceInstance(\rez1, \fbOscRez, \default, synthArgs:[\freq: 120, \vibAmp: 0.7, \lpfFreq: 200, \vibAdd: 1.2, \lpfRes: 20, \amp: 0.8, \att: 2]);
-	~satie.groupInstances[\default][\micro].set(\aziDeg, -90, \aziEle, 10, \gainDB, -80, \nfIndex, 1, \t_trig, 1);
+	~satie.groupInstances[\default][\micro].set(\aziDeg, -45, \aziEle, 30, \gainDB, -80, \nfIndex, 1, \t_trig, 1);
 	// ~satie.groupInstances[\default][\rez1].set(\aziDeg, 0, \aziEle, 10, \gainDB, -20, \nfIndex, 1);
 	~satie.replacePostProcessor([\delay], 0, 0);
 	~satie.replacePostProcessor([\envfol], 8, 1);
@@ -41,7 +40,7 @@ s = Server.supernova.local;
 	*/
 	SynthDef(\sinus,
 		{
-			|out = 0, freq = 0.5, amp = 0.0, mul = 2, add = -1|
+			|out = 0, freq = 0.5, amp = -99, mul = 2, add = -1|
 			var sig;
 			sig = SinOsc.ar(freq * rrand(0.1, 0.5), mul: mul, add: add);
 			Out.ar(out,sig * amp.dbamp);
@@ -142,6 +141,7 @@ s = Server.supernova.local;
 	EZSlider(w,
 		300@20,
 		controlSpec: \db,
+		initVal: -99,
 		label: "sinusoids global amplitude",
 		action: {|ez|
 			~sins.keysValuesDo({|key, synth|
@@ -204,4 +204,3 @@ s = Server.supernova.local;
 
 // add simple 3 oscilator thing playing different low frequency (0.1 - 5 Hz) waves
 // add slider2D for spatialization control
-
