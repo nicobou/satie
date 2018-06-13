@@ -31,15 +31,17 @@
 */
 
 ~name = \haptic2000;
-~description = "7 channel layout for haptic2000 prototype";
-~numChannels = 7;
+~description = "9 channel layout for haptic2000 prototype";
+~numChannels = 9;
 ~channelLayout = \mono;
 
 ~spk7 =  VBAPSpeakerArray.new(3, [
 	[0, 90],
 	[60, 0], [120, 0], [180, 0], [-120, 0], [-60, 0], [0, 0],
-	[0, -90]]
-); // 8 channel hexagon with center and extra dummy speaker
+	[40, 0], [160, 0],
+	//[0, -90] // dummy
+]
+);
 
 
 ~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1 |
@@ -72,7 +74,3 @@
 ~setup = { |satieInstance|
 		~vbuf7 = Buffer.loadCollection(satieInstance.satieConfiguration.server, ~spk7.getSetsAndMatrices);
 };
-
-
-
-
