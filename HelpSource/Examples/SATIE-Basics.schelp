@@ -1,7 +1,7 @@
-TITLE:: SATIE basics
-summary:: basic SATIE tutorial with examples
+TITLE:: SATIE Basics
+summary:: Basic SATIE tutorial with examples
 categories:: Libraries
-related:: Overview/SATIE-Overview, Classes/SatieConfiguration
+related:: Overview/SATIE-Overview, Classes/Satie, Classes/SatieConfiguration
 
 Section:: First steps
 
@@ -16,8 +16,6 @@ s = Server.supernova.local;
 ~satieConfiguration = SatieConfiguration.new(s, [\stereoListener]);
 // list possible listeners:
 ~satieConfiguration.spatPlugins.keys;
-// Change SuperCollider's block size (jack server's blocksize must be multiple of this value)
-~satieConfiguration.serverOptions.blockSize = 1024;
 // instantiate SATIE renderer and pass it the configuration
 ~satie = Satie.new(~satieConfiguration);
 ~satie.boot();
@@ -155,8 +153,6 @@ s = Server.supernova.local;
 ~satieConfiguration = SatieConfiguration.new(s, [\stereoListener]);
 // list possible listeners:
 ~satieConfiguration.spatPlugins.keys;
-// Change SuperCollider's block size (jack server's blocksize must be multiple of this value)
-~satieConfiguration.serverOptions.blockSize = 1024;
 
 // change input/output channels
 ~satieConfiguration.serverOptions.numOutputBusChannels = 2;

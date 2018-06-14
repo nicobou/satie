@@ -83,7 +83,6 @@ code::
 (
 s = Server.supernova.local;
 ~satieConfiguration = SatieConfiguration.new(s, [\stereoListener], numAudioAux: 2);
-~satieConfiguration.serverOptions.blockSize = 1024;
 ~satieConfiguration.debug = false;
 ~satie = Satie.new(~satieConfiguration);
 ~satie.boot();
