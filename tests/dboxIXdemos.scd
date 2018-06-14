@@ -47,7 +47,7 @@ s = Server.supernova.local;
 	}).add;
 
 	~satie.satieConfiguration.server.sync;
-	7.do({|item|
+	9.do({|item|
 		var name, synth;
 		name = "sinus_" ++ item;
 		synth = Synth.new(\sinus, addAction: \addToTail);
@@ -68,7 +68,7 @@ s = Server.supernova.local;
 			Out.ar(out,Lag.ar(sig, lag));
 	}).add;
 	~satie.satieConfiguration.server.sync;
-	7.do({|item|
+	9.do({|item|
 		var name, synth;
 		name = "sig_" ++ item;
 		synth = Synth.new(\signal, addAction: \addToTail);
@@ -130,12 +130,12 @@ s = Server.supernova.local;
 	t.string_("Sinusoids ON/OFF");
 	t.background = Color.grey;
 	w.view.decorator.nextLine;
-	~sins.keysValuesDo({|key, synth|
+	~sins.order.do({|key|
 		currentEnvironment[key] = EZSlider( w,
 			300@20,
 			controlSpec: ControlSpec(0.001, 5.0, \lin, 0.01, 0.1),
 			label: key,
-			action: {|ez| synth.set(\freq, ez.value)}
+			action: {|ez| ~sins[key].set(\freq, ez.value)}
 		);
 	});
 	EZSlider(w,
@@ -156,18 +156,18 @@ s = Server.supernova.local;
 	t.string_("Manual Control");
 	t.background = Color.grey;
 	w.view.decorator.nextLine;
-	~acts.keysValuesDo({|key, synth|
+	~acts.order.do({|key|
 		currentEnvironment[key] = EZSlider( w,
 			300@20,
 			controlSpec: ControlSpec(-1.0, 1.0, \lin, 0.01, 0.001),
 			label: key,
-			action: {|ez| synth.set(\val, ez.value)}
+			action: {|ez| ~acts[key].set(\val, ez.value)}
 		);
 		EZSlider( w,
 			300@20,
 			controlSpec: ControlSpec(0.05, 10, \lin, 0.1, 0.1),
 			label: key ++ " lag",
-			action: {|ez| synth.set(\lag, ez.value)}
+			action: {|ez| ~acts[key].set(\lag, ez.value)}
 		);
 	});
 
