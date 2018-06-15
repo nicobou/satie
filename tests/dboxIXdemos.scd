@@ -26,13 +26,11 @@ s = Server.supernova.local;
 	// ~satie.groupInstances[\default][\rez1].set(\aziDeg, 0, \aziEle, 10, \gainDB, -20, \nfIndex, 1);
 	~satie.replacePostProcessor([\delay], 0, 0);
 	~satie.replacePostProcessor([\envfol], 8, 1);
-	~satie.satieConfiguration.server.sync;
-	~satie.postProcessors[\post_proc_0].set(\del, 0.18);
-	~satie.postProcessors[\post_proc_1].set(\lpf, 5);
+
 	~satie.satieConfiguration.server.sync;
 
 
-	// Start Manual control
+	// Start Manual control\db,
 	~satie.satieConfiguration.server.sync;
 
 	/*************************************
@@ -101,7 +99,7 @@ s = Server.supernova.local;
 	);
 
 	EZSlider( w,
-		300@20,
+		300@20,\db,
 		label: "gain",
 		controlSpec: \db,
 		action: {|ez| ~satie.groupInstances[\default][\micro].set(\gainDB, ez.value)}
@@ -170,6 +168,18 @@ s = Server.supernova.local;
 			action: {|ez| ~acts[key].set(\lag, ez.value)}
 		);
 	});
+	EZSlider(w,
+		300@20,
+		controlSpec: ControlSpec(-1.0, 1.0, \lin, 0.01, 0.001),
+		initVal: 1,
+		label: "manual global",
+		action: {|ez|
+			~acts.keysValuesDo({|key, synth|
+				synth.set(\val, ez.value);
+			})
+		}
+	);
+
 
 	// OSC control
 	w.view.decorator.nextLine;
@@ -198,6 +208,9 @@ s = Server.supernova.local;
 		'/val',
 		recvPort: 18040
 	);
+	~satie.satieConfiguration.server.sync;
+	~satie.postProcessors[\post_proc_0].set(\del, 0.18);
+	~satie.postProcessors[\post_proc_1].set(\lpf, 5);
 };
 )
 
