@@ -13,6 +13,7 @@
 
 
 s = Server.supernova.local;
+// ~satieConfiguration = SatieConfiguration.new(s, [\cube, \haptic2000], 0, [0, 8]);
 ~satieConfiguration = SatieConfiguration.new(s, [\cube, \haptic2000], 0, [0, 8]);
 ~satie = Satie.new(~satieConfiguration);
 ~satie.boot();
@@ -83,7 +84,7 @@ s = Server.supernova.local;
 	*/
 
 	w = Window.new.front;
-	w.bounds = 400@900;
+	w.bounds = 335@1016;
 	w.view.decorator = FlowLayout(w.view.bounds);
 
 	// audio tracking
