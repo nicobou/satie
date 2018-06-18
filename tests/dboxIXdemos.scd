@@ -18,12 +18,12 @@ s = Server.supernova.local;
 ~satie = Satie.new(~satieConfiguration);
 ~satie.boot();
 ~satie.satieConfiguration.server.waitForBoot{
-	~satie.makeSynthDef(\mic, \MonoIn,  [], [], [], ~satie.satieConfiguration.listeningFormat, ~satie.satieConfiguration.outBusIndex);
+	~satie.makeSynthDef(\mic, \MonoIn,  [], [], [], ~satie.satieConfiguration.listeningFormat, ~satie.satieConfiguration.outBusIndex, paramsMapper: \haptic2000);
 	// ~satie.makeSynthDef(\fbOscRez, \fbOscRez,  [], [], [], ~satie.satieConfiguration.listeningFormat, ~satie.satieConfiguration.outBusIndex, paramsMapper: \nearFarField1);
 	~satie.makeSynthDef(\misD, \misDrone,  [], [], [], ~satie.satieConfiguration.listeningFormat, ~satie.satieConfiguration.outBusIndex, paramsMapper: \nearFarField1);
 	~satie.makeSourceInstance(\micro, \mic, \default);
 	// ~satie.makeSourceInstance(\rez1, \fbOscRez, \default, synthArgs:[\freq: 120, \vibAmp: 0.7, \lpfFreq: 200, \vibAdd: 1.2, \lpfRes: 20, \amp: 0.8, \att: 2]);
-	~satie.groupInstances[\default][\micro].set(\aziDeg, -45, \aziEle, 30, \gainDB, -80, \nfIndex, 1, \t_trig, 1);
+	~satie.groupInstances[\default][\micro].set(\aziDeg, -45, \aziEle, 30, \gainDB, -80, \t_trig, 1, \aziOffset, 60);
 	// ~satie.groupInstances[\default][\rez1].set(\aziDeg, 0, \aziEle, 10, \gainDB, -20, \nfIndex, 1);
 	~satie.replacePostProcessor([\delay], 0, 0);
 	~satie.replacePostProcessor([\envfol], 8, 1);
@@ -75,7 +75,6 @@ s = Server.supernova.local;
 		~acts.add(name.asSymbol -> synth);
 	});
 	// END discreet
-
 	s.meter;
 	s.plotTree;
 
@@ -93,14 +92,15 @@ s = Server.supernova.local;
 	t.background = Color.grey;
 
 	w.view.decorator.nextLine;
-	EZSlider( w,
+/*	EZSlider( w,
 		300@20,
-		label: "factor",
-		action: {|ez| ~satie.groupInstances[\default][\micro].set(\nfIndex, ez.value)}
-	);
+		label: "floor orient",
+		controlSpec: ControlSpec(-180, 180, \linear, 0.01),
+		action: {|ez| ~satie.groupInstances[\default][\micro].set(\aziOffsets, [0, ez.value])}
+	);*/
 
 	EZSlider( w,
-		300@20,\db,
+		300@20,
 		label: "gain",
 		controlSpec: \db,
 		action: {|ez| ~satie.groupInstances[\default][\micro].set(\gainDB, ez.value)}
@@ -116,9 +116,12 @@ s = Server.supernova.local;
 	~micPan = Slider2D.new(w, Rect(0, 0, 100, 100));
 	~micPan.action_(
 		{|sl|
+			var azi, ele;
+			azi = ~aziSpec.map(sl.x);
+			ele = ~eleSpec.map(sl.y);
 			~satie.groupInstances[\default][\micro].set(
-				\aziDeg, ~aziSpec.map(sl.x), \eleDeg, ~eleSpec.map(sl.y));
-			[~aziSpec.map(sl.x), ~eleSpec.map(sl.y)].postln;
+				\aziDeg,  azi, \eleDeg,  ele);
+			[azi, ele].postln;
 	});
 	~micPan.setXY(~aziSpec.unmap(0), ~eleSpec.unmap(45));
 
@@ -156,7 +159,7 @@ s = Server.supernova.local;
 	t.background = Color.grey;
 	w.view.decorator.nextLine;
 	~acts.order.do({|key|
-		currentEnvironment[key] = EZSlider( w,
+		currentEnvironment[key] = EZSlider( w,	~satie.satieConfiguration.orientationOffsetDeg[0]= 0;
 			300@20,
 			controlSpec: ControlSpec(-1.0, 1.0, \lin, 0.01, 0.001),
 			label: key,
@@ -197,12 +200,13 @@ s = Server.supernova.local;
 		{|msg, time, addr, recvPort|
 			if (~osc == true,
 				{
-					~acts[\sig_0].set(\val, msg[1].asFloat);
-					~acts[\sig_1].set(\val, msg[2].asFloat);
-					~acts[\sig_2].set(\val, msg[3].asFloat);
-					~acts[\sig_3].set(\val, msg[4].asFloat);
-					~acts[\sig_4].set(\val, msg[5].asFloat);
-					~acts[\sig_5].set(\val, msg[6].asFloat);
+					~acts[\sig_5].set(\val, msg[1].asFloat);
+					~acts[\sig_4].set(\val, msg[2].asFloat);
+					~acts[\sig_3].set(\val, msg[3].asFloat);
+					~acts[\sig_0].set(\val, msg[4].asFloat);
+					~acts[\sig_8].set(\val, msg[5].asFloat);
+					~acts[\sig_1].set(\val, msg[6].asFloat);
+					~acts[\sig_7].set(\val, msg[7].asFloat);
 				}
 			);
 		},
@@ -210,7 +214,7 @@ s = Server.supernova.local;
 		recvPort: 18040
 	);
 	~satie.satieConfiguration.server.sync;
-	~satie.postProcessors[\post_proc_0].set(\del, 0.18);
+	~satie.postProcessors[\post_proc_0].set(\del, 0.122);
 	~satie.postProcessors[\post_proc_1].set(\lpf, 5);
 };
 )
@@ -218,3 +222,5 @@ s = Server.supernova.local;
 
 // add simple 3 oscilator thing playing different low frequency (0.1 - 5 Hz) waves
 // add slider2D for spatialization control
+
+~satie.groupInstances[\default][\micro].set(\aziDeg, -145, \aziEle, 30, \gainDB, -0, \t_trig, 1, \aziOffset, 0);
