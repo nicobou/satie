@@ -42,7 +42,7 @@ One can use it either directly from SuperCollider or by sending it OSC messages.
 SECTION:: Examples
 The examples below show various facets of SATIE's functionality.
 DEFINITIONLIST::
-## LINK::Examples/Basics::
+## LINK::Examples/SATIE-Basics::
 || Progressive examples of SATIE functionnality, how to use it from scide.
 ## LINK::Overview/Spatializers::
 || Overview of available spatializers
