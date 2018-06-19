@@ -11,12 +11,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-~name = \haptic2000;
+~name = \haptic2000map;
 
-// default mapper does nothing. It could have been named 'identity'
+// offset rotation of the second (VBAP) spatializer (normally the haptic floor)
 ~function = { | aziDeg = 0, eleDeg = 0, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 0.5, spread = 1, aziOffset = 0, eleOffset = 0 |
 	[
-		[aziDeg, eleDeg, gainDB, delayMs, lpHz, hpHz, spread],
-		[aziDeg + aziOffset, eleDeg + eleOffset, gainDB, delayMs, lpHz, hpHz, spread]
+		[aziDeg, eleDeg, gainDB, delayMs, lpHz, hpHz, spread, aziOffset, eleOffset],
+		[aziDeg + aziOffset, eleDeg + eleOffset, gainDB, delayMs, lpHz, hpHz, spread, aziOffset, eleOffset]
 	];
 };
