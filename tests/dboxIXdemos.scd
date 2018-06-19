@@ -18,12 +18,12 @@ s = Server.supernova.local;
 ~satie = Satie.new(~satieConfiguration);
 ~satie.boot();
 ~satie.satieConfiguration.server.waitForBoot{
-	~satie.makeSynthDef(\mic, \MonoIn,  [], [], [], ~satie.satieConfiguration.listeningFormat, ~satie.satieConfiguration.outBusIndex, paramsMapper: \haptic2000);
+	~satie.makeSynthDef(\mic, \MonoIn,  [], [], [], ~satie.satieConfiguration.listeningFormat, ~satie.satieConfiguration.outBusIndex, paramsMapper: \haptic2000map);
 	// ~satie.makeSynthDef(\fbOscRez, \fbOscRez,  [], [], [], ~satie.satieConfiguration.listeningFormat, ~satie.satieConfiguration.outBusIndex, paramsMapper: \nearFarField1);
 	~satie.makeSynthDef(\misD, \misDrone,  [], [], [], ~satie.satieConfiguration.listeningFormat, ~satie.satieConfiguration.outBusIndex, paramsMapper: \nearFarField1);
 	~satie.makeSourceInstance(\micro, \mic, \default);
 	// ~satie.makeSourceInstance(\rez1, \fbOscRez, \default, synthArgs:[\freq: 120, \vibAmp: 0.7, \lpfFreq: 200, \vibAdd: 1.2, \lpfRes: 20, \amp: 0.8, \att: 2]);
-	~satie.groupInstances[\default][\micro].set(\aziDeg, -45, \aziEle, 30, \gainDB, -80, \t_trig, 1, \aziOffset, 60);
+	~satie.groupInstances[\default][\micro].set(\aziDeg, -45, \aziEle, 30, \gainDB, -80, \t_trig, 1);
 	// ~satie.groupInstances[\default][\rez1].set(\aziDeg, 0, \aziEle, 10, \gainDB, -20, \nfIndex, 1);
 	~satie.replacePostProcessor([\delay], 0, 0);
 	~satie.replacePostProcessor([\envfol], 8, 1);
@@ -92,12 +92,12 @@ s = Server.supernova.local;
 	t.background = Color.grey;
 
 	w.view.decorator.nextLine;
-/*	EZSlider( w,
+	EZSlider( w,
 		300@20,
 		label: "floor orient",
 		controlSpec: ControlSpec(-180, 180, \linear, 0.01),
-		action: {|ez| ~satie.groupInstances[\default][\micro].set(\aziOffsets, [0, ez.value])}
-	);*/
+		action: {|ez| ~satie.groupInstances[\default][\micro].set(\aziOffset, ez.value)}
+	);
 
 	EZSlider( w,
 		300@20,
@@ -159,7 +159,7 @@ s = Server.supernova.local;
 	t.background = Color.grey;
 	w.view.decorator.nextLine;
 	~acts.order.do({|key|
-		currentEnvironment[key] = EZSlider( w,	~satie.satieConfiguration.orientationOffsetDeg[0]= 0;
+		currentEnvironment[key] = EZSlider( w,
 			300@20,
 			controlSpec: ControlSpec(-1.0, 1.0, \lin, 0.01, 0.001),
 			label: key,
@@ -224,3 +224,12 @@ s = Server.supernova.local;
 // add slider2D for spatialization control
 
 ~satie.groupInstances[\default][\micro].set(\aziDeg, -145, \aziEle, 30, \gainDB, -0, \t_trig, 1, \aziOffset, 0);
+~satie.postProcessors[\post_proc_0].set(\del, 0.122);
+~satie.postProcessors[\post_proc_1].set(\lpf, 5);
+
+b = NetAddr.new("127.0.0.1", 18032);    // connect to satie's RX port
+
+b.sendMsg("/satie/source/update", "micro", 30,60, 0,0,15000,5);    // azimuthRad elevationRad gainDB delayMS  lpHZ  distanceMETERS
+b.sendMsg("/satie/source/update", "micro", -30,60, 0,0,15000,5);
+b.sendMsg("/satie/source/update", "micro", 90,60, 0,0,15000,5);
+b.sendMsg("/satie/source/update", "micro", -90,60, 0,0,15000,5);
