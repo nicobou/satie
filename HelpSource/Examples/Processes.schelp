@@ -2,10 +2,18 @@ TITLE:: Processes
 summary:: Introduction to SATIE processes
 categories:: Libraries>SATIE
 
-Go back to link::Overview/SATIE-Overview:: previous: link::Examples/Kamikaze::
+Go back to link::Overview/SATIE-Overview::
+
+Previous Section: link::Examples/Spatializers::
+
+Next Section: link::Examples/Effects::
+
+
+SECTION:: Overview
+
 Processes allow more complex behaviors while limiting OSC communications between 3D engine and SATIE server. Processes are arbitrary routines and could be associated with particle systems, granular-type sound events, patterns, sequences, but are not limited to generating sound (or other events) could also be used for introspection, tracking of various interaction or sound features and reporting. The process will run completely independent of the 3D engine control via OSC, unless appropriate methods have been implemented or overriden.
 
-SECTION::Simple process example
+SECTION:: Simple process example
 
 We start with setting up SATIE. The synths that will be used by the process must be compiled on the server:
 
@@ -99,6 +107,7 @@ code::
 
 Go back to link::Overview/SATIE-Overview::
 
-Previous Section: link::Examples/Kamikaze::
+Previous Section: link::Examples/Spatializers::
 
-Next Section: link::Examples/ProcessComplex::
+Next Section: link::Examples/Effects::
+

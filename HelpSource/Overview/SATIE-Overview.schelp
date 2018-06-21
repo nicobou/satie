@@ -35,31 +35,33 @@ s = Server.supernova.local;
 ::
 
 
-SUBSECTION:: Use it
+SECTION:: Use it
 One can use it either directly from SuperCollider or by sending it OSC messages. See examples below for various applications.
 
-
-SECTION:: Examples
+SUBSECTION:: Examples
 The examples below show various facets of SATIE's functionality.
 DEFINITIONLIST::
 ## LINK::Examples/SATIE-Basics::
 || Progressive examples of SATIE functionnality, how to use it from scide.
-## LINK::Overview/Spatializers::
+## LINK::Examples/Spatializers::
 || Overview of available spatializers
 ## LINK::Examples/Processes::
 || Example of SATIE processes
 ## LINK::Examples/Effects::
 || Introduction to using effects
-## LINK::Examples/OSC-API.html##SATIE OSC protocol (html)::
-|| How to talk (and listen) to SATIE via OSC
 ## LINK::Examples/Plugins::
 || Description of SATIE plugins
 ## LINK::Examples/Ambi::
 || Ambisonic support in SATIE
 ::
 
-SECTION:: Classes
+SUBSECTION:: API
+DEFINITIONLIST::
+## LINK::Overview/OSC-API.html##SATIE OSC protocol (html)::
+|| How to talk (and listen) to SATIE via OSC
+::
 
+SUBSECTION:: Classes
 DEFINITIONLIST::
 ## LINK::Classes/Satie::
 || Main SATIE audio renderer class
@@ -76,3 +78,4 @@ DEFINITIONLIST::
 ##LINK::Classes/SatiePlugins::
 || A Dictionary of plugins
 ::
+

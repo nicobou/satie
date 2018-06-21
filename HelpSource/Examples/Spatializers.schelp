@@ -3,6 +3,13 @@ SUMMARY:: Overview of spatialization plugins in SATIE
 CATEGORIES:: Libraries>SATIE, Libraries>HOA, UGens > Multichannel > Panners
 RELATED:: Overview/SATIE-Overview, Classes/SpatializerPlugin, Examples/Ambi
 
+Go back to link::Overview/SATIE-Overview::
+
+Previous Section: link::Examples/SATIE-Basics::
+
+Next Section: link::Examples/Processes::
+
+
 SECTION:: Overview
 
 SATIE provides two types of spatializers: VBAP and higher order ambisonics (up to the 5th order). The lists of available plugins in each category follows:
@@ -217,3 +224,11 @@ Platform.case (
 };
 )
 ::
+
+
+Go back to link::Overview/SATIE-Overview::
+
+Previous Section: link::Examples/SATIE-Basics::
+
+Next Section: link::Examples/Processes::
+

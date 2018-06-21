@@ -3,7 +3,13 @@ summary:: Use of ambisonic with SATIE, simultaneously with other spatialization
 categories:: SATIE
 related:: Overview/SATIE-Overview, Classes/Satie, Classes/SatieConfiguration
 
+Go back to link::Overview/SATIE-Overview::
+
+Previous Section: link::Examples/Plugins::
+
+
 Section:: Overview
+
 An ambisonic pipeline can be used simultaneously and in parallel with the usual spatialization pipeline. Here we provide examples of use that include:
 list::
 ## configuration of ambisonic pipelines for decoding b-format produced by sound objects
@@ -145,3 +151,6 @@ code::
 ::
 
 Go back to link::Overview/SATIE-Overview::
+
+Previous Section: link::Examples/Plugins::
+
