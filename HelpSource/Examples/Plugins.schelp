@@ -3,6 +3,13 @@ summary:: Writing audio plugins for SATIE
 categories:: Libraries>SATIE
 related:: Overview/SATIE-Overview, Classes/Satie, Classes/SatiePlugin, Classes/SpatializerPlugin
 
+Go back to link::Overview/SATIE-Overview::
+
+Previous Section: link::Examples/Effects::
+
+Next Section: link::Examples/Ambi::
+
+
 DESCRIPTION::
 
 SATIE plugins are SuperCollider functions. They are later wrapped together in order to generate several synths. There are three categories of plugins:
@@ -100,3 +107,11 @@ s = Server.supernova.local;
 // compile the synthdef for use with SATIE
 ~satie.makeSynthDef(\mySound, \simpleOSC, [], [~satie.aux[0]], [],~satieConfiguration.listeningFormat, [0]);
 ::
+
+
+Go back to link::Overview/SATIE-Overview::
+
+Previous Section: link::Examples/Effects::
+
+Next Section: link::Examples/Ambi::
+

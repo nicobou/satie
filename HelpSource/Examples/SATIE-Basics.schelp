@@ -3,6 +3,11 @@ summary:: Basic SATIE tutorial with examples
 categories:: Libraries
 related:: Overview/SATIE-Overview, Classes/Satie, Classes/SatieConfiguration
 
+Go back to link::Overview/SATIE-Overview::
+
+Next Section: link::Examples/Spatializers::
+
+
 Section:: First steps
 
 NOTE::SATIE takes advantage of parrallel processing provided by supernova server therefore it is a preferred setup and examples use it by default. ::
@@ -191,4 +196,5 @@ s.waitForBoot({
 
 Go back to link::Overview/SATIE-Overview::
 
-Next Section: link::Examples/Effects::
+Next Section: link::Examples/Spatializers::
+
