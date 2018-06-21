@@ -48,8 +48,8 @@
 	var inrange_coef;
 	var outrange_coef;
 
-	inrange_coef = cos((aziDeg.clip(-90,90) - [-90, -45, 0, 45, 90]) * 0.01745329251994).normalize.cubed;
-	outrange_coef = (1 - abs((aziDeg- aziDeg.fold(-90, 90) / 180))).cubed;
+	inrange_coef = abs(cos((Clip.kr(aziDeg - [-90, -45, 0, 45, 90], -90, 90) ) * 0.01745329251994)).cubed;
+	outrange_coef = (1 - abs((aziDeg - aziDeg.fold(-90, 90) / 180))).cubed;
 
 	outsig =  LPF.ar(DelayC.ar(
 		Lag.kr(gain, slewGain) * in,
@@ -59,15 +59,23 @@
 	outsig = BHiPass.ar(outsig, VarLag.kr(hpHz, slewFilter));
 
 	#a, b, c, d, e = inrange_coef * outrange_coef;
-	panWeights = [e, d, 0, a, b, c, 0, b, d] // reorder to speaker arrangement
+	panWeights = [e, d, 0, a, b, c, 0, b, d]; // reorder to speaker arrangement
 
-	outsig * Lag.kr(panWeights, 0.030);
+	outsig * Lag.ar(K2A.ar(panWeights), 0.030);
 };
 
 
 // s.reboot;
 // s.meter;
 //
+//
+// (
+// {
+// 	[0.01, 0.04, 0.9].normalize;
+//
+// 	Normalizer.ar([0.01,0.005,0.7]);
+// }.scope;
+// );
 // (
 // {
 // 	var angle = -120;
@@ -78,6 +86,8 @@
 // 	SinOsc.ar() * inrange_coef * [outrange_coef, outrange_coef, outrange_coef, outrange_coef, outrange_coef];
 // }.scope;
 // )
+
+
 
 
 
