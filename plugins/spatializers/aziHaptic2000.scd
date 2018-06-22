@@ -48,7 +48,10 @@
 	var inrange_coef;
 	var outrange_coef;
 
-	inrange_coef = abs(cos((Clip.kr(aziDeg - [-90, -45, 0, 45, 90], -90, 90) ) * 0.01745329251994)).cubed;
+	inrange_coef = (
+		(Clip.kr(aziDeg - [-90, -45, 0, 45, 90], -90, 90) )
+		* 0.01745329251994  // degrad
+	).cos.abs.cubed;
 	outrange_coef = (1 - abs((aziDeg - aziDeg.fold(-90, 90) / 180))).cubed;
 
 	outsig =  LPF.ar(DelayC.ar(
@@ -59,9 +62,9 @@
 	outsig = BHiPass.ar(outsig, VarLag.kr(hpHz, slewFilter));
 
 	#a, b, c, d, e = inrange_coef * outrange_coef;
-	panWeights = [e, d, 0, a, b, c, 0, b, d]; // reorder to speaker arrangement
+	panWeights = [e, d, Line.kr(0,0), a, b, c, Line.kr(0,0), b, d]; // reorder to speaker arrangement
 
-	outsig * Lag.ar(K2A.ar(panWeights), 0.030);
+	outsig * Lag.kr(panWeights, 0.030);
 };
 
 
