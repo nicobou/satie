@@ -68,31 +68,6 @@
 };
 
 
-// s.reboot;
-// s.meter;
-//
-//
-// (
-// {
-// 	[0.01, 0.04, 0.9].normalize;
-//
-// 	Normalizer.ar([0.01,0.005,0.7]);
-// }.scope;
-// );
-// (
-// {
-// 	var angle = -120;
-// 	var inrange_coef;
-// 	var outrange_coef;
-// 	inrange_coef = cos((angle.clip(-90,90) - [-90, -45, 0, 45, 90]) * 0.01745329251994).normalize.cubed;
-// 	outrange_coef = (1 - abs((angle - angle.fold(-90, 90) / 180))).cubed;
-// 	SinOsc.ar() * inrange_coef * [outrange_coef, outrange_coef, outrange_coef, outrange_coef, outrange_coef];
-// }.scope;
-// )
-
-
-
-
 
 
 
