@@ -14,6 +14,7 @@
 
 s = Server.supernova.local;
 // ~satieConfiguration = SatieConfiguration.new(s, [\cube, \haptic2000], 0, [0, 8]);
+//
 ~satieConfiguration = SatieConfiguration.new(s, [\stereoListener, \stereoListener, \aziHaptic2000], 0, [0, 2, 8]);
 ~satieConfiguration.serverOptions.numOutputBusChannels = 16;
 ~satie = Satie.new(~satieConfiguration);
@@ -227,7 +228,8 @@ s = Server.supernova.local;
 
 ~satie.groupInstances[\default][\micro].set(\aziDeg, -145, \aziEle, 30, \gainDB, -0, \t_trig, 1, \aziOffset, 0);
 ~satie.postProcessors[\post_proc_0].set(\del, 0.122);
-~satie.postProcessors[\post_proc_1].set(\lpf, 5);
+~satie.postProcessors[\post_proc_1].set(\del, 0.122);
+~satie.postProcessors[\post_proc_2].set(\lpf, 5);
 
 b = NetAddr.new("127.0.0.1", 18032);    // connect to satie's RX port
 
