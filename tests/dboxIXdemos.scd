@@ -13,8 +13,7 @@
 
 
 s = Server.supernova.local;
-// ~satieConfiguration = SatieConfiguration.new(s, [\cube, \haptic2000], 0, [0, 8]);
-~satieConfiguration = SatieConfiguration.new(s, [\cube, \aziHaptic2000], 0, [0, 8]);
+~satieConfiguration = SatieConfiguration.new(s, [\cube, \haptic2000], 0, [0, 8]);
 ~satie = Satie.new(~satieConfiguration);
 ~satie.boot();
 ~satie.satieConfiguration.server.waitForBoot{
