@@ -23,6 +23,10 @@ other:
 - utils:         diagnostics and other tools
 - tests:         unit tests and other testing scripts
 
+## License
+
+This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version. See [LICENSE](LICENSE) for the license text.
+
 ## Sponsors
 
 This project is made possible thanks to the Society for Arts and Technologies. [SAT](http://www.sat.qc.ca/) and to the Ministère de l'Économie, de la Science et de l'Innovation (MESI) du Québec
