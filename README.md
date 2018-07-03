@@ -25,7 +25,7 @@ other:
 
 ## Sponsors
 
-This project is made possible thanks to the Society for Arts and Technologies. [SAT](http://www.sat.qc.ca/) and to the Ministère de l'Économie, de la Science et de l'Innovation (MESI) du Québec
+This project is made possible thanks to the [Society for Arts and Technology](http://www.sat.qc.ca/) [SAT] and to the Ministère de l'Économie, de la Science et de l'Innovation (MESI) du Québec.
 
 ## SATIE Overview
 
@@ -38,4 +38,4 @@ Its aim is to facilitate using 3D space in audio music/audio composition and aut
 There is also [PySATIE](https://gitlab.com/sat-metalab/PySATIE) python module which allows for some SATIE control directly from python code (particularly useful for use with [Blender](https://www.blender.org/) or [Panda3d](https://www.panda3d.org/))
 
 
-See [SATIE OSC API](./SATIE-OSC-API.md) for details on OSC communication.
+See [SATIE OSC API](SATIE-OSC-API.md) for details on OSC communication.
