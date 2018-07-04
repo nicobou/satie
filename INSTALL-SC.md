@@ -92,9 +92,13 @@ git clone https://github.com/sekisushai/ambitools.git
 Then, the HRIR files for ku100 are located in `~/.local/share/satie/ambitools/FIR/hrir/hrir_ku100_lebedev50/`, which is the default configuration path for SATIE.
 
 ### Installing SATIE
-In order to install SATIE, open the SuperCollider IDE and run the following:
+In order to install latest release of SATIE, open the SuperCollider IDE (`scide` command) and run the following:
 ```
 Quarks.install("https://gitlab.com/sat-metalab/SATIE")
+```
+For the development version, run the following:
+```
+Quarks.install("https://gitlab.com/sat-metalab/SATIE", "develop")
 ```
 Once the Quark has been sucessfully fetched from git, run the following so that SATIE's path will be included during SuperCollider's class library compilation:
 ```
