@@ -81,7 +81,7 @@ returns:: a clone of the process
 (see an example of processes in LINK::Examples/Processes::)
 
 METHOD:: makeKamikaze
-Instantiate a shadow of the audio source of effect. See LINK::Examples/Kamikaze:: for an example of Kamikaze. See link::Classes/Satie#-makeSynthDef:: above for the description of arguments.
+Instantiate a shadow of the audio source of effect. See link::Classes/Satie#-makeSynthDef:: above for the description of arguments.
 
 returns:: link::Classes/Synth::
 
