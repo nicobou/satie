@@ -15,27 +15,25 @@
 s = Server.supernova.local;
 // ~satieConfiguration = SatieConfiguration.new(s, [\cube, \haptic2000], 0, [0, 8]);
 //
-~satieConfiguration = SatieConfiguration.new(s, [\stereoListener, \stereoListener, \aziHaptic2000], 0, [0, 2, 8]);
+~satieConfiguration = SatieConfiguration.new(s, [\stereoListener, \stereoListener, \aziHaptic2000], 0, [0, 6, 8]);
 ~satieConfiguration.serverOptions.numOutputBusChannels = 16;
 ~satie = Satie.new(~satieConfiguration);
 ~satie.boot();
 ~satie.satieConfiguration.server.waitForBoot{
 	~satie.makeSynthDef(\mic, \MonoIn,  [], [], [], ~satie.satieConfiguration.listeningFormat, ~satie.satieConfiguration.outBusIndex, paramsMapper: \haptic2000map);
-	// ~satie.makeSynthDef(\fbOscRez, \fbOscRez,  [], [], [], ~satie.satieConfiguration.listeningFormat, ~satie.satieConfiguration.outBusIndex, paramsMapper: \nearFarField1);
+	~satie.makeSynthDef(\fbOscRez, \fbOscRez,  [], [], [], ~satie.satieConfiguration.listeningFormat, ~satie.satieConfiguration.outBusIndex, paramsMapper: \haptic2000map);
 	~satie.makeSynthDef(\misD, \misDrone,  [], [], [], ~satie.satieConfiguration.listeningFormat, ~satie.satieConfiguration.outBusIndex, paramsMapper: \nearFarField1);
 	~satie.makeSourceInstance(\micro, \mic, \default);
-	// ~satie.makeSourceInstance(\rez1, \fbOscRez, \default, synthArgs:[\freq: 120, \vibAmp: 0.7, \lpfFreq: 200, \vibAdd: 1.2, \lpfRes: 20, \amp: 0.8, \att: 2]);
+	~satie.makeSourceInstance(\rez1, \fbOscRez, \default, synthArgs:[\freq: 120, \vibAmp: 0.7, \lpfFreq: 200, \vibAdd: 1.2, \lpfRes: 20, \amp: 0.8, \att: 2, \gainDB: -99]);
 	~satie.groupInstances[\default][\micro].set(\aziDeg, -45, \aziEle, 30, \gainDB, -80, \t_trig, 1);
 	// ~satie.groupInstances[\default][\rez1].set(\aziDeg, 0, \aziEle, 10, \gainDB, -20, \nfIndex, 1);
 	~satie.replacePostProcessor([\delay], 0, 0);
 	~satie.replacePostProcessor([\delay], 2, 1);
 	~satie.replacePostProcessor([\envfol], 8, 2);
-
 	~satie.satieConfiguration.server.sync;
 
 
-	// Start Manual control\db,
-	~satie.satieConfiguration.server.sync;
+	// Start Manual control
 
 	/*************************************
 	* sinusoids
@@ -86,7 +84,7 @@ s = Server.supernova.local;
 	*/
 
 	w = Window.new.front;
-	w.bounds = 335@1016;
+	w.bounds = 315@1030;
 	w.view.decorator = FlowLayout(w.view.bounds);
 
 	// audio tracking
@@ -104,9 +102,17 @@ s = Server.supernova.local;
 
 	EZSlider( w,
 		300@20,
-		label: "gain",
+		label: "input gain",
 		controlSpec: \db,
 		action: {|ez| ~satie.groupInstances[\default][\micro].set(\gainDB, ez.value)}
+	);
+
+	EZSlider( w,
+		300@20,
+		label: "synth gain",
+		controlSpec: \db,
+		initVal: -99,
+		action: {|ez| ~satie.groupInstances[\default][\rez1].set(\gainDB, ez.value)}
 	);
 
 	EZSlider( w,
@@ -124,7 +130,8 @@ s = Server.supernova.local;
 			ele = ~eleSpec.map(sl.y);
 			~satie.groupInstances[\default][\micro].set(
 				\aziDeg,  azi, \eleDeg,  ele);
-			[azi, ele].postln;
+			~satie.groupInstances[\default][\rez1].set(
+				\aziDeg,  azi, \eleDeg,  ele);
 	});
 	~micPan.setXY(~aziSpec.unmap(0), ~eleSpec.unmap(45));
 
@@ -218,22 +225,10 @@ s = Server.supernova.local;
 	);
 	~satie.satieConfiguration.server.sync;
 	~satie.postProcessors[\post_proc_0].set(\del, 0.122);
-	~satie.postProcessors[\post_proc_1].set(\lpf, 5);
+	~satie.postProcessors[\post_proc_1].set(\del, 0.122);
+	~satie.postProcessors[\post_proc_2].set(\lpf, 5);
+	~satie.groupInstances[\default][\rez1].set( \freq, 60, \vibFreq, 22,\vibAmp, 0.5, \lpfFreq, 5, \vibAdd, 1.3, \lpfRes, 1, \amp, 0.5, \att, 2);
+
 };
+
 )
-
-
-// add simple 3 oscilator thing playing different low frequency (0.1 - 5 Hz) waves
-// add slider2D for spatialization control
-
-~satie.groupInstances[\default][\micro].set(\aziDeg, -145, \aziEle, 30, \gainDB, -0, \t_trig, 1, \aziOffset, 0);
-~satie.postProcessors[\post_proc_0].set(\del, 0.122);
-~satie.postProcessors[\post_proc_1].set(\del, 0.122);
-~satie.postProcessors[\post_proc_2].set(\lpf, 5);
-
-b = NetAddr.new("127.0.0.1", 18032);    // connect to satie's RX port
-
-b.sendMsg("/satie/source/update", "micro", 30,60, 0,0,15000,5);    // azimuthRad elevationRad gainDB delayMS  lpHZ  distanceMETERS
-b.sendMsg("/satie/source/update", "micro", -30,60, 0,0,15000,5);
-b.sendMsg("/satie/source/update", "micro", 90,60, 0,0,15000,5);
-b.sendMsg("/satie/source/update", "micro", -90,60, 0,0,15000,5);
