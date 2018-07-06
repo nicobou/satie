@@ -15,6 +15,8 @@
 ~name = \hapticHOA;
 ~description = "8 channel hexagone with center ambisonic decoder";
 
-~function = {|in = 0, order |
+~function = {|in = 0, order = 2, lpf = 5|
+	var envfol;
+	envfol = LPF.ar(PeakFollower.ar(in),lpf , mul: 50, add: -1);
 	HOADecHaptic2000.ar(order, in);
 };
