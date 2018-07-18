@@ -86,9 +86,28 @@ Spatializer(s) in use
 returns:: Array
 
 METHOD:: satieRoot
-Absolute path to the SATIE installation
+Absolute path to the root of SATIE's source code
 
 returns:: String
+
+METHOD:: satieUserSupportDir
+Absolute path to SATIE's user support directory
+
+table::
+## Linux || ~/.local/share/satie/
+## macOS || ~/Library/Application Support/satie/
+## Windows || C:\Users\EMPHASIS::username::\AppData\Local\satie\
+::
+returns:: String
+
+METHOD:: loadPluginDir
+Loads a SATIE plugin directory
+
+argument:: path
+A String representing the path to a plugin directory
+
+discussion::
+The plugin directory must be structured appropriately. See LINK::Classes/SatiePlugin::
 
 METHOD:: init
 Private init
