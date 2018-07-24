@@ -16,9 +16,9 @@ SatieConfiguration {
 	var <>listeningFormat;
 	var <numAudioAux;
 	var <outBusIndex;
-	var <>hrirPath;
 	var <ambiOrders;  // array of wanted orders. Available orders are 1 to 5
 	var <minOutputBusChannels;
+	var <>hrirPath;
 	var <>ambiBusIndex; // array of bus indexes, related to the wanted orders specifyed in ambiOrders
 	var <>debug = false;
 	var <satieRoot;
@@ -37,15 +37,17 @@ SatieConfiguration {
 	// other options
 	var <>orientationOffsetDeg;
 
-	*new {| server, listeningFormat = #[\stereoListener, \stereoListener], numAudioAux = 0, outBusIndex = #[0], hrirPath = "~/.local/share/satie/ambitools/FIR/hrir/hrir_ku100_lebedev50/", ambiOrders = #[], minOutputBusChannels = 0 |
+	*new {| server, listeningFormat = #[\stereoListener, \stereoListener], numAudioAux = 0, outBusIndex = #[0], ambiOrders = #[], minOutputBusChannels = 0, hrirPath |
 		server = server;
-		^super.newCopyArgs(server, listeningFormat, numAudioAux, outBusIndex, hrirPath.asString, ambiOrders, minOutputBusChannels).init;
+		^super.newCopyArgs(server, listeningFormat, numAudioAux, outBusIndex, ambiOrders, minOutputBusChannels, hrirPath).init;
 	}
 
 	init {
 		serverOptions = server.options;
 		satieRoot = PathName(this.class.filenameSymbol.asString.dirname).parentPath;
 		satieUserSupportDir = PathName(Platform.userAppSupportDir).parentPath +/+ "satie";
+
+		hrirPath = hrirPath ?? {HOA.userKernelDir +/+ "FIR/hrir/hrir_ku100_lebedev50"};
 
 		this.initDicts;
 		this.initPlugins;
