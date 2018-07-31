@@ -53,6 +53,7 @@ Satie {
 	var postProcGroup;
 	var <ambiPostProcessors;
 	var ambiPostProcGroup;
+	var booted = false;
 
 	*new {|satieConfiguration|
 		^super.newCopyArgs(satieConfiguration).initRenderer;
@@ -84,25 +85,48 @@ Satie {
 
 	// public method
 	boot {
+		CmdPeriod.add(this.cmdPeriod);
+		try {
 
-		// pre-boot
-		satieConfiguration.listeningFormat.do { arg item, i;
-			if (item.asSymbol == \ambi3,
-				{
-					"%:  forcing the server block size to 128 as required by % spatializer ".format(this.class, item).warn;
-					options.blockSize = 128;
-			});
-		};
+			// pre-boot
+			satieConfiguration.listeningFormat.do { arg item, i;
+				if (item.asSymbol == \ambi3,
+					{
+						"%:  forcing the server block size to 128 as required by % spatializer ".format(this.class, item).warn;
+						options.blockSize = 128;
+					});
+			};
 
-		// boot
-		satieConfiguration.server.boot;
+			// boot
+			satieConfiguration.server.boot;
 
-		// post-boot
-		satieConfiguration.server.doWhenBooted({this.makeSatieGroup(\default, \addToHead)});
-		satieConfiguration.server.doWhenBooted({this.makeSatieGroup(\defaultFx, \addToTail)});
-		satieConfiguration.server.doWhenBooted({this.makePostProcGroup()});
+			// post-boot
+			this.execPostBootActions();
+			booted = true;
+		}
+		{|error|
+			"Could not boot SATIE because %s".format(error).postln;
+		}
+	}
+
+	cmdPeriod {
+		if ((booted),
+			{
+				"SATIE - cleaning up the scene".postln;
+				this.cleanUp();
+			}
+		);
+	}
+
+	execPostBootActions {
+		satieConfiguration.server.doWhenBooted({this.createDefaultGroups()});
 		satieConfiguration.server.doWhenBooted({this.postExec()});
+	}
 
+	createDefaultGroups {
+		this.makeSatieGroup(\default, \addToHead);
+		this.makeSatieGroup(\defaultFx, \addToTail);
+		this.makePostProcGroup();
 	}
 
 	replacePostProcessor{ | pipeline, outputIndex = 0, spatializerNumber = 0, defaultArgs = #[] |
