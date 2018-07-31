@@ -105,7 +105,7 @@ Satie {
 			booted = true;
 		}
 		{|error|
-			"Could not boot SATIE because %s".format(error).postln;
+			"Could not boot SATIE because %".format(error).postln;
 		}
 	}
 
