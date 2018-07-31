@@ -99,9 +99,13 @@ Satie {
 
 			// boot
 			satieConfiguration.server.boot;
+			osc = SatieOSC(this);
+			inspector = SatieIntrospection.new(this);
 
 			// post-boot
 			this.execPostBootActions();
+			satieConfiguration.server.doWhenBooted({this.postExec()});
+
 			booted = true;
 		}
 		{|error|
@@ -120,7 +124,6 @@ Satie {
 
 	execPostBootActions {
 		satieConfiguration.server.doWhenBooted({this.createDefaultGroups()});
-		satieConfiguration.server.doWhenBooted({this.postExec()});
 	}
 
 	createDefaultGroups {
@@ -261,9 +264,5 @@ Satie {
 			};
 		};
 		generatedSynthDefs = audioPlugins.keys;
-
-		satieConfiguration.server.sync;
-		osc = SatieOSC(this);
-		inspector = SatieIntrospection.new(this);
 	}
 }
