@@ -187,7 +187,7 @@ s.waitForBoot({
 			~numAudioInSynth.do({
 				arg item, i;
 				var nodeName = ("audio" ++ i);
-				~satie.makeInstance(nodeName.asSymbol, \MonoIn, synthArgs: [\gainDB: 0, \bus: i + 1 + ~inOffset, \t_trig: 1]);
+				~satie.makeInstance(nodeName.asSymbol, \MonoIn, synthArgs: [\gainDB: 0, \bus: i + ~inOffset, \t_trig: 1]);
 				// ~satie.makeInstance("drone" ++ i.asSymbol, \misDrone, \default, synthArgs: [\gainDB: 0]);
 			});
 		});
