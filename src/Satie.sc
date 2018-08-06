@@ -99,12 +99,14 @@ Satie {
 
 			// boot
 			satieConfiguration.server.boot;
-			osc = SatieOSC(this);
-			inspector = SatieIntrospection.new(this);
 
 			// post-boot
 			this.execPostBootActions();
-			satieConfiguration.server.doWhenBooted({this.postExec()});
+			satieConfiguration.server.doWhenBooted({
+				this.postExec();
+				osc = SatieOSC(this);
+				inspector = SatieIntrospection.new(this);
+			});
 
 			booted = true;
 		}
@@ -124,6 +126,7 @@ Satie {
 
 	execPostBootActions {
 		satieConfiguration.server.doWhenBooted({this.createDefaultGroups()});
+
 	}
 
 	createDefaultGroups {
