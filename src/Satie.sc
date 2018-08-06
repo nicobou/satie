@@ -110,11 +110,8 @@ Satie {
 				if (
 					execFile.notNil,
 					{
-						"**** executing %".format(execFile).postln;
+						"- Executing %".format(execFile).postln;
 						this.executeExternalFile(execFile);
-					},
-					{
-						"*** no file to execute".postln;
 					}
 				);
 			});
@@ -125,9 +122,8 @@ Satie {
 		}
 	}
 
-	executeExternalFile {|fpath|
-		var filepath = fpath;
-		if ( File.exists(filepath) == false,
+	executeExternalFile {|filepath|
+		if ( File.existsCaseSensitive(filepath) == false,
 			{
 				error("SatieOSC: satieFileLoader:   "++filepath++" not found, aborting");
 			},
@@ -141,12 +137,17 @@ Satie {
 					// else file type is good. Try to load
 					{
 						this.satieConfiguration.server.waitForBoot {
-
-							filepath.load;
+							try {
+								filepath.load;
+							}
+							{|error|
+								"Could not open file % because %".format(file, error).postln;
+							};
 							this.satieConfiguration.server.sync;
 						}; // waitForBoot
 					});
 			});
+
 	}
 
 	cmdPeriod {
