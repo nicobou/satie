@@ -14,8 +14,8 @@
 SatiePlugin {
 	var <name, <description, <function, <type;
 
-	*new{|name, description="This should describe the plugin", function, type="none"|
+	*new{|name, description="This should describe the plugin", function, channelLayout="none"|
 		description = description ? "Description missing"
-		^super.newCopyArgs(name, description, function, type);
+		^super.newCopyArgs(name, description, function, channelLayout);
 	}
 }
