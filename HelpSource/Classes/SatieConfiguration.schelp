@@ -24,6 +24,15 @@ A number of auxiliary channels. Auxiliary channels are used for routing audio si
 ARGUMENT:: outBusIndex
 The physical output offset. By default, it uses the first available physical output (index 0).
 
+ARGUMENT:: ambiOrders
+A list of orders for higher order ambisonics. Currently SATIE supports SC-HOA, which suppoerts up to 5th order. You can specify any number of ambisonic orders.
+
+ARGUMENT:: minOutputBusChannels
+A minimum number of outputs channels. It will force TELETYPE::numOutputBusChannels:: to this number of channels.
+
+ARGUMENT:: hrirPath
+Path to Head Related Impulse Response files. By default it will be set to TELETYPE::HOA.userKernelDir +/+ "FIR/hrir/hrir_ku100_lebedev50":: but you can provide your own.
+
 returns:: A SatieConfiguration.
 
 
