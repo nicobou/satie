@@ -17,6 +17,7 @@
 */
 Satie {
 	var <>satieConfiguration;
+	var <execFile;
 	var options;
 	var <>spat;
 	var <>debug = true;
@@ -55,8 +56,8 @@ Satie {
 	var ambiPostProcGroup;
 	var booted = false;
 
-	*new {|satieConfiguration|
-		^super.newCopyArgs(satieConfiguration).initRenderer;
+	*new {|satieConfiguration, execFile = nil|
+		^super.newCopyArgs(satieConfiguration, execFile).initRenderer;
 	}
 
 
@@ -106,13 +107,50 @@ Satie {
 				this.postExec();
 				osc = SatieOSC(this);
 				inspector = SatieIntrospection.new(this);
+				if (
+					execFile.notNil,
+					{
+						"- Executing %".format(execFile).postln;
+						this.executeExternalFile(execFile);
+					}
+				);
 			});
-
 			booted = true;
 		}
 		{|error|
 			"Could not boot SATIE because %".format(error).postln;
 		}
+	}
+
+	executeExternalFile {|filepath|
+		if ( File.existsCaseSensitive(filepath) == false,
+			{
+				error("SatieOSC: satieFileLoader:   "++filepath++" not found, aborting");
+				^nil;
+			},
+			// else  file exists, process
+			{
+
+				if (filepath.splitext.last != "scd",
+					{
+						error("SatieOSC : satieFileLoader: "++filepath++" must be a file of type  '.scd'  ");
+						^nil;
+					},
+					// else file type is good. Try to load
+					{
+						this.satieConfiguration.server.waitForBoot {
+							try {
+								filepath.load;
+							}
+							{|error|
+								"Could not open file % because %".format(filepath, error).postln;
+								^nil;
+							};
+							this.satieConfiguration.server.sync;
+						}; // waitForBoot
+					});
+			});
+
 	}
 
 	cmdPeriod {
