@@ -1,4 +1,4 @@
-This document will guide you through building SuperCollider and sc3-plugins from source, as well has installing SATIE and its necessary resources, on Ubuntu 16.04 and up.
+This document will guide you through building SuperCollider and sc3-plugins from source, as well as installing SATIE and its necessary resources, on Ubuntu 16.04 and up.
 
 **Note:**  SATIE makes use of UGens called the *HOAUGens* found in the sc3-plugins collection. These UGens were added to the sc3-plugins repository at commit [9326e1229a64ca82f76124a7a1a038095be22996](https://github.com/supercollider/sc3-plugins/tree/9326e1229a64ca82f76124a7a1a038095be22996).
 
