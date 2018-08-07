@@ -21,8 +21,14 @@ String, a short description of the plugin
 ARGUMENT:: function
 The actual sclang code that defines the plugin's behaviour.
 
+ARGUMENT:: channelLayout
+TELETYPE::mono:: or TELETYPE::ambi::
+
 ARGUMENT:: numChannels
 Number of channels in the spatializer (Integer)
+
+ARGUMENT:: setup
+A function to execute upon initialization
 
 returns:: (describe returnvalue here)
 
