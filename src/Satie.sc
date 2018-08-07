@@ -126,6 +126,7 @@ Satie {
 		if ( File.existsCaseSensitive(filepath) == false,
 			{
 				error("SatieOSC: satieFileLoader:   "++filepath++" not found, aborting");
+				^nil;
 			},
 			// else  file exists, process
 			{
@@ -133,6 +134,7 @@ Satie {
 				if (filepath.splitext.last != "scd",
 					{
 						error("SatieOSC : satieFileLoader: "++filepath++" must be a file of type  '.scd'  ");
+						^nil;
 					},
 					// else file type is good. Try to load
 					{
@@ -142,6 +144,7 @@ Satie {
 							}
 							{|error|
 								"Could not open file % because %".format(filepath, error).postln;
+								^nil;
 							};
 							this.satieConfiguration.server.sync;
 						}; // waitForBoot
