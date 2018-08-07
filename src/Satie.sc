@@ -141,7 +141,7 @@ Satie {
 								filepath.load;
 							}
 							{|error|
-								"Could not open file % because %".format(file, error).postln;
+								"Could not open file % because %".format(filepath, error).postln;
 							};
 							this.satieConfiguration.server.sync;
 						}; // waitForBoot
