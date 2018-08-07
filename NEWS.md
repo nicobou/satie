@@ -1,6 +1,28 @@
-# SATIE release notes
+# SATIE Changelog
 
-## SATIE version 1.0.1 (2018-04-19)
+## [1.1.0] - XXXX-XX-XX
+
+### New features
+- Analysis/monitoring side-chain with example monitoring plugins
+- _delay_ post-processor
+- Execute a file upon SATIE server boot
+
+### Improvements
+- Updated OSC API documentation which is now rendered in html
+- Added new audio generator
+- Ability to load custom plugins from user-defined directory
+- Revised documentation
+
+### Bugfixes
+- Proper handling of sceneClear
+- Proper handling of freeing synths from IDE
+- Fix to quark file
+
+### Removals
+- SAT specific plugins
+-
+
+## [1.0.1] - 2018-04-19
 ### New features
 - Support for ambisonics via SC-HOA quark
 - Several mappers for each spatialiser
