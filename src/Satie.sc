@@ -285,13 +285,16 @@ Satie {
 			);
 		};
 		satieConfiguration.server.sync;
+		if (satieConfiguration.generateSynthdefs, {this.makePlugins});
+	}
 
+	makePlugins {
 		// execute setup functions for audioSources
 		satieConfiguration.audioPlugins.do { arg item, i;
 			if (item.setup  != nil,
 				{
 					item.setup.value(this);
-			});
+				});
 		};
 
 		// generate synthdefs
@@ -305,5 +308,6 @@ Satie {
 			};
 		};
 		generatedSynthDefs = audioPlugins.keys;
+
 	}
 }

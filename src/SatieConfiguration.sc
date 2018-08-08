@@ -24,6 +24,7 @@ SatieConfiguration {
 	var <satieRoot;
 	var <satieUserSupportDir;
 	var <serverOptions;
+	var <>generateSynthdefs = true;
 
 	// Plugins needed by the renderer
 	var <>audioPlugins;
