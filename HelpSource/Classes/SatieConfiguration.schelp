@@ -1,5 +1,5 @@
 TITLE:: SatieConfiguration
-summary:: (put short description here)
+summary:: Configuration of the SATIE server
 categories:: Libraries
 related:: Overview/SATIE-Overview, Classes/Satie
 
@@ -120,6 +120,11 @@ The plugin directory must be structured appropriately. See LINK::Classes/SatiePl
 
 METHOD:: init
 Private init
+
+METHOD:: generateSynthdefs
+Boolean. Tells the SATIE server whether it should generate audio plugins SynthDefs automatically upon boot. True by default.
+If set to false, the user needs to run teletype::makeSynthDef:: by hand for each desired plugin.
+
 
 METHOD:: server
 Current server
