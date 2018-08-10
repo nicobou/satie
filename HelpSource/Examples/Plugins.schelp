@@ -53,17 +53,13 @@ s.plotTree;
 ~satie.groupInstances[\default][\droney].set(\t_trig, 1, \aziDeg, -30, \eleDeg, 30,\gainDB, -10, \envTrigger_triggerLevel, 0.12)
 ::
 
-The plugins are kept in SOFT::plugins:: directory within SATIE tree. They are further organized in directories by family and all plugins are loaded at configuration time and are kept in the following LINK::Classes/SatieConfiguration:: members:
-List::
-## .audioPlugins
-## .fxPlugins
-## .spatPlugins
-## .mapperPlugins
-## .postprocessorPlugins
-## .monitoringPlugins
-::
 
-Other plugins can be added from, arbitrary location, by adding to the appropriate dictionaries (see SatiePlugins and SatieConfiguration).
+
+
+SECTION:: Plugins in depth
+
+SATIE comes with a (small) set of plugins. Other plugins can be easily developped and added to the engine. The plugins are found in various locations: the quark installation location (such as TELETYPE::~/.local/share/SuperCollider/downloaded-quarks/SATIE::), the user support directory (see the variable in LINK::Classes/SatieConfiguration#-satieUserSupportDir::), which by default is set to TELETYPE::~/.local/share/satie:: or any other arbitrary location (see LINK::Classes/SatiePlugins:: for information how plugins are loaded).
+
 Every plugin should follow the following format:
 code::
 // Mandatory "fields" of a plugin:
@@ -78,12 +74,49 @@ code::
     FSinOsc.ar(sfreq)
 };
 ::
-Each plugin resides in its own .scd file. Each field is a global variable which gets consumed by the plugin loader, one at a time.
+Each plugin resides in its own .scd file. Each field is a global variable which gets consumed by the plugin loader, one at a time. You will see that for most of the plugins code::~name:: corresponds to the file name but it is not a requirement.
+
+The plugin's journey from conception to use is as follows:
+LIST::
+## Register the plugin with the appropriate dictionary in LINK::Classes/SatieConfiguration::
+## Let LINK::Classes/SatieFactory:: wrap it into a LINK::Classes/SynthDef::
+## Instantiate the pluginName
+## And finally interact with it
+::
+
+SUBSECTION:: Registering the plugin
+
+SATIE needs to know about the plugins that it manages. The plugins are kept in SOFT::plugins:: directory within SATIE tree. They are further organized in directories by family and all plugins are loaded at configuration time and are kept in the following LINK::Classes/SatieConfiguration:: members:
+
+DefinitionList::
+## LINK::Classes/SatieConfiguration#-audioPlugins::
+|| Typpically audio generators. They are usually placed in a group at \head
+## LINK::Classes/SatieConfiguration#-fxPlugins::
+|| Effects, that can be fed signal from generators (placed at \tail)
+## LINK::Classes/SatieConfiguration#-spatPlugins::
+|| Spatialisers (typically VBAP and other types of panning)
+## LINK::Classes/SatieConfiguration#-mapperPlugins::
+|| Parameter mapping
+## LINK::Classes/SatieConfiguration#-postprocessorPlugins::
+|| Post processing, or mastering. These are ensured to be at the end of the processing chain, between the SATIE world and physical interface
+## LINK::Classes/SatieConfiguration#-.monitoringPlugins::
+|| These are side-chains that can be inserted in into audio generators or effects in order to monitor the signal and, optionally, send OSC trigger messages back to the server.
+::
+
+The registration is done by means of loading the plugin code via LINK::Classes/SatiePlugins":: methods. The method LINK::Classes/SatieConfiguration#-loadPluginDir:: show how those methods are being used.
+
+The plugins are compiled into SynthDefs via LINK::Classes/Satie#-makeSynthDef:: method. This method will look up the function definition in the indicated dictionary address and prepare a SynthDef associated with provided symbol ID. It will then place the compiled SynthDef in renderer's dictionary where it will be ready for instantiation.
+
+And finally, we instantiate the desired Synth with LINK::Classes/Satie#-makeInstance::.
+
+Once instantiated, we get to interact with the Synth.
+
+Note, that by default, the steps up to, and including compilation of SynthDefs are done automatically by SATIE at boot time, unless overriden in configuration (see variable LINK::Classes/SatieConfiguration#-generateSynthdefs::). SATIE collects all plugins in its own installation directory as well as aforementioned LINK::Classes/SatieConfiguration#-satieUserSupportDir::.
 
 SECTION:: Working with plugins on-the-fly
 ANCHOR::onthefly::
 
-Sometimes, especially when developing new instruments, it is desirable to just doodle on a scratchpad without the need of saving a loading files off the disk. link::Classes/SatiePlugins#addAudioPlugin:: allows for loading a plugin defined in an environment, mimicking the above plugin creation guidelines:
+Sometimes, especially when developing new instruments, it is desirable to just doodle on a scratchpad without the need of saving a loading files off the disk. link::Classes/SatiePlugins#-addAudioPlugin:: allows for loading a plugin defined in an environment, mimicking the above plugin creation guidelines:
 
 code::
 // prepare SATIE in the usual way
@@ -108,10 +141,8 @@ s = Server.supernova.local;
 ~satie.makeSynthDef(\mySound, \simpleOSC, [], [~satie.aux[0]], [],~satieConfiguration.listeningFormat, [0]);
 ::
 
-
 Go back to link::Overview/SATIE-Overview::
 
 Previous Section: link::Examples/Effects::
 
 Next Section: link::Examples/Ambi::
-

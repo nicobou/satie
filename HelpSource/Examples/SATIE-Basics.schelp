@@ -106,6 +106,10 @@ code::
 )
 ::
 
+Section:: More on instancing
+
+
+
 Section:: Groups
 
 Groups facilitate updating properties of sound objects in bulk. SATIE creates two groups automatically: soft::default:: and soft::defaultFX::. All SATIE synth and effect instances will be placed in the respective group. User can create additional groups.
@@ -197,4 +201,3 @@ s.waitForBoot({
 Go back to link::Overview/SATIE-Overview::
 
 Next Section: link::Examples/Spatializers::
-
