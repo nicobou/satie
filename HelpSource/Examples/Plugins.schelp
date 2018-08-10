@@ -101,9 +101,11 @@ DefinitionList::
 || Post processing, or mastering. These are ensured to be at the end of the processing chain, between the SATIE world and physical interface
 ## LINK::Classes/SatieConfiguration#-.monitoringPlugins::
 || These are side-chains that can be inserted in into audio generators or effects in order to monitor the signal and, optionally, send OSC trigger messages back to the server.
+## LINK::Classes/SatieConfiguration#-.hoa::
+|| Higher Order Ambisonics decoders
 ::
 
-The registration is done by means of loading the plugin code via LINK::Classes/SatiePlugins":: methods. The method LINK::Classes/SatieConfiguration#-loadPluginDir:: show how those methods are being used.
+The registration is done by means of loading the plugin code via LINK::Classes/SatiePlugins:: methods. The method LINK::Classes/SatieConfiguration#-loadPluginDir:: show how those methods are being used.
 
 The plugins are compiled into SynthDefs via LINK::Classes/Satie#-makeSynthDef:: method. This method will look up the function definition in the indicated dictionary address and prepare a SynthDef associated with provided symbol ID. It will then place the compiled SynthDef in renderer's dictionary where it will be ready for instantiation.
 
@@ -112,6 +114,16 @@ And finally, we instantiate the desired Synth with LINK::Classes/Satie#-makeInst
 Once instantiated, we get to interact with the Synth.
 
 Note, that by default, the steps up to, and including compilation of SynthDefs are done automatically by SATIE at boot time, unless overriden in configuration (see variable LINK::Classes/SatieConfiguration#-generateSynthdefs::). SATIE collects all plugins in its own installation directory as well as aforementioned LINK::Classes/SatieConfiguration#-satieUserSupportDir::.
+
+SUBSECTION:: "Special"
+
+METHOD:: Kamikaze
+
+SATIE compiles additional "copies" of generator and effects plugins. It will create "shadow" suffixed with TELETYPE::-kamikaze::. These are exact cpopies of the provided code, except that its CODE::doneAction:: equals 2, therefore, the instance will be destroyed when its signal falls to 0. These kinds of synths are intended to be used in situations where we don't want to keep track of them and dispose of the automatically. They could be used, for instance, to accompany particle systems.
+
+METHOD:: Ambi
+
+The TELETYPE::Ambi:: shadows are created only when SATIE is configured to use Higher Order Ambisonics. All plugins will then will be compiled with copies that are usable with each ambisonics order specified.
 
 SECTION:: Working with plugins on-the-fly
 ANCHOR::onthefly::
