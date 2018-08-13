@@ -26,7 +26,7 @@ LIST::
 SUBSECTION::Mappers
 Their purpose is to apply mappings (i.e. via functions) to audio plugins' paramers
 SUBSECTION::Analysers
-Plugins that are inserted into audio plugins signal path, before spatialization stage, and their sole purpose is to analyse some signal feature (i.e. envelope, pitch, etc.) and forward it via OSC. See link::Examples/OSC:: for the OSC message description and an example use. These plugins should not return any audio but should make use of LINK::Classes/SendTrig:: and LINK::Classes/SendReply:: UGens to send triggers or streams of desired information.
+Plugins that are inserted into audio plugins signal path, before spatialization stage, and their sole purpose is to analyse some signal feature (i.e. envelope, pitch, etc.) and forward it via OSC. See link::Overview/OSC-API:: for the OSC message description. These plugins should not return any audio but should make use of LINK::Classes/SendTrig:: and LINK::Classes/SendReply:: UGens to send triggers or streams of desired information.
 ANCHOR::analysers example::
 CODE::
 (
