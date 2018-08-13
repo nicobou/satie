@@ -26,7 +26,7 @@ LIST::
 SUBSECTION::Mappers
 Their purpose is to apply mappings (i.e. via functions) to audio plugins' paramers
 SUBSECTION::Analysers
-Plugins that are inserted into audio plugins signal path, before spatialization stage, and their sole purpose is to analyse some signal feature (i.e. envelope, pitch, etc.) and forward it via OSC. See link::Examples/OSC:: for the OSC message description and an example use. These plugins should not return any audio but should make use of LINK::Classes/SendTrig:: and LINK::Classes/SendReply:: UGens to send triggers or streams of desired information.
+Plugins that are inserted into audio plugins signal path, before spatialization stage, and their sole purpose is to analyse some signal feature (i.e. envelope, pitch, etc.) and forward it via OSC. See link::Overview/OSC-API:: for the OSC message description. These plugins should not return any audio but should make use of LINK::Classes/SendTrig:: and LINK::Classes/SendReply:: UGens to send triggers or streams of desired information.
 ANCHOR::analysers example::
 CODE::
 (
@@ -53,17 +53,13 @@ s.plotTree;
 ~satie.groupInstances[\default][\droney].set(\t_trig, 1, \aziDeg, -30, \eleDeg, 30,\gainDB, -10, \envTrigger_triggerLevel, 0.12)
 ::
 
-The plugins are kept in SOFT::plugins:: directory within SATIE tree. They are further organized in directories by family and all plugins are loaded at configuration time and are kept in the following LINK::Classes/SatieConfiguration:: members:
-List::
-## .audioPlugins
-## .fxPlugins
-## .spatPlugins
-## .mapperPlugins
-## .postprocessorPlugins
-## .monitoringPlugins
-::
 
-Other plugins can be added from, arbitrary location, by adding to the appropriate dictionaries (see SatiePlugins and SatieConfiguration).
+
+
+SECTION:: Plugins in depth
+
+SATIE comes with a small set of plugins, and additional plugins can easily be developped and added to the engine. Satie looks for plugins in various locations. See LINK::Classes/SatiePlugin:: for a discussion of plugin locations and plugin directory structure.
+
 Every plugin should follow the following format:
 code::
 // Mandatory "fields" of a plugin:
@@ -78,12 +74,59 @@ code::
     FSinOsc.ar(sfreq)
 };
 ::
-Each plugin resides in its own .scd file. Each field is a global variable which gets consumed by the plugin loader, one at a time.
+Each plugin resides in its own .scd file. Each field is a global variable which gets consumed by the plugin loader, one at a time. It's recommended that the code::~name:: field matches the plugin's file name.
+
+The process of turning a plugin into a synth is as follows:
+LIST::
+## Register the plugin with the appropriate dictionary in LINK::Classes/SatieConfiguration::
+## Let LINK::Classes/SatieFactory:: wrap it into a LINK::Classes/SynthDef::
+## Instantiate the pluginName
+## And finally interact with it
+::
+
+SUBSECTION:: Registering the plugin
+
+SATIE needs to know about the plugins it manages. The plugins files are kept in directories which organize them by family. They are loaded at configuration time and kept in the following LINK::Classes/SatieConfiguration:: members:
+
+DefinitionList::
+## LINK::Classes/SatieConfiguration#-audioPlugins::
+|| Typpically audio generators. They are usually placed in a group at \head
+## LINK::Classes/SatieConfiguration#-fxPlugins::
+|| Effects, that can be fed signal from generators (placed at \tail)
+## LINK::Classes/SatieConfiguration#-spatPlugins::
+|| Spatialisers (typically VBAP and other types of panning)
+## LINK::Classes/SatieConfiguration#-mapperPlugins::
+|| Parameter mapping
+## LINK::Classes/SatieConfiguration#-postprocessorPlugins::
+|| Post processing, or mastering. These are ensured to be at the end of the processing chain, between the above plugins and the physical interface.
+## LINK::Classes/SatieConfiguration#-.monitoringPlugins::
+|| These are side-chains that can be inserted amongst audio generators or effects in order to monitor the signal and, optionally, send OSC trigger messages back to the server.
+## LINK::Classes/SatieConfiguration#-.hoa::
+|| Higher Order Ambisonics decoders
+::
+
+The registration is done by means of loading the plugin code. This is done by LINK::Classes/SatiePlugins:: and its methods. The source code of LINK::Classes/SatieConfiguration#-loadPluginDir:: shows how this is done.
+
+The plugins are compiled into SynthDefs via LINK::Classes/Satie#-makeSynthDef::. This method will look up the function definition in the indicated dictionary address and prepare a SynthDef associated with provided symbol ID. It will then place the compiled SynthDef in renderer's dictionary where it will be ready for instantiation.
+
+And finally, we instantiate the desired Synth with LINK::Classes/Satie#-makeInstance:: so that we can start interacting with it.
+
+Note, that by default, the above steps including the compilation of SynthDefs are done automatically by SATIE at boot time, unless overriden in configuration (see variable LINK::Classes/SatieConfiguration#-generateSynthdefs::).
+
+SUBSECTION:: Special use plugins
+
+STRONG::Kamikaze::
+
+SATIE compiles additional "copies" of generator and effect plugins. It will create "shadow" suffixed with TELETYPE::-kamikaze::. These are exact copies of the provided code, except that the synth will free itself when silence is detected. These kinds of synths are intended to be used in situations where we don't want to keep track of them. They could be used, for instance, to accompany particle systems.
+
+STRONG::Ambi::
+
+The TELETYPE::Ambi:: shadows are created only when SATIE is configured to use Higher Order Ambisonics. All plugins will then will be compiled with copies that are usable with each ambisonics order specified.
 
 SECTION:: Working with plugins on-the-fly
 ANCHOR::onthefly::
 
-Sometimes, especially when developing new instruments, it is desirable to just doodle on a scratchpad without the need of saving a loading files off the disk. link::Classes/SatiePlugins#addAudioPlugin:: allows for loading a plugin defined in an environment, mimicking the above plugin creation guidelines:
+When developing new plugins, it is sometimes desirable to be able to doodle on a scratchpad without the need of saving and loading files off the disk. link::Classes/SatiePlugins#-addAudioPlugin:: allows us to load a plugin defined in an environment, mimicking the above plugin creation guidelines:
 
 code::
 // prepare SATIE in the usual way
@@ -108,10 +151,8 @@ s = Server.supernova.local;
 ~satie.makeSynthDef(\mySound, \simpleOSC, [], [~satie.aux[0]], [],~satieConfiguration.listeningFormat, [0]);
 ::
 
-
 Go back to link::Overview/SATIE-Overview::
 
 Previous Section: link::Examples/Effects::
 
 Next Section: link::Examples/Ambi::
-

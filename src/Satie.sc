@@ -130,7 +130,6 @@ Satie {
 			},
 			// else  file exists, process
 			{
-
 				if (filepath.splitext.last != "scd",
 					{
 						error("SatieOSC : satieFileLoader: "++filepath++" must be a file of type  '.scd'  ");
@@ -150,7 +149,6 @@ Satie {
 						}; // waitForBoot
 					});
 			});
-
 	}
 
 	cmdPeriod {
@@ -291,7 +289,7 @@ Satie {
 	makePlugins {
 		// execute setup functions for audioSources
 		satieConfiguration.audioPlugins.do { arg item, i;
-			if (item.setup  != nil,
+			if (item.setup.notNil,
 				{
 					item.setup.value(this);
 				});
