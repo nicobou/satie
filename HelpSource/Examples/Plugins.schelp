@@ -58,7 +58,7 @@ s.plotTree;
 
 SECTION:: Plugins in depth
 
-SATIE comes with a small set of plugins. Other plugins can be easily developped and added to the engine. The plugins are found in various locations: the quark installation location (such as TELETYPE::~/.local/share/SuperCollider/downloaded-quarks/SATIE::), the user support directory (see the variable in LINK::Classes/SatieConfiguration#-satieUserSupportDir::), which by default is set to TELETYPE::~/.local/share/satie:: or any other arbitrary location (see LINK::Classes/SatiePlugins:: for information how plugins are loaded).
+SATIE comes with a small set of plugins, and additional plugins can easily be developped and added to the engine. Satie looks for plugins in various locations. See LINK::Classes/SatiePlugin:: for a discussion of plugin locations and plugin directory structure.
 
 Every plugin should follow the following format:
 code::
@@ -74,9 +74,9 @@ code::
     FSinOsc.ar(sfreq)
 };
 ::
-Each plugin resides in its own .scd file. Each field is a global variable which gets consumed by the plugin loader, one at a time. You will see that for most of the plugins code::~name:: corresponds to the file name but it is not a requirement.
+Each plugin resides in its own .scd file. Each field is a global variable which gets consumed by the plugin loader, one at a time. It's recommended that the code::~name:: field matches the plugin's file name.
 
-The plugin's journey from conception to use is as follows:
+The process of turning a plugin into a synth is as follows:
 LIST::
 ## Register the plugin with the appropriate dictionary in LINK::Classes/SatieConfiguration::
 ## Let LINK::Classes/SatieFactory:: wrap it into a LINK::Classes/SynthDef::
@@ -86,7 +86,7 @@ LIST::
 
 SUBSECTION:: Registering the plugin
 
-SATIE needs to know about the plugins that it manages. The plugins are kept in SOFT::plugins:: directory within SATIE tree. They are further organized in directories by family and all plugins are loaded at configuration time and are kept in the following LINK::Classes/SatieConfiguration:: members:
+SATIE needs to know about the plugins it manages. The plugins files are kept in directories which organize them by family. They are loaded at configuration time and kept in the following LINK::Classes/SatieConfiguration:: members:
 
 DefinitionList::
 ## LINK::Classes/SatieConfiguration#-audioPlugins::
@@ -98,22 +98,20 @@ DefinitionList::
 ## LINK::Classes/SatieConfiguration#-mapperPlugins::
 || Parameter mapping
 ## LINK::Classes/SatieConfiguration#-postprocessorPlugins::
-|| Post processing, or mastering. These are ensured to be at the end of the processing chain, between the SATIE world and physical interface
+|| Post processing, or mastering. These are ensured to be at the end of the processing chain, between the above plugins and the physical interface.
 ## LINK::Classes/SatieConfiguration#-.monitoringPlugins::
-|| These are side-chains that can be inserted in into audio generators or effects in order to monitor the signal and, optionally, send OSC trigger messages back to the server.
+|| These are side-chains that can be inserted amongst audio generators or effects in order to monitor the signal and, optionally, send OSC trigger messages back to the server.
 ## LINK::Classes/SatieConfiguration#-.hoa::
 || Higher Order Ambisonics decoders
 ::
 
-The registration is done by means of loading the plugin code via LINK::Classes/SatiePlugins:: methods. The method LINK::Classes/SatieConfiguration#-loadPluginDir:: show how those methods are being used.
+The registration is done by means of loading the plugin code. This is done by LINK::Classes/SatiePlugins:: and its methods. The source code of LINK::Classes/SatieConfiguration#-loadPluginDir:: shows how this is done.
 
-The plugins are compiled into SynthDefs via LINK::Classes/Satie#-makeSynthDef:: method. This method will look up the function definition in the indicated dictionary address and prepare a SynthDef associated with provided symbol ID. It will then place the compiled SynthDef in renderer's dictionary where it will be ready for instantiation.
+The plugins are compiled into SynthDefs via LINK::Classes/Satie#-makeSynthDef::. This method will look up the function definition in the indicated dictionary address and prepare a SynthDef associated with provided symbol ID. It will then place the compiled SynthDef in renderer's dictionary where it will be ready for instantiation.
 
-And finally, we instantiate the desired Synth with LINK::Classes/Satie#-makeInstance::.
+And finally, we instantiate the desired Synth with LINK::Classes/Satie#-makeInstance:: so that we can start interacting with it.
 
-Once instantiated, we get to interact with the Synth.
-
-Note, that by default, the steps up to, and including compilation of SynthDefs are done automatically by SATIE at boot time, unless overriden in configuration (see variable LINK::Classes/SatieConfiguration#-generateSynthdefs::). SATIE collects all plugins in its own installation directory as well as aforementioned LINK::Classes/SatieConfiguration#-satieUserSupportDir::.
+Note, that by default, the above steps including the compilation of SynthDefs are done automatically by SATIE at boot time, unless overriden in configuration (see variable LINK::Classes/SatieConfiguration#-generateSynthdefs::).
 
 SUBSECTION:: Special use plugins
 
@@ -128,7 +126,7 @@ The TELETYPE::Ambi:: shadows are created only when SATIE is configured to use Hi
 SECTION:: Working with plugins on-the-fly
 ANCHOR::onthefly::
 
-Sometimes, especially when developing new instruments, it is desirable to just doodle on a scratchpad without the need of saving a loading files off the disk. link::Classes/SatiePlugins#-addAudioPlugin:: allows for loading a plugin defined in an environment, mimicking the above plugin creation guidelines:
+When developing new plugins, it is sometimes desirable to be able to doodle on a scratchpad without the need of saving and loading files off the disk. link::Classes/SatiePlugins#-addAudioPlugin:: allows us to load a plugin defined in an environment, mimicking the above plugin creation guidelines:
 
 code::
 // prepare SATIE in the usual way
