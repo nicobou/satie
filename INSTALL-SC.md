@@ -81,3 +81,7 @@ https://github.com/sekisushai/ambitools/archive/master.zip
 
 Copy the folder called `/FIR` and place it inside the above `/kernels` folder.
 
+
+## SATIE at the Society for arts and technology [SAT]
+
+SATIE is developped by the [Metalab](http://sat.qc.ca/fr/recherche/metalab) team at the [Society for arts and technology](http://sat.qc.ca). Additional SATIE plugins and SuperCollider UGens have been developed by the Metalab in order to be used in the [Satosphère](http://sat.qc.ca/fr/satosphere) and with other audio systems at the SAT. Please see the [metalab-ugens repository](https://gitlab.com/sat-metalab/metalab-ugens) for more information.
