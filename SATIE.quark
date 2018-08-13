@@ -1,7 +1,7 @@
 (
-  name: "Satie",
+  name: "SATIE",
   summary: "Spatial Audio Toolkit for Immersive Environments",
-  version: "1.0.1",
+  version: "1.1.0",
   schelp: "Overview/SATIE-Overview",
   dependencies: [
     "NodeSnapshot",
