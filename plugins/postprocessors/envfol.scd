@@ -12,9 +12,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-~name = \Satosphere;
-~description = "Satosphere ambisonic decoder";
+~name = \envfol;
+~description = "Envelope follower (audio rate)";
 
-~function = {|in = 0, order |
-HOADecSATOsw0o.ar(order, in);
+~function = {|in = 0, decaycoeff = 0.99, amp = 10.0, lpf = 20 |
+	var env, out;
+	in.scope;
+	env = LPF.ar(PeakFollower.ar(in), lpf, mul: 50, add:-1);
+	env.scope;
+	env;
 };

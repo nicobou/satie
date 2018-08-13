@@ -40,7 +40,6 @@ HOA plugins make use the SC-HOA quark by Florian Grond.
 SUBSECTION:: HOA Spatializers
 TABLE::
 ## STRONG::Name:: || STRONG::Description::
-##  Satosphere || Satosphere ambisonic decoder
 ##  Binaural26 || Binaural decoder based on Lebedev26
 ##  Binaural06 || Binaural decoder based on Lebedev06
 ::

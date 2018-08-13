@@ -191,31 +191,7 @@
 
 			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
 
-			// clean processes
-			satie.processInstances.keysDo({|proc|
-				satie.cleanProcessInstance(proc);
-			});
-
-			// flush all nodes
-			satie.groups.keysDo ({ |group |
-				satie.groupInstances[group.asSymbol].do({|key|
-					key.free();
-				})
-			});
-
-			// remove the groups
-
-			satie.groupInstances[\default] = Dictionary.new;
-			satie.groupInstances[\defaultFx] = Dictionary.new;
-
-			satie.groups.keysDo({|item|
-				var group = item.asSymbol;
-				if ((group != \default) || (group != \defaultFx) || (group != \postProc)  || (group != \ambiPostProc),
-					{
-						satie.killSatieGroup(group);
-					}
-				)
-			});
+			satie.cleanUp();
 		}
 	}
 

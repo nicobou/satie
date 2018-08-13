@@ -19,8 +19,8 @@
 SourcePlugin : SatiePlugin {
 	var <setup;
 
-	*new{|name, description="This should describe the plugin", function, type, setup|
+	*new{|name, description="This should describe the plugin", function, channelLayout, setup|
 		description = description ? "Description missing"
-		^super.newCopyArgs(name, description, function, type, setup);
+		^super.newCopyArgs(name, description, function, channelLayout, setup);
 	}
 }

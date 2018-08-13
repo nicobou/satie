@@ -17,6 +17,7 @@
 */
 Satie {
 	var <>satieConfiguration;
+	var <execFile;
 	var options;
 	var <>spat;
 	var <>debug = true;
@@ -53,9 +54,10 @@ Satie {
 	var postProcGroup;
 	var <ambiPostProcessors;
 	var ambiPostProcGroup;
+	var booted = false;
 
-	*new {|satieConfiguration|
-		^super.newCopyArgs(satieConfiguration).initRenderer;
+	*new {|satieConfiguration, execFile = nil|
+		^super.newCopyArgs(satieConfiguration, execFile).initRenderer;
 	}
 
 
@@ -84,25 +86,89 @@ Satie {
 
 	// public method
 	boot {
+		CmdPeriod.add(this.cmdPeriod);
+		try {
 
-		// pre-boot
-		satieConfiguration.listeningFormat.do { arg item, i;
-			if (item.asSymbol == \ambi3,
-				{
-					"%:  forcing the server block size to 128 as required by % spatializer ".format(this.class, item).warn;
-					options.blockSize = 128;
+			// pre-boot
+			satieConfiguration.listeningFormat.do { arg item, i;
+				if (item.asSymbol == \ambi3,
+					{
+						"%:  forcing the server block size to 128 as required by % spatializer ".format(this.class, item).warn;
+						options.blockSize = 128;
+					});
+			};
+
+			// boot
+			satieConfiguration.server.boot;
+
+			// post-boot
+			this.execPostBootActions();
+			satieConfiguration.server.doWhenBooted({
+				this.postExec();
+				osc = SatieOSC(this);
+				inspector = SatieIntrospection.new(this);
+				if (
+					execFile.notNil,
+					{
+						"- Executing %".format(execFile).postln;
+						this.executeExternalFile(execFile);
+					}
+				);
 			});
-		};
+			booted = true;
+		}
+		{|error|
+			"Could not boot SATIE because %".format(error).postln;
+		}
+	}
 
-		// boot
-		satieConfiguration.server.boot;
+	executeExternalFile {|filepath|
+		if ( File.existsCaseSensitive(filepath) == false,
+			{
+				error("SatieOSC: satieFileLoader:   "++filepath++" not found, aborting");
+				^nil;
+			},
+			// else  file exists, process
+			{
+				if (filepath.splitext.last != "scd",
+					{
+						error("SatieOSC : satieFileLoader: "++filepath++" must be a file of type  '.scd'  ");
+						^nil;
+					},
+					// else file type is good. Try to load
+					{
+						this.satieConfiguration.server.waitForBoot {
+							try {
+								filepath.load;
+							}
+							{|error|
+								"Could not open file % because %".format(filepath, error).postln;
+								^nil;
+							};
+							this.satieConfiguration.server.sync;
+						}; // waitForBoot
+					});
+			});
+	}
 
-		// post-boot
-		satieConfiguration.server.doWhenBooted({this.makeSatieGroup(\default, \addToHead)});
-		satieConfiguration.server.doWhenBooted({this.makeSatieGroup(\defaultFx, \addToTail)});
-		satieConfiguration.server.doWhenBooted({this.makePostProcGroup()});
-		satieConfiguration.server.doWhenBooted({this.postExec()});
+	cmdPeriod {
+		if ((booted),
+			{
+				"SATIE - cleaning up the scene".postln;
+				this.cleanUp();
+			}
+		);
+	}
 
+	execPostBootActions {
+		satieConfiguration.server.doWhenBooted({this.createDefaultGroups()});
+
+	}
+
+	createDefaultGroups {
+		this.makeSatieGroup(\default, \addToHead);
+		this.makeSatieGroup(\defaultFx, \addToTail);
+		this.makePostProcGroup();
 	}
 
 	replacePostProcessor{ | pipeline, outputIndex = 0, spatializerNumber = 0, defaultArgs = #[] |
@@ -217,13 +283,16 @@ Satie {
 			);
 		};
 		satieConfiguration.server.sync;
+		if (satieConfiguration.generateSynthdefs, {this.makePlugins});
+	}
 
+	makePlugins {
 		// execute setup functions for audioSources
 		satieConfiguration.audioPlugins.do { arg item, i;
-			if (item.setup  != nil,
+			if (item.setup.notNil,
 				{
 					item.setup.value(this);
-			});
+				});
 		};
 
 		// generate synthdefs
@@ -238,8 +307,5 @@ Satie {
 		};
 		generatedSynthDefs = audioPlugins.keys;
 
-		satieConfiguration.server.sync;
-		osc = SatieOSC(this);
-		inspector = SatieIntrospection.new(this);
 	}
 }

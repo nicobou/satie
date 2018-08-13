@@ -255,4 +255,27 @@
 		this.killSatieGroup((name++"_group").asSymbol);
 		processInstances.removeAt(name);
 	}
+
+	cleanUp {
+		// clean processes
+		processInstances.keysDo({|proc|
+			this.cleanProcessInstance(proc);
+		});
+
+		// flush all nodes
+		this.groups.keysDo ({ |group |
+			this.groupInstances[group.asSymbol].do({|key|
+				key.free();
+			})
+		});
+
+		// remove groups
+		groups.keysDo({|item|
+			var group = item.asSymbol;
+			this.killSatieGroup(group);
+		});
+
+		// re-create clean slate
+		this.execPostBootActions();
+	}
 }

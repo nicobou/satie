@@ -15,6 +15,9 @@ Creates a new Satie renderer
 ARGUMENT:: satieConfiguration
 LINK::Classes/SatieConfiguration::
 
+ARGUMENT:: execFile
+Optional. (LINK::Classes/String::): path to a TELETYPE::.scd:: file to be executed immediately after SATIE has booted.
+
 INSTANCEMETHODS::
 
 METHOD:: satieRoot
@@ -49,6 +52,8 @@ A wrapper around link::#makeInstance:: to explicitly create an audio effect
 
 returns:: a link::Classes/Synth::
 
+METHOD:: execFile
+Holds a path to the file that is exectud upon SATIE boot.
 
 METHOD:: replacePostProcessor
 Replaces post-processor pipeline at the output of the spatializer.
@@ -252,6 +257,8 @@ Remove a process from the pipeline and clear its references.
 
 ARGUMENT:: processName
 (Symbol) The name (id) of the process
+
+PRIVATE:: cmdPeriod, createDefaultGroups, cleanProcessInstance, execPostBootActions, namesIds
 
 EXAMPLES::
 Post-processor example

@@ -246,8 +246,6 @@ SatieOSC {
 		^uriSynth.asString;
 	}
 
-
-
 	// receives OSC messages that look like:   /satie/load filename
 	loadFile {
 		^{ | msg |
@@ -256,28 +254,8 @@ SatieOSC {
 				{"SatieOSC : satieFileLoader:  message missing filepath".warn;},
 				// else
 				{
-					var filepath = msg[1].asString.standardizePath;   // can handle '~'
-
-					if ( File.exists(filepath) == false,
-						{
-							error("SatieOSC: satieFileLoader:   "++filepath++" not found, aborting");
-						},
-						// else  file exists, process
-						{
-
-							if (filepath.splitext.last != "scd",
-								{
-									error("SatieOSC : satieFileLoader: "++filepath++" must be a file of type  '.scd'  ");
-								},
-								// else file type is good. Try to load
-								{
-									satie.satieConfiguration.server.waitForBoot {
-
-										filepath.load;
-										satie.satieConfiguration.server.sync;
-									}; // waitForBoot
-							});
-					});
+					var filepath = msg[1].asString.standardizePath;   // can handle '~'\
+					satie.executeExternalFile(filepath);
 			});
 		}
 	}
