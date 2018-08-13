@@ -117,7 +117,7 @@ SUBSECTION:: Special use plugins
 
 STRONG::Kamikaze::
 
-SATIE compiles additional "copies" of generator and effects plugins. It will create "shadow" suffixed with TELETYPE::-kamikaze::. These are exact cpopies of the provided code, except that its CODE::doneAction:: equals 2, therefore, the instance will be destroyed when its signal falls to 0. These kinds of synths are intended to be used in situations where we don't want to keep track of them and dispose of the automatically. They could be used, for instance, to accompany particle systems.
+SATIE compiles additional "copies" of generator and effect plugins. It will create "shadow" suffixed with TELETYPE::-kamikaze::. These are exact copies of the provided code, except that the synth will free itself when silence is detected. These kinds of synths are intended to be used in situations where we don't want to keep track of them. They could be used, for instance, to accompany particle systems.
 
 STRONG::Ambi::
 
