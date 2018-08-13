@@ -1,6 +1,6 @@
 # SATIE Changelog
 
-## [1.1.0] - 2018-08-12
+## [1.1.0] - 2018-08-13
 
 ### New features
 - Analysis/monitoring side-chain with example monitoring plugins
