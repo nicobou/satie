@@ -2,6 +2,11 @@ TITLE:: Effects
 Summary:: Introducing effects and effect busses
 categories:: Libraries>SATIE
 
+Go back to link::Overview/SATIE-Overview::
+
+Previous Section: link::Examples/Processes::
+
+Next Section: link::Examples/Plugins::
 
 
 section:: Configuration
@@ -17,9 +22,9 @@ s = Server.supernova.local;
 ~satie.boot();
 s.waitForBoot({
 	// define a synth with effect on pre- and post- bus.
-	~satie.makeSynthDef(\string_with_effects, \zkarpluck1, [~satie.aux[0]], [~satie.aux[1]], ~satieConfiguration.listeningFormat, [0]);
+	~satie.makeSynthDef(\string_with_effects, \zkarpluck1, [~satie.aux[0]], [~satie.aux[1]], [],~satieConfiguration.listeningFormat, [0]);
 	// spatialized reverb effect (input will be set at creation):
-	~satie.makeSynthDef(\busreverb, \freeverb, [], [], ~satieConfiguration.listeningFormat, [0]);
+	~satie.makeSynthDef(\busreverb, \freeverb, [], [], [], ~satieConfiguration.listeningFormat, [0]);
 	// display some information
 	s.meter;
 	s.makeGui;
@@ -60,7 +65,6 @@ code::
 // listen: post reverb is on the right
 ~satie.groupInstances[\default][\test_src].set(\t_trig, 1, \note, rrand(42,72), 1, 0.5, \aziDeg, 130, \gainDB, -10);
 )
-
 // we can still hear pre-bus effect with no gain on the source
 ~satie.groupInstances[\default][\test_src].set(\gainDB, -99, \t_trig, 1, \note, rrand(42,72), 1, 0.5, \aziDeg, 130);
 
@@ -68,5 +72,7 @@ code::
 
 Go back to link::Overview/SATIE-Overview::
 
-Previous Section: link::Examples/Basics::
-Next Section: link::Examples/Kamikaze::
+Previous Section: link::Examples/Processes::
+
+Next Section: link::Examples/Plugins::
+

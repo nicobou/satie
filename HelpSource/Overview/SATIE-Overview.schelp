@@ -1,13 +1,14 @@
 TITLE:: SATIE Overview
 summary:: Spatial Audio Toolkit for Immersive Environments
-categories:: Libraries
+categories:: Libraries>SATIE
 
 DESCRIPTION::
 SATIE is an audio spacialization engine developed for realtime rendering of dense audio scenes to large multi-channel loudspeaker systems. It is a lower-level audio rendering process that maintains a dynamic DSP graph which is created and controlled via OSC messages from an external process. SATIE’s modular development environment provides for optimized real-time audio scene and resource management. There is no geometry per se in SATIE, rather, SATIE maintains a DSP graph of source nodes that are accumulated to a single "listener", corresponding to the renderer’s output configuration (stereo and/or multi-channel).
 
 Its aim is to facilitate using 3D space in audio music/audio composition and authoring and to play well with 3D audio engines (so far it has been used with Blender and Unity3D) and could also serve as volumetric audio spacialization addition to more traditional desktop DAW systems.
 
-For more information visit https://gitlab.com/sat-metalab/SATIE-quark
+For more information visit LINK::https://gitlab.com/sat-metalab/SATIE##SATIE:: website.
+
 
 SECTION:: Basic workflow
 
@@ -26,7 +27,7 @@ s = Server.supernova.local;
 // postprocessors - mastering
 // spatializers - duh...
 // s.options are exposed via the instance variable serverOptions of the SatieConfiguration class
-~satieConfiguration.serverOptions.blockSize = 1024;
+~satieConfiguration.serverOptions.numOutputBusChannels = 2;
 // now we can boot SATIE
 ~satie = Satie.new(~satieConfiguration);
 ~satie.boot();
@@ -34,29 +35,33 @@ s = Server.supernova.local;
 ::
 
 
-SUBSECTION:: Use it
+SECTION:: Use it
 One can use it either directly from SuperCollider or by sending it OSC messages. See examples below for various applications.
 
-
-SECTION:: Examples
+SUBSECTION:: Examples
 The examples below show various facets of SATIE's functionality.
 DEFINITIONLIST::
-## LINK::Examples/Basics::
+## LINK::Examples/SATIE-Basics::
 || Progressive examples of SATIE functionnality, how to use it from scide.
+## LINK::Examples/Spatializers::
+|| Overview of available spatializers
 ## LINK::Examples/Processes::
 || Example of SATIE processes
 ## LINK::Examples/Effects::
 || Introduction to using effects
-## LINK::Examples/OSC::
-|| How to talk (and listen) to SATIE via OSC
 ## LINK::Examples/Plugins::
 || Description of SATIE plugins
 ## LINK::Examples/Ambi::
 || Ambisonic support in SATIE
 ::
 
-SECTION:: Classes
+SUBSECTION:: API
+DEFINITIONLIST::
+## LINK::Overview/OSC-API.html##SATIE OSC protocol (html)::
+|| How to talk (and listen) to SATIE via OSC
+::
 
+SUBSECTION:: Classes
 DEFINITIONLIST::
 ## LINK::Classes/Satie::
 || Main SATIE audio renderer class
@@ -73,3 +78,4 @@ DEFINITIONLIST::
 ##LINK::Classes/SatiePlugins::
 || A Dictionary of plugins
 ::
+

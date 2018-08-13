@@ -1,5 +1,5 @@
 TITLE:: SatieConfiguration
-summary:: (put short description here)
+summary:: Configuration of the SATIE server
 categories:: Libraries
 related:: Overview/SATIE-Overview, Classes/Satie
 
@@ -23,6 +23,15 @@ A number of auxiliary channels. Auxiliary channels are used for routing audio si
 
 ARGUMENT:: outBusIndex
 The physical output offset. By default, it uses the first available physical output (index 0).
+
+ARGUMENT:: ambiOrders
+A list of orders for higher order ambisonics. Currently SATIE supports SC-HOA, which supports up to 5th order. You can specify any number of ambisonic orders.
+
+ARGUMENT:: minOutputBusChannels
+A minimum number of outputs channels. It will force TELETYPE::numOutputBusChannels:: to this number of channels.
+
+ARGUMENT:: hrirPath
+Path to Head Related Impulse Response files. By default it will be set to TELETYPE::HOA.userKernelDir +/+ "FIR/hrir/hrir_ku100_lebedev50":: but you can provide your own.
 
 returns:: A SatieConfiguration.
 
@@ -86,12 +95,36 @@ Spatializer(s) in use
 returns:: Array
 
 METHOD:: satieRoot
-Absolute path to the SATIE installation
+Absolute path to the root of SATIE's source code
 
 returns:: String
 
+METHOD:: satieUserSupportDir
+Absolute path to SATIE's user support directory
+
+table::
+## Linux || ~/.local/share/satie/
+## macOS || ~/Library/Application Support/satie/
+## Windows || C:\Users\EMPHASIS::username::\AppData\Local\satie\
+::
+returns:: String
+
+METHOD:: loadPluginDir
+Loads a SATIE plugin directory
+
+argument:: path
+A String representing the path to a plugin directory
+
+discussion::
+The plugin directory must be structured appropriately. See LINK::Classes/SatiePlugin::
+
 METHOD:: init
 Private init
+
+METHOD:: generateSynthdefs
+Boolean. Tells the SATIE server whether it should generate audio plugins SynthDefs automatically upon boot. True by default.
+If set to false, the user needs to run teletype::makeSynthDef:: by hand for each desired plugin.
+
 
 METHOD:: server
 Current server

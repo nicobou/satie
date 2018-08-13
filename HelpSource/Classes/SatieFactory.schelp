@@ -24,6 +24,9 @@ ARGUMENT:: preBusArray
 ARGUMENT:: postBusArray
 (Array) Post-processing busses
 
+ARGUMENT:: preMonitorArray
+(Array) List of synthDefs to be used for analysis/monitoring side-chain. See link::Examples/Plugins#Analysers:: for more information.
+
 ARGUMENT:: spatializerArray
 (Array) List of sptialisers that will process this synth
 
@@ -31,11 +34,9 @@ ARGUMENT:: firstOutputIndexArray
 Which output bus is its first output channel.
 
 ARGUMENT:: paramsMapper
-Some parameters can be modified by a link::Examples/MapperPlugins
+Some parameters can be modified by a link::Examples/Plugins::
 
 ARGUMENT:: synthArgs
 Arguments specific to this synth
 
 returns:: It does not return any value. On success, places a compiled SynthDef on the server.
-
-

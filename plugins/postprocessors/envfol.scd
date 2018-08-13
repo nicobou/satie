@@ -11,11 +11,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-SatiePlugin {
-	var <name, <description, <function, <type;
 
-	*new{|name, description="This should describe the plugin", function, channelLayout="none"|
-		description = description ? "Description missing"
-		^super.newCopyArgs(name, description, function, channelLayout);
-	}
-}
+~name = \envfol;
+~description = "Envelope follower (audio rate)";
+
+~function = {|in = 0, decaycoeff = 0.99, amp = 10.0, lpf = 20 |
+	var env, out;
+	in.scope;
+	env = LPF.ar(PeakFollower.ar(in), lpf, mul: 50, add:-1);
+	env.scope;
+	env;
+};

@@ -1,9 +1,15 @@
 TITLE:: Ambisonics with SATIE
 summary:: Use of ambisonic with SATIE, simultaneously with other spatialization
-categories:: Libraries
-related:: Overview/SATIE-Overview, Classes/SatieConfiguration
+categories:: SATIE
+related:: Overview/SATIE-Overview, Classes/Satie, Classes/SatieConfiguration
+
+Go back to link::Overview/SATIE-Overview::
+
+Previous Section: link::Examples/Plugins::
+
 
 Section:: Overview
+
 An ambisonic pipeline can be used simultaneously and in parallel with the usual spatialization pipeline. Here we provide examples of use that include:
 list::
 ## configuration of ambisonic pipelines for decoding b-format produced by sound objects
@@ -28,8 +34,6 @@ s = Server.supernova.local;
 );
 // list possible listeners:
 ~satieConfiguration.spatPlugins.keys;
-// Change SuperCollider's block size (jack server's blocksize must be multiple of this value)
-~satieConfiguration.serverOptions.blockSize = 512;
 ~satieConfiguration.serverOptions.numOutputBusChannels = 64;
 ~satieConfiguration.serverOptions.numInputBusChannels = 8;
 ~satieConfiguration.serverOptions.memSize = 2.pow(18);
@@ -147,3 +151,6 @@ code::
 ::
 
 Go back to link::Overview/SATIE-Overview::
+
+Previous Section: link::Examples/Plugins::
+

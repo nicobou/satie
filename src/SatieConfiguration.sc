@@ -16,13 +16,15 @@ SatieConfiguration {
 	var <>listeningFormat;
 	var <numAudioAux;
 	var <outBusIndex;
-	var <>hrirPath;
 	var <ambiOrders;  // array of wanted orders. Available orders are 1 to 5
 	var <minOutputBusChannels;
+	var <>hrirPath;
 	var <>ambiBusIndex; // array of bus indexes, related to the wanted orders specifyed in ambiOrders
 	var <>debug = false;
 	var <satieRoot;
+	var <satieUserSupportDir;
 	var <serverOptions;
+	var <>generateSynthdefs = true;
 
 	// Plugins needed by the renderer
 	var <>audioPlugins;
@@ -31,40 +33,69 @@ SatieConfiguration {
 	var <>mapperPlugins;
 	var <>postprocessorPlugins;
 	var <>hoaPlugins;
+	var <>monitoringPlugins;
 
 	// other options
 	var <>orientationOffsetDeg;
 
-	*new {| server, listeningFormat = #[\stereoListener, \stereoListener], numAudioAux = 0, outBusIndex = #[0], hrirPath = "~/.local/share/satie/ambitools/FIR/hrir/hrir_ku100_lebedev50/", ambiOrders = #[], minOutputBusChannels = 0 |
+	*new {| server, listeningFormat = #[\stereoListener, \stereoListener], numAudioAux = 0, outBusIndex = #[0], ambiOrders = #[], minOutputBusChannels = 0, hrirPath |
 		server = server;
-		^super.newCopyArgs(server, listeningFormat, numAudioAux, outBusIndex, hrirPath.asString, ambiOrders, minOutputBusChannels).init;
+		^super.newCopyArgs(server, listeningFormat, numAudioAux, outBusIndex, ambiOrders, minOutputBusChannels, hrirPath).init;
 	}
 
-	init{
-		var thisPath, pluginsPath;
-
-		// the path of this class
-		thisPath = PathName.new(this.class.filenameSymbol.asString.dirname);
-		// the root of the SATIE quark
-		satieRoot = thisPath.parentPath;
-		// plugins
-		pluginsPath = satieRoot+/+PathName("plugins");
-		pluginsPath = pluginsPath.fullPath;
+	init {
 		serverOptions = server.options;
-		// load plugins
-		audioPlugins = SatiePlugins.newSource(pluginsPath++"/audiosources/*.scd");
-		fxPlugins = SatiePlugins.newAudio(pluginsPath++"/effects/*.scd");
-		spatPlugins = SatiePlugins.newSpat(pluginsPath++"/spatializers/*.scd");
-		mapperPlugins = SatiePlugins.newAudio(pluginsPath++"/mappers/*.scd");
-		postprocessorPlugins = SatiePlugins.newAudio(pluginsPath++"/postprocessors/*.scd");
-		hoaPlugins = SatiePlugins.newAudio(pluginsPath++"/hoa/*.scd");
+		satieRoot = PathName(this.class.filenameSymbol.asString.dirname).parentPath;
+		satieUserSupportDir = PathName(Platform.userAppSupportDir).parentPath +/+ "satie";
+
+		hrirPath = hrirPath ?? {HOA.userKernelDir +/+ "FIR/hrir/hrir_ku100_lebedev50"};
+
+		this.initDicts;
+		this.initPlugins;
+
 		if (debug, {
 			"New configuration: \nRoot: %\nSpat: %\nPlugins: %, %, %, %".format(
 				this.satieRoot, listeningFormat, this.audioPlugins, this.fxPlugins, this.spatPlugins, this.mapperPlugins, this.postprocessorPlugins
 			).postln;
 		});
+
 		this.handleSpatFormat(listeningFormat);
 		orientationOffsetDeg = [0, 0];
+	}
+
+	initDicts {
+
+		audioPlugins = SatiePlugins.new;
+		fxPlugins = SatiePlugins.new;
+		spatPlugins = SatiePlugins.new;
+		mapperPlugins = SatiePlugins.new;
+		postprocessorPlugins = SatiePlugins.new;
+		hoaPlugins = SatiePlugins.new;
+		monitoringPlugins = SatiePlugins.new;
+	}
+
+	initPlugins {
+		var userPlugsPath;
+
+		this.loadPluginDir(satieRoot +/+ "plugins");
+
+		userPlugsPath = satieUserSupportDir +/+ "plugins";
+		if (PathName(userPlugsPath).isFolder.not) {
+			"No plugins directory found at %".format(userPlugsPath).warn
+		} {
+			this.loadPluginDir(userPlugsPath)
+		}
+	}
+
+	loadPluginDir { |path|
+
+		audioPlugins.putAll(SatiePlugins.newSource(path +/+ "audiosources" +/+ "*.scd"));
+		fxPlugins.putAll(SatiePlugins.newAudio(path +/+ "effects" +/+ "*.scd"));
+		spatPlugins.putAll(SatiePlugins.newSpat(path +/+ "spatializers" +/+ "*.scd"));
+		mapperPlugins.putAll(SatiePlugins.newAudio(path +/+ "mappers" +/+ "*.scd"));
+		postprocessorPlugins.putAll(SatiePlugins.newAudio(path +/+ "postprocessors" +/+ "*.scd"));
+		hoaPlugins.putAll(SatiePlugins.newAudio(path +/+ "hoa" +/+ "*.scd"));
+		monitoringPlugins.putAll(SatiePlugins.newAudio(path +/+ "monitoring" +/+ "*.scd"));
 	}
 
 	handleSpatFormat { arg format;

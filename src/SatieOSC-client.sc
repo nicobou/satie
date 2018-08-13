@@ -68,4 +68,48 @@
 			returnAddress.sendMsg("/arguments", json);
 		}
 	}
+
+	triggerHandler {
+		^{| args, time, addr, recvPort |
+			TreeSnapshot.get({
+				|snapshot|
+				snapshot.nodes.do({|node|
+					var id, instanceName;
+					id = node.nodeId.asInt;
+					if (node.isSynth && id == args[1].asInt) {
+						satie.namesIds.keysValuesDo({
+							|key, value|
+							if (value == id) {
+								instanceName = key;
+							}
+						});
+						returnAddress.sendMsg("/trigger", instanceName, args[3]);
+					}
+				});
+			});
+		}
+	}
+
+	envelopeHandler {
+		^{| args, time, addr, recvPort |
+			TreeSnapshot.get({
+				|snapshot|
+				snapshot.nodes.do({|node|
+					var id, instanceName, restArgs;
+					id = node.nodeId.asInt;
+					if (node.isSynth && id == args[1].asInt) {
+						satie.namesIds.keysValuesDo({
+							|key, value|
+							if (value == id) {
+								instanceName = key;
+							}
+						});
+						// because SendReply allows for a list of values to be sent...
+						restArgs = args.copyRange(3, args.size() -1);
+						returnAddress.sendMsg("/analysis", instanceName, *restArgs);
+					}
+				});
+			});
+		}
+	}
 }

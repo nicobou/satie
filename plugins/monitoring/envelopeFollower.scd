@@ -11,10 +11,25 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+/*       Monitoring/analysis plugin definition
 
-~name = \Satosphere;
-~description = "Satosphere ambisonic decoder";
+	Each monitoring/analyser plugin should define the following global variables:
+    ~name: (symbol) name of the spatializer
+	~description: (string) a short description
+	~function: the actual definition of the plugin
+	~setup: optional function that will set up the plugin before server boots
 
-~function = {|in = 0, order |
-HOADecSATOsw0o.ar(order, in);
-};
+	It should not return any audio
+*/
+
+~name = \envFollow;
+~description = "Send amplitude envelope stream";
+
+~function = { arg in, envFollow_rate=10;
+	var mic = in,
+	env = EnvFollow.kr(mic, 0.999),
+	trig = Impulse.kr(envFollow_rate);
+	SendReply.kr(trig, "/analysis", env);
+    };
+
+~setup = nil;

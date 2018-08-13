@@ -4,26 +4,49 @@ categories:: Libraries>SATIE
 related:: Overview/SATIE-Overview, Classes/Satie, Classes/SatiePlugins, Classes/SpatializerPlugin, Examples/Plugins
 
 DESCRIPTION::
-This is a base class for SATIE plugin. It is used by link::Classes/SatiePlugins::
-All SATIE plugins (audiosources, effects, mappers, postprocessors, spatializers) reside in the plugin directory within the SATIE tree. Other plugins can be added from, arbitrary location, by adding to the appropriate doctionaries (see link::Classes/SatiePlugins:: and link::Classes/SatieConfiguration::).
+This is a base class for SATIE plugins. It is used by link::Classes/SatiePlugins::.
 
-Every plugin should follow the following format:
+SATIE plugins (audiosources, effects, spatializers, etc.) reside in structured plugin directories. The directory structure is as follows (names are case-sensitive):
+
+TELETYPE::plugins/::
+TREE::
+## TELETYPE::audiosources/::
+	TREE::
+	## TELETYPE::some_audiosource_plugin.scd::
+	## TELETYPE::another_audiosource_plugin.scd::
+	## TELETYPE::etc.::
+	::
+## TELETYPE::effects/::
+	TREE::
+	## TELETYPE::some_effect_plugin.scd::
+	## TELETYPE::etc.::
+	::
+## TELETYPE::hoa/::
+## TELETYPE::mappers/::
+## TELETYPE::monitoring/::
+## TELETYPE::postprocessors/::
+## TELETYPE::spatializers/::
+::
+
+NOTE::A correctly structured plugin directory can be found within SATIE's source code (the folder named CODE::plugins::).::
+
+By default, SATIE searches for plugins in two locations defined in LINK::Classes/SatieConfiguration#-satieRoot:: and LINK::Classes/SatieConfiguration#-satieUserSupportDir::. Other plugin directories can be loaded via the method link::Classes/SatieConfiguration#-loadPluginDir::.
+
+Plugins must reside in one of the sub-folders of the plugin directory. Plugins are defined inside their individual CODE::.scd:: files. The format of a plugin file is as follows:
 
 code::
 // Mandatory "fields" of a plugin:
 
-// name
+// name (a Symbol)
 ~name = \pluginName;
 // description
 ~description = "Short description of plugin's purpose or functionality";
 // function definition
 ~function = {| sfreq = 200 |
-	// note, that the plugin should not contain Out uGen.
+	// note, that the plugin should not contain an Out UGen.
 	FSinOsc.ar(sfreq)
 };
 ::
-
-Each plugin resides in its own .scd file. Each field is a global variable which gets consumed by the plugin loader, one at a time.
 
 CLASSMETHODS::
 
@@ -39,8 +62,7 @@ String, a short description of the plugin
 ARGUMENT:: function
 The actual sclang code that defines the plugin's behaviour.
 
+ARGUMENT:: channelLayout
+TELETYPE::mono:: or TELETYPE::ambi::
 
 returns:: SatiePlugin
-
-
-

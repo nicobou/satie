@@ -21,7 +21,7 @@ SatiePlugins : Dictionary {
 		^super.new.spatializerPath(path);
 	}
 
-		*newSource {|path|
+	*newSource {|path|
 		^super.new.sourcePath(path);
 	}
 
@@ -61,7 +61,7 @@ SatiePlugins : Dictionary {
 		name = env[\name];
 		description = env[\description];
 		function = env[\function];
-		type = env[\function];
+		type = env[\channelLayout];
 		this.add(name.asSymbol -> SatiePlugin.new(name.asSymbol, description, function, type));
 	}
 

@@ -1,91 +1,87 @@
-**Note**: SATIE is now updated to use SuperCollider version 3.9
+This document will guide you through building SuperCollider and sc3-plugins from source, as well as installing SATIE and its necessary resources, on Ubuntu 16.04 and up.
 
-**Goal**: you want SuperCollider version 3.9 and sc3-plugins working with supernova (the parallel SuperCollider server), so that SATIE will run many sound sources simultaneously.
+**Note:**  SATIE makes use of UGens called the *HOAUGens* found in the sc3-plugins collection. These UGens were added to the sc3-plugins repository at commit [9326e1229a64ca82f76124a7a1a038095be22996](https://github.com/supercollider/sc3-plugins/tree/9326e1229a64ca82f76124a7a1a038095be22996).
 
-Building for Ubuntu 16.04 and up
--------------------------
+## Building SuperCollider 3.9 from git
 
-From a terminal, go into your source directory and type the following commands.
+Open a terminal and create a source directory inside which you will clone SuperCollider:
+```
+cd ~/	# move to the root of your user's home 
+mkdir -p source && cd source
+```
 
 ### Install dependencies
 
 ```
-sudo apt-get install build-essential libqt4-dev libqtwebkit-dev \
+sudo apt-get install build-essential pkg-config cmake ccache git \
     libjack-jackd2-dev libsndfile1-dev libasound2-dev libavahi-client-dev \
-    libicu-dev libreadline6-dev libfftw3-dev libxt-dev libcwiid-dev \
-    pkg-config cmake subversion git qt5-default qt5-qmake qttools5-dev qttools5-dev-tools qtdeclarative5-dev \
-    libqt5webkit5-dev qtpositioning5-dev libqt5sensors5-dev libqt5opengl5-dev libudev-dev
+    libicu-dev libreadline6-dev libfftw3-dev libxt-dev libudev-dev \
+    qt5-default qt5-qmake qttools5-dev qttools5-dev-tools qtdeclarative5-dev \
+    libqt5webkit5-dev qtpositioning5-dev libqt5sensors5-dev libqt5opengl5-dev
 ```
 
-### Building SuperCollider
+### Clone and build SuperCollider
+
+Run the following commands from the root of your source directory:
 ```
-git clone https://github.com/supercollider/supercollider.git
+git clone --recursive https://github.com/supercollider/supercollider.git
 cd supercollider
 git checkout 3.9
-git submodule init && git submodule update
+git submodule update --init
 mkdir build
 cd build
-cmake ..
+cmake -DCMAKE_BUILD_TYPE=Release -DNATIVE=ON -DSC_EL=OFF ..    # turn off emacs-based IDE
+make
+sudo make install
+sudo ldconfig    # needed when building SuperCollider for the first time
+```
+
+## Build sc3-plugins from git
+
+Run the following commands from the root of your source directory:
+```
+git clone --recursive https://github.com/supercollider/sc3-plugins.git
+cd sc3-plugins
+git submodule update --init
+mkdir build
+cd build
+cmake -DSC_PATH=../../supercollider/ -DSUPERNOVA=ON -DCMAKE_BUILD_TYPE=Release -DNATIVE=ON ..
 make
 sudo make install
 ```
 
-### sc3-plugins
+## Install SATIE and its dependencies
+
+In a terminal, open the SuperCollider IDE by using the following command:
 ```
-git clone https://gitlab.com/sat-metalab/forks/sc3-plugin-with-HOA
-cd sc3-plugin-with-HOA
-git checkout feat/sc-hoa
-git submodule init && git submodule update
-mkdir build
-cd build
-cmake -DSC_PATH=../../supercollider/ -DQUARKS=OFF -DSUPERNOVA=ON ..
-make
-sudo make install
+scide
 ```
 
-Then type `scide` (the SuperCollider IDE) and check the console to see if everything installed well.
+You can install the SATIE Quark from within the IDE by using the `Quarks.install` command. Write the following lines of code in a new document and evaluate them by moving the cursor on a line and hitting `Ctrl-Enter`. Evaluate the following lines one after the other:
+```
+Quarks.install("SATIE");
+Quarks.uninstall("UnitTesting");
+LanguageConfig.addExcludePath(Platform.userAppSupportDir ++ "/downloaded-quarks/UnitTesting").store;
+```
 
-SATIE is a SuperCollider Quark and it depends on the following Quarks:
+**Note:**  Running the last two lines is required due to a conflict between the UnitTesting Quark and SuperCollider's new built-in UnitTest classes. The UnitTesting Quark's path needs to be excluded in order for SuperCollider's class library to successfully compile. If UnitTesting is causing `duplicate Class found` errors when starting SC, or when recompiling the class library, you will need to manually delete it from your system. In the IDE's menu, click `File->Open user support directory` then navigate to the `downloaded-quarks` folder and delete the folder called `UnitTesting`.
 
-- SC-HOA
+### Installing additional resources
 
-Building for OSX
--------------------------
+Binaural rendering in SATIE is made possible through the SC-HOA Quark, the HOAUGens (from sc3-plugins), and the HRIR filters from the ambitools project. In order to make full use of SATIE, you will need to download HFIR filters and place them in a specific location on your system.
 
-####  plugin locations for OSX
-The supercollider plugins should be located in:
+First, create the following location on your system:
+```
+mkdir ~/.local/share/HOA/kernels/ 
+```
 
-`/Library/Application Support/SuperCollider/Extensions/plugins`
-or
-`~/Library/Application Support/SuperCollider/Extensions/plugins`
+Next, download a copy of the ambitools repository from GitHub and extract its contents:
 
-Adding dependencies
--------------------------
-### Binaural kernels for SC_HOA
-Binaural rendering is made possible through the ambitools HRIR Filters. Here follows how to download and make available the HRIR files.
+https://github.com/sekisushai/ambitools/archive/master.zip
 
-~~~~
-mkdir -p ~/.local/share/satie/
-cd ~/.local/share/satie/
-git clone https://github.com/sekisushai/ambitools.git
-~~~~
+Copy the folder called `/FIR` and place it inside the above `/kernels` folder.
 
-Then, the HRIR files for ku100 are located in `~/.local/share/satie/ambitools/FIR/hrir/hrir_ku100_lebedev50/`, which is the default configuration path for SATIE.
 
-### Installing quarks
-Quarks can be installed in a number of ways. Here are two ways to do it (in supercollider):
+## SATIE at the Society for arts and technology [SAT]
 
-~~~~
-// installation via the gui:
-Quarks.gui
-
-// installation via command:
-Quarks.install("SC-HOA");
-~~~~
-
-note:  once you have installed the quark(s) in supercollider, you will need to evaluate the following lines so that supercollider remembers.
-
-~~~~
-LanguageConfig.includePaths
-LanguageConfig.store
-~~~~
+SATIE is developped by the [Metalab](http://sat.qc.ca/fr/recherche/metalab) team at the [Society for arts and technology](http://sat.qc.ca). Additional SATIE plugins and SuperCollider UGens have been developed by the Metalab in order to be used in the [Satosphère](http://sat.qc.ca/fr/satosphere) and with other audio systems at the SAT. Please see the [metalab-ugens repository](https://gitlab.com/sat-metalab/metalab-ugens) for more information.

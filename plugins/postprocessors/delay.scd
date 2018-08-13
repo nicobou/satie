@@ -11,11 +11,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-SatiePlugin {
-	var <name, <description, <function, <type;
 
-	*new{|name, description="This should describe the plugin", function, channelLayout="none"|
-		description = description ? "Description missing"
-		^super.newCopyArgs(name, description, function, channelLayout);
-	}
-}
+~name = \delay;
+~description = "Simple delay line";
+
+~function = {|in = 0, del = 0.5|
+	DelayC.ar(in, 2, del);
+};

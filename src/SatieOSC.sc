@@ -91,6 +91,13 @@ SatieOSC {
 		this.newOSC(\satieRendererSetOutputMute, this.setOutputMuteHandler, "/satie/renderer/setOutputMute");
 		this.newOSC(\satieRendererSetOutputDim, this.setOutputDimHandler, "/satie/renderer/setOutputDim");
 		this.newOSC(\satieRendererFreeSynths, this.freeSynthsHandler, "/satie/renderer/freeSynths");
+
+		// This is for the exclusive use of SendTrig, which (invariably) sends a trigger message to '/tr' path.
+		// We use OSCdef directly because currently newOSC custom method does not give us full control over
+		// OSCdef instance.
+		OSCdef(\satieTrigger, this.triggerHandler, "/tr", satie.satieConfiguration.server.addr);
+		// and another receiver for SendReply attached tot he envelope follower
+		OSCdef(\satieEnvelope, this.envelopeHandler, "/analysis", satie.satieConfiguration.server.addr);
 	}
 
 	/*      create a new OSC definition*/
@@ -239,8 +246,6 @@ SatieOSC {
 		^uriSynth.asString;
 	}
 
-
-
 	// receives OSC messages that look like:   /satie/load filename
 	loadFile {
 		^{ | msg |
@@ -249,28 +254,8 @@ SatieOSC {
 				{"SatieOSC : satieFileLoader:  message missing filepath".warn;},
 				// else
 				{
-					var filepath = msg[1].asString.standardizePath;   // can handle '~'
-
-					if ( File.exists(filepath) == false,
-						{
-							error("SatieOSC: satieFileLoader:   "++filepath++" not found, aborting");
-						},
-						// else  file exists, process
-						{
-
-							if (filepath.splitext.last != "scd",
-								{
-									error("SatieOSC : satieFileLoader: "++filepath++" must be a file of type  '.scd'  ");
-								},
-								// else file type is good. Try to load
-								{
-									satie.satieConfiguration.server.waitForBoot {
-
-										filepath.load;
-										satie.satieConfiguration.server.sync;
-									}; // waitForBoot
-							});
-					});
+					var filepath = msg[1].asString.standardizePath;   // can handle '~'\
+					satie.executeExternalFile(filepath);
 			});
 		}
 	}
