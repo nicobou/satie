@@ -1,17 +1,18 @@
 // UnitTest.reset;
 
 TestSatieIntrospection : UnitTest {
-	var s, satie, conf;
+	var server, satie, conf;
 
 	setUp {
-		s = Server.local;
-		conf = SatieConfiguration.new(s, [\stereoListener]);
+		server = Server(this.class.name); 
+		conf = SatieConfiguration.new(server, [\stereoListener]);
 		satie = Satie.new(conf);
-		this.bootServer;
+		server.bootSync;
 	}
 
 	tearDown {
-		s.quit();
+		server.quit;
+		server.remove;
 	}
 
 	test_setup {
