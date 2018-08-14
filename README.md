@@ -8,7 +8,11 @@ SATIE is built with SuperCollider, an audio programming environment and language
 
 See [SATIE OSC API](SATIE-OSC-API.md) for details on OSC communication.
 
-There is also [PySATIE](https://gitlab.com/sat-metalab/PySATIE) python module which allows for some SATIE control directly from python code (particularly useful for use with [Blender](https://www.blender.org/) or [Panda3d](https://www.panda3d.org/))
+There are also some known efforts to bridges for specific software:
+
+- [gdosc](https://github.com/djiamnot/gdosc) module for [Godot](https://godotengine.org) game engine.
+- A Unity example can be found here: https://gitlab.com/sat-metalab/satie4unityExample
+- [PySATIE](https://gitlab.com/sat-metalab/PySATIE) is a Python module which allows for some SATIE control directly from python code (particularly useful for use with [Blender](https://www.blender.org/) or [Panda3d](https://www.panda3d.org/))
 
 ## Directory structure
 
@@ -34,4 +38,3 @@ This program is free software; you can redistribute it and/or modify it under th
 ## Sponsors
 
 This project is made possible thanks to the [Society for Arts and Technology](http://www.sat.qc.ca/) [SAT] and to the Ministère de l'Économie, de la Science et de l'Innovation (MESI) du Québec.
-
