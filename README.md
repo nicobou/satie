@@ -2,13 +2,13 @@
 
 SATIE is an audio spatialization engine developed for realtime rendering of dense audio scenes to large multi-channel loudspeaker systems. It is a lower-level audio rendering process that maintains a dynamic DSP graph which is created and controlled via OSC messages from an external process. SATIE’s modular development environment provides for optimized real-time audio scene and resource management. There is no geometry per se in SATIE, rather, SATIE maintains a DSP graph of source nodes that are accumulated to a single "listener", corresponding to the renderer’s output configuration (stereo and/or multi-channel).
 
-Its aim is to facilitate using 3D space in audio music/audio composition and authoring and to play well with 3D audio engines (so far it has been used with Blender and Unity3D) and could also serve as volumetric audio spatialization addition to more traditional desktop DAW systems.
+Its aim is to facilitate using 3D space in music/audio composition and authoring, to play well with 3D audio engines (so far it has been used with Blender and Unity3D), to serve as a volumetric audio spatialization addition to more traditional desktop DAW systems.
 
 SATIE is built with SuperCollider, an audio programming environment and language and is controlled via OSC. See instructions for [installing SuperCollider 3.9](INSTALL-SC.md).
 
 See [SATIE OSC API](SATIE-OSC-API.md) for details on OSC communication.
 
-There are also some known efforts to bridges for specific software:
+There are also some known efforts to make bridges for specific software:
 
 - [gdosc](https://github.com/djiamnot/gdosc) module for [Godot](https://godotengine.org) game engine.
 - A Unity example can be found here: https://gitlab.com/sat-metalab/satie4unityExample
