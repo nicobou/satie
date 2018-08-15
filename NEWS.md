@@ -1,5 +1,10 @@
 # SATIE Changelog
 
+## [1.1.1] - 2018-08-15
+
+## Improvements
+- A better Readme
+
 ## [1.1.0] - 2018-08-13
 
 ### New features
