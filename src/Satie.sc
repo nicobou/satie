@@ -308,4 +308,29 @@ Satie {
 		generatedSynthDefs = audioPlugins.keys;
 
 	}
+
+	makePlugin {|plugName|
+		var plug;
+		plug = satieConfiguration.audioPlugins[plugName];
+		if (plug.notNil,
+			{ plug.postln},
+			{ "% cannot be found".format(plugName).postln}
+		)
+	}
+
+	pluginExecSetup {|plugin|
+		if (plugin.setup.notNil,
+			{plugin.setup.value(this)}
+		)
+	}
+
+	// compileSynthDef {|plugin|
+	// 	if ((plugin.type == \mono).asBoolean,
+	// 			{
+	// 				this.makeSynthDef(plugin.name,item.name, [],[],[], satieConfiguration.listeningFormat, satieConfiguration.outBusIndex);
+	// 			});
+	// 	satieConfiguration.ambiOrders.do { |order, i|
+	// 			this.makeAmbi((plugin.name ++ "Ambi" ++ order.asSymbol), item.name, [], [], [], order, [], satieConfiguration.ambiBusIndex[i]);
+	// 	}
+	// }
 }
