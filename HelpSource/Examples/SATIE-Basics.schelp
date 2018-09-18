@@ -222,14 +222,14 @@ s.waitForBoot({
 
 // Cue file and play it
 (
-~monoFile = Buffer.cueSoundFile(~satie.satieConfiguration.server, "/usr/share/sounds/alsa/Front_Center.wav", 0, 1);
+~monoFile = Buffer.cueSoundFile(~satie.satieConfiguration.server, Platform.resourceDir +/+ "sounds/a11wlk01.wav", 0, 1);
 
 // instantiate
 ~satie.makeSourceInstance(\monof, \sndFile, \default, synthArgs: [\bufnum: ~monoFile, \loop, 1]);
 ~satie.groupInstances[\default][\monof].set(\gainDB, -10, \aziDeg, -120, \eleDeg, 15, \t_trig, 1, \loop, 1);
 )
 
-// cue another
+// cue again or another
 ~monoFile.cueSoundFile(Platform.resourceDir +/+ "sounds/a11wlk01.wav");
 
 // clean up
