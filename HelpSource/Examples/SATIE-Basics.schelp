@@ -194,6 +194,50 @@ s.waitForBoot({
 
 ::
 
+
+Section:: Use case: Play a mono sound file
+
+This example converts a 6 channel audio input that corresponds to 5.1 to stereo. The 5.1 channels should be in this order: Front-L, Center, Front-R, Surround-L, Surround-R, LFE.
+
+code::
+(
+// define a server, SATIE needs it
+s = Server.supernova.local;
+// instantiate a SatieConfiguration. Here we will use a stereo spatializer
+~satieConfiguration = SatieConfiguration.new(s, [\stereoListener]);
+
+// change input/output channels
+~satieConfiguration.serverOptions.numOutputBusChannels = 2;
+~satieConfiguration.serverOptions.numInputBusChannels = 2;
+
+// instantiate SATIE renderer and pass it the configuration
+~satie = Satie.new(~satieConfiguration);
+~satie.boot();
+s.waitForBoot({
+    s.meter;
+    s.makeGui;
+    s.plotTree;
+})
+)
+
+// Cue file and play it
+(
+~monoFile = Buffer.cueSoundFile(~satie.satieConfiguration.server, Platform.resourceDir +/+ "sounds/a11wlk01.wav", 0, 1);
+
+// instantiate
+~satie.makeSourceInstance(\monof, \sndFile, \default, synthArgs: [\bufnum: ~monoFile, \loop, 1]);
+~satie.groupInstances[\default][\monof].set(\gainDB, -10, \aziDeg, -120, \eleDeg, 15, \t_trig, 1, \loop, 1);
+)
+
+// cue again or another
+~monoFile.cueSoundFile(Platform.resourceDir +/+ "sounds/a11wlk01.wav");
+
+// clean up
+~satie.cleanUp
+
+::
+
+
 Go back to link::Overview/SATIE-Overview::
 
 Next Section: link::Examples/Spatializers::
