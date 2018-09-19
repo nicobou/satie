@@ -3,14 +3,13 @@ image: ubuntu:18.04
 before_script:
 
     # install dependancies
-    - apt-get update -yq
+    - apt-get update
     - export DEBIAN_FRONTEND=noninteractive
-    - apt-get install -yq
+    - apt-get install --yes --quiet
         build-essential
         pkg-config
         cmake
         git
-        jackd1
         libjack-dev
         libsndfile1-dev
         libasound2-dev
@@ -20,6 +19,7 @@ before_script:
         libreadline6-dev
         libfftw3-dev
         libudev-dev
+    - apt-get install --yes --quiet --no-install-recommends jackd1
 
     # build SuperCollider
     - git clone
