@@ -6,8 +6,9 @@ before_script:
     - apt-get update
     - export DEBIAN_FRONTEND=noninteractive
     - apt-get install --yes --quiet
-        build-essential
-        pkg-config
+        gcc
+        g++
+        make
         cmake
         git
         libjack-dev
