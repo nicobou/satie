@@ -29,26 +29,19 @@
 ~channelLayout = \ambi;
 
 ~function = { | order = 2, bufnum = 0, loop = 1, mul = 1|
-	// SynthDef.wrap(~diskins.at(order), prependArgs: [loop, bufnum]);
-	// DiskIn.ar(16, bufnum, BufRateScale.kr(bufnum));
-	SynthDef.wrap(~diskin, prependArgs: [bufnum]);
+	SynthDef.wrap(~diskins.at(order), prependArgs: [loop, bufnum]);
 };
 
-// ~setup = { |satieInstance|
-// 	var orders = satieInstance.satieConfiguration.ambiOrders;
-// 	~diskins = Array.fill(6, {0});
-// 	~diskins.do({|i, index|
-// 		var idx, numChannels, func;
-// 		idx = index;
-// 		numChannels = (idx + 1).pow(2).asInt;
-// 		func = { |bufnum, loop|
-// 			DiskIn.ar(16, bufnum, BufRateScale.kr(bufnum));
-// 		};
-// 		~diskins.put(idx, func);
-// 	});
-// };
-
-
-~diskin = { |bufnum|
-	DiskIn.ar(16, bufnum, BufRateScale.kr(bufnum));
+~setup = { |satieInstance|
+	var orders = satieInstance.satieConfiguration.ambiOrders;
+	~diskins = Array.fill(6, {0});
+	~diskins.do({|i, index|
+		var idx, numChannels, func;
+		idx = index;
+		numChannels = (idx + 1).pow(2).asInt;
+		func = { |loop, bufnum|
+			DiskIn.ar(numChannels, bufnum, BufRateScale.kr(bufnum));
+		};
+		~diskins.put(idx, func);
+	});
 };
