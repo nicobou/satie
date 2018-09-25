@@ -283,18 +283,23 @@ Satie {
 			);
 		};
 		satieConfiguration.server.sync;
-		if (satieConfiguration.generateSynthdefs, {this.makePlugins});
+		if (satieConfiguration.generateSynthdefs, {
+			this.setupPlugins;
+			this.makePlugins;
+		});
 	}
 
-	makePlugins {
-		// execute setup functions for audioSources
+	setupPlugins {
+		// execute setup functions in plugins
 		satieConfiguration.audioPlugins.do { arg item, i;
 			if (item.setup.notNil,
 				{
 					item.setup.value(this);
 				});
 		};
+	}
 
+	makePlugins {
 		// generate synthdefs
 		audioPlugins.do { arg item;
 			if ((item.type == \mono).asBoolean,
