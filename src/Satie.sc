@@ -54,7 +54,7 @@ Satie {
 	var postProcGroup;
 	var <ambiPostProcessors;
 	var ambiPostProcGroup;
-	var booted = false;
+	var <booted = false;
 
 	*new {|satieConfiguration, execFile = nil|
 		^super.newCopyArgs(satieConfiguration, execFile).initRenderer;
