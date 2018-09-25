@@ -313,19 +313,4 @@ Satie {
 		generatedSynthDefs = audioPlugins.keys;
 
 	}
-
-	makePlugin {|plugName|
-		var plug;
-		plug = satieConfiguration.audioPlugins[plugName];
-		if (plug.notNil,
-			{ plug.postln},
-			{ "% cannot be found".format(plugName).postln}
-		)
-	}
-
-	pluginExecSetup {|plugin|
-		if (plugin.setup.notNil,
-			{plugin.setup.value(this)}
-		)
-	}
 }
