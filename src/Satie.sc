@@ -55,6 +55,7 @@ Satie {
 	var <ambiPostProcessors;
 	var ambiPostProcGroup;
 	var <booted = false;
+	var <>doneCb = nil;
 
 	*new {|satieConfiguration, execFile = nil|
 		^super.newCopyArgs(satieConfiguration, execFile).initRenderer;
@@ -106,6 +107,7 @@ Satie {
 					}
 				);
 				booted = true;
+				if (doneCb.notNil, {doneCb.value()});
 			});
 		}
 		{|error|
