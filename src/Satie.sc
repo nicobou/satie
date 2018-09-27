@@ -89,15 +89,6 @@ Satie {
 		CmdPeriod.add(this.cmdPeriod);
 		try {
 
-			// pre-boot
-			satieConfiguration.listeningFormat.do { arg item, i;
-				if (item.asSymbol == \ambi3,
-					{
-						"%:  forcing the server block size to 128 as required by % spatializer ".format(this.class, item).warn;
-						options.blockSize = 128;
-					});
-			};
-
 			// boot
 			satieConfiguration.server.boot;
 
