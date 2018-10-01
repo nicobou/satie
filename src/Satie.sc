@@ -105,8 +105,8 @@ Satie {
 						this.executeExternalFile(execFile);
 					}
 				);
+				booted = true;
 			});
-			booted = true;
 		}
 		{|error|
 			"Could not boot SATIE because %".format(error).postln;
