@@ -30,7 +30,7 @@ TestSatie_Server : UnitTest {
         this.assertEquals(satie.booted, true, "Satie booted succesfully");
 
         timeout.stop;
-		cond = nil;
+        cond = nil;
     }
 
 }
