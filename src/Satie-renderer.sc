@@ -274,8 +274,5 @@
 			var group = item.asSymbol;
 			this.killSatieGroup(group);
 		});
-
-		// re-create clean slate
-		this.execPostBootActions();
 	}
 }
