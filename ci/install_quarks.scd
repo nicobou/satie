@@ -6,6 +6,7 @@ fork {
     } {
         "SATIE quark file not found at: %".format(~path).postln
     };
+    5.wait;
     0.exit
 }
 
