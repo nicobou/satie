@@ -11,6 +11,7 @@ TestSatie_Server : UnitTest {
         server.quit;
         server.remove;
         satie = nil;
+        OSCdef.freeAll;
     }
 
     test_boot {
