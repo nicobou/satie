@@ -104,12 +104,12 @@ Satie {
 		});
 	}
 
-	quit {
+	quit { |quitServer = true|
 		CmdPeriod.remove(this);
 		ServerTree.remove(this, satieConfiguration.server);
 		this.cleanUp;
 		booted = false;
-		satieConfiguration.server.quit;
+        if(quitServer, { satieConfiguration.server.quit });
 	}
 
 	executeExternalFile {|filepath|
