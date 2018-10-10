@@ -87,32 +87,29 @@ Satie {
 
 	// public method
 	boot {
-		CmdPeriod.add(this.cmdPeriod);
-		try {
+		satieConfiguration.server.boot;
+		satieConfiguration.server.doWhenBooted({
+			this.postExec();
+			osc = SatieOSC(this);
+			inspector = SatieIntrospection.new(this);
+			ServerTree.add(this, satieConfiguration.server);
+			CmdPeriod.add(this);
+			booted = true;
+			if (doneCb.notNil, {doneCb.value()});
 
-			// boot
-			satieConfiguration.server.boot;
-
-			// post-boot
-			this.execPostBootActions();
-			satieConfiguration.server.doWhenBooted({
-				this.postExec();
-				osc = SatieOSC(this);
-				inspector = SatieIntrospection.new(this);
-				if (
-					execFile.notNil,
-					{
-						"- Executing %".format(execFile).postln;
-						this.executeExternalFile(execFile);
-					}
-				);
-				booted = true;
-				if (doneCb.notNil, {doneCb.value()});
+			if(execFile.notNil, {
+				"- Executing %".format(execFile).postln;
+				this.executeExternalFile(execFile);
 			});
-		}
-		{|error|
-			"Could not boot SATIE because %".format(error).postln;
-		}
+		});
+	}
+
+	quit { |quitServer = true|
+		CmdPeriod.remove(this);
+		ServerTree.remove(this, satieConfiguration.server);
+		this.cleanUp;
+		booted = false;
+        if(quitServer, { satieConfiguration.server.quit });
 	}
 
 	executeExternalFile {|filepath|
@@ -144,18 +141,14 @@ Satie {
 			});
 	}
 
-	cmdPeriod {
-		if ((booted),
-			{
-				"SATIE - cleaning up the scene".postln;
-				this.cleanUp();
-			}
-		);
+	doOnServerTree {
+		"SATIE - creating default groups".postln;
+		this.createDefaultGroups;
 	}
 
-	execPostBootActions {
-		satieConfiguration.server.doWhenBooted({this.createDefaultGroups()});
-
+	cmdPeriod {
+		"SATIE - cleaning up the scene".postln;
+		this.cleanUp;
 	}
 
 	createDefaultGroups {
@@ -257,6 +250,7 @@ Satie {
 	// private method
 	postExec {
 		// execute any code needed after the server has been booted
+		this.createDefaultGroups;
 		this.setAuxBusses();
 		this.setAmbiBusses();
 		// loading HRIR filters
