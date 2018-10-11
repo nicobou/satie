@@ -108,6 +108,7 @@ Satie {
 		CmdPeriod.remove(this);
 		ServerTree.remove(this, satieConfiguration.server);
 		this.cleanUp;
+		osc.deleteAll;
 		booted = false;
         if(quitServer, { satieConfiguration.server.quit });
 	}

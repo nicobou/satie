@@ -1,4 +1,5 @@
 SatieOSC {
+
 	var satie;
 	var <rootURI;
 	var <>oscServerPort;
@@ -9,11 +10,12 @@ SatieOSC {
 	var <dynamicResponder;
 	var returnAddress;
 
-
 	// used for audio renderer control
 	var volume;     // will point to server volume / mute control
 	var outputDB = 0;    // current state of the supercollider server output
 	var outputTrimDB = 0;
+
+	var <oscDefs;
 
 	// TODO satieContext must be an array in order to duplicate message forwarding to sc server
 	*new { | satieContext, rootPath = "/satie", serverPort = 18032, clientPort = 18060 |
@@ -23,6 +25,7 @@ SatieOSC {
 	initOSC {
 		" - satie: %\n - rootURI: %\n - port: %".format(satie, rootURI, oscServerPort).postln;
 		" + %".format(satie.satieConfiguration.server).postln;
+		oscDefs = IdentityDictionary.new;
 		dynamicResponder = true;
 		oscClientIP = "localhost";
 		returnAddress = NetAddr(this.oscClientIP, this.oscClientPort);
@@ -95,20 +98,36 @@ SatieOSC {
 		// This is for the exclusive use of SendTrig, which (invariably) sends a trigger message to '/tr' path.
 		// We use OSCdef directly because currently newOSC custom method does not give us full control over
 		// OSCdef instance.
-		OSCdef(\satieTrigger, this.triggerHandler, "/tr", satie.satieConfiguration.server.addr);
-		// and another receiver for SendReply attached tot he envelope follower
-		OSCdef(\satieEnvelope, this.envelopeHandler, "/analysis", satie.satieConfiguration.server.addr);
+		oscDefs.put(
+			\satieTrigger,
+			OSCdef(\satieTrigger, this.triggerHandler, "/tr", satie.satieConfiguration.server.addr);
+		);
+		// and another receiver for SendReply attached to the envelope follower
+		oscDefs.put(
+			\satieEnvelope,
+			OSCdef(\satieEnvelope, this.envelopeHandler, "/analysis", satie.satieConfiguration.server.addr);
+		);
 	}
 
 	/*      create a new OSC definition*/
 	newOSC { | id, cb, path = \default |
-		OSCdef(id.asSymbol, cb, path, recvPort: oscServerPort);
+		var key = id.asSymbol;
+		oscDefs.put(
+			key,
+			OSCdef(key, cb, path, recvPort: oscServerPort)
+		);
 	}
 
-	deleteOSC {|id|
-		OSCdef(id.asSymbol).free;
+	deleteOSC { |id|
+		var key = id.asSymbol;
+		OSCdef(key).free;
+		oscDefs.removeAt(key);
 	}
 
+	deleteAll {
+		oscDefs.keysDo({ |key| OSCdef(key).free });
+		oscDefs.clear;
+	}
 
 	removeGroup { | groupName |
 		if ( satie.groups.includesKey(groupName.asSymbol) ,
