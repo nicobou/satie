@@ -4,6 +4,7 @@ fork {
     // list test classnames
     tests = [
         TestSatie_Server,
+        TestSatie_quit,
     ];
 
     // run each test

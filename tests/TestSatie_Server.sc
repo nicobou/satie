@@ -9,6 +9,7 @@ TestSatie_Server : UnitTest {
 
 	tearDown {
 		satie.quit;
+		satie = nil;
 		server.remove;
 	}
 
