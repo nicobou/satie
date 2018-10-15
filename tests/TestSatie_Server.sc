@@ -1,36 +1,36 @@
 TestSatie_Server : UnitTest {
 
-    var server, satie;
+	var server, satie;
 
-    setUp {
-        server = Server(this.class.name);
-        satie = Satie(SatieConfiguration(server));
-    }
+	setUp {
+		server = Server(this.class.name);
+		satie = Satie(SatieConfiguration(server));
+	}
 
-    tearDown {
-        satie.quit;
-        server.remove;
-    }
+	tearDown {
+		satie.quit;
+		server.remove;
+	}
 
-    test_boot {
-        satie.boot;
-        this.wait({ satie.booted }, "Satie boot timed out", 8);
-    }
+	test_boot {
+		satie.boot;
+		this.wait({ satie.booted }, "Satie boot timed out", 8);
+	}
 
-    test_bootCallback {
-        var timeout, cond = Condition();
+	test_bootCallback {
+		var timeout, cond = Condition();
 
-        satie.doneCb = { cond.unhang };
-        timeout = fork { 8.wait; cond.unhang };
+		satie.doneCb = { cond.unhang };
+		timeout = fork { 8.wait; cond.unhang };
 
-        satie.boot;
-        cond.hang;
+		satie.boot;
+		cond.hang;
 
-        this.assertEquals(satie.booted, true, "Satie booted succesfully");
+		this.assertEquals(satie.booted, true, "Satie booted succesfully");
 
-        timeout.stop;
-        cond = nil;
-        satie.doneCb = nil;
-    }
+		timeout.stop;
+		cond = nil;
+		satie.doneCb = nil;
+	}
 
 }
