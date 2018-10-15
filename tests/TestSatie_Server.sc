@@ -8,10 +8,8 @@ TestSatie_Server : UnitTest {
     }
 
     tearDown {
-        server.quit;
+        satie.quit;
         server.remove;
-        satie = nil;
-        OSCdef.freeAll;
     }
 
     test_boot {
@@ -32,6 +30,7 @@ TestSatie_Server : UnitTest {
 
         timeout.stop;
         cond = nil;
+        satie.doneCb = nil;
     }
 
 }
