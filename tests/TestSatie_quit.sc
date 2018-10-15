@@ -40,6 +40,14 @@ TestSatie_quit : UnitTest {
 		);
 	}
 
+	test_groupInstances_free {
+		this.assertEquals(
+			satie.groupInstances.isEmpty,
+			true,
+			"Group Instances where freed after quit"
+		);
+	}
+
 	//
 	// test_processInstance_free
 	//
