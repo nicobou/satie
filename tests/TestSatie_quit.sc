@@ -5,6 +5,8 @@ TestSatie_quit : UnitTest {
 	setUp {
 		server = Server(this.class.name);
 		satie = Satie(SatieConfiguration(server));
+		satie.makeProcess(\dummy, ( ));
+		satie.makeProcessInstance(\testProcess, \dummy);
 		satie.boot;
 		this.wait({ satie.booted }, "Satie failed to boot in 'setUp'", 5);
 		satie.quit;
@@ -48,9 +50,13 @@ TestSatie_quit : UnitTest {
 		);
 	}
 
-	//
-	// test_processInstance_free
-	//
+	test_processInstance_free {
+		this.assertEquals(
+			satie.processInstances.isEmpty,
+			true,
+			"Process Instances where freed after quit"
+		);
+	}
 
 	test_oscDefs_free {
 		this.assertEquals(
