@@ -6,7 +6,6 @@ TestSatieConfiguration_server : UnitTest {
 	}
 
 	tearDown {
-		satie.quit;
 		server.remove;
 	}
 
@@ -21,6 +20,7 @@ TestSatieConfiguration_server : UnitTest {
 			satie.spatPlugins[spat].numChannels,
 			"Server has correct number of output channels"
 		);
+		satie.quit;
 	}
 
 }
