@@ -13,7 +13,7 @@
 
 SatieConfiguration {
 	var <server;
-	var <>listeningFormat;
+	var <listeningFormat;
 	var <numAudioAux;
 	var <outBusIndex;
 	var <ambiOrders;  // array of wanted orders. Available orders are 1 to 5
@@ -98,7 +98,7 @@ SatieConfiguration {
 		monitoringPlugins.putAll(SatiePlugins.newAudio(path +/+ "monitoring" +/+ "*.scd"));
 	}
 
-	handleSpatFormat { arg format;
+	handleSpatFormat { |format|
 		serverOptions.numOutputBusChannels = outBusIndex.minItem;
 
 		format.do { arg item, i;
@@ -114,4 +114,5 @@ SatieConfiguration {
 		};
 		if (serverOptions.numOutputBusChannels < this.minOutputBusChannels,  {serverOptions.numOutputBusChannels = this.minOutputBusChannels;});
 	}
+
 }
