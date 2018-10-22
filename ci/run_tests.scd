@@ -5,6 +5,7 @@ fork {
     tests = [
         TestSatie_Server,
         TestSatie_quit,
+        TestSatieConfiguration,
     ];
 
     // run each test
