@@ -32,7 +32,7 @@
 // dome speaker layout
 
 
-~name = \_1474_VBAP;
+~name = \1474VBAP;
 ~description = "16 channel dome (IEM)";
 ~numChannels = 16;
 ~channelLayout = \mono;

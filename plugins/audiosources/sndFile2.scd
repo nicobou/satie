@@ -17,7 +17,7 @@
 */
 
 
-~name = \sndFile;
+~name = \sndFile2;
 ~description = "A sound file player (stream from disk)";
 ~channelLayout = \mono;
 
