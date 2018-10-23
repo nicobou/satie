@@ -67,4 +67,25 @@ TestSatieConfiguration : UnitTest {
 		}
 	}
 
+	test_loadPlugins {
+		var path = PathName(config.satieRoot +/+ "plugins");
+		path.filesDo { |file|
+			var folder = file.folderName.asSymbol;
+			var filename = file.fileNameWithoutExtension.asSymbol;
+			var category = switch(folder)
+				{\audiosources} {\audioPlugins}
+				{\effects} {\fxPlugins}
+				{\hoa} {\hoaPlugins}
+				{\mappers} {\mapperPlugins}
+				{\monitoring} {\monitoringPlugins}
+				{\postprocessors} {\postprocessorPlugins}
+				{\spatializers} {\spatPlugins};
+			this.assertEquals(
+				config.slotAt(category).at(filename).isNil,
+				false,
+				"Plugin %/% loaded successfully".format(folder, filename)
+			)
+		}
+	}
+
 }
