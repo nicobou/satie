@@ -19,6 +19,10 @@ fork {
     UnitTest.report;
 
     "quiting sclang...".postln;
-    0.exit
+    if(UnitTest.failures.size > 0) {
+        1.exit
+    } {
+        0.exit
+    }
 }
 
