@@ -34,7 +34,7 @@ TestSatieConfiguration : UnitTest {
 	}
 
 	test_satieRoot {
-		var rootPath = "/builds/sat-metalab/SATIE"; // GitLab CI path
+		var rootPath = "/builds/sat-metalab/SATIE/"; // GitLab CI path
 		this.assertEquals(config.satieRoot, rootPath, "Satie root path is correctly set");
 	}
 
