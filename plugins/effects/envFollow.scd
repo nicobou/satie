@@ -22,6 +22,7 @@
 
 ~name = \envFollow;
 ~description = "Send a trigger based on envelope threshold";
+~channelLayout = \mono;
 
 ~function = { arg in, triggerLevel=0.2, debounce=1 ;
 	var mic = In.ar(in),

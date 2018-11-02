@@ -14,7 +14,7 @@
 
 ~name = \envfol;
 ~description = "Envelope follower (audio rate)";
-
+~channelLayout = \mono;
 ~function = {|in = 0, decaycoeff = 0.99, amp = 10.0, lpf = 20 |
 	var env, out;
 	in.scope;

@@ -14,7 +14,7 @@
 
 ~name = \delay;
 ~description = "Simple delay line";
-
+~channelLayout = \mono;
 ~function = {|in = 0, del = 0.5|
 	DelayC.ar(in, 2, del);
 };

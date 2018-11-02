@@ -14,7 +14,7 @@
 
 ~name = \limiter;
 ~description = "hard limiter";
-
+~channelLayout = \mono;
 ~function = {|in = 0, limitDB = 0 |
 var limit = limitDB.dbamp;
 Limiter.ar(in, limit);
