@@ -290,7 +290,7 @@ Satie {
 	makePlugins {
 		// generate synthdefs
 		audioPlugins.do { arg item;
-			if ((item.type == \mono).asBoolean,
+			if ((item.channelLayout == \mono).asBoolean,
 				{
 					this.makeSynthDef(item.name,item.name, [],[],[], satieConfiguration.listeningFormat, satieConfiguration.outBusIndex);
 				});
