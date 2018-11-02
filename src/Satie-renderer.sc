@@ -105,7 +105,7 @@
 			}
 		);
 
-		if(satieConfiguration.audioPlugins.at(srcName).type == \mono, {
+		if(dico.at(srcName).type == \mono, {
 			SatieFactory.makeAmbiFromMono(
 				name,
 				dico.at(srcName).function,
