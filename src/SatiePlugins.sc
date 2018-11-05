@@ -57,12 +57,12 @@ SatiePlugins : Dictionary {
 	}
 
 	addAudioPlugin { | env |
-		var name, description, function, type;
+		var name, description, function, channelLayout;
 		name = env[\name];
 		description = env[\description];
 		function = env[\function];
-		type = env[\channelLayout];
-		this.add(name.asSymbol -> SatiePlugin.new(name.asSymbol, description, function, type));
+		channelLayout = env[\channelLayout];
+		this.add(name.asSymbol -> SatiePlugin.new(name.asSymbol, description, function, channelLayout));
 	}
 
 	showPlugins {

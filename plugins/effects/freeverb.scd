@@ -11,17 +11,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*       Audio plugin definition 
+/*       Audio plugin definition
 
 	Each audio plugin should define the following global variables:
     ~name: (symbol) name of the spatializer
 	~description: (string) a short description
 	~function: the actual definition of the plugin
-	
+
 */
 
 ~name = \freeverb;
 ~description = "A very simple reverb";
+~channelLayout = \mono;
 ~function = { arg in, mix=1.0, room=0.5, damp=0.5, outputDB=0;
 	outputDB.dbamp *  FreeVerb.ar(In.ar(in), mix, room, damp);
 };

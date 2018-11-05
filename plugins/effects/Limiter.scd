@@ -11,17 +11,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*       Audio plugin definition 
+/*       Audio plugin definition
 
 	Each audio plugin should define the following global variables:
     ~name: (symbol) name of the spatializer
 	~description: (string) a short description
 	~function: the actual definition of the plugin
-	
+
 */
 
 ~name = \Limiter;
 ~description = "A simple limiter";
+~channelLayout = \mono;
 
 ~function = { arg in, level=0.7, dur=0.01, outputDB=0;
 	outputDB.dbamp * Limiter.ar(In.ar(in), level, dur);

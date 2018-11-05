@@ -31,7 +31,7 @@
 		});
 		if(satieConfiguration.audioPlugins.at(srcName) != nil,
 			{
-				if(satieConfiguration.audioPlugins.at(srcName).type != \mono, {
+				if(satieConfiguration.audioPlugins.at(srcName).channelLayout != \mono, {
 					"makesynthDef failed: audio source must be mono (% is not mono)".format(srcName).warn;
 					^0;
 				});
@@ -51,7 +51,7 @@
 			}
 		);
 		spatSymbolArray.collect({|item, i|
-			if(satieConfiguration.spatPlugins.at(item).type != \mono, {
+			if(satieConfiguration.spatPlugins.at(item).channelLayout != \mono, {
 				"makesynthDef failed: spatializer must be mono (% is not mono)".format(item).warn;
 				^0;
 			});
@@ -105,7 +105,7 @@
 			}
 		);
 
-		if(satieConfiguration.audioPlugins.at(srcName).type == \mono, {
+		if(dico.at(srcName).channelLayout == \mono, {
 			SatieFactory.makeAmbiFromMono(
 				name,
 				dico.at(srcName).function,
@@ -119,7 +119,7 @@
 				ambiBusIndex,
 				satieConfiguration.mapperPlugins.at(paramsMapper).function,
 				synthArgs);
-		},{ // else  (assuming type is \ambi
+		},{ // else  (assuming channelLayout is \ambi
 			SatieFactory.makeAmbi(
 				name,
 				dico.at(srcName).function,
