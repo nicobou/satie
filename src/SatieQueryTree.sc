@@ -1,3 +1,7 @@
+// This class is based off of TreeSnapshot and TraceParser from the NodeSnapshot quark.
+// https://github.com/scztt/NodeSnapshot.quark
+// Scott Carver, 2013, MIT License
+
 SatieQueryTree {
 	var server, msg, <nodeIds, index;
 
