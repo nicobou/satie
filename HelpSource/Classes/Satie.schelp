@@ -70,7 +70,7 @@ Index number of the spatializer to which the post-process will be attached. Defa
 ARGUMENT:: defaultArgs
 An array of arguments, if any
 
-METHOD:: fxPlugins
+METHOD:: effects
 a dictionary containing effects plugins definitions
 
 returns:: link::Classes/SatiePlugins::
@@ -160,7 +160,7 @@ Symbol: the name of the group.
 
 This method does not return.
 
-METHOD:: mapperPlugins
+METHOD:: mappers
 
 returns:: a link::Classes/Dictionary:: of mapper plugins
 
@@ -168,11 +168,11 @@ METHOD:: debug
 
 returns:: link::Classes/SatieConfiguration##debug::
 
-METHOD:: spatPlugins
+METHOD:: spatializers
 
-returns:: link::Classes/SatieConfiguration##spatPlugins::
+returns:: link::Classes/SatieConfiguration##spatializers::
 
-METHOD:: audioPlugins
+METHOD:: sources
 (describe method here)
 
 returns:: (describe returnvalue here)

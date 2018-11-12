@@ -33,7 +33,7 @@ s = Server.supernova.local;
 	minOutputBusChannels: 4
 );
 // list possible listeners:
-~satieConfiguration.spatPlugins.keys;
+~satieConfiguration.spatializers.keys;
 ~satieConfiguration.serverOptions.numOutputBusChannels = 64;
 ~satieConfiguration.serverOptions.numInputBusChannels = 8;
 ~satieConfiguration.serverOptions.memSize = 2.pow(18);

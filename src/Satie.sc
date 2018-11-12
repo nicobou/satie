@@ -57,7 +57,6 @@ Satie {
 
 	// Private method
 	initRenderer {
-		// FIXME, remove those member duplication and rename satieConfiguration into a shorter name:
 		options = config.serverOptions;
 		satieRoot = config.satieRoot;
 		debug = config.debug;
@@ -153,12 +152,12 @@ Satie {
 				{
 					var previousSynth = SynthDef.wrap({
 						In.ar(config.outBusIndex[spatializerNumber],
-							config.spatPlugins[config.listeningFormat[spatializerNumber]].numChannels
+							config.spatializers[config.listeningFormat[spatializerNumber]].numChannels
 						);
 					});
 					// collecting spatializers
 					pipeline.do { arg item;
-						previousSynth = SynthDef.wrap(config.postprocessorPlugins.at(item).function, prependArgs: [previousSynth]);
+						previousSynth = SynthDef.wrap(config.postprocessors.at(item).function, prependArgs: [previousSynth]);
 						// add individual pipeline item to the dictionaries used by introspection
 						groupInstances[\postProc].put(item.asSymbol, previousSynth);
 						mastering.put(item.asSymbol, item.asSymbol);
@@ -193,7 +192,7 @@ Satie {
 					// backing the hoa pipeline
 					pipeline.do { arg item;
 						previousSynth = SynthDef.wrap(
-							config.hoaPlugins.at(item).function,
+							config.hoa.at(item).function,
 						prependArgs: [previousSynth, order]);
 						// add individual pipeline item to the dictionaries used by introspection
 						groupInstances[\ambiPostProc].put(item.asSymbol, previousSynth);
@@ -250,12 +249,12 @@ Satie {
 		config.listeningFormat.do { arg item, i;
 			// run .setup on spat plugin.
 			// TODO: discuss generalization of this for any plugin.
-			if ((config.spatPlugins[item.asSymbol].setup == nil).asBoolean,
+			if ((config.spatializers[item.asSymbol].setup == nil).asBoolean,
 				{ if(debug,
-					{ "% - no setup here".format(config.spatPlugins[item].name).postln; }
+					{ "% - no setup here".format(config.spatializers[item].name).postln; }
 				);
 				},
-				{ config.spatPlugins[item.asSymbol].setup.value(this) }
+				{ config.spatializers[item.asSymbol].setup.value(this) }
 			);
 		};
 		config.server.sync;
@@ -267,7 +266,7 @@ Satie {
 
 	setupPlugins {
 		// execute setup functions in plugins
-		config.audioPlugins.do { arg item, i;
+		config.sources.do { arg item, i;
 			if (item.setup.notNil,
 				{
 					item.setup.value(this);
@@ -277,7 +276,7 @@ Satie {
 
 	makePlugins {
 		// generate synthdefs
-		config.audioPlugins.do { arg item;
+		config.sources.do { arg item;
 			if ((item.channelLayout == \mono).asBoolean,
 				{
 					this.makeSynthDef(item.name,item.name, [],[],[], config.listeningFormat, config.outBusIndex);
@@ -286,7 +285,7 @@ Satie {
 				this.makeAmbi((item.name ++ "Ambi" ++ order.asSymbol), item.name, [], [], [], order, [], config.ambiBusIndex[i]);
 			};
 		};
-		generatedSynthDefs = config.audioPlugins.keys;
+		generatedSynthDefs = config.sources.keys;
 
 	}
 }

@@ -21,7 +21,7 @@ s = Server.supernova.local;
 // pass the server to the configuration and define some options
 ~satieConfiguration = SatieConfiguration.new(s, [\stereoListener]);
 // At this point SatieConfiguration has scanned the plugins directories:
-// audiosources - audio generators
+// sources - audio generators
 // effects - audio effects
 // mappers - paramater mapping plugins
 // postprocessors - mastering

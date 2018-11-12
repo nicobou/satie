@@ -64,7 +64,7 @@ Set a scene-wide keyword value
 
 ## Node messages
 
-Nodes are instances of audiosources, effects or processes. Nodes also belong to groups. There are three ways of addressing a node:
+Nodes are instances of audio sources, effects or processes. Nodes also belong to groups. There are three ways of addressing a node:
 
 -   source - individual instance of type `audiosource` or `effect`
 -   group
