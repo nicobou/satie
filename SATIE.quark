@@ -4,7 +4,6 @@
   version: "1.1.1",
   schelp: "Overview/SATIE-Overview",
   dependencies: [
-    "NodeSnapshot@0.2.0",
     "SC-HOA"
   ],
   url: "https://gitlab.com/sat-metalab/SATIE",
