@@ -5,7 +5,7 @@
 SatieQueryTree {
 	var server, msg, <nodeIds, index;
 
-	*get { |action, server|
+	*get { |server, action|
 		var node = RootNode(server);
 
 		OSCFunc(
