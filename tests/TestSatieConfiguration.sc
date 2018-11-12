@@ -81,8 +81,8 @@ TestSatieConfiguration : UnitTest {
 				{\postprocessors} {\postprocessorPlugins}
 				{\spatializers} {\spatPlugins};
 			this.assertEquals(
-				config.slotAt(category).at(filename).isNil,
-				false,
+				config.slotAt(category).at(filename).isNil.not,
+				true,
 				"Plugin %/% loaded successfully".format(folder, filename)
 			)
 		}
