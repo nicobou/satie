@@ -20,15 +20,15 @@ SatieIntrospection {
 	*
 	*/
 	updatePluginsList{
-		allPlugins = context.sources.merge(context.effects).merge(context.postprocessors);
+		allPlugins = context.config.sources.merge(context.config.effects).merge(context.config.postprocessors);
 	}
 
 	// return a dictionary audio plugins. Key is the type of plugin, value a Set of names.
 	getPluginList {
 		var ret = Dictionary.new();
-		ret.add(\generators -> context.sources.keys);
-		ret.add(\effects -> context.effects.keys);
-		ret.add(\mastering -> context.postprocessors);
+		ret.add(\generators -> context.config.sources.keys);
+		ret.add(\effects -> context.config.effects.keys);
+		ret.add(\mastering -> context.config.postprocessors);
 		^ret;
 	}
 
@@ -142,7 +142,7 @@ SatieIntrospection {
 	}
 
 	updateSpatList {
-		spatList = context.spatializers;
+		spatList = context.config.spatializers;
 	}
 
 	/* *****

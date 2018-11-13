@@ -72,16 +72,8 @@ TestSatieConfiguration : UnitTest {
 		path.filesDo { |file|
 			var folder = file.folderName.asSymbol;
 			var filename = file.fileNameWithoutExtension.asSymbol;
-			var category = switch(folder)
-				{\sources} {\sources}
-				{\effects} {\effects}
-				{\hoa} {\hoa}
-				{\mappers} {\mappers}
-				{\monitoring} {\monitoring}
-				{\postprocessors} {\postprocessors}
-				{\spatializers} {\spatializers};
 			this.assertEquals(
-				config.slotAt(category).at(filename).isNil.not,
+				config.slotAt(folder).at(filename).isNil.not,
 				true,
 				"Plugin %/% loaded successfully".format(folder, filename)
 			)
