@@ -44,6 +44,11 @@ SatieConfiguration {
 	}
 
 	init {
+
+		if(listeningFormat.size != outBusIndex.size) {
+			Error("Mismatched arguments. There should be one outBusIndex value for each listeningFormat.").throw;
+		};
+
 		serverOptions = server.options;
 		satieRoot = PathName(this.class.filenameSymbol.asString.dirname).parentPath;
 		satieUserSupportDir = PathName(Platform.userAppSupportDir).parentPath +/+ "satie";
