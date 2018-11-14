@@ -21,13 +21,11 @@
 
 		if (satieConfiguration.ambiOrders.size == 0,
 		{
-				// no ambisonics  defined, using VBAP
-				"ezMake: making VBAP synth".debug;
+				// no ambisonics  defined, using standard spatializer(s)
 			this.makeSynthDef(id, srcName,preBusArray,postBusArray,srcPreMonitorFuncsArray,spatSymbolArray,firstOutputIndexes,paramsMapper,synthArgs);
 		},
-			// else ambisonics defined
+			// else ambisonics defined, using ambisonic spatializer
 		{
-			"ezMake: making ambisonic synth".debug;
 			this.makeAmbi(id, srcName, preBusArray, postBusArray, srcPreMonitorFuncsArray, ambiOrder, ambiEffectPipeline, ambiBusIndex, paramsMapper, synthArgs);
 		});
 	}
