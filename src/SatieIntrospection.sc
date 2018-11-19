@@ -47,7 +47,7 @@ SatieIntrospection {
 					^argnames = allPlugins[key].function.def.keyValuePairsFromArgs;
 				},
 				{
-					if(context.satieConfiguration.debug,
+					if(context.config.debug,
 						{"% tried % in % and found none...\n".format(this.class.getBackTrace, plugin, allPlugins).warn}
 					);
 					argnames = "null";
@@ -67,7 +67,7 @@ SatieIntrospection {
 					^description = allPlugins[key.asSymbol].description;
 				},
 				{
-					if(context.satieConfiguration.debug,
+					if(context.config.debug,
 						{"% tried % in % and found none...".format(this.class.getBackTrace, plugin, allPlugins).warn}
 					);
 					description = "null";
@@ -110,7 +110,7 @@ SatieIntrospection {
 					});
 				},
 				{
-					if(context.satieConfiguration.debug,
+					if(context.config.debug,
 						{"% tried % in % and found none...".format(this.class.getBackTrace, plugin, allPlugins).warn}
 					);
 				}
@@ -132,7 +132,7 @@ SatieIntrospection {
 				^argnames = spatList[spatPlug.asSymbol].function.def.keyValuePairsFromArgs;
 			},
 			{
-				if(context.satieConfiguration.debug,
+				if(context.config.debug,
 					{"% tried % in % and found none...\n".format(this.class.getBackTrace, spatPlug, spatList).warn}
 				);
 				argnames = "null";
@@ -226,7 +226,7 @@ SatieIntrospection {
 						^ret;
 					},
 					{
-						if (context.satieConfiguration.debug,
+						if (context.config.debug,
 							{"% did not find % in %".format(this.class.getBackTrace, synthName, instances).postln});
 						ret = "null";
 					}
@@ -262,7 +262,7 @@ SatieIntrospection {
 						^ret;
 					},
 					{
-						if (context.satieConfiguration.debug,
+						if (context.config.debug,
 							{"% did not find % in %".format(this.class.getBackTrace, synthName, instances).postln});
 						ret = "null";
 					}

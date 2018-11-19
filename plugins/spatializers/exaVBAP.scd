@@ -69,7 +69,7 @@
 };
 
 ~setup = { |satieInstance|
-		~spk6 = Buffer.loadCollection(satieInstance.satieConfiguration.server, ~spk6.getSetsAndMatrices);
+		~spk6 = Buffer.loadCollection(satieInstance.config.server, ~spk6.getSetsAndMatrices);
 };
 
 

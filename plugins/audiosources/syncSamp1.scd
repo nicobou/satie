@@ -101,7 +101,7 @@ if (~phasorSync == nil,
 	if ( ~syncSamp1SyncBus == nil,
 		{
 			"\syncSamp1: setting up global Phasor".inform;
-			~syncSamp1SyncBus = Bus.audio(satieInstance.satieConfiguration.server,1); // this will be our sync bus
+			~syncSamp1SyncBus = Bus.audio(satieInstance.config.server,1); // this will be our sync bus
 	});
 
 	// set up needed sync signal generator and bus for this synthdef

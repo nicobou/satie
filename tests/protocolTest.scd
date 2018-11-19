@@ -35,22 +35,22 @@ s = Server.supernova.local;
 ~satie = Satie.new(~satieConfiguration);
 ~satie.boot();
 
-~satie.satieConfiguration.server.waitForBoot{
+~satie.config.server.waitForBoot{
 
-	~satie.satieConfiguration.server.sync;    // two are needed, otherwise supernova will exit when synths are generated (maxOS 10.12)
-	~satie.satieConfiguration.server.sync;
+	~satie.config.server.sync;    // two are needed, otherwise supernova will exit when synths are generated (maxOS 10.12)
+	~satie.config.server.sync;
 
-	~satie.makeSynthDef(\pink, \PinkSin, [], [],  ~satie.satieConfiguration.listeningFormat, [~satie.satieConfiguration.outBusIndex[0]]);
-	~satie.makeSynthDef(\dust, \DustDust,  [~satie.aux[0]], [], ~satie.satieConfiguration.listeningFormat, [~satie.satieConfiguration.outBusIndex[0]]);
-	~satie.makeSynthDef(\default, \default,  [], [], ~satie.satieConfiguration.listeningFormat, [~satie.satieConfiguration.outBusIndex[0]]);
-	~satie.makeSynthDef(\test, \testtone,   [], [], ~satie.satieConfiguration.listeningFormat, [~satie.satieConfiguration.outBusIndex[0]]);
-	~satie.makeSynthDef(\busgverb, \gverb,  [], [], ~satie.satieConfiguration.listeningFormat, [~satie.satieConfiguration.outBusIndex[0]]);
-	~satie.makeSynthDef(\zkarpluck1, \zkarpluck1, [~satie.aux[0]], [], ~satie.satieConfiguration.listeningFormat, [~satie.satieConfiguration.outBusIndex[0]] );   // sends to effects bus, pre-spatializer
+	~satie.makeSynthDef(\pink, \PinkSin, [], [],  ~satie.config.listeningFormat, [~satie.config.outBusIndex[0]]);
+	~satie.makeSynthDef(\dust, \DustDust,  [~satie.aux[0]], [], ~satie.config.listeningFormat, [~satie.config.outBusIndex[0]]);
+	~satie.makeSynthDef(\default, \default,  [], [], ~satie.config.listeningFormat, [~satie.config.outBusIndex[0]]);
+	~satie.makeSynthDef(\test, \testtone,   [], [], ~satie.config.listeningFormat, [~satie.config.outBusIndex[0]]);
+	~satie.makeSynthDef(\busgverb, \gverb,  [], [], ~satie.config.listeningFormat, [~satie.config.outBusIndex[0]]);
+	~satie.makeSynthDef(\zkarpluck1, \zkarpluck1, [~satie.aux[0]], [], ~satie.config.listeningFormat, [~satie.config.outBusIndex[0]] );   // sends to effects bus, pre-spatializer
 
-	// ~satie.makeSynthDef(\nearTest, \default,   [~satie.aux[0]],  [],~satie.satieConfiguration.listeningFormat,  [~satie.satieConfiguration.outBusIndex[0]], \nearField1);  // for mapping distances
-	// ~satie.makeSynthDef(\farTest, \default,   [~satie.aux[0]],  [],~satie.satieConfiguration.listeningFormat,  [~satie.satieConfiguration.outBusIndex[0]], \farField1);  // for mapping distances
+	// ~satie.makeSynthDef(\nearTest, \default,   [~satie.aux[0]],  [],~satie.config.listeningFormat,  [~satie.config.outBusIndex[0]], \nearField1);  // for mapping distances
+	// ~satie.makeSynthDef(\farTest, \default,   [~satie.aux[0]],  [],~satie.config.listeningFormat,  [~satie.config.outBusIndex[0]], \farField1);  // for mapping distances
 
-	~satie.satieConfiguration.server.sync;
+	~satie.config.server.sync;
 
 	s.meter;
 	s.makeGui;

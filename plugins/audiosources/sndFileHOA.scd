@@ -26,7 +26,7 @@
 };
 
 ~setup = { |satieInstance|
-	var orders = satieInstance.satieConfiguration.ambiOrders;
+	var orders = satieInstance.config.ambiOrders;
 	~diskins = Array.fill(6, {0});
 	~diskins.do({|i, index|
 		var idx, numChannels, func;

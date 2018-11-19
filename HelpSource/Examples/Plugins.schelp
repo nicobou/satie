@@ -43,8 +43,8 @@ s.plotTree;
 
 // set up an OSC client to receive on port 18060
 // then execute the following lines
-~satie.makeAmbi(\input1,\MonoIn,[],[], [\envTrigger],2,[~satie.satieConfiguration.ambiBusIndex[0]] );
-~satie.makeAmbi(\drone,\misDrone,[],[], [\envFollow],2,[~satie.satieConfiguration.ambiBusIndex[0]] );
+~satie.makeAmbi(\input1,\MonoIn,[],[], [\envTrigger],2,[~satie.config.ambiBusIndex[0]] );
+~satie.makeAmbi(\drone,\misDrone,[],[], [\envFollow],2,[~satie.config.ambiBusIndex[0]] );
 
 ~satie.makeSourceInstance(\in1, \input1, \default)
 ~satie.groupInstances[\default][\in1].set(\t_trig, 1, \aziDeg, 30, \eleDeg, 30,\gainDB, -10, \envTrigger_triggerLevel, 0.12)

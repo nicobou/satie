@@ -21,7 +21,7 @@
 	setOrientationDegHandler {
 		^{ | args |
 
-			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
+			if (satie.config.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
 
 			if ( (args.size != 3 ) ,
 				{
@@ -29,8 +29,8 @@
 				},
 				// else
 				{
-					satie.satieConfiguration.orientationOffsetDeg[0] = args[1].asFloat;
-					satie.satieConfiguration.orientationOffsetDeg[1] = args[2].asFloat;
+					satie.config.orientationOffsetDeg[0] = args[1].asFloat;
+					satie.config.orientationOffsetDeg[1] = args[2].asFloat;
 			})
 		}
 	}
@@ -39,7 +39,7 @@
 	setOutputDBHandler {
 		^{ | args |
 
-			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
+			if (satie.config.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
 
 			if ( (args.size != 2 ) ,
 				{
@@ -48,7 +48,7 @@
 				// else
 				{
 					outputDB = args[1].asFloat;
-					satie.satieConfiguration.server.volume = outputTrimDB + outputDB;
+					satie.config.server.volume = outputTrimDB + outputDB;
 			})
 		}
 	}
@@ -56,7 +56,7 @@
 	setOutputTrimDBHandler {
 		^{ | args |
 
-			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
+			if (satie.config.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
 
 			if ( (args.size != 2 ) ,
 				{
@@ -65,7 +65,7 @@
 				// else
 				{
 					outputTrimDB = args[1].asFloat;
-					satie.satieConfiguration.server.volume = outputTrimDB + outputDB;
+					satie.config.server.volume = outputTrimDB + outputDB;
 			})
 		}
 	}
@@ -73,7 +73,7 @@
 	setOutputMuteHandler {
 		^{ | args |
 
-			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
+			if (satie.config.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
 
 			if ( (args.size != 2 ) ,
 				{
@@ -82,9 +82,9 @@
 				// else
 				{
 					if (args [1] > 0,
-						{satie.satieConfiguration.server.volume.mute;},
+						{satie.config.server.volume.mute;},
 						// else
-						{satie.satieConfiguration.server.volume.unmute;} );  // full muting implmentation
+						{satie.config.server.volume.unmute;} );  // full muting implmentation
 
 			})
 		}
@@ -93,7 +93,7 @@
 	setOutputDimHandler {
 		^{ | args |
 
-			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
+			if (satie.config.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
 
 			if ( (args.size != 2 ) ,
 				{
@@ -103,9 +103,9 @@
 				{
 
 					if (args [1] > 0,
-						{  satie.satieConfiguration.server.volume = -30;  },
+						{  satie.config.server.volume = -30;  },
 						// else
-						{  satie.satieConfiguration.server.volume =  outputDB + outputTrimDB;   });
+						{  satie.config.server.volume =  outputDB + outputTrimDB;   });
 
 			})
 		}
@@ -114,7 +114,7 @@
 		freeSynthsHandler {
 		^{ | args |
 
-			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
+			if (satie.config.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
 
 			if ( (args.size != 2 ) ,
 				{

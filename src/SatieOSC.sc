@@ -24,12 +24,12 @@ SatieOSC {
 
 	initOSC {
 		" - satie: %\n - rootURI: %\n - port: %".format(satie, rootURI, oscServerPort).postln;
-		" + %".format(satie.satieConfiguration.server).postln;
+		" + %".format(satie.config.server).postln;
 		oscDefs = IdentityDictionary.new;
 		dynamicResponder = true;
 		oscClientIP = "localhost";
 		returnAddress = NetAddr(this.oscClientIP, this.oscClientPort);
-		volume = satie.satieConfiguration.server.volume;
+		volume = satie.config.server.volume;
 		volume.setVolumeRange(-99, 18);
 
 		// set up default groups
@@ -100,12 +100,12 @@ SatieOSC {
 		// OSCdef instance.
 		oscDefs.put(
 			\satieTrigger,
-			OSCdef(\satieTrigger, this.triggerHandler, "/tr", satie.satieConfiguration.server.addr).permanent_(true);
+			OSCdef(\satieTrigger, this.triggerHandler, "/tr", satie.config.server.addr).permanent_(true);
 		);
 		// and another receiver for SendReply attached to the envelope follower
 		oscDefs.put(
 			\satieEnvelope,
-			OSCdef(\satieEnvelope, this.envelopeHandler, "/analysis", satie.satieConfiguration.server.addr).permanent_(true);
+			OSCdef(\satieEnvelope, this.envelopeHandler, "/analysis", satie.config.server.addr).permanent_(true);
 		);
 	}
 
@@ -132,7 +132,7 @@ SatieOSC {
 	removeGroup { | groupName |
 		if ( satie.groups.includesKey(groupName.asSymbol) ,
 			{
-				if (satie.satieConfiguration.debug, {postf("•satieOSC.removeGroup:  group node: % \n",  groupName);});
+				if (satie.config.debug, {postf("•satieOSC.removeGroup:  group node: % \n",  groupName);});
 				satie.groups.removeAt(groupName.asSymbol);     // remove node from global dictionary
 		});
 	}
@@ -163,7 +163,7 @@ SatieOSC {
 						"%: node: % does not exist".format(this.class.getBackTrace, node).warn;
 					}
 				);
-				if (satie.satieConfiguration.debug,
+				if (satie.config.debug,
 					{postf("•satieOSC.clearSourceNode: delete  node  % in group %\n", nameSym, group);});
 		});
 	}
@@ -196,7 +196,7 @@ SatieOSC {
 	createSourceNode { | sourceName, synthName , groupName=\default |
 		var type, synth;
 
-		if (satie.satieConfiguration.debug, {"→    %: sourceName: %,  synthName: %,  groupName: %".format(this.class.getBackTrace, sourceName,synthName,groupName).postln});
+		if (satie.config.debug, {"→    %: sourceName: %,  synthName: %,  groupName: %".format(this.class.getBackTrace, sourceName,synthName,groupName).postln});
 
 		synth = satie.makeSourceInstance(sourceName.asSymbol, synthName, groupName);
 		synth.register(); // register with NodeWatcher for testing
@@ -207,7 +207,7 @@ SatieOSC {
 
 	createEffectNode { | sourceName, synthName , groupName=\defaultFx, auxBus|
 		var synth;
-		if (satie.satieConfiguration.debug, {"→    %: sourceName: %,  synthName: %,  groupName: %,  auxBus %".format(this.class.getBackTrace, sourceName,synthName,groupName, auxBus).postln});
+		if (satie.config.debug, {"→    %: sourceName: %,  synthName: %,  groupName: %,  auxBus %".format(this.class.getBackTrace, sourceName,synthName,groupName, auxBus).postln});
 
 		synth = satie.makeFxInstance(sourceName, synthName, groupName, [\in, satie.aux[auxBus] ]);
 		postf("satieOSC.createEffectNode: creating effects node % of group %, with  synth:  % on bus %, \n", sourceName, groupName, synthName, auxBus);
