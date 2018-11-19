@@ -17,7 +17,7 @@ TestSatieConfiguration_server : UnitTest {
 		this.wait({ satie.booted }, "Satie failed to boot after 5 seconds", 5);
 		this.assertEquals(
 			server.options.numOutputBusChannels,
-			satie.spatPlugins[spat].numChannels,
+			satie.config.spatPlugins[spat].numChannels,
 			"Server has correct number of output channels"
 		);
 		satie.quit;

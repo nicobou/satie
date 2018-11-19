@@ -4,7 +4,7 @@
 	createSourceHandler {
 		^{ | args |
 
-			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
+			if (satie.config.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
 
 			if ( (args.size < 2 ) ,
 				{
@@ -32,7 +32,7 @@
 	createEffectHandler {
 		^{ | args |
 
-			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
+			if (satie.config.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
 
 			if ( (args.size < 3 ) ,
 				{
@@ -78,7 +78,7 @@
 	createProcessHandler {
 		^{ | args |
 
-			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
+			if (satie.config.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
 
 			if ( (args.size < 2 ) ,
 				{
@@ -105,7 +105,7 @@
 	createSourceGroupHandler {
 		^{ | args |
 
-			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
+			if (satie.config.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
 
 			if ( (args.size < 2 ) ,
 				{
@@ -123,7 +123,7 @@
 	createEffectGroupHandler {
 		^{ | args |
 
-			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
+			if (satie.config.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
 
 			if ( (args.size < 2 ) ,
 				{
@@ -142,7 +142,7 @@
 	createProcessGroupHandler {
 		^{ | args |
 
-			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
+			if (satie.config.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
 
 			if ( (args.size < 2 ) ,
 				{
@@ -160,7 +160,7 @@
 
 	deleteNodeHandler {
 		^{ | args |
-			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
+			if (satie.config.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
 
 			if ( (args.size != 2 ) ,
 				{	"→    %: message missing nodeName %".format(this.class.getBackTrace, args).error},
@@ -189,7 +189,7 @@
 	clearSceneHandler {
 		^{ | args |
 
-			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
+			if (satie.config.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
 
 			satie.cleanUp();
 		}
@@ -201,7 +201,7 @@
 				{"% message missing flag".format(this.class.getBackTrace).warn},
 				{
 					"→    %:  message: %".format(this.class.getBackTrace, args).postln;
-					satie.satieConfiguration.debug = args[1].asInt.asBoolean;
+					satie.config.debug = args[1].asInt.asBoolean;
 				}
 			)
 		}
@@ -215,7 +215,7 @@
 			if (args.size != 8,
 				{"→    %: message missing values".format(args).warn},
 				{
-					if (satie.satieConfiguration.debug,
+					if (satie.config.debug,
 						{"→    %: message: %".format(this.class.getBackTrace, args).postln});
 					thisSynth = this.getSourceNode(nodeName, \synth);
 					this.updateNode(thisSynth, args);
@@ -248,7 +248,7 @@
 			if (args.size != 8,
 				{"→    %: message missing values".format(args).warn},
 				{
-					if (satie.satieConfiguration.debug,
+					if (satie.config.debug,
 						{
 							"%: args: %".format(this.class.getBackTrace, args).postln;
 						}
@@ -262,7 +262,7 @@
 					);
 					if (myProcess[\setUpdate] == nil,
 						{
-							if (satie.satieConfiguration.debug,
+							if (satie.config.debug,
 								{
 									"%: no setUpdate on % so we update group % with args %".
 									format(this.class.getBackTrace, myProcess, thisGroup, args).postln;
@@ -272,8 +272,8 @@
 						},
 						{
 							var aziDeg, eleDeg, gainDB, delayMs, lpHz, distance;
-							aziDeg = args[2] + satie.satieConfiguration.orientationOffsetDeg[0];
-							eleDeg= args[3] + satie.satieConfiguration.orientationOffsetDeg[1];
+							aziDeg = args[2] + satie.config.orientationOffsetDeg[0];
+							eleDeg= args[3] + satie.config.orientationOffsetDeg[1];
 							gainDB = args[4];
 							delayMs = args[5];
 							lpHz = args[6];
@@ -291,9 +291,9 @@
 	updateNode { | node, args |
 		var aziDeg, eleDeg, gainDB, delayMs, lpHz, distance;
 		// get values from vector
-		if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
-		aziDeg = args[2] + satie.satieConfiguration.orientationOffsetDeg[0];
-		eleDeg= args[3] + satie.satieConfiguration.orientationOffsetDeg[1];
+		if (satie.config.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
+		aziDeg = args[2] + satie.config.orientationOffsetDeg[0];
+		eleDeg= args[3] + satie.config.orientationOffsetDeg[1];
 		gainDB = args[4];
 		delayMs = args[5];
 		lpHz = args[6];
@@ -313,7 +313,7 @@
 			var nodeName = args[1].asSymbol;
 			var props = args.copyRange(2, args.size -1);
 
-			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
+			if (satie.config.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
 			if (satie.processInstances.includesKey(nodeName.asSymbol),
 				{
 					var grName = (nodeName++"_group").asSymbol;
@@ -343,7 +343,7 @@
 			var props = args.copyRange(2, args.size -1);
 			var targetNode;
 
-			if (satie.satieConfiguration.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
+			if (satie.config.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
 			if (satie.groups.includesKey(nodeName.asSymbol),
 				{
 					targetNode = this.getGroupNode(nodeName, \group);
@@ -362,7 +362,7 @@
 			var props = args.copyRange(2, args.size -1);
 			var targetNode;
 
-			if (satie.satieConfiguration.debug, {"→ %: message: %".format(this.class.getBackTrace, args).postln});
+			if (satie.config.debug, {"→ %: message: %".format(this.class.getBackTrace, args).postln});
 			targetNode = this.getSourceNode(nodeName);
 			// this.nodeSet(targetNode, props);
 			if (targetNode == nil,
@@ -378,13 +378,13 @@
 
 	nodeSet {| targetNode, props |
 
-		if (satie.satieConfiguration.debug, {"→ %:\n    → targetNode: %\n     →properties: % ".format(this.class.getBackTrace, targetNode, props).postln});
+		if (satie.config.debug, {"→ %:\n    → targetNode: %\n     →properties: % ".format(this.class.getBackTrace, targetNode, props).postln});
 
 		props.pairsDo({|prop, val|
 			switch(prop,
 				'hpHz',
 				{
-					var halfSrate = 0.5 * satie.satieConfiguration.server.sampleRate;
+					var halfSrate = 0.5 * satie.config.server.sampleRate;
 
 					targetNode.set(\hpHz ,  clip(val, 1, halfSrate ));
 				},
@@ -410,7 +410,7 @@
 		var keyHandler = nil;
 		var setHandler = nil;
 
-		if (satie.satieConfiguration.debug, {
+		if (satie.config.debug, {
 			"%: %".format(this.class.getBackTrace, props);
 		});
 
@@ -418,7 +418,7 @@
 			switch(prop,
 				'hpHz',
 				{
-					var halfSrate = 0.5 * satie.satieConfiguration.server.sampleRate;
+					var halfSrate = 0.5 * satie.config.server.sampleRate;
 					value = clip(val, 1, halfSrate );
 				},
 				'spread',
@@ -460,7 +460,7 @@
 			var nodeName  = args[1].asSymbol;
 			var propsVec = args.copyRange(2, args.size - 1);
 
-			if (satie.satieConfiguration.debug,
+			if (satie.config.debug,
 				{
 					postf("SatieOSC.processProperty: % \n", args);
 				});
@@ -517,7 +517,7 @@
 	evalFnProcHandler {
 		^{ | args |
 
-			if (satie.satieConfiguration.debug, { postf("SatieOSC.evalProcFnHandler:  mess: %\n", args); });
+			if (satie.config.debug, { postf("SatieOSC.evalProcFnHandler:  mess: %\n", args); });
 
 			// verify data
 			if (  ( args.size < 3)  ,
@@ -553,7 +553,7 @@
 	setVecProcHandler {
 		^{ | args |
 
-			if (satie.satieConfiguration.debug, { postf("SatieOSC.setVecProcHandler:  mess: %\n", args); });
+			if (satie.config.debug, { postf("SatieOSC.setVecProcHandler:  mess: %\n", args); });
 
 			if (  ( args.size < 3)  ,   			// verify data
 				{
@@ -608,7 +608,7 @@
 	setVecSourceHandler {
 		^{ | args |
 
-			if (satie.satieConfiguration.debug, { postf("satieOSC.setVecSourceHandler:  mess: %\n", args); });
+			if (satie.config.debug, { postf("satieOSC.setVecSourceHandler:  mess: %\n", args); });
 
 			if (  ( args.size < 3)  ,   // verify data
 				{
@@ -629,7 +629,7 @@
 	setVecGroupHandler {
 		^{ | args |
 
-			if (satie.satieConfiguration.debug, { postf("SatieOSC.setVecGroupHandler:  mess: %\n", args); });
+			if (satie.config.debug, { postf("SatieOSC.setVecGroupHandler:  mess: %\n", args); });
 
 			if (  ( args.size < 3)  ,   // verify data
 				{
@@ -651,7 +651,7 @@
 	stateSourceHandler {
 		^{ | args |
 
-			if ( satie.satieConfiguration.debug,
+			if ( satie.config.debug,
 				{
 					postf("SatieOSC.stateSourceHandler: % \n", args);
 			});
@@ -686,7 +686,7 @@
 	stateGroupHandler {
 		^{ | args |
 
-			if ( satie.satieConfiguration.debug,
+			if ( satie.config.debug,
 				{
 					postf("SatieOSC.stateGroupHandler: % \n", args);
 			});
@@ -722,7 +722,7 @@
 	stateProcHandler {
 		^{ | args |
 
-			if ( satie.satieConfiguration.debug,
+			if ( satie.config.debug,
 				{
 					postf("SatieOSC.stateProcHandler: % \n", args);
 				});

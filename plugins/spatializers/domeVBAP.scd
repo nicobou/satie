@@ -79,7 +79,7 @@
 };
 
 ~setup = { |satieInstance|
-		~vbuf31 = Buffer.loadCollection(satieInstance.satieConfiguration.server, ~spk31.getSetsAndMatrices);
+		~vbuf31 = Buffer.loadCollection(satieInstance.config.server, ~spk31.getSetsAndMatrices);
 };
 
 

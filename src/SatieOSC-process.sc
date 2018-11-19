@@ -23,7 +23,7 @@
 		rawArgVec = uriPath.asString.split($ );
 		rawArgVec.removeAt(0);  // drop first item in list
 
-		if ( satie.satieConfiguration.debug,  { postf("•satieOSC.createProcessNode:   %   URI  %   optArgs: %\n", id, uriPath, rawArgVec);});
+		if ( satie.config.debug,  { postf("•satieOSC.createProcessNode:   %   URI  %   optArgs: %\n", id, uriPath, rawArgVec);});
 
 		// make list of items in argString
 		rawArgVec.do( { arg item;

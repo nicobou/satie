@@ -96,7 +96,7 @@ elev: [90,40,40,40,40,0,0,0,0,0,0,0,-40,-40,-40,-40],
 
 ~setup = { |satieInstance|
 
-		~vbuf16 = Buffer.loadCollection(satieInstance.satieConfiguration.server, ~spk16.getSetsAndMatrices);
+		~vbuf16 = Buffer.loadCollection(satieInstance.config.server, ~spk16.getSetsAndMatrices);
 
 };
 

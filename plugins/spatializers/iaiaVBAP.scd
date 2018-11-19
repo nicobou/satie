@@ -108,7 +108,7 @@ spread  units  (0 == directional, ....,  100 == omni)
 };
 
 ~setup = { |satieInstance|
-		~vbufIAIA_24 = Buffer.loadCollection(satieInstance.satieConfiguration.server, ~spkIAIA_24.getSetsAndMatrices);
+		~vbufIAIA_24 = Buffer.loadCollection(satieInstance.config.server, ~spkIAIA_24.getSetsAndMatrices);
 };
 
 /*
