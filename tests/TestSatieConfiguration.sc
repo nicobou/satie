@@ -50,13 +50,13 @@ TestSatieConfiguration : UnitTest {
 
 	test_initDicts {
 		var dicts = [
-			\audioPlugins,
-			\fxPlugins,
-			\spatPlugins,
-			\mapperPlugins,
-			\postprocessorPlugins,
-			\hoaPlugins,
-			\monitoringPlugins,
+			\sources,
+			\effects,
+			\spatializers,
+			\mappers,
+			\postprocessors,
+			\hoa,
+			\monitoring,
 		];
 		dicts.do { |key|
 			this.assertEquals(
@@ -72,16 +72,8 @@ TestSatieConfiguration : UnitTest {
 		path.filesDo { |file|
 			var folder = file.folderName.asSymbol;
 			var filename = file.fileNameWithoutExtension.asSymbol;
-			var category = switch(folder)
-				{\audiosources} {\audioPlugins}
-				{\effects} {\fxPlugins}
-				{\hoa} {\hoaPlugins}
-				{\mappers} {\mapperPlugins}
-				{\monitoring} {\monitoringPlugins}
-				{\postprocessors} {\postprocessorPlugins}
-				{\spatializers} {\spatPlugins};
 			this.assertEquals(
-				config.slotAt(category).at(filename).isNil.not,
+				config.slotAt(folder).at(filename).isNil.not,
 				true,
 				"Plugin %/% loaded successfully".format(folder, filename)
 			)

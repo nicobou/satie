@@ -20,7 +20,7 @@ s = Server.supernova.local;
 // instantiate a SatieConfiguration. Here we will use a stereo spatializer
 ~satieConfiguration = SatieConfiguration.new(s, [\stereoListener]);
 // list possible listeners:
-~satieConfiguration.spatPlugins.keys;
+~satieConfiguration.spatializers.keys;
 // instantiate SATIE renderer and pass it the configuration
 ~satie = Satie.new(~satieConfiguration);
 ~satie.boot();
@@ -157,7 +157,7 @@ s = Server.supernova.local;
 // instantiate a SatieConfiguration. Here we will use a stereo spatializer
 ~satieConfiguration = SatieConfiguration.new(s, [\stereoListener]);
 // list possible listeners:
-~satieConfiguration.spatPlugins.keys;
+~satieConfiguration.spatializers.keys;
 
 // change input/output channels
 ~satieConfiguration.serverOptions.numOutputBusChannels = 2;

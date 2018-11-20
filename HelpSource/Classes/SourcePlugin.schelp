@@ -6,7 +6,7 @@ related:: Overview/SATIE-Overview, Classes/Satie, Classes/SatiePlugins, Classes/
 
 DESCRIPTION::
 This is a base class for SATIE plugin that will output audio signals.
-All SATIE plugins (audiosources, effects, mappers, postprocessors, spatializers) reside in the plugin directory within the SATIE tree. Other plugins can be added from, arbitrary location, by adding to the appropriate dictionaries (see link::Classes/SatiePlugins:: and link::Classes/SatieConfiguration::).
+All SATIE plugins (sources, effects, mappers, postprocessors, spatializers) reside in the plugin directory within the SATIE tree. Other plugins can be added from, arbitrary location, by adding to the appropriate dictionaries (see link::Classes/SatiePlugins:: and link::Classes/SatieConfiguration::).
 
 
 CLASSMETHODS::

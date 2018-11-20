@@ -17,12 +17,12 @@ There are also some known efforts to make bridges for specific software:
 ## Directory structure
 
 SATIE internal plugins:
-- audiosources:  sound sources (like file player)
-- effects:       effect (like reverb)
-- spatializers:  spatialization (like stereo)
-- mappers:       mapper
+- sources:         sound sources (like file player)
+- effects:         effect (like reverb)
+- spatializers:    spatialization (like stereo)
+- mappers:         mapper
 - postprocessors:  audio mastering
-- processes:     generating many events algorithmically
+- processes:       generating many events algorithmically
 
 other:
 - HelpSource:    documentation, in schelp format, available within SC IDE (scide)

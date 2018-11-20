@@ -29,19 +29,19 @@
 			"Running with no legacy spatializers".debug;
 			^0;
 		});
-		if(config.audioPlugins.at(srcName) != nil,
+		if(config.sources.at(srcName) != nil,
 			{
-				if(config.audioPlugins.at(srcName).channelLayout != \mono, {
+				if(config.sources.at(srcName).channelLayout != \mono, {
 					"makesynthDef failed: audio source must be mono (% is not mono)".format(srcName).warn;
 					^0;
 				});
-				dico = config.audioPlugins;
+				dico = config.sources;
 				generators.add(id.asSymbol -> srcName.asSymbol);
 			}
 		);
-		if(config.fxPlugins.at(srcName) != nil,
+		if(config.effects.at(srcName) != nil,
 			{
-				dico = config.fxPlugins;
+				dico = config.effects;
 				effects.add(id.asSymbol -> srcName.asSymbol);
 			}
 		);
@@ -51,7 +51,7 @@
 			}
 		);
 		spatSymbolArray.collect({|item, i|
-			if(config.spatPlugins.at(item).channelLayout != \mono, {
+			if(config.spatializers.at(item).channelLayout != \mono, {
 				"makesynthDef failed: spatializer must be mono (% is not mono)".format(item).warn;
 				^0;
 			});
@@ -63,13 +63,13 @@
 			srcPreToBusses,
 			srcPostToBusses,
 			srcPreMonitorFuncsArray.collect({|item, i|
-				config.monitoringPlugins.at(item).function;
+				config.monitoring.at(item).function;
 			}),
 			spatSymbolArray.collect({|item, i|
-				config.spatPlugins.at(item).function
+				config.spatializers.at(item).function
 			}),
 			firstOutputIndexes,
-			config.mapperPlugins.at(paramsMapper).function,
+			config.mappers.at(paramsMapper).function,
 			synthArgs
 		);
 	}
@@ -87,15 +87,15 @@
 		synthArgs = #[] |
 
 		var dico;
-		if(config.audioPlugins.at(srcName) != nil,
+		if(config.sources.at(srcName) != nil,
 			{
-				dico = config.audioPlugins;
+				dico = config.sources;
 				generators.add(name.asSymbol -> srcName.asSymbol);
 			}
 		);
-		if(config.fxPlugins.at(srcName) != nil,
+		if(config.effects.at(srcName) != nil,
 			{
-				dico = config.fxPlugins;
+				dico = config.effects;
 				effects.add(name.asSymbol -> srcName.asSymbol);
 			}
 		);
@@ -112,12 +112,12 @@
 				preBusArray,
 				postBusArray,
 				srcPreMonitorFuncsArray.collect({|item, i|
-					config.monitoringPlugins.at(item).function;
+					config.monitoring.at(item).function;
 				}),
 				ambiOrder,
 				ambiEffectPipeline,
 				ambiBusIndex,
-				config.mapperPlugins.at(paramsMapper).function,
+				config.mappers.at(paramsMapper).function,
 				synthArgs);
 		},{ // else  (assuming channelLayout is \ambi
 			SatieFactory.makeAmbi(
@@ -126,12 +126,12 @@
 				preBusArray,
 				postBusArray,
 				srcPreMonitorFuncsArray.collect({|item, i|
-					config.monitoringPlugins.at(item).function;
+					config.monitoring.at(item).function;
 				}),
 				ambiOrder,
 				ambiEffectPipeline,
 				ambiBusIndex,
-				config.mapperPlugins.at(paramsMapper).function,
+				config.mappers.at(paramsMapper).function,
 				synthArgs);
 		});
 	}

@@ -170,7 +170,7 @@ s.waitForBoot({
 	s.sync;
 
 	if (~listListeners == true, {
-		~satie.spatPlugins.keys.do({arg item; (~logPrefix ++ item.asSymbol).postln});
+		~satie.spatializers.keys.do({arg item; (~logPrefix ++ item.asSymbol).postln});
 		thisProcess.shutdown;
 		0.exit;
 	});

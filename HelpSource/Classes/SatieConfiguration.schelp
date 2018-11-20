@@ -61,7 +61,7 @@ table::
 ## domeVBAP || 31 channel sphere (SAT dome)
 ::
 
-METHOD:: fxPlugins
+METHOD:: effects
 Instance variable for effects plugins.
 
 returns:: Dictionary
@@ -71,12 +71,12 @@ Get/set options
 
 returns:: supernova.options
 
-METHOD:: mapperPlugins
+METHOD:: mappers
 Instance variable holds mapper plugins.
 
 returns:: Dictionary
 
-METHOD:: audioPlugins
+METHOD:: sources
 Instance variable holds audio plugins
 
 returns:: Dictionary
@@ -84,7 +84,7 @@ returns:: Dictionary
 METHOD:: debug
 Print SATIE debug messages
 
-METHOD:: spatPlugins
+METHOD:: spatializers
 Instance variable hold spatializer plugins
 
 returns:: Dictionary

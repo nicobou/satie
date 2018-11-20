@@ -18,7 +18,7 @@ SATIE plugins are SuperCollider functions. They are later wrapped together in or
 SUBSECTION::Audio plugins
 Are inserted into the signal chain and provide either a sound source or effect. Usually they generate audio signals. The following families of plugins fall into this category:
 LIST::
-## audiosources (generators)
+## sources (generators)
 ## effects
 ## post-processors
 ## spatializers
@@ -89,17 +89,17 @@ SUBSECTION:: Registering the plugin
 SATIE needs to know about the plugins it manages. The plugins files are kept in directories which organize them by family. They are loaded at configuration time and kept in the following LINK::Classes/SatieConfiguration:: members:
 
 DefinitionList::
-## LINK::Classes/SatieConfiguration#-audioPlugins::
+## LINK::Classes/SatieConfiguration#-sources::
 || Typpically audio generators. They are usually placed in a group at \head
-## LINK::Classes/SatieConfiguration#-fxPlugins::
+## LINK::Classes/SatieConfiguration#-effects::
 || Effects, that can be fed signal from generators (placed at \tail)
-## LINK::Classes/SatieConfiguration#-spatPlugins::
+## LINK::Classes/SatieConfiguration#-spatializers::
 || Spatialisers (typically VBAP and other types of panning)
-## LINK::Classes/SatieConfiguration#-mapperPlugins::
+## LINK::Classes/SatieConfiguration#-mappers::
 || Parameter mapping
-## LINK::Classes/SatieConfiguration#-postprocessorPlugins::
+## LINK::Classes/SatieConfiguration#-postprocessors::
 || Post processing, or mastering. These are ensured to be at the end of the processing chain, between the above plugins and the physical interface.
-## LINK::Classes/SatieConfiguration#-.monitoringPlugins::
+## LINK::Classes/SatieConfiguration#-.monitoring::
 || These are side-chains that can be inserted amongst audio generators or effects in order to monitor the signal and, optionally, send OSC trigger messages back to the server.
 ## LINK::Classes/SatieConfiguration#-.hoa::
 || Higher Order Ambisonics decoders
@@ -146,7 +146,7 @@ s = Server.supernova.local;
 	};
 });
 // add it to the list of registered plugins
-~satie.audioPlugins.addAudioPlugin(~instr);
+~satie.sources.addAudioPlugin(~instr);
 // compile the synthdef for use with SATIE
 ~satie.makeSynthDef(\mySound, \simpleOSC, [], [~satie.aux[0]], [],~satieConfiguration.listeningFormat, [0]);
 ::

@@ -90,7 +90,7 @@ code::
 // register the process with SATIE
 ~process = ~satie.makeProcess(\testProcess, ~helloProcess);
 // instantiate the process. It will automatically execute its setup() method.
-// it will also create a unique group for audiosources
+// it will also create a unique group for audio sources
 // it will also register it with Satie in processInstances dictionary
 ~satie.makeProcessInstance(\myProcess, \testProcess);
 ::
