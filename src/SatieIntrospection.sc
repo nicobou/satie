@@ -28,7 +28,7 @@ SatieIntrospection {
 		var ret = Dictionary.new();
 		ret.add(\generators -> context.config.sources.keys);
 		ret.add(\effects -> context.config.effects.keys);
-		ret.add(\mastering -> context.config.postprocessors);
+		ret.add(\mastering -> context.config.postprocessors.keys);
 		^ret;
 	}
 
