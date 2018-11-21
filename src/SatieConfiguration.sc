@@ -45,7 +45,7 @@ SatieConfiguration {
 
 	init {
 
-		if(listeningFormat.size != outBusIndex.size) {
+		if((listeningFormat.size > 0) && (listeningFormat.size != outBusIndex.size)) {
 			Error("Mismatched arguments. There should be one outBusIndex value for each listeningFormat.").throw;
 		};
 
