@@ -145,7 +145,7 @@ SatieFactory {
 
 					outsig = BHiPass.ar(outsig, VarLag.kr(hpHz, slewFilter ) );
 					HOAEncoder.ar(order, outsig,
-						Ramp.kr(aziDeg * 0.017453292519943, slewPanning),
+						Ramp.kr(aziDeg * -0.017453292519943, slewPanning),
 						Ramp.kr(eleDeg * 0.017453292519943, slewPanning),
 					gainDB, plane_spherical, radius, speaker_radius);
 				};
