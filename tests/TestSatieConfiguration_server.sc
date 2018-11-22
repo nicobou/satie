@@ -23,4 +23,19 @@ TestSatieConfiguration_server : UnitTest {
 		satie.quit;
 	}
 
+	test_outBusIndex_numChannels {
+		var outOffsets = [2, 4];
+		var spat = \stereoListener;
+		var config = SatieConfiguration(server, [spat, spat], outBusIndex: outOffsets);
+		var satie = Satie(config);
+		satie.boot;
+		this.wait({ satie.booted }, "Satie failed to boot after 5 seconds", 5);
+		this.assertEquals(
+			server.options.numOutputBusChannels,
+			6,
+			"Server output channels correctly offset"
+		);
+		satie.quit;
+	}
+
 }
