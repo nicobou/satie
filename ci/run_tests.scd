@@ -7,6 +7,7 @@ fork {
         TestSatie_quit,
         TestSatieConfiguration,
         TestSatieConfiguration_server,
+        TestOscCommunication,
     ];
 
     // run each test
