@@ -56,7 +56,7 @@ SatieOSC {
 		this.newOSC(\satieSceneCreateProcessGroup, this.createProcessGroupHandler, "/satie/scene/createProcessGroup");
 
 		this.newOSC(\satieSceneDeleteNode, this.deleteNodeHandler, "/satie/scene/deleteNode");
-		this.newOSC(\satieDebugFlag, this.debugFlagHandler, "/satie/scene/debugFlag");
+		this.newOSC(\satieDebugFlag, this.debugFlagHandler, "/satie/scene/debug");
 		this.newOSC(\satieClearScene, this.clearSceneHandler, "/satie/scene/clear");
 
 		// node level handlers
