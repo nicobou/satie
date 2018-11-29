@@ -23,7 +23,7 @@ before_script:
 
     # build SuperCollider
     - git clone
-        --branch 3.10
+        --branch master
         --depth 1
         --recurse-submodules
         https://github.com/supercollider/supercollider.git
@@ -41,7 +41,7 @@ before_script:
 
     # build sc3-plugins
     - git clone
-        --branch 3.10
+        --branch master
         --depth 1
         --recurse-submodules
         https://github.com/supercollider/sc3-plugins.git
@@ -63,4 +63,3 @@ test:
         - jackd --no-realtime -d dummy -r 48000 -p 1024 &
         - sleep 20
         - sclang ci/run_tests.scd
-        - echo "Success!"
