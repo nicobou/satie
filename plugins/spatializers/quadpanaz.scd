@@ -58,5 +58,5 @@
 
 	outsig = BHiPass.ar(outsig, VarLag.kr(hpHz, slewFilter));
 
-	PanAz.ar(numChans: 4, in: outsig, pos: azi, width: spread.linlin(0.0, 100.0, 0.0, 2.0));
+	PanAz.ar(numChans: 4, in: outsig, pos: azi);
 };
