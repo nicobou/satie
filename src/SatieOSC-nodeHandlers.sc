@@ -191,7 +191,8 @@
 
 			if (satie.config.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
 
-			satie.cleanUp();
+			satie.cleanUp;
+			satie.createDefaultGroups;
 		}
 	}
 
