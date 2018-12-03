@@ -14,6 +14,6 @@ If changes include changes to the OSC protocol, document your OSC messages in [S
 `sudo apt install pandoc`
 
 and run the following command from the root of the directory:
-```pandoc -s --toc -c doc.css -f markdown -t html SATIE-OSC-API.md -o HelpSource/Examples/OSC-API.html```
+```pandoc -s --toc -c doc.css -f markdown -t html SATIE-OSC-API.md -o HelpSource/Overview/OSC-API.html```
 
 You're done.
