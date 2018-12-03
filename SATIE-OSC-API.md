@@ -52,12 +52,6 @@ Delete a node
 #### /satie/scene/clear
 Clear the scene. Removes all instances and groups.
 
-#### /satie/scene/set key value
-Set a scene-wide keyword value
-
--  key : parameter name
--  value : int, float or string
-
 #### /satie/scene/debug debugFlag
    Enable or disable debug printing
 -  debugFlag : 1 or 0, defaults to 0
