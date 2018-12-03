@@ -73,11 +73,6 @@ Nodes are instances of audio sources, effects or processes. Nodes also belong to
 #### /satie/\<nodeType\>/state nodeName value
 Node state (whether it is playing/computing or not): 1 = active, 0 = inactive
 
-#### /satie/\<nodeType\>/event nodeName eventName \<opt\> atom1 atom2...atomN
-Some event
-
-For specific sources, effects and processes, consult the sources located in the *plugins* directory. Also, see Introspection section for other means of getting information from SATIE.
-
 #### /satie/\<nodeType\>/set nodeName key1 val1 key2 val2 .... keyN valN
 Set a property
 
