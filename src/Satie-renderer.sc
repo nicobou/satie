@@ -258,19 +258,22 @@
 
 	cleanUp {
 		// clean processes
-		processInstances.keysDo({|proc|
+		processInstances.keysDo({ |proc|
 			this.cleanProcessInstance(proc);
 		});
 
 		// flush all nodes
-		this.groups.keysDo ({ |group |
-			this.groupInstances[group.asSymbol].do({|key|
-				key.free();
+		this.groups.keysDo ({ |key|
+			this.groupInstances[key.asSymbol].do({ |node|
+				node.free;
 			})
 		});
 
+		// clear namesIds
+		this.namesIds.clear;
+
 		// remove groups
-		groups.keysDo({|item|
+		groups.keysDo({ |item|
 			var group = item.asSymbol;
 			this.killSatieGroup(group);
 		});
