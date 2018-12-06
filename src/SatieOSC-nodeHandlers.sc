@@ -660,7 +660,7 @@
 			// verify message
 			if (  ( args.size != 3)  ,
 				{
-					error("SatieOSC.stateSourceHandler: bad messafe length: expects oscAddress nodeName val % \n", args);
+					error("SatieOSC.stateSourceHandler: bad message length: expects oscAddress nodeName val % \n", args);
 				}, // else args good
 				{
 					var nodeName  = args[1];
@@ -695,7 +695,7 @@
 			// verify message
 			if (  ( args.size != 3)  ,
 				{
-					error("SatieOSC.stateGroupHandler: bad messafe length: expects oscAddress nodeName val % \n", args);
+					error("SatieOSC.stateGroupHandler: bad message length: expects oscAddress nodeName val % \n", args);
 				}, // else args good
 				{
 					var nodeName  = args[1];
