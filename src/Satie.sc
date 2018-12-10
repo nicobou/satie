@@ -213,10 +213,10 @@ Satie {
 
 	// private method
 	makePostProcGroup {
-		ambiPostProcGroup = ParGroup(1,\addToTail);
+		ambiPostProcGroup = ParGroup(config.server, \addToTail);
 		groups.put(\ambiPostProc, ambiPostProcGroup);
 		groupInstances.put(\ambiPostProc, Dictionary.new());
-		postProcGroup = ParGroup(1,\addToTail);
+		postProcGroup = ParGroup(config.server, \addToTail);
 		groups.put(\postProc, postProcGroup);
 		groupInstances.put(\postProc, Dictionary.new());
 	}
