@@ -176,10 +176,10 @@
 			{
 				if (addAction == \addToEffects,
 					{
-						group = ParGroup.new(groups[\defaultFx], \addAfter);
+						group = ParGroup(groups[\defaultFx], \addAfter);
 					},
 					{
-						group = ParGroup.new(addAction: addAction);
+						group = ParGroup(config.server, addAction);
 					});
 				groups.put(name.asSymbol, group);
 				groupInstances.put(name.asSymbol, Dictionary.new);
