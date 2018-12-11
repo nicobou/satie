@@ -256,8 +256,13 @@
 		processInstances.removeAt(name);
 	}
 
+	// deprecated class, use Satie.clearScene instead
 	cleanUp {
-		// clean processes
+		this.deprecated(thisMethod, Satie.findMethod(\clearScene));
+	}
+
+	cleanSlate {
+		// clear processes
 		processInstances.keysDo({ |proc|
 			this.cleanProcessInstance(proc);
 		});

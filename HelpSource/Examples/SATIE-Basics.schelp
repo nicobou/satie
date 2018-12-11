@@ -233,7 +233,7 @@ s.waitForBoot({
 ~monoFile.cueSoundFile(Platform.resourceDir +/+ "sounds/a11wlk01.wav");
 
 // clean up
-~satie.cleanUp
+~satie.clearScene
 
 ::
 
