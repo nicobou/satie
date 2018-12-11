@@ -141,16 +141,19 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li>spread (range (0 to 100)) default = 1</li>
 </ul>
 <h2 id="only-for-nodetypes-source-and-process">Only for nodeTypes: source and process</h2>
-<h4 id="satienodetypeupdate-nodename-azimuthdegrees-elevationdegrees-gaindb-delayms-lphz-distance">/satie/&lt;nodeType&gt;/update nodeName azimuthDegrees elevationDegrees gainDB delayMS lpHZ distance</h4>
-<p>Update many essential properties at once. This message is typically sent every frame, all properties relate to node's position. <code>distance</code> applies only to processes.</p>
+<h4 id="satienodetypeupdate-nodename-azimuth-elevation-gaindb-delayms-lphz-distance">/satie/&lt;nodeType&gt;/update nodeName azimuth elevation gainDB delayMS lpHz distance</h4>
+<p>Update many essential properties at once. This message is typically sent every frame, all properties relate to node's position.</p>
+<pre class=note>
+<span class=note text>NOTE:<span> 'distance' applies only to processes.
+</pre>
 <ul>
 <li>nodeName : name of the node</li>
-<li>azimuthDegrees : azimuth in degrees (-180 ... 180)</li>
-<li>elevationDegrees : (-180 ... 180)</li>
+<li>azimuth : azimuth in degrees (-180 ... 180)</li>
+<li>elevation : elevation in degrees (-180 ... 180)</li>
 <li>gainDB : gain in decibles</li>
 <li>delayMS : delay in miliseconds</li>
-<li>lpHZ : low pas filter in Hertz</li>
-<li>distance : distance in meters</li>
+<li>lpHz : low pas filter in Hertz</li>
+<li>distance : distance in meters (can be omitted when updating sources and groups)</li>
 </ul>
 <h3 id="only-for-notetype-process">Only for noteType: process</h3>
 <h4 id="satieprocessproperty-processname-key-value">/satie/process/property processName key value</h4>
