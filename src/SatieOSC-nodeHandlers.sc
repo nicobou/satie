@@ -677,7 +677,6 @@
 						}, // else good to go
 						{
 							targetNode.run(state);
-							targetNode.register(); // register with NodeWatcher, for state checking
 						});
 				});
 		}
@@ -709,7 +708,6 @@
 						{
 							targetNode = satie.groups[nodeName.asSymbol];
 							targetNode.run(state);
-							targetNode.register(); // register with NodeWatcher, for state checking
 
 						},
 						{   // else no group
