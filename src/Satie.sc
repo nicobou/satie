@@ -94,7 +94,7 @@ Satie {
 	quit { |quitServer = true|
 		CmdPeriod.remove(this);
 		ServerTree.remove(this, config.server);
-		this.cleanUp;
+		this.cleanSlate;
 		osc.deleteAll;
 		booted = false;
         if(quitServer, { config.server.quit });
@@ -129,14 +129,19 @@ Satie {
 			});
 	}
 
+	clearScene {
+		this.cleanSlate;
+		this.createDefaultGroups;
+	}
+
 	doOnServerTree {
 		"SATIE - creating default groups".postln;
 		this.createDefaultGroups;
 	}
 
 	cmdPeriod {
-		"SATIE - cleaning up the scene".postln;
-		this.cleanUp;
+		"SATIE - clearing the scene".postln;
+		this.cleanSlate;
 	}
 
 	createDefaultGroups {
