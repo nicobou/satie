@@ -199,7 +199,6 @@ SatieOSC {
 		if (satie.config.debug, {"→    %: sourceName: %,  synthName: %,  groupName: %".format(this.class.getBackTrace, sourceName,synthName,groupName).postln});
 
 		synth = satie.makeSourceInstance(sourceName.asSymbol, synthName, groupName);
-		synth.register(); // register with NodeWatcher for testing
 
 		postf(">>satieOSC.createSourceNode:  creating %:  uri: %  group: %\n", sourceName, synthName, groupName);
 
