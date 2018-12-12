@@ -6,7 +6,7 @@ A "scene" contains source/effect/process nodes which are kept in groups.
 These messages create and manage scene content.
 
 #### /satie/load filename
-Load and evaluate a file in supercollider. Filename must be a full file path to a file located on the audiorendering machine
+Load and evaluate a file in supercollider. Filename must be a full file path to a file located on the audio rendering machine
 
 #### /satie/scene/createSource nodeName synthdefName \<groupName\>
 Instantiate an audio generator plugin.
@@ -60,7 +60,7 @@ Clear the scene. Removes all instances and groups.
 
 Nodes are instances of audio sources, effects or processes. Nodes also belong to groups. There are three ways of addressing a node:
 
--   source - individual instance of type `audiosource` or `effect`
+-   source - individual instance of type `source` or `effect`
 -   group
 -   process
 
