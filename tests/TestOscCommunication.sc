@@ -219,17 +219,15 @@ TestOscCommunication : UnitTest {
 	}
 
 	test_source_update {
-		//FIXME: not all plugins make use of the 'distance' argument.
-		// We need to slice the value array in the assert.
 		var result;
-		var value = [90.0, 45.0, -50.0, 2000.0, 8000.0, 25];
-		addr.sendMsg('/satie/source/update', 'mySource', value[0], value[1], value[2], value[3], value[4], value[5]);
+		var value = [90.0, 45.0, -50.0, 2000.0, 8000.0];
+		addr.sendMsg('/satie/source/update', 'mySource', value[0], value[1], value[2], value[3], value[4]);
 		server.sync;
 		satie.groupInstances[\default][\mySource].getn(index: 3, count: 5, action: { |val| result = val });
 		server.sync;
 		this.assertEquals(
 			result,
-			value[..4],
+			value,
 			"/satie/source/update set all the node's update arguments."
 		);
 	}

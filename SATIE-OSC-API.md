@@ -93,16 +93,20 @@ Spatializer properties (contained in most spatializers)
 
 ## Only for nodeTypes: source and process
 
-#### /satie/\<nodeType\>/update nodeName azimuthDegrees elevationDegrees gainDB delayMS lpHZ distance
-Update many essential properties at once. This message is typically sent every frame, all properties relate to node's position. `distance` applies only to processes.
+#### /satie/\<nodeType\>/update nodeName azimuth elevation gainDB delayMS lpHz distance
+Update many essential properties at once. This message is typically sent every frame, all properties relate to node's position.
+
+<pre class=note>
+<span class=note text>NOTE:<span> 'distance' applies only to processes.
+</pre>
 
 -  nodeName : name of the node
--  azimuthDegrees : azimuth in degrees (-180 ... 180)
--  elevationDegrees : (-180 ... 180)
+-  azimuth : azimuth in degrees (-180 ... 180)
+-  elevation : elevation in degrees (-180 ... 180)
 -  gainDB : gain in decibles
 -  delayMS : delay in miliseconds
--  lpHZ : low pas filter in Hertz
--  distance : distance in meters
+-  lpHz : low pas filter in Hertz
+-  distance : distance in meters (can be omitted when updating sources and groups)
 
 ### Only for noteType: process
 

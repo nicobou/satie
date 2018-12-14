@@ -209,35 +209,33 @@
 	}
 
 	updateSrcHandler {
-		^{ | args |
+		^{ |args|
 			var nodeName = args[1];
-			var aziDeg, eleDeg, gainDB, delayMs, lpHz, distance;
 			var thisSynth;
-			if (args.size != 8,
-				{"→    %: message missing values".format(args).warn},
-				{
-					if (satie.config.debug,
-						{"→    %: message: %".format(this.class.getBackTrace, args).postln});
-					thisSynth = this.getSourceNode(nodeName, \synth);
-					this.updateNode(thisSynth, args);
-				}
-			)
+
+			if(args.size >= 7, {
+				if(satie.config.debug, {
+					"→    %: message: %".format(this.class.getBackTrace, args).postln
+				});
+				thisSynth = this.getSourceNode(nodeName, \synth);
+				this.updateNode(thisSynth, args);
+			}, {
+				"→    %: message missing values".format(args).warn
+			})
 		}
 	}
 
 	updateGroupHandler {
-		^{ | args |
+		^{ |args|
 			var nodeName = args[1];
-			var aziDeg, eleDeg, gainDB, delayMs, lpHz, distance;
 			var thisGroup;
 
-			if (args.size != 8,
-				{"→    %: message missing values".format(args).warn},
-				{
-					thisGroup = this.getGroupNode(nodeName, \group);
-					this.updateNode(thisGroup, args);
-				}
-			);
+			if(args.size >= 7, {
+				thisGroup = this.getGroupNode(nodeName, \group);
+				this.updateNode(thisGroup, args);
+			}, {
+				"→    %: message missing values".format(args).warn
+			})
 		}
 	}
 
@@ -290,23 +288,20 @@
 
 	// for sources and groups
 	updateNode { | node, args |
-		var aziDeg, eleDeg, gainDB, delayMs, lpHz, distance;
-		// get values from vector
+		var pairs;
+
 		if (satie.config.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
-		aziDeg = args[2] + satie.config.orientationOffsetDeg[0];
-		eleDeg= args[3] + satie.config.orientationOffsetDeg[1];
-		gainDB = args[4];
-		delayMs = args[5];
-		lpHz = args[6];
-		distance = args[7];  // not used by basic spatializers
-		node.set(
-			\aziDeg, aziDeg,
-			\eleDeg, eleDeg,
-			\gainDB, gainDB,
-			\delayMs, delayMs,
-			\lpHz, lpHz,
-			\distance, distance;
-		);
+
+		args[2] = args[2] + satie.config.orientationOffsetDeg[0];
+		args[3] = args[3] + satie.config.orientationOffsetDeg[1];
+
+		// interleave the two inner arrays
+		// will be as long as shortest array, thus dropping 'distance' when absent
+		pairs = [
+			[\aziDeg, \eleDeg, \gainDB, \delayMs, \lpHz, \distance],
+			args[2..]
+		].lace;
+		node.set(*pairs);
 	}
 
 	setProcHandler {
