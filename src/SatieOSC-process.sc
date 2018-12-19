@@ -33,9 +33,6 @@
 			});
 		});
 
-		~shit=argList;
-		argList.postln;
-
 		if (satie.processInstances[id.asSymbol]  != nil,
 			{
 				error("satieOSC.createProcessNode source Process node: "++id++",   ALREADY EXISTS, aborting \n", );
