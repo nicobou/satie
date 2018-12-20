@@ -239,13 +239,13 @@
 	}
 
 	// instantiate a process - also creates a unique group
-	makeProcessInstance { | id, processName, addAction=\addToHead |
+	makeProcessInstance { | id, processName, arglist, addAction=\addToHead |
 		var groupName, myProcess;
 		groupName = (id++"_group").asSymbol;
 		this.makeSatieGroup(groupName, addAction);
 		myProcess = this.cloneProcess(processName.asSymbol);
 		processInstances.put(id, myProcess);
-		processInstances[id].setup(id, groupName);
+		processInstances[id].setup(id, groupName, arglist);
 		^processInstances;
 	}
 

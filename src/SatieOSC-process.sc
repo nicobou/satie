@@ -30,7 +30,7 @@
 			if ( item != "",
 				{
 					argList.add(item);
-				});
+			});
 		});
 
 		if (satie.processInstances[id.asSymbol]  != nil,
@@ -39,8 +39,8 @@
 			},
 			// else ALL GOOD,  instantiate
 			{
-				satie.makeProcessInstance(id.asSymbol, processName);
 				postf(">>satieOSC.createProcessNode: creating: %,  with  process:  %   and arglist: % \n", id, processName, argList);
-			});
+				satie.makeProcessInstance(id.asSymbol, processName, argList);
+		});
 	}
 }
