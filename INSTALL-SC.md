@@ -1,50 +1,96 @@
-This document will guide you through building SuperCollider and sc3-plugins from source, as well as installing SATIE and its necessary resources, on Ubuntu 16.04 and up.
+This document will help you get started with SATIE by guiding you through its installation on Ubuntu 18.04 and macOS. It recommended that you use SATIE with the latest versions of SuperCollider and sc3-plugins. SATIE is intended to be used with `supernova`, SuperCollider's alternative multi-threaded audio server. For higher order ambisonics, SATIE makes use of the `HOAUGens` which are part of sc3-plugins since version 3.10. 
 
-**Note:**  SATIE makes use of UGens called the *HOAUGens* found in the sc3-plugins collection. These UGens were added to the sc3-plugins repository at commit [9326e1229a64ca82f76124a7a1a038095be22996](https://github.com/supercollider/sc3-plugins/tree/9326e1229a64ca82f76124a7a1a038095be22996).
+In summary, SATIE needs:
+- SuperCollider 3.10+
+- sc3-plugins 3.10+
+- SATIE quark itself
+- SC-HOA quark
+- additional downloadable ressources for ambisonics 
 
-## Building SuperCollider 3.9 from git
+The following will help you get SuperCollider and sc3-plugins installed on your system. Please consult these project's documentation for more in-depth information:
 
-Open a terminal and create a source directory inside which you will clone SuperCollider:
+[SuperCollider on GitHub](https://github.com/supercollider/supercollider/tree/master)
+[sc3-plugins on GitHub](https://github.com/supercollider/sc3-plugins/tree/master)
+
+## macOS
+
+### Installing SuperCollider
+
+To install SuperCollider, head over to the releases page and download the macOS release binary:
+
+<https://github.com/supercollider/supercollider/releases>
+
+Extract and drag the 'SuperCollider` folder in your 'Applications` folder.
+
+### Installing sc3-plugins
+
+To install the sc3-plugins, head over to the releases page and download the macOS release binary:
+
+<https://github.com/supercollider/sc3-plugins/releases>
+
+**Note:** Be sure to download the version of sc3-plugins that matches your version of SuperCollider.
+
+Extract and place the sc3-plugins forlder in your SuperCollider extensions folder. By default, this folder is located at:
+
+```supercollider
+~/Library/Application Support/SuperCollider/Extensions
 ```
-cd ~/	# move to the root of your user's home 
-mkdir -p source && cd source
+
+## linux
+
+### Installing SuperCollider
+
+SuperCollider 3.10 isn't packaged for Ubuntu at the time of writing. Building it is therefore the only option.
+Fortunately, building SuperCollider is a relatively simple process. The following instructions will guide you through the build
+process on Ubuntu 18.04. If you are using a prior version of Ubuntu, follow the instructions provided in the 
+[Linux README](https://github.com/supercollider/supercollider/blob/master/README_LINUX.md).
+
+#### Install build dependencies
+
+Before building SuperCollider, you must install its build dependencies. Fortunately, the required packages are all available to install using Ubuntu package manager. Install the following packages with this command:
+
+```bash
+sudo apt-get install build-essential libsndfile1-dev libasound2-dev libavahi-client-dev 
+libicu-dev libreadline6-dev libfftw3-dev libxt-dev libudev-dev pkg-config git cmake 
+qt5-default qt5-qmake qttools5-dev qttools5-dev-tools qtdeclarative5-dev qtpositioning5-dev 
+libqt5sensors5-dev libqt5opengl5-dev qtwebengine5-dev libqt5svg5-dev libqt5websockets5-dev
 ```
 
-### Install dependencies
+#### Clone SuperCollider
 
-```
-sudo apt-get install build-essential pkg-config cmake ccache git \
-    libjack-jackd2-dev libsndfile1-dev libasound2-dev libavahi-client-dev \
-    libicu-dev libreadline6-dev libfftw3-dev libxt-dev libudev-dev \
-    qt5-default qt5-qmake qttools5-dev qttools5-dev-tools qtdeclarative5-dev \
-    libqt5webkit5-dev qtpositioning5-dev libqt5sensors5-dev libqt5opengl5-dev
-```
+You will need to clone the SuperCollider source code and fetch it's submodules. Create a folder in which to clone the SuperCollider source. Assuming the folder is `~/src`, run the following commands:
 
-### Clone and build SuperCollider
-
-Run the following commands from the root of your source directory:
-```
-git clone --recursive https://github.com/supercollider/supercollider.git
+```bash
+cd ~/src
+git clone --branch master --recurse-submodules https://github.com/supercollider/supercollider.git
 cd supercollider
-git checkout 3.9
-git submodule update --init
-mkdir build
-cd build
-cmake -DCMAKE_BUILD_TYPE=Release -DNATIVE=ON -DSC_EL=OFF ..    # turn off emacs-based IDE
+git submodule update
+```
+
+#### Build and install 
+
+You can now build and install SuperCollider on your system. First, create a build folder at the root of your cloned SuperCollider source folder. Then, configure, build, and install. 
+
+```bash
+cd ~/src/supercollider
+mkdir build && cd build
+cmake -DCMAKE_BUILD_TYPE=Release -DNATIVE=ON -DSC_EL=OFF ..   # turn off emacs-based IDE
 make
 sudo make install
 sudo ldconfig    # needed when building SuperCollider for the first time
 ```
 
-## Build sc3-plugins from git
+### Installing sc3-plugins
 
-Run the following commands from the root of your source directory:
+Like SuperCollider, the sc3-plugins version 3.10 aren't currently packaged for linux, but can 
+be built easily. Assuming you want to clone the source code into `~/src`, run the following commands:
+
 ```
-git clone --recursive https://github.com/supercollider/sc3-plugins.git
+cd ~/src
+git clone --branch master --recurse-submodules https://github.com/supercollider/sc3-plugins.git
 cd sc3-plugins
-git submodule update --init
-mkdir build
-cd build
+git submodule update
+mkdir build && cd build
 cmake -DSC_PATH=../../supercollider/ -DSUPERNOVA=ON -DCMAKE_BUILD_TYPE=Release -DNATIVE=ON ..
 make
 sudo make install
@@ -52,19 +98,11 @@ sudo make install
 
 ## Install SATIE and its dependencies
 
-In a terminal, open the SuperCollider IDE by using the following command:
-```
-scide
-```
-
 You can install the SATIE Quark from within the IDE by using the `Quarks.install` command. Write the following lines of code in a new document and evaluate them by moving the cursor on a line and hitting `Ctrl-Enter`. Evaluate the following lines one after the other:
+
 ```
 Quarks.install("SATIE");
-Quarks.uninstall("UnitTesting");
-LanguageConfig.addExcludePath(Platform.userAppSupportDir ++ "/downloaded-quarks/UnitTesting").store;
 ```
-
-**Note:**  Running the last two lines is required due to a conflict between the UnitTesting Quark and SuperCollider's new built-in UnitTest classes. The UnitTesting Quark's path needs to be excluded in order for SuperCollider's class library to successfully compile. If UnitTesting is causing `duplicate Class found` errors when starting SC, or when recompiling the class library, you will need to manually delete it from your system. In the IDE's menu, click `File->Open user support directory` then navigate to the `downloaded-quarks` folder and delete the folder called `UnitTesting`.
 
 ### Installing additional resources
 
