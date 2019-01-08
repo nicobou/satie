@@ -1,9 +1,41 @@
 # SATIE Changelog
 
+
+
+## [1.2.0] - 2019-01-XX
+
+### New features
+- New `Satie.quit` method
+- New `Satie.clearScene` method
+- New `SatieQueryTree` class
+- New convenience method `Satie.switchMake`
+- Allow function to be called immediately after boot
+- Make use of SuperCollider's CmdPeriod and ServerTree classes
+- Project now uses Gitlab CI
+- Many new unit tests
+
+### Improvements
+- Improved booting
+- Allow freeing OSCdefs
+- Renaned SATIE plugin folders
+- Renamed some SATIE plugins
+- All plugins make use of the `~channelLayout` field
+- Throw error when `listeningFormat` and `outBusIndex` don't match
+- Removed duplicate plugin dictionary variables from class `Satie`
+- SATIE no longer forces `blockSize = 128` when doing ambisonics
+- SATIE no longer depends on NodeWatcher quark
+- Removed unused methods
+- Revised documentation
+- Cleaned up OSC API
+
+
+
 ## [1.1.1] - 2018-08-15
 
-## Improvements
+### Improvements
 - A better Readme
+
+
 
 ## [1.1.0] - 2018-08-13
 
@@ -27,7 +59,10 @@
 ### Removals
 - SAT specific plugins
 
+
+
 ## [1.0.1] - 2018-04-19
+
 ### New features
 - Support for ambisonics via SC-HOA quark
 - Several mappers for each spatialiser
