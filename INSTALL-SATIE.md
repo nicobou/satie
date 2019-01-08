@@ -6,7 +6,7 @@ In order to use SATIE, you will need:
 * SuperCollider 3.10+
 * sc3-plugins 3.10+
 * SATIE quark
-* additional downloadable ressources for ambisonics
+* additional downloadable resources for ambisonics
 
 In-depth documentation and platform specific installation instructions for SuperCollider and sc3-plugins can be found in their respective Github repositories:
 * [SuperCollider on GitHub](https://github.com/supercollider/supercollider/tree/master)
@@ -30,9 +30,9 @@ To install the sc3-plugins, head over to the releases page and download the macO
 
 https://github.com/supercollider/sc3-plugins/releases
 
-> **Note:** Be sure to download the version of sc3-plugins that matches your version of SuperCollider (ex: 3.9 or 3.10).
+> **Note:** Be sure to download the version of sc3-plugins that matches your version of SuperCollider
 
-Extract and place the sc3-plugins forlder in your SuperCollider extensions folder. By default, this folder is located at:
+Extract and place the sc3-plugins folder in your SuperCollider extensions folder. By default, this folder is located at:
 
 ```
 ~/Library/Application Support/SuperCollider/Extensions
@@ -44,7 +44,7 @@ Extract and place the sc3-plugins forlder in your SuperCollider extensions folde
 
 #### Installing SuperCollider
 
-SuperCollider 3.10 isn't packaged for Ubuntu at the time of writing. Building it for source is therefore required.
+SuperCollider 3.10 isn't packaged for Ubuntu at the time of writing. Building it from source is therefore required.
 The following instructions will guide you through the build process on Ubuntu 18.04.
 If you are using a prior version of Ubuntu, follow the instructions provided in SuperCollider's 
 [Linux README](https://github.com/supercollider/supercollider/blob/master/README_LINUX.md).
@@ -92,7 +92,7 @@ sudo ldconfig    # needed when building SuperCollider for the first time
 
 #### Installing sc3-plugins
 
-Like SuperCollider, sc3-plugins 3.10 isn't currently packaged for linux.
+Like SuperCollider, sc3-plugins 3.10 isn't currently packaged for Linux.
 You will need to clone the sc3-plugins Github repository and fetch the project's submodules.
 
 Assuming you want to clone the repository into a folder called `~/src`, run the following commands:
@@ -127,7 +127,7 @@ Quarks.install("SATIE");
 
 > **Note:** SATIE depends on another quark, called _SC-HOA_, for its higher-order ambisonics capabilities. This quark will be installed automatically when installing SATIE.
 
-You must restart the SuperCollider interpreter, or recompille the class library, in order to make SATIE available for use after installation.
+You must restart the SuperCollider interpreter, or recompile the class library, in order to make SATIE available for use after installation.
 
 
 
