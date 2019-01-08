@@ -1,7 +1,7 @@
 (
   name: "SATIE",
   summary: "Spatial Audio Toolkit for Immersive Environments",
-  version: "1.1.1",
+  version: "1.2.0",
   schelp: "Overview/SATIE-Overview",
   dependencies: [
     "SC-HOA"
