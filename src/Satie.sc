@@ -144,6 +144,19 @@ Satie {
 		this.cleanSlate;
 	}
 
+	disableOSC {
+		this.enableOSC(false)
+	}
+
+	enableOSC { |bool = true|
+		var oscDefs = this.osc.oscDefs;
+		if (bool) {
+			oscDefs.do { |i| i.enable }
+		} {
+			oscDefs.do { |i| i.disable }
+		}
+	}
+
 	createDefaultGroups {
 		this.makeSatieGroup(\default, \addToHead);
 		this.makeSatieGroup(\defaultFx, \addToTail);
