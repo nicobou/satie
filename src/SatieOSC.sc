@@ -100,12 +100,12 @@ SatieOSC {
 		// OSCdef instance.
 		oscDefs.put(
 			\satieTrigger,
-			OSCdef(\satieTrigger, this.triggerHandler, "/tr", satie.config.server.addr).permanent_(true);
+			OSCdef(\satieTrigger, this.triggerHandler, "/tr", satie.config.server.addr);
 		);
 		// and another receiver for SendReply attached to the envelope follower
 		oscDefs.put(
 			\satieEnvelope,
-			OSCdef(\satieEnvelope, this.envelopeHandler, "/analysis", satie.config.server.addr).permanent_(true);
+			OSCdef(\satieEnvelope, this.envelopeHandler, "/analysis", satie.config.server.addr);
 		);
 	}
 
@@ -114,7 +114,7 @@ SatieOSC {
 		var key = id.asSymbol;
 		oscDefs.put(
 			key,
-			OSCdef(key, cb, path, recvPort: oscServerPort).permanent_(true)
+			OSCdef(key, cb, path, recvPort: oscServerPort)
 		);
 	}
 
