@@ -94,19 +94,27 @@ Spatializer properties (contained in most spatializers)
 ## Only for nodeTypes: source and process
 
 #### /satie/\<nodeType\>/update nodeName azimuth elevation gainDB delayMS lpHz distance
-Update many essential properties at once. This message is typically sent every frame, all properties relate to node's position.
+Update some essential properties at once. This message is typically sent every frame, all properties relate to node's position. This method is a shorthand to sending many `set` messages, behind the scenes it simply weaves received values to corresponding keys.
 
-<pre class=note>
-<span class=note text>NOTE:<span> 'distance' applies only to processes.
-</pre>
+By default, the update message expects the following values:
 
 -  nodeName : name of the node
 -  azimuth : azimuth in degrees (-180 ... 180)
 -  elevation : elevation in degrees (-180 ... 180)
 -  gainDB : gain in decibles
--  delayMS : delay in miliseconds
--  lpHz : low pas filter in Hertz
--  distance : distance in meters (can be omitted when updating sources and groups)
+
+The content of the `update` message is configurable. The variable `SatieOSC.update_custom_keys` is a `List` (by default it is empty) to hold extra _keys_. You can assign a list of any parameters affecting SATIE instances and it will forward appropriate messages, i.e:
+
+```
+~satie.osc.update_custom_keys = [\freq]
+```
+will tell SATIE to expect 5 values. Sending `/satie/source/update sffff boo 90 0 -30 800` will weave the _keys_ with received _values_ to `\aziDeg, 90, \eleDeg, 90, \gainDB, -30, \freq, 800` and set these parameters to the instance named `boo` .
+
+The message is checked for length so SATIE will print a warning if the number of received values is not equal to the sum of lengths of `Satie.update_message_keys` and `Satie.update_custom_keys` but will try to apply the message anyways.
+
+<pre class=note>
+<span class=note text>NOTE:<span> This behavior affects how `update` is handled by _Process_ that implements `setUpdate` method. This method should not assume that the `update` message is composed of values corresponding to `aziDeg, eleDeg, gainDB, delayMS, lpHz, distance` anymore. In the current implementation `setUpdate`'s signature should be as follows `setUpdate = { |self, aziDeg, eleDeg, gainDB ... args| }` where `args` will be provided as a list of values directly forwarded from the OSC message.
+</pre>
 
 ### Only for noteType: process
 
