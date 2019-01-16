@@ -15,6 +15,10 @@ SatieOSC {
 	var outputDB = 0;    // current state of the supercollider server output
 	var outputTrimDB = 0;
 
+	// custom update message. These keys will be mached with sent values.
+	var update_message_keys;
+	var <>update_custom_keys;
+
 	var <oscDefs;
 
 	// TODO satieContext must be an array in order to duplicate message forwarding to sc server
@@ -31,6 +35,8 @@ SatieOSC {
 		returnAddress = NetAddr(this.oscClientIP, this.oscClientPort);
 		volume = satie.config.server.volume;
 		volume.setVolumeRange(-99, 18);
+		update_message_keys = [\aziDeg, \eleDeg, \gainDB];
+		update_custom_keys = List.new();
 
 		// set up default groups
 		if ( satie.groups[\default] == nil,

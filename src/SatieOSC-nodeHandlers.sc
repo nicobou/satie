@@ -208,19 +208,25 @@
 		}
 	}
 
+	update_message_size{
+		var ret;
+		^(update_message_keys.size() + update_custom_keys.size() + 2);
+	}
+
 	updateSrcHandler {
 		^{ |args|
 			var nodeName = args[1];
-			var thisSynth;
+			var thisSynth = this.getSourceNode(nodeName, \synth);
+			var msg_size = this.update_message_size();
 
-			if(args.size >= 7, {
+			if(args.size  == msg_size, {
 				if(satie.config.debug, {
 					"→    %: message: %".format(this.class.getBackTrace, args).postln
 				});
-				thisSynth = this.getSourceNode(nodeName, \synth);
 				this.updateNode(thisSynth, args);
 			}, {
-				"→    %: message missing values".format(args).warn
+				"→    Received a message of size is %, but expected: %.".format(args.size, msg_size).warn;
+				this.updateNode(thisSynth, args);
 			})
 		}
 	}
@@ -228,13 +234,14 @@
 	updateGroupHandler {
 		^{ |args|
 			var nodeName = args[1];
-			var thisGroup;
+			var thisGroup = this.getGroupNode(nodeName, \group);
+			var msg_size = this.update_message_size();
 
-			if(args.size >= 7, {
-				thisGroup = this.getGroupNode(nodeName, \group);
+			if(args.size  == msg_size, {
 				this.updateNode(thisGroup, args);
 			}, {
-				"→    %: message missing values".format(args).warn
+				"→    Received a message of size is %, but expected: %.".format(args.size, msg_size).warn;
+				this.updateNode(thisGroup, args);
 			})
 		}
 	}
@@ -243,9 +250,10 @@
 		^{ | args |
 			var nodeName = args[1].asSymbol;
 			var thisGroupName, thisGroup, myProcess;
+			var msg_size = this.update_message_size();
 
-			if (args.size != 8,
-				{"→    %: message missing values".format(args).warn},
+			if (args.size != msg_size,
+				{"→    Received a message of size is %, but expected: %.".format(args.size, msg_size).warn;},
 				{
 					if (satie.config.debug,
 						{
@@ -270,14 +278,11 @@
 							this.updateNode(thisGroup, args);
 						},
 						{
-							var aziDeg, eleDeg, gainDB, delayMs, lpHz, distance;
+							var aziDeg, eleDeg, gainDB;
 							aziDeg = args[2] + satie.config.orientationOffsetDeg[0];
 							eleDeg= args[3] + satie.config.orientationOffsetDeg[1];
 							gainDB = args[4];
-							delayMs = args[5];
-							lpHz = args[6];
-							distance = args[7];  // not used by basic spatializers
-							myProcess[\setUpdate].value(myProcess, aziDeg, eleDeg, gainDB, delayMs, lpHz, distance);
+							myProcess[\setUpdate].value(myProcess, aziDeg, eleDeg, gainDB, args[4..]);
 						}
 					);
 				}
@@ -289,16 +294,18 @@
 	// for sources and groups
 	updateNode { | node, args |
 		var pairs;
+		var final_keys = [];
 
 		if (satie.config.debug, {"→    %: message: %".format(this.class.getBackTrace, args).postln});
 
 		args[2] = args[2] + satie.config.orientationOffsetDeg[0];
 		args[3] = args[3] + satie.config.orientationOffsetDeg[1];
 
+		final_keys = update_message_keys ++ update_custom_keys;
 		// interleave the two inner arrays
 		// will be as long as shortest array, thus dropping 'distance' when absent
 		pairs = [
-			[\aziDeg, \eleDeg, \gainDB, \delayMs, \lpHz, \distance],
+			final_keys,
 			args[2..]
 		].lace;
 		node.set(*pairs);
@@ -363,7 +370,7 @@
 			// this.nodeSet(targetNode, props);
 			if (targetNode == nil,
 				{
-					error("%: source node: % - bug: undefined synth".format(this.class.getBackTrace, targetNode));
+					error("%: source node: % - bug: undefined synth: %".format(this.class.getBackTrace, targetNode, nodeName));
 				},
 				{
 					this.nodeSet(targetNode, props);
