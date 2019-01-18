@@ -278,11 +278,13 @@
 							this.updateNode(thisGroup, args);
 						},
 						{
-							var aziDeg, eleDeg, gainDB;
+							var aziDeg, eleDeg, gainDB, delayMs, lpHz;
 							aziDeg = args[2] + satie.config.orientationOffsetDeg[0];
 							eleDeg= args[3] + satie.config.orientationOffsetDeg[1];
 							gainDB = args[4];
-							myProcess[\setUpdate].value(myProcess, aziDeg, eleDeg, gainDB, args[5..]);
+							delayMs = args[5];
+							lpHz = args[6];
+							myProcess[\setUpdate].value(myProcess, aziDeg, eleDeg, gainDB, delayMs, lpHz, args[7..]);
 						}
 					);
 				}

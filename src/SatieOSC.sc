@@ -35,7 +35,7 @@ SatieOSC {
 		returnAddress = NetAddr(this.oscClientIP, this.oscClientPort);
 		volume = satie.config.server.volume;
 		volume.setVolumeRange(-99, 18);
-		update_message_keys = [\aziDeg, \eleDeg, \gainDB];
+		update_message_keys = [\aziDeg, \eleDeg, \gainDB, \delayMS, \lpHz];
 		update_custom_keys = List.new();
 
 		// set up default groups
