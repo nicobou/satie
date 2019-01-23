@@ -2,7 +2,7 @@
 
 
 
-## [1.2.0] - 2019-01-XX
+## [1.2.0] - 2019-01-23
 
 ### New features
 - New `Satie.quit` method
@@ -17,7 +17,8 @@
 ### Improvements
 - Improved booting
 - Allow freeing OSCdefs
-- Renaned SATIE plugin folders
+- OSC API message 'update' now more flexible
+- Renamed SATIE plugin folders
 - Renamed some SATIE plugins
 - All plugins make use of the `~channelLayout` field
 - Throw error when `listeningFormat` and `outBusIndex` don't match
