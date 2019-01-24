@@ -1,4 +1,5 @@
 SatieOSC {
+
 	var satie;
 	var <rootURI;
 	var <>oscServerPort;
@@ -9,11 +10,16 @@ SatieOSC {
 	var <dynamicResponder;
 	var returnAddress;
 
-
 	// used for audio renderer control
 	var volume;     // will point to server volume / mute control
 	var outputDB = 0;    // current state of the supercollider server output
 	var outputTrimDB = 0;
+
+	// custom update message. These keys will be mached with sent values.
+	var update_message_keys;
+	var <>update_custom_keys;
+
+	var <oscDefs;
 
 	// TODO satieContext must be an array in order to duplicate message forwarding to sc server
 	*new { | satieContext, rootPath = "/satie", serverPort = 18032, clientPort = 18060 |
@@ -22,12 +28,15 @@ SatieOSC {
 
 	initOSC {
 		" - satie: %\n - rootURI: %\n - port: %".format(satie, rootURI, oscServerPort).postln;
-		" + %".format(satie.satieConfiguration.server).postln;
+		" + %".format(satie.config.server).postln;
+		oscDefs = IdentityDictionary.new;
 		dynamicResponder = true;
 		oscClientIP = "localhost";
 		returnAddress = NetAddr(this.oscClientIP, this.oscClientPort);
-		volume = satie.satieConfiguration.server.volume;
+		volume = satie.config.server.volume;
 		volume.setVolumeRange(-99, 18);
+		update_message_keys = [\aziDeg, \eleDeg, \gainDB, \delayMS, \lpHz];
+		update_custom_keys = List.new();
 
 		// set up default groups
 		if ( satie.groups[\default] == nil,
@@ -53,7 +62,7 @@ SatieOSC {
 		this.newOSC(\satieSceneCreateProcessGroup, this.createProcessGroupHandler, "/satie/scene/createProcessGroup");
 
 		this.newOSC(\satieSceneDeleteNode, this.deleteNodeHandler, "/satie/scene/deleteNode");
-		this.newOSC(\satieDebugFlag, this.debugFlagHandler, "/satie/scene/debugFlag");
+		this.newOSC(\satieDebugFlag, this.debugFlagHandler, "/satie/scene/debug");
 		this.newOSC(\satieClearScene, this.clearSceneHandler, "/satie/scene/clear");
 
 		// node level handlers
@@ -95,25 +104,41 @@ SatieOSC {
 		// This is for the exclusive use of SendTrig, which (invariably) sends a trigger message to '/tr' path.
 		// We use OSCdef directly because currently newOSC custom method does not give us full control over
 		// OSCdef instance.
-		OSCdef(\satieTrigger, this.triggerHandler, "/tr", satie.satieConfiguration.server.addr);
-		// and another receiver for SendReply attached tot he envelope follower
-		OSCdef(\satieEnvelope, this.envelopeHandler, "/analysis", satie.satieConfiguration.server.addr);
+		oscDefs.put(
+			\satieTrigger,
+			OSCdef(\satieTrigger, this.triggerHandler, "/tr", satie.config.server.addr);
+		);
+		// and another receiver for SendReply attached to the envelope follower
+		oscDefs.put(
+			\satieEnvelope,
+			OSCdef(\satieEnvelope, this.envelopeHandler, "/analysis", satie.config.server.addr);
+		);
 	}
 
 	/*      create a new OSC definition*/
 	newOSC { | id, cb, path = \default |
-		OSCdef(id.asSymbol, cb, path, recvPort: oscServerPort);
+		var key = id.asSymbol;
+		oscDefs.put(
+			key,
+			OSCdef(key, cb, path, recvPort: oscServerPort)
+		);
 	}
 
-	deleteOSC {|id|
-		OSCdef(id.asSymbol).free;
+	deleteOSC { |id|
+		var key = id.asSymbol;
+		OSCdef(key).free;
+		oscDefs.removeAt(key);
 	}
 
+	deleteAll {
+		oscDefs.keysDo({ |key| OSCdef(key).free });
+		oscDefs.clear;
+	}
 
 	removeGroup { | groupName |
 		if ( satie.groups.includesKey(groupName.asSymbol) ,
 			{
-				if (satie.satieConfiguration.debug, {postf("•satieOSC.removeGroup:  group node: % \n",  groupName);});
+				if (satie.config.debug, {postf("•satieOSC.removeGroup:  group node: % \n",  groupName);});
 				satie.groups.removeAt(groupName.asSymbol);     // remove node from global dictionary
 		});
 	}
@@ -144,7 +169,7 @@ SatieOSC {
 						"%: node: % does not exist".format(this.class.getBackTrace, node).warn;
 					}
 				);
-				if (satie.satieConfiguration.debug,
+				if (satie.config.debug,
 					{postf("•satieOSC.clearSourceNode: delete  node  % in group %\n", nameSym, group);});
 		});
 	}
@@ -177,10 +202,9 @@ SatieOSC {
 	createSourceNode { | sourceName, synthName , groupName=\default |
 		var type, synth;
 
-		if (satie.satieConfiguration.debug, {"→    %: sourceName: %,  synthName: %,  groupName: %".format(this.class.getBackTrace, sourceName,synthName,groupName).postln});
+		if (satie.config.debug, {"→    %: sourceName: %,  synthName: %,  groupName: %".format(this.class.getBackTrace, sourceName,synthName,groupName).postln});
 
 		synth = satie.makeSourceInstance(sourceName.asSymbol, synthName, groupName);
-		synth.register(); // register with NodeWatcher for testing
 
 		postf(">>satieOSC.createSourceNode:  creating %:  uri: %  group: %\n", sourceName, synthName, groupName);
 
@@ -188,7 +212,7 @@ SatieOSC {
 
 	createEffectNode { | sourceName, synthName , groupName=\defaultFx, auxBus|
 		var synth;
-		if (satie.satieConfiguration.debug, {"→    %: sourceName: %,  synthName: %,  groupName: %,  auxBus %".format(this.class.getBackTrace, sourceName,synthName,groupName, auxBus).postln});
+		if (satie.config.debug, {"→    %: sourceName: %,  synthName: %,  groupName: %,  auxBus %".format(this.class.getBackTrace, sourceName,synthName,groupName, auxBus).postln});
 
 		synth = satie.makeFxInstance(sourceName, synthName, groupName, [\in, satie.aux[auxBus] ]);
 		postf("satieOSC.createEffectNode: creating effects node % of group %, with  synth:  % on bus %, \n", sourceName, groupName, synthName, auxBus);

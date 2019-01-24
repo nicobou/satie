@@ -6,7 +6,7 @@ A "scene" contains source/effect/process nodes which are kept in groups.
 These messages create and manage scene content.
 
 #### /satie/load filename
-Load and evaluate a file in supercollider. Filename must be a full file path to a file located on the audiorendering machine
+Load and evaluate a file in supercollider. Filename must be a full file path to a file located on the audio rendering machine
 
 #### /satie/scene/createSource nodeName synthdefName \<groupName\>
 Instantiate an audio generator plugin.
@@ -52,31 +52,20 @@ Delete a node
 #### /satie/scene/clear
 Clear the scene. Removes all instances and groups.
 
-#### /satie/scene/set key value
-Set a scene-wide keyword value
-
--  key : parameter name
--  value : int, float or string
-
 #### /satie/scene/debug debugFlag
    Enable or disable debug printing
 -  debugFlag : 1 or 0, defaults to 0
 
 ## Node messages
 
-Nodes are instances of audiosources, effects or processes. Nodes also belong to groups. There are three ways of addressing a node:
+Nodes are instances of audio sources, effects or processes. Nodes also belong to groups. There are three ways of addressing a node:
 
--   source - individual instance of type `audiosource` or `effect`
+-   source - individual instance of type `source` or `effect`
 -   group
 -   process
 
 #### /satie/\<nodeType\>/state nodeName value
 Node state (whether it is playing/computing or not): 1 = active, 0 = inactive
-
-#### /satie/\<nodeType\>/event nodeName eventName \<opt\> atom1 atom2...atomN
-Some event
-
-For specific sources, effects and processes, consult the sources located in the *plugins* directory. Also, see Introspection section for other means of getting information from SATIE.
 
 #### /satie/\<nodeType\>/set nodeName key1 val1 key2 val2 .... keyN valN
 Set a property
@@ -104,16 +93,30 @@ Spatializer properties (contained in most spatializers)
 
 ## Only for nodeTypes: source and process
 
-#### /satie/\<nodeType\>/update nodeName azimuthDegrees elevationDegrees gainDB delayMS lpHZ distance
-Update many essential properties at once. This message is typically sent every frame, all properties relate to node's position. `distance` applies only to processes.
+#### /satie/\<nodeType\>/update nodeName azimuth elevation gainDB delayMS lpHz
+Update some essential properties at once. This message is typically sent every frame, all properties relate to node's position. This method is a shorthand to sending many `set` messages, behind the scenes it simply weaves received values to corresponding keys.
+
+By default, the update message expects the following values:
 
 -  nodeName : name of the node
--  azimuthDegrees : azimuth in degrees (-180 ... 180)
--  elevationDegrees : (-180 ... 180)
+-  azimuth : azimuth in degrees (-180 ... 180)
+-  elevation : elevation in degrees (-180 ... 180)
 -  gainDB : gain in decibles
--  delayMS : delay in miliseconds
--  lpHZ : low pas filter in Hertz
--  distance : distance in meters
+-  delayMS : delay in milliseconds
+-  lpHz : low pass filter in Hertz
+
+The content of the `update` message is configurable. The variable `SatieOSC.update_custom_keys` is a `List` (by default it is empty) to hold extra _keys_. You can assign a list of any parameters affecting SATIE instances and it will forward appropriate messages, i.e:
+
+```
+~satie.osc.update_custom_keys = [\freq]
+```
+will tell SATIE to expect 5 values. Sending `/satie/source/update sffff boo 90 0 -30 1.0 12000 800` will weave the _keys_ with received _values_ to `\aziDeg, 90, \eleDeg, 90, \gainDB, -30, \delayMS, 1.0, \lpHz, 12000, \freq, 800` and set these parameters to the instance named `boo` .
+
+The message is checked for length so SATIE will print a warning if the number of received values is not equal to the sum of lengths of `Satie.update_message_keys` and `Satie.update_custom_keys` but will try to apply the message anyways.
+
+<pre class=note>
+<span class=note text>NOTE:<span> This behavior affects how `update` is handled by _Process_ that implements `setUpdate` method. This method should not assume that the `update` message is composed of values corresponding to `aziDeg, eleDeg, gainDB, delayMS, lpHz, distance` anymore. In the current implementation `setUpdate`'s signature should be as follows `setUpdate = { |self, aziDeg, eleDeg, gainDB ... args| }` where `args` will be provided as a list of values directly forwarded from the OSC message.
+</pre>
 
 ### Only for noteType: process
 

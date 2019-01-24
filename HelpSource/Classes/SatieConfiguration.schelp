@@ -16,19 +16,19 @@ ARGUMENT:: server
 The server instance. The server should not be booted. Only supernova should be used with SATIE.
 
 ARGUMENT:: listeningFormat
-A name of the of the listening format configuration. The default is stereoListener. The list of plugins is available via spatPlugins instance variable.
+An array of listening formats. The default is TELETYPE::[\stereoListener]::. Can be configured with one or more listening formats, each with their own TELETYPE::outBusIndex:: value. For a partial list of available formats, see LINK::#-handleSpatFormat::.
 
 ARGUMENT:: numAudioAux
 A number of auxiliary channels. Auxiliary channels are used for routing audio signals to effects, espcially, but can have other uses.
 
 ARGUMENT:: outBusIndex
-The physical output offset. By default, it uses the first available physical output (index 0).
+An array of output channel offset values for the TELETYPE::listeningFormats::. There must be exactly one offset value per TELETYPE::listeningFormat::. The default is TELETYPE::[0]::, which configures a single TELETYPE::listeningFormat:: such that its signal is output starting from the server's first output channel. Overlapping or non-congruous channel setups are allowed (for the latter see TELETYPE::minOutputBusChannels:: below).
 
 ARGUMENT:: ambiOrders
 A list of orders for higher order ambisonics. Currently SATIE supports SC-HOA, which supports up to 5th order. You can specify any number of ambisonic orders.
 
 ARGUMENT:: minOutputBusChannels
-A minimum number of outputs channels. It will force TELETYPE::numOutputBusChannels:: to this number of channels.
+The minimum number of server outputs channels. The default is TELETYPE::0::. This will ensure the server has at least this number of outputs. This can be used to guarantee an adequate number of output channels when doing non-congruous TELETYPE::outBusIndex:: setups.
 
 ARGUMENT:: hrirPath
 Path to Head Related Impulse Response files. By default it will be set to TELETYPE::HOA.userKernelDir +/+ "FIR/hrir/hrir_ku100_lebedev50":: but you can provide your own.
@@ -61,7 +61,7 @@ table::
 ## domeVBAP || 31 channel sphere (SAT dome)
 ::
 
-METHOD:: fxPlugins
+METHOD:: effects
 Instance variable for effects plugins.
 
 returns:: Dictionary
@@ -71,12 +71,12 @@ Get/set options
 
 returns:: supernova.options
 
-METHOD:: mapperPlugins
+METHOD:: mappers
 Instance variable holds mapper plugins.
 
 returns:: Dictionary
 
-METHOD:: audioPlugins
+METHOD:: sources
 Instance variable holds audio plugins
 
 returns:: Dictionary
@@ -84,7 +84,7 @@ returns:: Dictionary
 METHOD:: debug
 Print SATIE debug messages
 
-METHOD:: spatPlugins
+METHOD:: spatializers
 Instance variable hold spatializer plugins
 
 returns:: Dictionary

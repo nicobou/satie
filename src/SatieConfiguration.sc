@@ -13,7 +13,7 @@
 
 SatieConfiguration {
 	var <server;
-	var <>listeningFormat;
+	var <listeningFormat;
 	var <numAudioAux;
 	var <outBusIndex;
 	var <ambiOrders;  // array of wanted orders. Available orders are 1 to 5
@@ -27,23 +27,28 @@ SatieConfiguration {
 	var <>generateSynthdefs = true;
 
 	// Plugins needed by the renderer
-	var <>audioPlugins;
-	var <>fxPlugins;
-	var <>spatPlugins;
-	var <>mapperPlugins;
-	var <>postprocessorPlugins;
-	var <>hoaPlugins;
-	var <>monitoringPlugins;
+	var <>sources;
+	var <>effects;
+	var <>spatializers;
+	var <>mappers;
+	var <>postprocessors;
+	var <>hoa;
+	var <>monitoring;
 
 	// other options
 	var <>orientationOffsetDeg;
 
-	*new {| server, listeningFormat = #[\stereoListener, \stereoListener], numAudioAux = 0, outBusIndex = #[0], ambiOrders = #[], minOutputBusChannels = 0, hrirPath |
+	*new {| server, listeningFormat = #[\stereoListener], numAudioAux = 0, outBusIndex = #[0], ambiOrders = #[], minOutputBusChannels = 0, hrirPath |
 		server = server;
 		^super.newCopyArgs(server, listeningFormat, numAudioAux, outBusIndex, ambiOrders, minOutputBusChannels, hrirPath).init;
 	}
 
 	init {
+
+		if((listeningFormat.size > 0) && (listeningFormat.size != outBusIndex.size)) {
+			Error("Mismatched arguments. There should be one outBusIndex value for each listeningFormat.").throw;
+		};
+
 		serverOptions = server.options;
 		satieRoot = PathName(this.class.filenameSymbol.asString.dirname).parentPath;
 		satieUserSupportDir = PathName(Platform.userAppSupportDir).parentPath +/+ "satie";
@@ -55,7 +60,7 @@ SatieConfiguration {
 
 		if (debug, {
 			"New configuration: \nRoot: %\nSpat: %\nPlugins: %, %, %, %".format(
-				this.satieRoot, listeningFormat, this.audioPlugins, this.fxPlugins, this.spatPlugins, this.mapperPlugins, this.postprocessorPlugins
+				this.satieRoot, listeningFormat, this.sources, this.effects, this.spatializers, this.mappers, this.postprocessors
 			).postln;
 		});
 
@@ -65,13 +70,13 @@ SatieConfiguration {
 
 	initDicts {
 
-		audioPlugins = SatiePlugins.new;
-		fxPlugins = SatiePlugins.new;
-		spatPlugins = SatiePlugins.new;
-		mapperPlugins = SatiePlugins.new;
-		postprocessorPlugins = SatiePlugins.new;
-		hoaPlugins = SatiePlugins.new;
-		monitoringPlugins = SatiePlugins.new;
+		sources = SatiePlugins.new;
+		effects = SatiePlugins.new;
+		spatializers = SatiePlugins.new;
+		mappers = SatiePlugins.new;
+		postprocessors = SatiePlugins.new;
+		hoa = SatiePlugins.new;
+		monitoring = SatiePlugins.new;
 	}
 
 	initPlugins {
@@ -89,20 +94,20 @@ SatieConfiguration {
 
 	loadPluginDir { |path|
 
-		audioPlugins.putAll(SatiePlugins.newSource(path +/+ "audiosources" +/+ "*.scd"));
-		fxPlugins.putAll(SatiePlugins.newAudio(path +/+ "effects" +/+ "*.scd"));
-		spatPlugins.putAll(SatiePlugins.newSpat(path +/+ "spatializers" +/+ "*.scd"));
-		mapperPlugins.putAll(SatiePlugins.newAudio(path +/+ "mappers" +/+ "*.scd"));
-		postprocessorPlugins.putAll(SatiePlugins.newAudio(path +/+ "postprocessors" +/+ "*.scd"));
-		hoaPlugins.putAll(SatiePlugins.newAudio(path +/+ "hoa" +/+ "*.scd"));
-		monitoringPlugins.putAll(SatiePlugins.newAudio(path +/+ "monitoring" +/+ "*.scd"));
+		sources.putAll(SatiePlugins.newSource(path +/+ "sources" +/+ "*.scd"));
+		effects.putAll(SatiePlugins.newAudio(path +/+ "effects" +/+ "*.scd"));
+		spatializers.putAll(SatiePlugins.newSpat(path +/+ "spatializers" +/+ "*.scd"));
+		mappers.putAll(SatiePlugins.newAudio(path +/+ "mappers" +/+ "*.scd"));
+		postprocessors.putAll(SatiePlugins.newAudio(path +/+ "postprocessors" +/+ "*.scd"));
+		hoa.putAll(SatiePlugins.newAudio(path +/+ "hoa" +/+ "*.scd"));
+		monitoring.putAll(SatiePlugins.newAudio(path +/+ "monitoring" +/+ "*.scd"));
 	}
 
-	handleSpatFormat { arg format;
+	handleSpatFormat { |format|
 		serverOptions.numOutputBusChannels = outBusIndex.minItem;
 
 		format.do { arg item, i;
-			var spatPlugin = this.spatPlugins[item.asSymbol];
+			var spatPlugin = this.spatializers[item.asSymbol];
 			serverOptions.numOutputBusChannels = serverOptions.numOutputBusChannels + spatPlugin.numChannels;
 			if (debug, {
 				postln("%: setting listening format to %\n".format(this.class, format));
@@ -114,4 +119,5 @@ SatieConfiguration {
 		};
 		if (serverOptions.numOutputBusChannels < this.minOutputBusChannels,  {serverOptions.numOutputBusChannels = this.minOutputBusChannels;});
 	}
+
 }

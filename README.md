@@ -4,7 +4,7 @@ SATIE is an audio spatialization engine developed for realtime rendering of dens
 
 Its aim is to facilitate using 3D space in music/audio composition and authoring, to play well with 3D audio engines (so far it has been used with Blender and Unity3D) or to serve as a volumetric audio spatialization addition to more traditional desktop DAW systems.
 
-SATIE is built with SuperCollider, an audio programming environment and language and is controlled via OSC. See instructions for [installing SuperCollider 3.9](INSTALL-SC.md).
+SATIE is built with SuperCollider, an audio programming environment and language and is controlled via OSC. See instructions for [installing SuperCollider](INSTALL-SC.md).
 
 See [SATIE OSC API](SATIE-OSC-API.md) for details on OSC communication.
 
@@ -17,12 +17,12 @@ There are also some known efforts to make bridges for specific software:
 ## Directory structure
 
 SATIE internal plugins:
-- audiosources:  sound sources (like file player)
-- effects:       effect (like reverb)
-- spatializers:  spatialization (like stereo)
-- mappers:       mapper
+- sources:         sound sources (sound file players, synths)
+- effects:         effect (reverbs, filters)
+- spatializers:    spatialization (stereophonic, quadraphonic, higher-order ambisonics)
+- mappers:         mapper
 - postprocessors:  audio mastering
-- processes:     generating many events algorithmically
+- processes:       generating many events algorithmically
 
 other:
 - HelpSource:    documentation, in schelp format, available within SC IDE (scide)

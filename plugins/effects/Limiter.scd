@@ -20,15 +20,10 @@
 
 */
 
-~name = \envFollow;
-~description = "Send a trigger based on envelope threshold";
+~name = \Limiter;
+~description = "A simple limiter";
+~channelLayout = \mono;
 
-~function = { arg in, triggerLevel=0.2, debounce=1 ;
-	var mic = In.ar(in),
-	amplitude = Amplitude.kr(mic),
-	env = EnvFollow.kr(mic, 0.999),
-	trig = amplitude > triggerLevel,
-	timer = Timer.kr(trig),
-	filteredTrig = (timer > debounce); //* trig;
-	SendTrig.kr(filteredTrig, 0, env);
-    };
+~function = { arg in, level=0.7, dur=0.01, outputDB=0;
+	outputDB.dbamp * Limiter.ar(In.ar(in), level, dur);
+};

@@ -73,7 +73,7 @@
 
 
 ~setup = { |satieInstance|
-		~vbuf8 = Buffer.loadCollection(satieInstance.satieConfiguration.server, ~spk8.getSetsAndMatrices);
+		~vbuf8 = Buffer.loadCollection(satieInstance.config.server, ~spk8.getSetsAndMatrices);
 };
 
 

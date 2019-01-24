@@ -11,14 +11,25 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+/*       Audio plugin definition
 
-~name = \envfol;
-~description = "Envelope follower (audio rate)";
+	Each audio plugin should define the following global variables:
+    ~name: (symbol) name of the spatializer
+	~description: (string) a short description
+	~function: the actual definition of the plugin
+
+*/
+
+~name = \envFollow;
+~description = "Send a trigger based on envelope threshold";
 ~channelLayout = \mono;
-~function = {|in = 0, decaycoeff = 0.99, amp = 10.0, lpf = 20 |
-	var env, out;
-	in.scope;
-	env = LPF.ar(PeakFollower.ar(in), lpf, mul: 50, add:-1);
-	env.scope;
-	env;
-};
+
+~function = { arg in, triggerLevel=0.2, debounce=1 ;
+	var mic = In.ar(in),
+	amplitude = Amplitude.kr(mic),
+	env = EnvFollow.kr(mic, 0.999),
+	trig = amplitude > triggerLevel,
+	timer = Timer.kr(trig),
+	filteredTrig = (timer > debounce); //* trig;
+	SendTrig.kr(filteredTrig, 0, env);
+    };

@@ -70,7 +70,7 @@ Index number of the spatializer to which the post-process will be attached. Defa
 ARGUMENT:: defaultArgs
 An array of arguments, if any
 
-METHOD:: fxPlugins
+METHOD:: effects
 a dictionary containing effects plugins definitions
 
 returns:: link::Classes/SatiePlugins::
@@ -160,27 +160,9 @@ Symbol: the name of the group.
 
 This method does not return.
 
-METHOD:: mapperPlugins
-
-returns:: a link::Classes/Dictionary:: of mapper plugins
-
 METHOD:: debug
 
 returns:: link::Classes/SatieConfiguration##debug::
-
-METHOD:: spatPlugins
-
-returns:: link::Classes/SatieConfiguration##spatPlugins::
-
-METHOD:: audioPlugins
-(describe method here)
-
-returns:: (describe returnvalue here)
-
-METHOD:: initRenderer
-(describe method here)
-
-returns:: (describe returnvalue here)
 
 METHOD:: makeSynthDef
 Calls link::Classes/SatieFactory#makeSynthDef:: method and creates references to compiled SynthDefs for use with VBAP sptialization methods
@@ -249,7 +231,7 @@ Custom synth arguments passed to link::Classes/SatieFactory::
 
 returns:: a Synth
 
-METHOD:: satieConfiguration
+METHOD:: config
 Reference to link::Classes/SatieConfiguration::
 
 METHOD:: removeProcess

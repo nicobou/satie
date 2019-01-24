@@ -16,20 +16,13 @@
 *
 */
 Satie {
-	var <>satieConfiguration;
+	var <>config;
 	var <execFile;
 	var options;
 	var <>spat;
 	var <>debug = true;
 	var <satieRoot;
 
-	// Plugins needed by the renderer
-	var <>audioPlugins;
-	var <>fxPlugins;
-	var <>spatPlugins;
-	var <>mapperPlugins;
-	var <>postprocessorPlugins;
-	var <>hoaPlugins;
 	var <mastering;
 
 	/*    RENDERER     */
@@ -54,7 +47,8 @@ Satie {
 	var postProcGroup;
 	var <ambiPostProcessors;
 	var ambiPostProcGroup;
-	var booted = false;
+	var <booted = false;
+	var <>doneCb = nil;
 
 	*new {|satieConfiguration, execFile = nil|
 		^super.newCopyArgs(satieConfiguration, execFile).initRenderer;
@@ -63,15 +57,9 @@ Satie {
 
 	// Private method
 	initRenderer {
-		// FIXME, remove those member duplication and rename satieConfiguration into a shorter name:
-		options = satieConfiguration.serverOptions;
-		satieRoot = satieConfiguration.satieRoot;
-		debug = satieConfiguration.debug;
-		audioPlugins = satieConfiguration.audioPlugins;
-		fxPlugins = satieConfiguration.fxPlugins;
-		spatPlugins = satieConfiguration.spatPlugins;
-		mapperPlugins = satieConfiguration.mapperPlugins;
-		postprocessorPlugins = satieConfiguration.postprocessorPlugins;
+		options = config.serverOptions;
+		satieRoot = config.satieRoot;
+		debug = config.debug;
 		postProcessors = Dictionary.new();
 		ambiPostProcessors = Dictionary.new();
 		groups = Dictionary.new();
@@ -86,40 +74,30 @@ Satie {
 
 	// public method
 	boot {
-		CmdPeriod.add(this.cmdPeriod);
-		try {
-
-			// pre-boot
-			satieConfiguration.listeningFormat.do { arg item, i;
-				if (item.asSymbol == \ambi3,
-					{
-						"%:  forcing the server block size to 128 as required by % spatializer ".format(this.class, item).warn;
-						options.blockSize = 128;
-					});
-			};
-
-			// boot
-			satieConfiguration.server.boot;
-
-			// post-boot
-			this.execPostBootActions();
-			satieConfiguration.server.doWhenBooted({
-				this.postExec();
-				osc = SatieOSC(this);
-				inspector = SatieIntrospection.new(this);
-				if (
-					execFile.notNil,
-					{
-						"- Executing %".format(execFile).postln;
-						this.executeExternalFile(execFile);
-					}
-				);
-			});
+		config.server.boot;
+		config.server.doWhenBooted({
+			this.postExec();
+			osc = SatieOSC(this);
+			inspector = SatieIntrospection.new(this);
+			ServerTree.add(this, config.server);
+			CmdPeriod.add(this);
 			booted = true;
-		}
-		{|error|
-			"Could not boot SATIE because %".format(error).postln;
-		}
+			if (doneCb.notNil, {doneCb.value()});
+
+			if(execFile.notNil, {
+				"- Executing %".format(execFile).postln;
+				this.executeExternalFile(execFile);
+			});
+		});
+	}
+
+	quit { |quitServer = true|
+		CmdPeriod.remove(this);
+		ServerTree.remove(this, config.server);
+		this.cleanSlate;
+		osc.deleteAll;
+		booted = false;
+        if(quitServer, { config.server.quit });
 	}
 
 	executeExternalFile {|filepath|
@@ -137,7 +115,7 @@ Satie {
 					},
 					// else file type is good. Try to load
 					{
-						this.satieConfiguration.server.waitForBoot {
+						this.config.server.waitForBoot {
 							try {
 								filepath.load;
 							}
@@ -145,24 +123,38 @@ Satie {
 								"Could not open file % because %".format(filepath, error).postln;
 								^nil;
 							};
-							this.satieConfiguration.server.sync;
+							this.config.server.sync;
 						}; // waitForBoot
 					});
 			});
 	}
 
-	cmdPeriod {
-		if ((booted),
-			{
-				"SATIE - cleaning up the scene".postln;
-				this.cleanUp();
-			}
-		);
+	clearScene {
+		this.cleanSlate;
+		this.createDefaultGroups;
 	}
 
-	execPostBootActions {
-		satieConfiguration.server.doWhenBooted({this.createDefaultGroups()});
+	doOnServerTree {
+		"SATIE - creating default groups".postln;
+		this.createDefaultGroups;
+	}
 
+	cmdPeriod {
+		"SATIE - clearing the scene".postln;
+		this.cleanSlate;
+	}
+
+	disableOSC {
+		this.enableOSC(false)
+	}
+
+	enableOSC { |bool = true|
+		var oscDefs = this.osc.oscDefs;
+		if (bool) {
+			oscDefs.do { |i| i.enable }
+		} {
+			oscDefs.do { |i| i.disable }
+		}
 	}
 
 	createDefaultGroups {
@@ -172,25 +164,25 @@ Satie {
 	}
 
 	replacePostProcessor{ | pipeline, outputIndex = 0, spatializerNumber = 0, defaultArgs = #[] |
-		satieConfiguration.server.doWhenBooted({
+		config.server.doWhenBooted({
 			var postprocname = "post_proc_"++spatializerNumber;
 			SynthDef(postprocname,
 				{
 					var previousSynth = SynthDef.wrap({
-						In.ar(satieConfiguration.outBusIndex[spatializerNumber],
-							this.spatPlugins[satieConfiguration.listeningFormat[spatializerNumber]].numChannels
+						In.ar(config.outBusIndex[spatializerNumber],
+							config.spatializers[config.listeningFormat[spatializerNumber]].numChannels
 						);
 					});
 					// collecting spatializers
 					pipeline.do { arg item;
-						previousSynth = SynthDef.wrap(postprocessorPlugins.at(item).function, prependArgs: [previousSynth]);
+						previousSynth = SynthDef.wrap(config.postprocessors.at(item).function, prependArgs: [previousSynth]);
 						// add individual pipeline item to the dictionaries used by introspection
 						groupInstances[\postProc].put(item.asSymbol, previousSynth);
 						mastering.put(item.asSymbol, item.asSymbol);
 					};
 					ReplaceOut.ar(outputIndex, previousSynth);
 			}).add;
-			satieConfiguration.server.sync;
+			config.server.sync;
 			postProcessors.at(postprocname.asSymbol).free();
 			postProcessors.put(postprocname.asSymbol, Synth(postprocname.asSymbol, args: defaultArgs, target: postProcGroup));
 
@@ -202,12 +194,12 @@ Satie {
 	}
 
 	replaceAmbiPostProcessor{ | pipeline, order = 1, outputIndex = 0, spatializerNumber = 0, defaultArgs = #[] |
-		satieConfiguration.server.doWhenBooted({
+		config.server.doWhenBooted({
 			var ambiPostProcName = this.makeAmbiPostProcName(order, spatializerNumber);
 			var bformatBus = 0;
-			satieConfiguration.ambiOrders.do { |item, i|
+			config.ambiOrders.do { |item, i|
 				if (item.asInt == order, {
-					bformatBus = satieConfiguration.ambiBusIndex[i];
+					bformatBus = config.ambiBusIndex[i];
 				});
 			};
 			SynthDef(ambiPostProcName,
@@ -218,14 +210,14 @@ Satie {
 					// backing the hoa pipeline
 					pipeline.do { arg item;
 						previousSynth = SynthDef.wrap(
-							satieConfiguration.hoaPlugins.at(item).function,
+							config.hoa.at(item).function,
 						prependArgs: [previousSynth, order]);
 						// add individual pipeline item to the dictionaries used by introspection
 						groupInstances[\ambiPostProc].put(item.asSymbol, previousSynth);
 					};
 					Out.ar(outputIndex, previousSynth);
 			}).add;
-			satieConfiguration.server.sync;
+			config.server.sync;
 			ambiPostProcessors.at(ambiPostProcName.asSymbol).free();
 			ambiPostProcessors.put(
 				ambiPostProcName.asSymbol,
@@ -239,73 +231,79 @@ Satie {
 
 	// private method
 	makePostProcGroup {
-		ambiPostProcGroup = ParGroup(1,\addToTail);
+		ambiPostProcGroup = ParGroup(config.server, \addToTail);
 		groups.put(\ambiPostProc, ambiPostProcGroup);
 		groupInstances.put(\ambiPostProc, Dictionary.new());
-		postProcGroup = ParGroup(1,\addToTail);
+		postProcGroup = ParGroup(config.server, \addToTail);
 		groups.put(\postProc, postProcGroup);
 		groupInstances.put(\postProc, Dictionary.new());
 	}
 
 	setAuxBusses {
-		postf("THIS IS THE SERVER OUTPUT BUS: %\n", satieConfiguration.server.outputBus);
-		auxbus = Bus.audio(satieConfiguration.server, satieConfiguration.numAudioAux);
+		postf("THIS IS THE SERVER OUTPUT BUS: %\n", config.server.outputBus);
+		auxbus = Bus.audio(config.server, config.numAudioAux);
 		postf("THIS IS THE SERVER AUX BUS: %\n", auxbus);
 
-		aux = Array.fill(satieConfiguration.numAudioAux, {arg i; auxbus.index + i});
+		aux = Array.fill(config.numAudioAux, {arg i; auxbus.index + i});
 	}
 	setAmbiBusses {
-		satieConfiguration.ambiBusIndex = Array.newClear(satieConfiguration.ambiOrders.size());
-		satieConfiguration.ambiOrders.do { arg item, i;
-			satieConfiguration.ambiBusIndex[i] = Bus.audio(satieConfiguration.server, (item+1).pow(2));
+		config.ambiBusIndex = Array.newClear(config.ambiOrders.size());
+		config.ambiOrders.do { arg item, i;
+			config.ambiBusIndex[i] = Bus.audio(config.server, (item+1).pow(2));
 		};
 	}
 
 	// private method
 	postExec {
 		// execute any code needed after the server has been booted
+		this.createDefaultGroups;
 		this.setAuxBusses();
 		this.setAmbiBusses();
 		// loading HRIR filters
-		HOADecLebedev06.loadHrirFilters(satieConfiguration.server, satieConfiguration.hrirPath);
-		HOADecLebedev26.loadHrirFilters(satieConfiguration.server, satieConfiguration.hrirPath);
+		HOADecLebedev06.loadHrirFilters(config.server, config.hrirPath);
+		HOADecLebedev26.loadHrirFilters(config.server, config.hrirPath);
 
 		// execute setup functions for spatializers
-		satieConfiguration.listeningFormat.do { arg item, i;
+		config.listeningFormat.do { arg item, i;
 			// run .setup on spat plugin.
 			// TODO: discuss generalization of this for any plugin.
-			if ((spatPlugins[item.asSymbol].setup == nil).asBoolean,
+			if ((config.spatializers[item.asSymbol].setup == nil).asBoolean,
 				{ if(debug,
-					{ "% - no setup here".format(spatPlugins[item].name).postln; }
+					{ "% - no setup here".format(config.spatializers[item].name).postln; }
 				);
 				},
-				{ spatPlugins[item.asSymbol].setup.value(this) }
+				{ config.spatializers[item.asSymbol].setup.value(this) }
 			);
 		};
-		satieConfiguration.server.sync;
-		if (satieConfiguration.generateSynthdefs, {this.makePlugins});
+		config.server.sync;
+		if (config.generateSynthdefs, {
+			this.setupPlugins;
+			this.makePlugins;
+		});
 	}
 
-	makePlugins {
-		// execute setup functions for audioSources
-		satieConfiguration.audioPlugins.do { arg item, i;
+	setupPlugins {
+		// execute setup functions in plugins
+		config.sources.do { arg item, i;
 			if (item.setup.notNil,
 				{
 					item.setup.value(this);
 				});
 		};
+	}
 
+	makePlugins {
 		// generate synthdefs
-		audioPlugins.do { arg item;
-			if ((item.type == \mono).asBoolean,
+		config.sources.do { arg item;
+			if ((item.channelLayout == \mono).asBoolean,
 				{
-					this.makeSynthDef(item.name,item.name, [],[],[], satieConfiguration.listeningFormat, satieConfiguration.outBusIndex);
+					this.makeSynthDef(item.name,item.name, [],[],[], config.listeningFormat, config.outBusIndex);
 				});
-			satieConfiguration.ambiOrders.do { |order, i|
-				this.makeAmbi((item.name ++ "Ambi" ++ order.asSymbol), item.name, [], [], [], order, [], satieConfiguration.ambiBusIndex[i]);
+			config.ambiOrders.do { |order, i|
+				this.makeAmbi((item.name ++ "Ambi" ++ order.asSymbol), item.name, [], [], [], order, [], config.ambiBusIndex[i]);
 			};
 		};
-		generatedSynthDefs = audioPlugins.keys;
+		generatedSynthDefs = config.sources.keys;
 
 	}
 }

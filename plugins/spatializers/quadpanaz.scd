@@ -18,6 +18,7 @@
 	~description: (string) a short description
 	~numChannels: (int) number of channels
 	~function: the definition of the spatializer
+	~channelLayout: mono or ambi
 
 	where function should use the following input arguments:
 
@@ -29,44 +30,14 @@
 	lpHz    hertz
 	spread  units  (0 == directional, ....,  100 == omni)
 */
-// dome speaker layout
 
 
-~name = \_1474_VBAP;
-~description = "16 channel dome (IEM)";
-~numChannels = 16;
+~name = \quadpanaz;
+~description = "4 channel 2D layout (equal power on a circle)";
+~numChannels = 4;
 ~channelLayout = \mono;
 
-/* speaker positions used by ambIEM
-https://github.com/supercollider-quarks/AmbIEM/blob/master/Classes/DecodeAmbi.sc
-
-azi: [0,45,135,225,315,25,75,130,180,230,285,335,0,90,180,270]
-elev: [90,40,40,40,40,0,0,0,0,0,0,0,-40,-40,-40,-40],
-
-*/
-
-// note, this is a global variable, used by specialized listeners to decode the output format.
-~speakerConfig1474 = [
-[0 , 90 ],  // top
-[45 , 40 ], // upper
-[135 , 40 ],
-[-135 , 40 ],
-[-45 , 40 ],
-[25 , 0 ],   // middle
-[75 , 0  ],
-[130 , 0  ],
-[180 , 0  ],
-[-130 , 0 ],
-[-75 , 0 ],
-[-25 , 0 ],
-[0 , -40  ],  // lower
-[90 , -40  ],
-[180 , -40  ],
-[-90 , -40 ]];
-
-~spk16 = VBAPSpeakerArray.new(3, ~speakerConfig1474 );
-
-~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1 |
+~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 0.0 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP
 	var delay = delayMs * 0.001;    // convert to seconds
 	var slewDelay = 0.3; //  note: this needs to be improved ... smoother
@@ -75,29 +46,17 @@ elev: [90,40,40,40,40,0,0,0,0,0,0,0,-40,-40,-40,-40],
 	var slewPanning = 0.030;
 	var panWeights;
 	var outsig;
-
+	var max_ele = 30;
+	var min_ele = -60;
+	var azi;
+	azi = aziDeg.linlin(-180.0, 180.0, -1.0, 1.0);
 
 	outsig =  LPF.ar(DelayC.ar(
 		Lag.kr(gain, slewGain) * in,
 		maxdelaytime: 0.5,
-		delaytime: delay.lag(slewDelay)),   lpHz.lag(slewFilter)    );
+		delaytime: delay.lag(slewDelay)), lpHz.lag(slewFilter));
 
-	outsig = BHiPass.ar(outsig, VarLag.kr(hpHz, slewFilter )  );
+	outsig = BHiPass.ar(outsig, VarLag.kr(hpHz, slewFilter));
 
-	panWeights = VBAP.kr(numChans: ~spk16.numSpeakers,
-		in: 1.0,
-		bufnum: ~vbuf16.bufnum,
-		azimuth: aziDeg,
-		elevation: eleDeg,
-		spread: spread );
-
-	outsig * Lag.kr(panWeights, 0.030);
+	PanAz.ar(numChans: 4, in: outsig, pos: azi);
 };
-
-~setup = { |satieInstance|
-
-		~vbuf16 = Buffer.loadCollection(satieInstance.satieConfiguration.server, ~spk16.getSetsAndMatrices);
-
-};
-
-

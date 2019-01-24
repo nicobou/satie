@@ -20,15 +20,15 @@ SatieIntrospection {
 	*
 	*/
 	updatePluginsList{
-		allPlugins = context.audioPlugins.merge(context.fxPlugins).merge(context.postprocessorPlugins);
+		allPlugins = context.config.sources.merge(context.config.effects).merge(context.config.postprocessors);
 	}
 
 	// return a dictionary audio plugins. Key is the type of plugin, value a Set of names.
 	getPluginList {
 		var ret = Dictionary.new();
-		ret.add(\generators -> context.audioPlugins.keys);
-		ret.add(\effects -> context.fxPlugins.keys);
-		ret.add(\mastering -> context.postprocessorPlugins);
+		ret.add(\generators -> context.config.sources.keys);
+		ret.add(\effects -> context.config.effects.keys);
+		ret.add(\mastering -> context.config.postprocessors.keys);
 		^ret;
 	}
 
@@ -47,7 +47,7 @@ SatieIntrospection {
 					^argnames = allPlugins[key].function.def.keyValuePairsFromArgs;
 				},
 				{
-					if(context.satieConfiguration.debug,
+					if(context.config.debug,
 						{"% tried % in % and found none...\n".format(this.class.getBackTrace, plugin, allPlugins).warn}
 					);
 					argnames = "null";
@@ -67,7 +67,7 @@ SatieIntrospection {
 					^description = allPlugins[key.asSymbol].description;
 				},
 				{
-					if(context.satieConfiguration.debug,
+					if(context.config.debug,
 						{"% tried % in % and found none...".format(this.class.getBackTrace, plugin, allPlugins).warn}
 					);
 					description = "null";
@@ -110,7 +110,7 @@ SatieIntrospection {
 					});
 				},
 				{
-					if(context.satieConfiguration.debug,
+					if(context.config.debug,
 						{"% tried % in % and found none...".format(this.class.getBackTrace, plugin, allPlugins).warn}
 					);
 				}
@@ -132,7 +132,7 @@ SatieIntrospection {
 				^argnames = spatList[spatPlug.asSymbol].function.def.keyValuePairsFromArgs;
 			},
 			{
-				if(context.satieConfiguration.debug,
+				if(context.config.debug,
 					{"% tried % in % and found none...\n".format(this.class.getBackTrace, spatPlug, spatList).warn}
 				);
 				argnames = "null";
@@ -142,7 +142,7 @@ SatieIntrospection {
 	}
 
 	updateSpatList {
-		spatList = context.spatPlugins;
+		spatList = context.config.spatializers;
 	}
 
 	/* *****
@@ -226,7 +226,7 @@ SatieIntrospection {
 						^ret;
 					},
 					{
-						if (context.satieConfiguration.debug,
+						if (context.config.debug,
 							{"% did not find % in %".format(this.class.getBackTrace, synthName, instances).postln});
 						ret = "null";
 					}
@@ -262,7 +262,7 @@ SatieIntrospection {
 						^ret;
 					},
 					{
-						if (context.satieConfiguration.debug,
+						if (context.config.debug,
 							{"% did not find % in %".format(this.class.getBackTrace, synthName, instances).postln});
 						ret = "null";
 					}

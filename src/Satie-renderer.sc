@@ -29,29 +29,29 @@
 			"Running with no legacy spatializers".debug;
 			^0;
 		});
-		if(satieConfiguration.audioPlugins.at(srcName) != nil,
+		if(config.sources.at(srcName) != nil,
 			{
-				if(satieConfiguration.audioPlugins.at(srcName).type != \mono, {
+				if(config.sources.at(srcName).channelLayout != \mono, {
 					"makesynthDef failed: audio source must be mono (% is not mono)".format(srcName).warn;
 					^0;
 				});
-				dico = satieConfiguration.audioPlugins;
+				dico = config.sources;
 				generators.add(id.asSymbol -> srcName.asSymbol);
 			}
 		);
-		if(satieConfiguration.fxPlugins.at(srcName) != nil,
+		if(config.effects.at(srcName) != nil,
 			{
-				dico = satieConfiguration.fxPlugins;
+				dico = config.effects;
 				effects.add(id.asSymbol -> srcName.asSymbol);
 			}
 		);
-		if (satieConfiguration.debug,
+		if (config.debug,
 			{
 				"params mapper %".format(paramsMapper).postln;
 			}
 		);
 		spatSymbolArray.collect({|item, i|
-			if(satieConfiguration.spatPlugins.at(item).type != \mono, {
+			if(config.spatializers.at(item).channelLayout != \mono, {
 				"makesynthDef failed: spatializer must be mono (% is not mono)".format(item).warn;
 				^0;
 			});
@@ -63,13 +63,13 @@
 			srcPreToBusses,
 			srcPostToBusses,
 			srcPreMonitorFuncsArray.collect({|item, i|
-				satieConfiguration.monitoringPlugins.at(item).function;
+				config.monitoring.at(item).function;
 			}),
 			spatSymbolArray.collect({|item, i|
-				satieConfiguration.spatPlugins.at(item).function
+				config.spatializers.at(item).function
 			}),
 			firstOutputIndexes,
-			satieConfiguration.mapperPlugins.at(paramsMapper).function,
+			config.mappers.at(paramsMapper).function,
 			synthArgs
 		);
 	}
@@ -87,51 +87,51 @@
 		synthArgs = #[] |
 
 		var dico;
-		if(satieConfiguration.audioPlugins.at(srcName) != nil,
+		if(config.sources.at(srcName) != nil,
 			{
-				dico = satieConfiguration.audioPlugins;
+				dico = config.sources;
 				generators.add(name.asSymbol -> srcName.asSymbol);
 			}
 		);
-		if(satieConfiguration.fxPlugins.at(srcName) != nil,
+		if(config.effects.at(srcName) != nil,
 			{
-				dico = satieConfiguration.fxPlugins;
+				dico = config.effects;
 				effects.add(name.asSymbol -> srcName.asSymbol);
 			}
 		);
-		if (satieConfiguration.debug,
+		if (config.debug,
 			{
 				"params mapper %".format(paramsMapper).postln;
 			}
 		);
 
-		if(satieConfiguration.audioPlugins.at(srcName).type == \mono, {
+		if(dico.at(srcName).channelLayout == \mono, {
 			SatieFactory.makeAmbiFromMono(
 				name,
 				dico.at(srcName).function,
 				preBusArray,
 				postBusArray,
 				srcPreMonitorFuncsArray.collect({|item, i|
-					satieConfiguration.monitoringPlugins.at(item).function;
+					config.monitoring.at(item).function;
 				}),
 				ambiOrder,
 				ambiEffectPipeline,
 				ambiBusIndex,
-				satieConfiguration.mapperPlugins.at(paramsMapper).function,
+				config.mappers.at(paramsMapper).function,
 				synthArgs);
-		},{ // else  (assuming type is \ambi
+		},{ // else  (assuming channelLayout is \ambi
 			SatieFactory.makeAmbi(
 				name,
 				dico.at(srcName).function,
 				preBusArray,
 				postBusArray,
 				srcPreMonitorFuncsArray.collect({|item, i|
-					satieConfiguration.monitoringPlugins.at(item).function;
+					config.monitoring.at(item).function;
 				}),
 				ambiOrder,
 				ambiEffectPipeline,
 				ambiBusIndex,
-				satieConfiguration.mapperPlugins.at(paramsMapper).function,
+				config.mappers.at(paramsMapper).function,
 				synthArgs);
 		});
 	}
@@ -176,10 +176,10 @@
 			{
 				if (addAction == \addToEffects,
 					{
-						group = ParGroup.new(groups[\defaultFx], \addAfter);
+						group = ParGroup(groups[\defaultFx], \addAfter);
 					},
 					{
-						group = ParGroup.new(addAction: addAction);
+						group = ParGroup(config.server, addAction);
 					});
 				groups.put(name.asSymbol, group);
 				groupInstances.put(name.asSymbol, Dictionary.new);
@@ -239,13 +239,13 @@
 	}
 
 	// instantiate a process - also creates a unique group
-	makeProcessInstance { | id, processName, addAction=\addToHead |
+	makeProcessInstance { | id, processName, arglist, addAction=\addToHead |
 		var groupName, myProcess;
 		groupName = (id++"_group").asSymbol;
 		this.makeSatieGroup(groupName, addAction);
 		myProcess = this.cloneProcess(processName.asSymbol);
 		processInstances.put(id, myProcess);
-		processInstances[id].setup(id, groupName);
+		processInstances[id].setup(id, groupName, arglist);
 		^processInstances;
 	}
 
@@ -256,26 +256,31 @@
 		processInstances.removeAt(name);
 	}
 
+	// deprecated class, use Satie.clearScene instead
 	cleanUp {
-		// clean processes
-		processInstances.keysDo({|proc|
+		this.deprecated(thisMethod, Satie.findMethod(\clearScene));
+	}
+
+	cleanSlate {
+		// clear processes
+		processInstances.keysDo({ |proc|
 			this.cleanProcessInstance(proc);
 		});
 
 		// flush all nodes
-		this.groups.keysDo ({ |group |
-			this.groupInstances[group.asSymbol].do({|key|
-				key.free();
+		this.groups.keysDo ({ |key|
+			this.groupInstances[key.asSymbol].do({ |node|
+				node.free;
 			})
 		});
 
+		// clear namesIds
+		this.namesIds.clear;
+
 		// remove groups
-		groups.keysDo({|item|
+		groups.keysDo({ |item|
 			var group = item.asSymbol;
 			this.killSatieGroup(group);
 		});
-
-		// re-create clean slate
-		this.execPostBootActions();
 	}
 }

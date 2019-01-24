@@ -12,7 +12,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 SatiePlugin {
-	var <name, <description, <function, <type;
+	var <name, <description, <function, <channelLayout;
 
 	*new{|name, description="This should describe the plugin", function, channelLayout="none"|
 		description = description ? "Description missing"

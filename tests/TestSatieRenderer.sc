@@ -11,7 +11,7 @@ TestSatieRenderer : UnitTest {
 
 	test_setup {
 		4.0.wait; // wait for the server
-		this.assert(satie.satieConfiguration.listeningFormat[0] == \stereoListener, "Listening format should be stereoListener");
+		this.assert(satie.config.listeningFormat[0] == \stereoListener, "Listening format should be stereoListener");
 		this.assert(satie.class == Satie, "satie should be SATIE");
 	}
 	test_groups {

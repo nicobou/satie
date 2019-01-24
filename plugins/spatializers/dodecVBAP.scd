@@ -91,7 +91,7 @@
 
 
 ~setup = { |satieInstance|
-		~vbuf20 = Buffer.loadCollection(satieInstance.satieConfiguration.server, ~spk20.getSetsAndMatrices);
+		~vbuf20 = Buffer.loadCollection(satieInstance.config.server, ~spk20.getSetsAndMatrices);
 };
 
 

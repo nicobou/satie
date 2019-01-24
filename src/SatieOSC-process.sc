@@ -23,14 +23,14 @@
 		rawArgVec = uriPath.asString.split($ );
 		rawArgVec.removeAt(0);  // drop first item in list
 
-		if ( satie.satieConfiguration.debug,  { postf("•satieOSC.createProcessNode:   %   URI  %   optArgs: %\n", id, uriPath, rawArgVec);});
+		if ( satie.config.debug,  { postf("•satieOSC.createProcessNode:   %   URI  %   optArgs: %\n", id, uriPath, rawArgVec);});
 
 		// make list of items in argString
 		rawArgVec.do( { arg item;
 			if ( item != "",
 				{
 					argList.add(item);
-				});
+			});
 		});
 
 		if (satie.processInstances[id.asSymbol]  != nil,
@@ -39,8 +39,8 @@
 			},
 			// else ALL GOOD,  instantiate
 			{
-				satie.makeProcessInstance(id.asSymbol, processName);
 				postf(">>satieOSC.createProcessNode: creating: %,  with  process:  %   and arglist: % \n", id, processName, argList);
-			});
+				satie.makeProcessInstance(id.asSymbol, processName, argList);
+		});
 	}
 }

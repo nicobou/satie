@@ -29,13 +29,42 @@
 	lpHz    hertz
 	spread  units  (0 == directional, ....,  100 == omni)
 */
+// dome speaker layout
 
-~name = \exaVBAP;
-~description = "6 channel ring (2D)";
-~numChannels = 6;
+
+~name = \VBAP1474;
+~description = "16 channel dome (IEM)";
+~numChannels = 16;
 ~channelLayout = \mono;
 
-~spk6 = VBAPSpeakerArray.new(2, [0, 60, 120, 180, -120, -60]); // 8 channel ring
+/* speaker positions used by ambIEM
+https://github.com/supercollider-quarks/AmbIEM/blob/master/Classes/DecodeAmbi.sc
+
+azi: [0,45,135,225,315,25,75,130,180,230,285,335,0,90,180,270]
+elev: [90,40,40,40,40,0,0,0,0,0,0,0,-40,-40,-40,-40],
+
+*/
+
+// note, this is a global variable, used by specialized listeners to decode the output format.
+~speakerConfig1474 = [
+[0 , 90 ],  // top
+[45 , 40 ], // upper
+[135 , 40 ],
+[-135 , 40 ],
+[-45 , 40 ],
+[25 , 0 ],   // middle
+[75 , 0  ],
+[130 , 0  ],
+[180 , 0  ],
+[-130 , 0 ],
+[-75 , 0 ],
+[-25 , 0 ],
+[0 , -40  ],  // lower
+[90 , -40  ],
+[180 , -40  ],
+[-90 , -40 ]];
+
+~spk16 = VBAPSpeakerArray.new(3, ~speakerConfig1474 );
 
 ~function = {|in = 0, aziDeg = 0, eleDeg = 45, gainDB = -90, delayMs = 1, lpHz = 15000, hpHz = 1, spread = 1 |
 	var gain= gainDB.dbamp;   // convert gainDB to gainAMP
@@ -48,9 +77,6 @@
 	var outsig;
 
 
-// need to work out the interpolation better, using Lag or Ramp or whatever else...
-
-
 	outsig =  LPF.ar(DelayC.ar(
 		Lag.kr(gain, slewGain) * in,
 		maxdelaytime: 0.5,
@@ -58,9 +84,9 @@
 
 	outsig = BHiPass.ar(outsig, VarLag.kr(hpHz, slewFilter )  );
 
-	panWeights = VBAP.kr(numChans: ~spk6.numSpeakers,
+	panWeights = VBAP.kr(numChans: ~spk16.numSpeakers,
 		in: 1.0,
-		bufnum: ~vbuf6.bufnum,
+		bufnum: ~vbuf16.bufnum,
 		azimuth: aziDeg,
 		elevation: eleDeg,
 		spread: spread );
@@ -69,8 +95,9 @@
 };
 
 ~setup = { |satieInstance|
-		~spk6 = Buffer.loadCollection(satieInstance.config.server, ~spk6.getSetsAndMatrices);
-};
 
+		~vbuf16 = Buffer.loadCollection(satieInstance.config.server, ~spk16.getSetsAndMatrices);
+
+};
 
 

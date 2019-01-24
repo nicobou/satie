@@ -33,7 +33,7 @@ s = Server.supernova.local;
 	minOutputBusChannels: 4
 );
 // list possible listeners:
-~satieConfiguration.spatPlugins.keys;
+~satieConfiguration.spatializers.keys;
 ~satieConfiguration.serverOptions.numOutputBusChannels = 64;
 ~satieConfiguration.serverOptions.numInputBusChannels = 8;
 ~satieConfiguration.serverOptions.memSize = 2.pow(18);
@@ -118,9 +118,8 @@ code::
 
 (  // Rotate
 ~satie.replaceAmbiPostProcessor([\Rotate, \Binaural26], spatializerNumber: 0, order: 1, outputIndex: ~satieConfiguration.outBusIndex);
-~ambipost = ~satie.getAmbiPostProc(order: 1, spatializerNumber: 0);
-~ambipost.set(\rotatePitchDeg, 0, \rotateRollDeg, 0, \rotateYawDeg, 0);
-~ambipost.set(\rotatePitchDeg, 180, \rotateRollDeg, 180, \rotateYawDeg, 180);
+~satie.getAmbiPostProc(order: 1, spatializerNumber: 0).set(\rotatePitchDeg, 0, \rotateRollDeg, 0, \rotateYawDeg, 0);
+~satie.getAmbiPostProc(order: 1, spatializerNumber: 0).set(\rotatePitchDeg, 180, \rotateRollDeg, 180, \rotateYawDeg, 180);
 )
 
 (  // Mirror

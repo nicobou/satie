@@ -20,7 +20,7 @@ TestSatieOSC : UnitTest {
 		osc.sendMsg("/satie/scene", "debugFlag", 1);
 		osc.sendMsg("/satie/scene", "createSource",  "sheefa", "plugin://string", "default");
 		1.0.wait; // wait for the message action
-		this.assert(satie.satieConfiguration.debug == true, "Debug should be true");
+		this.assert(satie.config.debug == true, "Debug should be true");
 		this.assert(satie.groupInstances[\default].keys.includes(\sheefa), "A synth (string) should be in the default group");
 		this.assert(satie.groupInstances[\default][\sheefa].class == Synth, "The synth (string) in the default group should be of class Synth");
 	}

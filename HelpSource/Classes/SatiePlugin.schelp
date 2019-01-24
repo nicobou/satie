@@ -6,14 +6,14 @@ related:: Overview/SATIE-Overview, Classes/Satie, Classes/SatiePlugins, Classes/
 DESCRIPTION::
 This is a base class for SATIE plugins. It is used by link::Classes/SatiePlugins::.
 
-SATIE plugins (audiosources, effects, spatializers, etc.) reside in structured plugin directories. The directory structure is as follows (names are case-sensitive):
+SATIE plugins (sources, effects, spatializers, etc.) reside in structured plugin directories. The directory structure is as follows (names are case-sensitive):
 
 TELETYPE::plugins/::
 TREE::
-## TELETYPE::audiosources/::
+## TELETYPE::sources/::
 	TREE::
-	## TELETYPE::some_audiosource_plugin.scd::
-	## TELETYPE::another_audiosource_plugin.scd::
+	## TELETYPE::some_source_plugin.scd::
+	## TELETYPE::another_source_plugin.scd::
 	## TELETYPE::etc.::
 	::
 ## TELETYPE::effects/::
